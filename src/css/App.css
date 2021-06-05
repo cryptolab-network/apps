@@ -2,10 +2,12 @@
   text-align: center;
 }
 
-html {
-  height: 100%;
-  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-  overflow: hidden;
+.card-layout {
+  justify-content: center;
+  align-items: center;
+  border: solid 1px #23beb9;
+  border-radius: 8px;
+  background-color: #18232f;
 }
 
 #stars {
@@ -451,26 +453,6 @@ html {
     44px 565px #fff, 33px 1324px #fff, 262px 531px #fff, 751px 1873px #fff, 362px 261px #fff,
     928px 1253px #fff, 1881px 1444px #fff, 153px 1291px #fff, 1692px 1452px #fff, 273px 1046px #fff,
     1759px 1106px #fff, 263px 655px #fff, 1847px 785px #fff, 154px 177px #fff;
-}
-
-#title {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  color: #fff;
-  text-align: center;
-  font-family: 'lato', sans-serif;
-  font-weight: 300;
-  font-size: 50px;
-  letter-spacing: 10px;
-  margin-top: -60px;
-  padding-left: 10px;
-}
-#title span {
-  background: -webkit-linear-gradient(white, #38495a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 @keyframes animStar {
