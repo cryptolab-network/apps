@@ -1,19 +1,36 @@
 import styled from 'styled-components';
-
-const CardContent = ({ className = '' }) => {
-  return (
-    <CardContentLayout className={className}>
-      <div>TITLE</div>
-    </CardContentLayout>
-  );
-};
+import Slogan from './components/Slogan';
+import CardContent from './components/CardContent';
+import { ReactComponent as MicroScopeIcon } from '../../assets/images/microscope.svg';
+import { ReactComponent as EyeIcon } from '../../assets/images/eye.svg';
+import { ReactComponent as BeakerIcon } from '../../assets/images/beaker.svg';
 
 const Portal = () => {
   return (
     <PortalLayout>
-      <CardContent className="card-layout" />
-      <CardContent className="card-layout" />
-      <CardContent className="card-layout" />
+      <SloganLayout>
+        <Slogan />
+      </SloganLayout>
+      <CardsLayout>
+        <CardContent
+          icon={MicroScopeIcon}
+          title="Staking Guide"
+          detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
+          className="card-layout"
+        />
+        <CardContent
+          icon={EyeIcon}
+          title="Portfolio \n Benchmark"
+          detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
+          className="card-layout"
+        />
+        <CardContent
+          icon={BeakerIcon}
+          title="PortfolioManagement"
+          detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
+          className="card-layout"
+        />
+      </CardsLayout>
     </PortalLayout>
   );
 };
@@ -22,9 +39,24 @@ export default Portal;
 
 const PortalLayout = styled.div`
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
-const CardContentLayout = styled.div`
-  width: 320px;
-  height: 320px;
+const SloganLayout = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 64px;
+`;
+
+const CardsLayout = styled.div`
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 `;

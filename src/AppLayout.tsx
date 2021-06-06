@@ -111,7 +111,8 @@ const HeaderDiv = styled.div`
 `;
 
 const RouteContent = styled.div`
-  min-height: calc(100vh - 55px);
+  display: flex;
+  min-height: calc(100vh - 93px);
   overflow-y: scroll;
 `;
 
