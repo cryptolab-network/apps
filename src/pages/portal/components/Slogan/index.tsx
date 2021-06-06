@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 import { ReactComponent as CryptoLabLogo } from '../../../../assets/images/main-vertical-color-logo.svg';
+import './index.css';
 
 const Slogan = () => {
   return (
     <SloganLayout>
-      <CryptoLabLogo />
+      <CryptoLabLogo id="slogan" />
       <SloganTitle>Built to maximize staking yield</SloganTitle>
       <SloganDetail>
         CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama
@@ -23,6 +24,7 @@ const SloganLayout = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding-bottom: 12px;
 `;
 
 const SloganTitle = styled.div`

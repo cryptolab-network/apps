@@ -13,20 +13,20 @@ const Portal = () => {
       </SloganLayout>
       <CardsLayout>
         <CardContent
-          icon={MicroScopeIcon}
-          title="Staking Guide"
+          Icon={MicroScopeIcon}
+          title={'Staking Guide'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
         />
         <CardContent
-          icon={EyeIcon}
-          title="Portfolio \n Benchmark"
+          Icon={EyeIcon}
+          title={'Portfolio\nBenchmark'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
         />
         <CardContent
-          icon={BeakerIcon}
-          title="PortfolioManagement"
+          Icon={BeakerIcon}
+          title={'Portfolio\nManagement'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
         />
@@ -51,6 +51,9 @@ const SloganLayout = styled.div`
   flex-direction: column;
   justify-content: flex-end;
   padding-bottom: 64px;
+  @media (max-height: 762px) {
+    padding-bottom: 32px;
+  }
 `;
 
 const CardsLayout = styled.div`

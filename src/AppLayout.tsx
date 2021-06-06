@@ -44,10 +44,10 @@ const MenuListItem = styled.li`
 // header
 const Header = () => {
   const MenuDOM = useMemo(() => {
-    let dom = menuList.map((item) => {
-      console.log('item: ', item.title);
+    let dom = menuList.map((item, key) => {
       return (
         <MenuItem
+          key={`${item}.${key}`}
           title={item.title}
           onClick={() => {
             console.log(`link to: ${item.url}`);

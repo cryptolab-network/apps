@@ -22,13 +22,22 @@ type ButtonProps = {
   primary: boolean;
 };
 const ButtonStyle = styled.button<ButtonProps>`
-  background: ${(props) => (props.primary ? '#23beb9' : 'white')};
-  color: ${(props) => (props.primary ? 'white' : 'palevioletred')};
+  background: ${(props) => (props.primary ? '#17222d' : '#17222d')};
+  color: ${(props) => (props.primary ? '#23beb9' : '23beb9')};
   font-family: Montserrat;
   font-weight: bold;
   font-size: 1em;
   padding: 11px 20px;
-  border: 0px;
+  border: solid 1px #23beb9;
   border-radius: 100px;
   cursor: pointer;
+  :hover {
+    background-color: #169692;
+    color: #ffffff;
+    border: solid 1px #169692;
+    -webkit-transition: background-color 300ms ease-out;
+    -moz-transition: background-color 300ms ease-out;
+    -o-transition: background-color 300ms ease-out;
+    transition: background-color 300ms ease-out;
+  }
 `;
