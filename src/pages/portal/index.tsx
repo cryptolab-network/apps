@@ -19,13 +19,13 @@ const Portal = () => {
           className="card-layout"
         />
         <CardContent
-          Icon={EyeIcon}
+          Icon={BeakerIcon}
           title={'Portfolio\nBenchmark'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
         />
         <CardContent
-          Icon={BeakerIcon}
+          Icon={EyeIcon}
           title={'Portfolio\nManagement'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
