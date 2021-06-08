@@ -1,68 +1,34 @@
-import { useMemo } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import Portal from './pages/portal';
+import { BrowserRouter, NavLink, Route, Switch, Link } from 'react-router-dom';
+import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
+import './css/AppLayout.css';
 
-// menu
-const menuList = [
-  { title: 'Staking Guide', url: '' },
-  { title: 'Portfolio Benchmark', url: '' },
-  { title: 'Portfolio Management', url: '' },
-];
+import Guide from './pages/Guide';
+import Benchmark from './pages/Benchmark';
+import Management from './pages/Management';
 
-const MenuItem = ({ title = '', onClick = () => {} }) => {
-  return <MenuListItem onClick={onClick}>{title}</MenuListItem>;
-};
-
-const MenuUnorderList = styled.ul`
-  padding-left: 0px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const MenuListItem = styled.li`
-  font-family: Montserrat;
-  font-weight: bold;
-  font-size: 16px;
-  color: white;
-  height: 100%;
-  margin-left: 32px;
-  margin-right: 32px;
-  border-bottom: 2px solid transparent;
-  :hover {
-    color: #23beb9;
-    border-bottom: 2px solid #23beb9;
-    -webkit-transition: border 300ms ease-out;
-    -moz-transition: border 300ms ease-out;
-    -o-transition: border 300ms ease-out;
-    transition: border 300ms ease-out;
-  }
-`;
 // header
 const Header = () => {
-  const MenuDOM = useMemo(() => {
-    let dom = menuList.map((item, key) => {
-      return (
-        <MenuItem
-          key={`${item}.${key}`}
-          title={item.title}
-          onClick={() => {
-            console.log(`link to: ${item.url}`);
-          }}
-        />
-      );
-    });
-    return <MenuUnorderList>{dom}</MenuUnorderList>;
-  }, []);
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
-        <CryptoLabLogo />
+        <NavLink exact to="/">
+          <CryptoLabLogo />
+        </NavLink>
       </HeaderLeftDiv>
-      <HeaderMidDiv>{MenuDOM}</HeaderMidDiv>
+      <HeaderMidDiv>
+        <NavLink exact to="/guide" className="header-item" activeClassName="header-item-active">
+          Staking Guide
+        </NavLink>
+        <NavLink exact to="/benchmark" className="header-item" activeClassName="header-item-active">
+          Portfolio Benchmark
+        </NavLink>
+        <NavLink exact to="/management" className="header-item" activeClassName="header-item-active">
+          Portfolio Management
+        </NavLink>
+      </HeaderMidDiv>
       <HeaderRightDiv>
         <Button
           title="Use Benchmark"
@@ -80,11 +46,14 @@ const AppLayout = () => {
   return (
     <>
       <GradientLight>
-        <Header />
         <BrowserRouter>
+          <Header />
           <RouteContent>
             <Switch>
-              <Route path="/" component={Portal} />
+              <Route exact path="/" component={Portal} />
+              <Route exact path="/guide" component={Guide} />
+              <Route exact path="/benchmark" component={Benchmark} />
+              <Route exact path="/management" component={Management} />
             </Switch>
           </RouteContent>
         </BrowserRouter>
