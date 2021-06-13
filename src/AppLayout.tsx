@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import Button from './components/Button';
-import { BrowserRouter, NavLink, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter, NavLink, Route, Switch } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import './css/AppLayout.css';
@@ -19,13 +19,13 @@ const Header = () => {
         </NavLink>
       </HeaderLeftDiv>
       <HeaderMidDiv>
-        <NavLink exact to="/guide" className="header-item" activeClassName="header-item-active">
+        <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
           Staking Guide
         </NavLink>
-        <NavLink exact to="/benchmark" className="header-item" activeClassName="header-item-active">
+        <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
           Portfolio Benchmark
         </NavLink>
-        <NavLink exact to="/management" className="header-item" activeClassName="header-item-active">
+        <NavLink to="/management" className="header-item" activeClassName="header-item-active">
           Portfolio Management
         </NavLink>
       </HeaderMidDiv>
@@ -51,9 +51,9 @@ const AppLayout = () => {
           <RouteContent>
             <Switch>
               <Route exact path="/" component={Portal} />
-              <Route exact path="/guide" component={Guide} />
-              <Route exact path="/benchmark" component={Benchmark} />
-              <Route exact path="/management" component={Management} />
+              <Route path="/guide" component={Guide} />
+              <Route path="/benchmark" component={Benchmark} />
+              <Route path="/management" component={Management} />
             </Switch>
           </RouteContent>
         </BrowserRouter>

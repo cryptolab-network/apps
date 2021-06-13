@@ -1,0 +1,10 @@
+.navlink {
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  background-color: transparent;
+  border-radius: 100px;
+}
+.navlink.navlink-active {
+  background-color: #23beb9;
+}
