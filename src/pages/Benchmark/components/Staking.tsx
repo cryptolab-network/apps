@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
+import Node from '../../../components/Node';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 const StakingHeader = () => {
   return (
@@ -20,7 +23,59 @@ const StakingHeader = () => {
   );
 };
 
+interface iOption {
+  label: string;
+  value: number;
+}
+
 const Staking = () => {
+  const [inputData, setInputData] = useState({ stakeAmount: 0, strategy: {}, rewardDestination: null });
+  const [strategyOptions, setStrategyOptions] = useState<iOption[]>([]);
+
+  useEffect(() => {
+    // get strategy options
+    const result = [
+      { label: 'General', value: 1 },
+      { label: 'Aggressive', value: 2 },
+      { label: 'High frenquency ', value: 3 },
+    ];
+
+    setStrategyOptions(result);
+    setInputData((prev) => {
+      if (_.isEmpty(prev.strategy)) {
+        return { ...prev, strategy: result[0] };
+      } else {
+        return { ...prev };
+      }
+    });
+  }, []);
+
+  const handleInputChange = (name) => (e) => {
+    let tmpValue;
+    switch (name) {
+      case 'stakeAmount':
+        if (!isNaN(e.target.value)) {
+          tmpValue = e.target.value;
+          // TODO: deal with input number format and range
+        } else {
+          // not a number
+          return;
+        }
+        break;
+      case 'strategy':
+        tmpValue = e;
+        break;
+      case 'rewardDestination':
+        tmpValue = e;
+        break;
+      default:
+        // stakeAmount
+        tmpValue = e.target.value;
+        break;
+    }
+    setInputData((prev) => ({ ...prev, [name]: tmpValue }));
+  };
+
   return (
     <CardHeader Header={StakingHeader}>
       <ContentBlock>
@@ -30,23 +85,49 @@ const Staking = () => {
         </ContentBlockLeft>
         <ContentBlockRight>
           <Balance>Balance: 23778.50331</Balance>
-          <Input style={{ width: '80%' }} />
+          <Input
+            style={{ width: '80%' }}
+            onChange={handleInputChange('stakeAmount')}
+            value={inputData.stakeAmount}
+          />
         </ContentBlockRight>
       </ContentBlock>
       <div style={{ height: 34 }}></div>
       <ContentBlock>
         <ContentBlockLeft>
-          <DropdownCommon
-            style={{ width: '80%' }}
-            options={[
-              { label: '1', value: 1 },
-              { label: '2', value: 2 },
-            ]}
-          />
+          <ContentColumnLayout>
+            <ContentBlockTitle>Strategy</ContentBlockTitle>
+            <DropdownCommon
+              style={{ flex: 1, width: '90%' }}
+              options={strategyOptions}
+              value={inputData.strategy}
+              onChange={handleInputChange('strategy')}
+            />
+            <ContentBlockFooter />
+          </ContentColumnLayout>
         </ContentBlockLeft>
         <ContentBlockRight>
           <ValueStyle>16.5%</ValueStyle>
         </ContentBlockRight>
+      </ContentBlock>
+      <div style={{ height: 17 }}></div>
+      <ContentBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+        <ContentColumnLayout width="100%" justifyContent="flex-start">
+          <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+          <DropdownCommon
+            style={{ flex: 1, width: '100%' }}
+            options={[
+              { label: 'Specified payment account', value: 0, isDisabled: true },
+              { label: 'wallet 001', value: 1 },
+              { label: 'wallet 002', value: 2 },
+            ]}
+            value={inputData.rewardDestination}
+            onChange={handleInputChange('rewardDestination')}
+            theme="dark"
+          />
+          <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+          <ContentBlockFooter style={{ minHeight: 50 }} />
+        </ContentColumnLayout>
       </ContentBlock>
     </CardHeader>
   );
@@ -99,17 +180,14 @@ const Subtitle = styled.div`
   line-height: 1.55;
 `;
 
-type ContentBlockProps = {
-  backgroundColor?: string;
-};
-const ContentBlock = styled.div<ContentBlockProps>`
-  background-color: ${(props) => (props.backgroundColor ? props.backgroundColor : 'white')};
+const ContentBlock = styled.div`
+  background-color: white;
   border-radius: 6px;
   padding: 14px 25px 14px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 62px;
+  height: 62px;
 `;
 
 const ContentBlockLeft = styled.div`
@@ -139,6 +217,43 @@ const Balance = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
+`;
+
+type ContentColumnLayoutProps = {
+  justifyContent?: string;
+  width?: string;
+};
+const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
+  display: flex;
+  flex-direction: column;
+  justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'space-between')};
+  align-items: flex-start;
+  width: ${(props) => (props.width ? props.width : '90%')};
+`;
+const ContentBlockTitle = styled.div`
+  flex: 1;
+  color: ${(props) => (props.color ? props.color : '#17222d')};
+  min-height: 24px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
+  margin-left: -8px;
+`;
+
+type ContentBlockFooterProps = {
+  minHeight?: string;
+};
+const ContentBlockFooter = styled.div<ContentBlockFooterProps>`
+  flex-grow: 1;
+  color: blue;
+  width: 100%;
+  min-height: ${(props) => (props.minHeight ? props.minHeight : '16px')};
 `;
 
 const ContentBlockRight = styled.div`

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const Input = ({ ...props }) => {
   return (
     <InputLayout {...props}>
-      <InputStyle />
+      <InputStyle onChange={props.onChange} value={props.value} />
     </InputLayout>
   );
 };
