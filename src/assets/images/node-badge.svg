@@ -1,31 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
     <defs>
         <style>
-            .cls-2{fill:#5e1ca3}.cls-3{fill:#542cea}.cls-4{fill:#264712}.cls-5{fill:#ca8bf2}.cls-9{fill:#e9aa41}.cls-10{fill:#420f07}.cls-11{fill:#394813}
+            .cls-201{fill:#5e1ca3}.cls-301{fill:#542cea}.cls-401{fill:#264712}.cls-5{fill:#ca8bf2}.cls-901{fill:#e9aa41}.cls-1001{fill:#420f07}.cls-1101{fill:#394813}
         </style>
     </defs>
     <g id="Group_69" transform="translate(-757 -714)">
         <circle id="Ellipse_24" cx="14" cy="14" r="14" fill="#f0f0f0" transform="translate(757 714)"/>
         <g id="Group_68" transform="translate(761.014 716.309)">
-            <circle id="Ellipse_5" cx="2" cy="2" r="2" class="cls-2" transform="translate(7.986 -0.309)"/>
-            <circle id="Ellipse_6" cx="2" cy="2" r="2" class="cls-3" transform="translate(7.986 4.691)"/>
-            <circle id="Ellipse_10" cx="2" cy="2" r="2" class="cls-4" transform="translate(3.986 2.691)"/>
+            <circle id="Ellipse_5" cx="2" cy="2" r="2" class="cls-201" transform="translate(7.986 -0.309)"/>
+            <circle id="Ellipse_6" cx="2" cy="2" r="2" class="cls-301" transform="translate(7.986 4.691)"/>
+            <circle id="Ellipse_10" cx="2" cy="2" r="2" class="cls-401" transform="translate(3.986 2.691)"/>
             <circle id="Ellipse_14" cx="2" cy="2" r="2" class="cls-5" transform="translate(11.986 2.691)"/>
             <circle id="Ellipse_7" cx="2" cy="2" r="2" fill="#3a0b46" transform="translate(7.986 9.691)"/>
             <circle id="Ellipse_11" cx="2" cy="2" r="2" fill="#270946" transform="translate(3.986 7.691)"/>
             <circle id="Ellipse_18" cx="2" cy="2" r="2" fill="#9a88f2" transform="translate(-0.014 4.691)"/>
-            <circle id="Ellipse_21" cx="2" cy="2" r="2" class="cls-9" transform="translate(15.986 4.691)"/>
-            <circle id="Ellipse_15" cx="2" cy="2" r="2" class="cls-10" transform="translate(11.986 7.691)"/>
-            <circle id="Ellipse_8" cx="2" cy="2" r="2" class="cls-10" transform="translate(7.986 14.691)"/>
-            <circle id="Ellipse_12" cx="2" cy="2" r="2" class="cls-3" transform="translate(3.986 12.691)"/>
-            <circle id="Ellipse_19" cx="2" cy="2" r="2" class="cls-4" transform="translate(-0.014 9.691)"/>
-            <circle id="Ellipse_22" cx="2" cy="2" r="2" class="cls-11" transform="translate(15.986 9.691)"/>
+            <circle id="Ellipse_21" cx="2" cy="2" r="2" class="cls-901" transform="translate(15.986 4.691)"/>
+            <circle id="Ellipse_15" cx="2" cy="2" r="2" class="cls-1001" transform="translate(11.986 7.691)"/>
+            <circle id="Ellipse_8" cx="2" cy="2" r="2" class="cls-1001" transform="translate(7.986 14.691)"/>
+            <circle id="Ellipse_12" cx="2" cy="2" r="2" class="cls-301" transform="translate(3.986 12.691)"/>
+            <circle id="Ellipse_19" cx="2" cy="2" r="2" class="cls-401" transform="translate(-0.014 9.691)"/>
+            <circle id="Ellipse_22" cx="2" cy="2" r="2" class="cls-1101" transform="translate(15.986 9.691)"/>
             <circle id="Ellipse_16" cx="2" cy="2" r="2" fill="#1e471c" transform="translate(11.986 12.691)"/>
-            <circle id="Ellipse_9" cx="2" cy="2" r="2" class="cls-9" transform="translate(7.986 19.691)"/>
+            <circle id="Ellipse_9" cx="2" cy="2" r="2" class="cls-901" transform="translate(7.986 19.691)"/>
             <circle id="Ellipse_13" cx="2" cy="2" r="2" class="cls-5" transform="translate(3.986 17.691)"/>
-            <circle id="Ellipse_20" cx="2" cy="2" r="2" class="cls-2" transform="translate(-0.014 14.691)"/>
+            <circle id="Ellipse_20" cx="2" cy="2" r="2" class="cls-201" transform="translate(-0.014 14.691)"/>
             <circle id="Ellipse_23" cx="2" cy="2" r="2" fill="#1d472a" transform="translate(15.986 14.691)"/>
-            <circle id="Ellipse_17" cx="2" cy="2" r="2" class="cls-11" transform="translate(11.986 17.691)"/>
+            <circle id="Ellipse_17" cx="2" cy="2" r="2" class="cls-1101" transform="translate(11.986 17.691)"/>
         </g>
     </g>
 </svg>
