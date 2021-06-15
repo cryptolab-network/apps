@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { ReactComponent as NodeBadge } from '../../assets/images/node-badge.svg';
 
-// TODO: this node svg is affected to other svg using the same style class
 const Node = ({ title, address }) => {
   return (
     <NodeLayout>

@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Button = ({ title = '', onClick = () => {}, children = {}, primary = false }) => {
+const Button = ({ title = '', onClick = () => {}, children = {}, primary = false, ...props }) => {
   return (
-    <ButtonStyle primary onClick={onClick}>
+    <ButtonStyle primary onClick={onClick} {...props}>
       {title}
     </ButtonStyle>
   );
@@ -27,7 +27,7 @@ const ButtonStyle = styled.button<ButtonProps>`
   font-family: Montserrat;
   font-weight: bold;
   font-size: 1em;
-  padding: 11px 20px;
+  padding: 6px 20px;
   border: solid 1px #23beb9;
   border-radius: 100px;
   cursor: pointer;

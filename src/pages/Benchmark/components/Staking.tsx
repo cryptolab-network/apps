@@ -3,10 +3,14 @@ import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
 import Node from '../../../components/Node';
+import Warning from '../../../components/Hint/Warn';
+import TimeCircle from '../../../components/Time/Circle';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
+import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import styled from 'styled-components';
 import _ from 'lodash';
+import Button from '../../../components/Button';
 
 const StakingHeader = () => {
   return (
@@ -18,7 +22,9 @@ const StakingHeader = () => {
           <Subtitle>Select the preferred type for evaluation</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
-      <HeaderRight></HeaderRight>
+      <HeaderRight>
+        <OptionIcon />
+      </HeaderRight>
     </HeaderLayout>
   );
 };
@@ -77,59 +83,74 @@ const Staking = () => {
   };
 
   return (
-    <CardHeader Header={StakingHeader}>
-      <ContentBlock>
-        <ContentBlockLeft>
-          <KSMLogo />
-          <LogoTitle>KSM</LogoTitle>
-        </ContentBlockLeft>
-        <ContentBlockRight>
-          <Balance>Balance: 23778.50331</Balance>
-          <Input
-            style={{ width: '80%' }}
-            onChange={handleInputChange('stakeAmount')}
-            value={inputData.stakeAmount}
-          />
-        </ContentBlockRight>
-      </ContentBlock>
-      <div style={{ height: 34 }}></div>
-      <ContentBlock>
-        <ContentBlockLeft>
-          <ContentColumnLayout>
-            <ContentBlockTitle>Strategy</ContentBlockTitle>
-            <DropdownCommon
-              style={{ flex: 1, width: '90%' }}
-              options={strategyOptions}
-              value={inputData.strategy}
-              onChange={handleInputChange('strategy')}
+    <>
+      <CardHeader Header={StakingHeader}>
+        <ContentBlock>
+          <ContentBlockLeft>
+            <KSMLogo />
+            <LogoTitle>KSM</LogoTitle>
+          </ContentBlockLeft>
+          <ContentBlockRight>
+            <Balance>Balance: 23778.50331</Balance>
+            <Input
+              style={{ width: '80%' }}
+              onChange={handleInputChange('stakeAmount')}
+              value={inputData.stakeAmount}
             />
-            <ContentBlockFooter />
+          </ContentBlockRight>
+        </ContentBlock>
+        <div style={{ height: 34 }}></div>
+        <ContentBlock>
+          <ContentBlockLeft>
+            <ContentColumnLayout>
+              <ContentBlockTitle>Strategy</ContentBlockTitle>
+              <DropdownCommon
+                style={{ flex: 1, width: '90%' }}
+                options={strategyOptions}
+                value={inputData.strategy}
+                onChange={handleInputChange('strategy')}
+              />
+              <ContentBlockFooter />
+            </ContentColumnLayout>
+          </ContentBlockLeft>
+          <ContentBlockRight>
+            <ValueStyle>16.5%</ValueStyle>
+          </ContentBlockRight>
+        </ContentBlock>
+        <div style={{ height: 17 }}></div>
+        <ContentBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+          <ContentColumnLayout width="100%" justifyContent="flex-start">
+            <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+            <DropdownCommon
+              style={{ flex: 1, width: '100%' }}
+              options={[
+                { label: 'Specified payment account', value: 0, isDisabled: true },
+                { label: 'wallet 001', value: 1 },
+                { label: 'wallet 002', value: 2 },
+              ]}
+              value={inputData.rewardDestination}
+              onChange={handleInputChange('rewardDestination')}
+              theme="dark"
+            />
+            <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+            <ContentBlockFooter style={{ minHeight: 50 }} />
           </ContentColumnLayout>
-        </ContentBlockLeft>
-        <ContentBlockRight>
-          <ValueStyle>16.5%</ValueStyle>
-        </ContentBlockRight>
-      </ContentBlock>
-      <div style={{ height: 17 }}></div>
-      <ContentBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
-        <ContentColumnLayout width="100%" justifyContent="flex-start">
-          <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
-          <DropdownCommon
-            style={{ flex: 1, width: '100%' }}
-            options={[
-              { label: 'Specified payment account', value: 0, isDisabled: true },
-              { label: 'wallet 001', value: 1 },
-              { label: 'wallet 002', value: 2 },
-            ]}
-            value={inputData.rewardDestination}
-            onChange={handleInputChange('rewardDestination')}
-            theme="dark"
-          />
-          <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
-          <ContentBlockFooter style={{ minHeight: 50 }} />
-        </ContentColumnLayout>
-      </ContentBlock>
-    </CardHeader>
+        </ContentBlock>
+        <FooterLayout>
+          <div style={{ marginBottom: 12 }}>
+            <Button
+              title="Nominate"
+              onClick={() => {
+                console.log('Nominate');
+              }}
+              style={{ width: 220 }}
+            />
+          </div>
+          <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
+        </FooterLayout>
+      </CardHeader>
+      <TimeCircle />
+    </>
   );
 };
 
@@ -272,4 +293,12 @@ const ValueStyle = styled.div`
   font-style: normal;
   line-height: 1.2;
   color: #23beb9;
+`;
+
+const FooterLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40.5px;
 `;

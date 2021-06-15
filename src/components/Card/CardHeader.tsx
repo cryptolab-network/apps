@@ -24,12 +24,12 @@ const CardHeaderLayout = styled.div`
 const HeaderLayout = styled.div`
   width: 100%;
   border-bottom: solid 1px #23beb9;
-  padding: 17px 21px 17px 21px;
+  padding: 17px 27px 17px 27px;
   box-sizing: border-box;
 `;
 
 const MainContentLayout = styled.div`
-  padding: 29px;
+  padding: 29px 29px 15px 29px;
   display: flex;
   flex-direction: column;
 `;

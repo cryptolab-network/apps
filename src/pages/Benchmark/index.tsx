@@ -50,5 +50,5 @@ const MainLayout = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  background-color: white;
+  // background-color: white;
 `;

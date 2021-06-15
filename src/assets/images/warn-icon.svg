@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="14" viewBox="0 0 16 14">
+    <defs>
+        <style>
+            .cls-2{fill:#fff}
+        </style>
+    </defs>
+    <g id="Group_81" transform="translate(-709 -843)">
+        <path id="Polygon_1" fill="#f7ab00" d="M7.132 1.519a1 1 0 0 1 1.736 0L15.145 12.5a1 1 0 0 1-.868 1.5H1.723a1 1 0 0 1-.868-1.5z" transform="translate(709 843)"/>
+        <g id="Group_80">
+            <path id="Rectangle_56" d="M0 0H2V5H0z" class="cls-2" transform="translate(716 848)"/>
+            <path id="Rectangle_57" d="M0 0H2V2H0z" class="cls-2" transform="translate(716 854)"/>
+        </g>
+    </g>
+</svg>

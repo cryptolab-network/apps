@@ -37,15 +37,12 @@ const TabLayout = styled.div`
   align-items: center;
   background-color: #42464c;
   border-radius: 100px;
-  // padding: 0 74px 0 0;
   height: 41px;
   margin-top: 32px;
 `;
 const TabItem = styled.div<ITabItem>`
   width: 100%;
-  // background-color: #23beb9;
   height: 100%;
-  // border-radius: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
