@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="21" height="22" viewBox="0 0 21 22">
+    <defs>
+        <style>
+            .green-arrow{fill:#23beb9}
+        </style>
+    </defs>
+    <g id="Group_4453" transform="translate(-949 -406)">
+        <g id="Group_41" transform="translate(953 409)">
+            <rect id="Rectangle_50" width="15.341" height="1.278" class="green-arrow" rx=".639" transform="translate(7.268 0) rotate(90)"/>
+            <g id="Group_40" transform="translate(0 8.491)">
+                <rect id="Rectangle_51" width="9.375" height="1.278" class="green-arrow" rx=".639" transform="translate(0.904 0) rotate(45)"/>
+                <rect id="Rectangle_52" width="9.375" height="1.278" class="green-arrow" rx=".639" transform="translate(13.257 0.904) rotate(135)"/>
+            </g>
+        </g>
+        <path id="Rectangle_167" fill="none" d="M0 0H21V22H0z" transform="translate(949 406)"/>
+    </g>
+</svg>

@@ -8,6 +8,7 @@ import TimeCircle from '../../../components/Time/Circle';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
+import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
 import styled from 'styled-components';
 import _ from 'lodash';
 import Button from '../../../components/Button';
@@ -99,7 +100,9 @@ const Staking = () => {
             />
           </ContentBlockRight>
         </ContentBlock>
-        <div style={{ height: 34 }}></div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4, marginBottom: 4 }}>
+          <GreenArrow />
+        </div>
         <ContentBlock>
           <ContentBlockLeft>
             <ContentColumnLayout>
@@ -149,7 +152,10 @@ const Staking = () => {
           <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
         </FooterLayout>
       </CardHeader>
-      <TimeCircle />
+      <DashboardLayout>
+        <TimeCircle />
+        <TimeCircle />
+      </DashboardLayout>
     </>
   );
 };
@@ -301,4 +307,12 @@ const FooterLayout = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 40.5px;
+`;
+
+const DashboardLayout = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 32px;
 `;
