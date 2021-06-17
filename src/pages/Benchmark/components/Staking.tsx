@@ -153,8 +153,8 @@ const Staking = () => {
         </FooterLayout>
       </CardHeader>
       <DashboardLayout>
-        <TimeCircle />
-        <TimeCircle />
+        <TimeCircle type="epoch" percentage={68} />
+        <TimeCircle type="era" percentage={75} />
       </DashboardLayout>
     </>
   );
