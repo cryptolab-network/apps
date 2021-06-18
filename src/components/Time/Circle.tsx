@@ -6,9 +6,11 @@ import {
   buildStyles,
 } from 'react-circular-progressbar';
 import { number } from 'prop-types';
+import { setInterval } from 'timers';
 
 const TimeCircle = ({ type, percentage }) => {
-  const [progress, setProgress] = useState<number[]>([]);
+  // const [progress, setProgress] = useState<number[]>([]);
+  const [progress, setProgress] = useState(0);
 
   const ContentDOM = useMemo(() => {
     if (type === 'epoch') {
@@ -38,14 +40,9 @@ const TimeCircle = ({ type, percentage }) => {
     }
   }, [type]);
   useEffect(() => {
-    let tempProgress: number[] = [];
-    let stepNumber = 0;
-    while (stepNumber < percentage) {
-      tempProgress.push(stepNumber);
-      stepNumber += 10;
-    }
-    tempProgress.push(percentage);
-    setProgress(tempProgress);
+    setInterval(() => {
+      setProgress(percentage);
+    }, 500);
   }, [percentage]);
 
   return (
@@ -64,7 +61,7 @@ const TimeCircle = ({ type, percentage }) => {
       </WordLayout>
       <CircleLayout>
         <CircularProgressbarWithChildren
-          value={75}
+          value={progress}
           strokeWidth={50}
           styles={buildStyles({
             strokeLinecap: 'butt',
@@ -72,6 +69,7 @@ const TimeCircle = ({ type, percentage }) => {
             pathColor: '#183942',
             textColor: '#f88',
             backgroundColor: '#192431',
+            pathTransitionDuration: 0.15,
           })}
         >
           <div
@@ -85,7 +83,7 @@ const TimeCircle = ({ type, percentage }) => {
             }}
           >
             <CircularProgressbarWithChildren
-              value={75}
+              value={progress}
               strokeWidth={10}
               styles={buildStyles({
                 strokeLinecap: 'butt',
@@ -93,6 +91,7 @@ const TimeCircle = ({ type, percentage }) => {
                 textColor: '#f88',
                 trailColor: '#1a4e55',
                 backgroundColor: '#183942',
+                pathTransitionDuration: 0.35,
               })}
             >
               <div
