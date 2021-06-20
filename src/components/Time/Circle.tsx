@@ -1,15 +1,9 @@
 import { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {
-  CircularProgressbar,
-  CircularProgressbarWithChildren,
-  buildStyles,
-} from 'react-circular-progressbar';
-import { number } from 'prop-types';
+import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import { setInterval } from 'timers';
 
 const TimeCircle = ({ type, percentage }) => {
-  // const [progress, setProgress] = useState<number[]>([]);
   const [progress, setProgress] = useState(0);
 
   const ContentDOM = useMemo(() => {

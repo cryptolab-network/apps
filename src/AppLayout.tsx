@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Button from './components/Button';
+import NetworkSelect from './components/NetworkSelect';
 import { BrowserRouter, NavLink, Route, Switch } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
@@ -30,6 +31,7 @@ const Header = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
+        <NetworkSelect />
         <Button
           title="Use Benchmark"
           onClick={() => {
