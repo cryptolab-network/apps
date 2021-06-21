@@ -7,7 +7,7 @@ import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg
 import './index.css';
 import styled from 'styled-components';
 
-const ButtonDropdown = () => {
+const NetworkSelect = () => {
   const [isOpen, setOpen] = useState(false);
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +88,7 @@ const ButtonDropdown = () => {
   );
 };
 
-export default ButtonDropdown;
+export default NetworkSelect;
 
 const ButtonLayout = styled.div`
   background-color: transparent;

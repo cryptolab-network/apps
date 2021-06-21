@@ -1,10 +1,13 @@
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkSelect from './components/NetworkSelect';
+import WalletSelect from './components/WalletSelect';
 import { BrowserRouter, NavLink, Route, Switch } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import './css/AppLayout.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
@@ -32,12 +35,13 @@ const Header = () => {
       </HeaderMidDiv>
       <HeaderRightDiv>
         <NetworkSelect />
-        <Button
+        <WalletSelect />
+        {/* <Button
           title="Use Benchmark"
           onClick={() => {
             console.log('test');
           }}
-        />
+        /> */}
       </HeaderRightDiv>
     </HeaderDiv>
   );
@@ -51,6 +55,17 @@ const AppLayout = () => {
         <BrowserRouter>
           <Header />
           <RouteContent>
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
             <Switch>
               <Route exact path="/" component={Portal} />
               <Route path="/guide" component={Guide} />
