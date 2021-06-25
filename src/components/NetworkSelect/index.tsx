@@ -1,14 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
 import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
+// import { polkadotChain } from '../../instance/Network';
 import './index.css';
 import styled from 'styled-components';
 
 const NetworkSelect = () => {
+  // state
   const [isOpen, setOpen] = useState(false);
+  const [currentNetwork, setCurrentNetwork] = useState('KSM');
+  //ref
   const btnRef = useRef<HTMLDivElement>(null);
 
   const close = () => {
@@ -40,13 +44,45 @@ const NetworkSelect = () => {
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
+  useEffect(() => {
+    // TODO: remove this, or update this network changing
+    // (async () => {
+    //   await polkadotChain.setNetwork(currentNetwork);
+    // })();
+
+    close();
+  }, [currentNetwork]);
+
+  const DisplayNetworkPanelDOM = useMemo(() => {
+    let dom = {};
+    switch (currentNetwork) {
+      case 'KSM':
+        dom = (
+          <>
+            <KSMLogo style={{ width: 36, height: 36 }} />
+            <NetworkTitle>KSM</NetworkTitle>
+          </>
+        );
+        break;
+      case 'DOT':
+        dom = (
+          <>
+            <DOTLogo style={{ width: 36, height: 36 }} />
+            <NetworkTitle>DOT</NetworkTitle>
+          </>
+        );
+        break;
+      default:
+        break;
+    }
+    return dom;
+  }, [currentNetwork]);
+
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
-          <KSMLogo style={{ width: 36, height: 36 }} />
-
-          <NetworkTitle>KSM</NetworkTitle>
+          {DisplayNetworkPanelDOM}
           <div style={{ width: 40 }}>
             <DropDownIcon
               style={{
@@ -72,11 +108,11 @@ const NetworkSelect = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              <li className="li first">
+              <li className="li first" onClick={() => setCurrentNetwork('KSM')}>
                 <KSMLogo style={{ width: 36, height: 36 }} />
                 <NetworkTitleLight>KSM</NetworkTitleLight>
               </li>
-              <li className="li last">
+              <li className="li last" onClick={() => setCurrentNetwork('DOT')}>
                 <DOTLogo style={{ width: 36, height: 36 }} />
                 <NetworkTitleLight>DOT</NetworkTitleLight>
               </li>

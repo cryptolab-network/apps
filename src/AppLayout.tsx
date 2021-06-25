@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import Button from './components/Button';
+// import Button from './components/Button';
 import NetworkSelect from './components/NetworkSelect';
 import WalletSelect from './components/WalletSelect';
 import { BrowserRouter, NavLink, Route, Switch } from 'react-router-dom';
@@ -12,9 +12,12 @@ import { ToastContainer } from 'react-toastify';
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
+import { useSelector } from 'react-redux';
+import { RootState } from './store';
 
 // header
 const Header = () => {
+  const counter = useSelector((state: RootState) => state.counter);
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -34,6 +37,7 @@ const Header = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
+        <div>{counter.value}</div>
         <NetworkSelect />
         <WalletSelect />
         {/* <Button

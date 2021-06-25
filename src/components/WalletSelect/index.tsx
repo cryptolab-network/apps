@@ -3,20 +3,8 @@ import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
 import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
-import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
-import { ApiPromise, WsProvider } from '@polkadot/api';
-
 import styled from 'styled-components';
-import { toast } from 'react-toastify';
-import {
-  web3Accounts,
-  web3Enable,
-  web3FromAddress,
-  web3ListRpcProviders,
-  web3UseRpcProvider,
-} from '@polkadot/extension-dapp';
 import './index.css';
-import { useEffect } from 'react';
 
 const WalletSelect = () => {
   const [isOpen, setOpen] = useState(false);
@@ -53,55 +41,17 @@ const WalletSelect = () => {
 
   const handleConnect = async () => {
     try {
-      const allInjected = await web3Enable('crypto-lab');
-      console.log('all injected: ', allInjected);
-      const allAccounts = await web3Accounts();
+      console.log('click');
     } catch (error) {
       console.log('error: ', error);
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        await web3Enable('crypto-lab');
-        const allAccounts = await web3Accounts();
-        console.log('allAccounts: ', allAccounts);
-      } catch (error) {
-        toast.error(`Oops! there is some error: ${error}`, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const wsProvider = new WsProvider('wss://westend-rpc.polkadot.io');
-      const api = await ApiPromise.create({ provider: wsProvider });
-      console.log(api.genesisHash.toHex());
-      let balance = await api.query.system.account('5CCbH1g9YBqYwTV8g4AK1mrYouQXwJn6ghsgcsg1UKU4fVdo');
-      console.log('balance: ', balance.data.free);
-    })();
-  }, []);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleConnect}>
           <Hint>Connect Wallet</Hint>
-          {/* <KSMLogo style={{ width: 36, height: 36 }} />
-
-          <NetworkTitle>KSM</NetworkTitle>
-          <div style={{ width: 40 }}>
-            <DropDownIcon
-              style={{
-                stroke: 'black',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transitionDuration: '0.2s',
-              }}
-            />
-          </div> */}
         </Button>
       </ButtonLayout>
       {renderLayer(
