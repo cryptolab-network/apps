@@ -2,6 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import { setInterval } from 'timers';
+import './index.css';
 
 const TimeCircle = ({ type, percentage }) => {
   const [progress, setProgress] = useState(0);
