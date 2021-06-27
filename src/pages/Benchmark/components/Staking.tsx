@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
@@ -12,8 +12,35 @@ import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow
 import styled from 'styled-components';
 import _ from 'lodash';
 import Button from '../../../components/Button';
+import Tooltip from '../../../components/Tooltip';
+import Switch from '../../../components/Switch';
 
-const StakingHeader = () => {
+const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
+  const advancedDOM = useMemo(() => {
+    return (
+      <AdvancedOptionLayout>
+        <AdvancedOption>
+          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>Advanced</span>
+          <div style={{ marginLeft: 16 }}>
+            <Switch checked={advancedOption.advanced} onChange={onChange('advanced')} />
+          </div>
+        </AdvancedOption>
+        <AdvancedOption>
+          <span style={{ color: advancedOption.decentralized ? '#23beb9' : '#fff' }}>Decentralized</span>
+          <div style={{ marginLeft: 16 }}>
+            <Switch checked={advancedOption.decentralized} onChange={onChange('decentralized')} />
+          </div>
+        </AdvancedOption>
+        <AdvancedOption>
+          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>Support us</span>
+          <div style={{ marginLeft: 16 }}>
+            <Switch checked={advancedOption.supportus} onChange={onChange('supportus')} />
+          </div>
+        </AdvancedOption>
+      </AdvancedOptionLayout>
+    );
+  }, [advancedOption.advanced, advancedOption.decentralized, advancedOption.supportus, onChange]);
+
   return (
     <HeaderLayout>
       <HeaderLeft>
@@ -24,7 +51,9 @@ const StakingHeader = () => {
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
-        <OptionIcon />
+        <Tooltip content={advancedDOM} visible={advancedOption.toggle} tooltipToggle={optionToggle}>
+          <OptionIcon />
+        </Tooltip>
       </HeaderRight>
     </HeaderLayout>
   );
@@ -38,6 +67,38 @@ interface iOption {
 const Staking = () => {
   const [inputData, setInputData] = useState({ stakeAmount: 0, strategy: {}, rewardDestination: null });
   const [strategyOptions, setStrategyOptions] = useState<iOption[]>([]);
+  const [advancedOption, setAdvancedOption] = useState({
+    toggle: false,
+    advanced: false,
+    decentralized: false,
+    supportus: false,
+  });
+
+  const handleAdvancedOptionChange = useCallback(
+    (optionName) => (checked) => {
+      console.log('checked:', checked);
+      console.log('optionName:', optionName);
+      switch (optionName) {
+        case 'advanced':
+          setAdvancedOption((prev) => ({ ...prev, advanced: checked }));
+          break;
+        case 'decentralized':
+          setAdvancedOption((prev) => ({ ...prev, decentralized: checked }));
+          break;
+        case 'supportus':
+          setAdvancedOption((prev) => ({ ...prev, supportus: checked }));
+          break;
+
+        default:
+          break;
+      }
+    },
+    []
+  );
+
+  const handleOptionToggle = useCallback((visible) => {
+    setAdvancedOption((prev) => ({ ...prev, toggle: visible }));
+  }, []);
 
   useEffect(() => {
     // get strategy options
@@ -85,7 +146,15 @@ const Staking = () => {
 
   return (
     <>
-      <CardHeader Header={StakingHeader}>
+      <CardHeader
+        Header={() => (
+          <StakingHeader
+            advancedOption={advancedOption}
+            optionToggle={handleOptionToggle}
+            onChange={handleAdvancedOptionChange}
+          />
+        )}
+      >
         <ContentBlock>
           <ContentBlockLeft>
             <KSMLogo />
@@ -315,4 +384,24 @@ const DashboardLayout = styled.div`
   justify-content: space-around;
   align-items: center;
   margin-top: 32px;
+`;
+
+const AdvancedOptionLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const AdvancedOption = styled.div`
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #23beb9;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
 `;
