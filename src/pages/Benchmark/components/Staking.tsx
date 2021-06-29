@@ -5,6 +5,8 @@ import DropdownCommon from '../../../components/Dropdown/Common';
 import Node from '../../../components/Node';
 import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
+import TitleInput from '../../../components/Input/TitleInput';
+import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
@@ -72,6 +74,17 @@ const Staking = () => {
     advanced: false,
     decentralized: false,
     supportus: false,
+  });
+  const [advancedSetting, setAdvancedSetting] = useState({
+    minSelfStake: undefined, // input amount
+    maxCommission: undefined, // input amount
+    identity: false, // switch
+    maxUnclaimedEras: undefined, // input amount
+    previousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: undefined, // input %
+    minInclusion: undefined, // input %
+    telemetry: false, // switch
   });
 
   const handleAdvancedOptionChange = useCallback(
@@ -143,6 +156,124 @@ const Staking = () => {
     }
     setInputData((prev) => ({ ...prev, [name]: tmpValue }));
   };
+
+  const handleAdvancedFilter = (name) => (e) => {
+    // TODO: input validator, limit
+    switch (name) {
+      case 'minSelfStake':
+        console.log('value: ', e.target.value);
+        setAdvancedSetting((prev) => ({ ...prev, minSelfStake: e.target.value }));
+        break;
+      case 'maxCommission':
+        break;
+      case 'identity':
+        setAdvancedSetting((prev) => ({ ...prev, identity: e }));
+        break;
+      case 'maxUnclaimedEras':
+        break;
+      case 'previousSlashes':
+        setAdvancedSetting((prev) => ({ ...prev, previousSlashes: e }));
+        break;
+      case 'isSubIdentity':
+        setAdvancedSetting((prev) => ({ ...prev, isSubIdentity: e }));
+        break;
+      case 'historicalApy':
+        break;
+      case 'minInclusion':
+        break;
+      case 'telemetry':
+        setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  const advancedSettingDOM = useMemo(() => {
+    if (!advancedOption.advanced) {
+      return null;
+    }
+    return (
+      <>
+        <div style={{ height: 17 }}></div>
+        <AdvancedBlockWrap>
+          <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+            <ContentColumnLayout width="100%" justifyContent="flex-start">
+              <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
+              <AdvancedSettingWrap>
+                <TitleInput
+                  title="Min. Self Stake"
+                  placeholder="input minimal amount"
+                  inputLength={170}
+                  value={advancedSetting.minSelfStake}
+                  onChange={handleAdvancedFilter('minSelfStake')}
+                />
+                <TitleInput
+                  title="Max. Commission"
+                  placeholder="input maximum amount"
+                  inputLength={170}
+                  value={advancedSetting.maxCommission}
+                  onChange={handleAdvancedFilter('maxCommission')}
+                />
+                <TitleInput
+                  title="Max. Unclaimed Eras"
+                  placeholder="input maximum amount"
+                  inputLength={170}
+                  value={advancedSetting.maxUnclaimedEras}
+                  onChange={handleAdvancedFilter('maxUnclaimedEras')}
+                />
+                <TitleInput
+                  title="Historical APY"
+                  placeholder="0 - 100"
+                  unit="%"
+                  value={advancedSetting.historicalApy}
+                  onChange={handleAdvancedFilter('historicalApy')}
+                />
+                <TitleInput
+                  title="Min. Eras Inclusion Rate"
+                  placeholder="0 - 100"
+                  unit="%"
+                  value={advancedSetting.minInclusion}
+                  onChange={handleAdvancedFilter('minInclusion')}
+                />
+                <TitleSwitch
+                  title="Identity"
+                  checked={advancedSetting.identity}
+                  onChange={handleAdvancedFilter('identity')}
+                />
+                <TitleSwitch
+                  title="Prev. Slashes"
+                  checked={advancedSetting.previousSlashes}
+                  onChange={handleAdvancedFilter('previousSlashes')}
+                />
+                <TitleSwitch
+                  title="Is Sub-Identity"
+                  checked={advancedSetting.isSubIdentity}
+                  onChange={handleAdvancedFilter('isSubIdentity')}
+                />
+                <TitleSwitch
+                  title="Is Telemeterable"
+                  checked={advancedSetting.telemetry}
+                  onChange={handleAdvancedFilter('telemetry')}
+                />
+              </AdvancedSettingWrap>
+            </ContentColumnLayout>
+          </AdvancedBlock>
+        </AdvancedBlockWrap>
+      </>
+    );
+  }, [
+    advancedOption.advanced,
+    advancedSetting.minSelfStake,
+    advancedSetting.maxCommission,
+    advancedSetting.maxUnclaimedEras,
+    advancedSetting.historicalApy,
+    advancedSetting.minInclusion,
+    advancedSetting.identity,
+    advancedSetting.previousSlashes,
+    advancedSetting.isSubIdentity,
+    advancedSetting.telemetry,
+  ]);
 
   return (
     <>
@@ -221,10 +352,11 @@ const Staking = () => {
                   <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
                 </RewardComponent>
               </DestinationWrap>
-              <ContentBlockFooter style={{ minHeight: 50 }} />
+              <ContentBlockFooter style={{ minHeight: advancedOption.advanced ? 0 : 50 }} />
             </ContentColumnLayout>
           </RewardBlock>
         </RewardBlockWrap>
+        {advancedSettingDOM}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
             <Button
@@ -528,5 +660,51 @@ const ArrowContainer = styled.div<ArrowContainerProps>`
   transition-duration: 0.2s;
   @media (max-width: 1340px) {
     transform: rotate(0deg);
+  }
+`;
+
+const AdvancedSettingWrap = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  // @media (max-width: 1395px) {
+  //   flex-wrap: wrap;
+  // }
+  // @media (max-width: 720px) {
+  //   width: calc(100vw - 160px);
+  // }
+`;
+
+const AdvancedBlock = styled.div`
+  background-color: white;
+  border-radius: 6px;
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
+  width: 100%;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface RewardBlockWrapProps {
+  advanced: Boolean;
+}
+const AdvancedBlockWrap = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 1200px;
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
   }
 `;
