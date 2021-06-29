@@ -33,4 +33,5 @@ const Msg = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.25;
+  overflow-wrap: break-word;
 `;

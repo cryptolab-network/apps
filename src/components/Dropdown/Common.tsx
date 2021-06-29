@@ -23,7 +23,7 @@ const DropdownCommon = ({ options, ...props }) => {
       // none of react-select's styles are passed to <Control />
       width: '100%',
       display: 'flex',
-      paddingBottom: 4,
+      paddingBottom: 11,
       borderBottom: props.theme && props.theme === 'dark' ? 'solid 1px #525a63' : 'solid 1px #d7d8d9',
     }),
     indicatorSeparator: () => ({

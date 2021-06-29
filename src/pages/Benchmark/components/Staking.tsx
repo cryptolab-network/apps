@@ -155,59 +155,76 @@ const Staking = () => {
           />
         )}
       >
-        <ContentBlock>
-          <ContentBlockLeft>
-            <KSMLogo />
-            <LogoTitle>KSM</LogoTitle>
-          </ContentBlockLeft>
-          <ContentBlockRight>
-            <Balance>Balance: 23778.50331</Balance>
-            <Input
-              style={{ width: '80%' }}
-              onChange={handleInputChange('stakeAmount')}
-              value={inputData.stakeAmount}
-            />
-          </ContentBlockRight>
-        </ContentBlock>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4, marginBottom: 4 }}>
-          <GreenArrow />
-        </div>
-        <ContentBlock>
-          <ContentBlockLeft>
-            <ContentColumnLayout>
-              <ContentBlockTitle>Strategy</ContentBlockTitle>
-              <DropdownCommon
-                style={{ flex: 1, width: '90%' }}
-                options={strategyOptions}
-                value={inputData.strategy}
-                onChange={handleInputChange('strategy')}
+        <ContentBlockWrap advanced={advancedOption.advanced}>
+          <ContentBlock>
+            <ContentBlockLeft>
+              <KSMLogo />
+              <LogoTitle>KSM</LogoTitle>
+            </ContentBlockLeft>
+            <ContentBlockRight>
+              <Balance>Balance: 23778.50331</Balance>
+              <Input
+                style={{ width: '80%' }}
+                onChange={handleInputChange('stakeAmount')}
+                value={inputData.stakeAmount}
               />
-              <ContentBlockFooter />
-            </ContentColumnLayout>
-          </ContentBlockLeft>
-          <ContentBlockRight>
-            <ValueStyle>16.5%</ValueStyle>
-          </ContentBlockRight>
-        </ContentBlock>
+            </ContentBlockRight>
+          </ContentBlock>
+          <ArrowContainer advanced={advancedOption.advanced}>
+            <GreenArrow />
+          </ArrowContainer>
+          <ContentBlock>
+            <ContentBlockLeft>
+              <ContentColumnLayout>
+                <ContentBlockTitle>Strategy</ContentBlockTitle>
+                <DropdownCommon
+                  style={{ flex: 1, width: '90%' }}
+                  options={strategyOptions}
+                  value={inputData.strategy}
+                  onChange={handleInputChange('strategy')}
+                />
+                <ContentBlockFooter />
+              </ContentColumnLayout>
+            </ContentBlockLeft>
+            <ContentBlockRight>
+              <Balance>Calculated APY</Balance>
+              <ValueStyle>16.5%</ValueStyle>
+            </ContentBlockRight>
+          </ContentBlock>
+        </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
-        <ContentBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
-            <DropdownCommon
-              style={{ flex: 1, width: '100%' }}
-              options={[
-                { label: 'Specified payment account', value: 0, isDisabled: true },
-                { label: 'wallet 001', value: 1 },
-                { label: 'wallet 002', value: 2 },
-              ]}
-              value={inputData.rewardDestination}
-              onChange={handleInputChange('rewardDestination')}
-              theme="dark"
-            />
-            <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
-            <ContentBlockFooter style={{ minHeight: 50 }} />
-          </ContentColumnLayout>
-        </ContentBlock>
+        <RewardBlockWrap advanced={advancedOption.advanced}>
+          <RewardBlock
+            advanced={advancedOption.advanced}
+            style={{ backgroundColor: '#2E3843', height: 'auto' }}
+          >
+            <ContentColumnLayout width="100%" justifyContent="flex-start">
+              <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+              <DestinationWrap advanced={advancedOption.advanced}>
+                <RewardComponent advanced={advancedOption.advanced} marginTop={5}>
+                  <DropdownCommon
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                    }}
+                    options={[
+                      { label: 'Specified payment account', value: 0, isDisabled: true },
+                      { label: 'wallet 001', value: 1 },
+                      { label: 'wallet 002', value: 2 },
+                    ]}
+                    value={inputData.rewardDestination}
+                    onChange={handleInputChange('rewardDestination')}
+                    theme="dark"
+                  />
+                </RewardComponent>
+                <RewardComponent advanced={advancedOption.advanced}>
+                  <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+                </RewardComponent>
+              </DestinationWrap>
+              <ContentBlockFooter style={{ minHeight: 50 }} />
+            </ContentColumnLayout>
+          </RewardBlock>
+        </RewardBlockWrap>
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
             <Button
@@ -284,6 +301,93 @@ const ContentBlock = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 62px;
+  width: 570px;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface ContentBlockWrapProps {
+  advanced: Boolean;
+}
+const ContentBlockWrap = styled.div<ContentBlockWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '1200px' : '620px')};
+  @media (max-width: 1395px) {
+    flex-wrap: ${(props) => (props.advanced ? 'wrap' : 'nowrap')};
+    flex-direction: column;
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 100px);
+  }
+`;
+
+interface RewardBlockProps {
+  advanced: Boolean;
+}
+const RewardBlock = styled.div<RewardBlockProps>`
+  background-color: white;
+  border-radius: 6px;
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
+  width: ${(props) => (props.advanced ? '100%' : '570px')};
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface RewardBlockWrapProps {
+  advanced: Boolean;
+}
+const RewardBlockWrap = styled.div<RewardBlockWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '1200px' : '620px')};
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
+  }
+`;
+
+interface RewardComponentProps {
+  advanced: Boolean;
+  marginTop?: number;
+}
+const RewardComponent = styled.div<RewardComponentProps>`
+  width: ${(props) => (props.advanced ? '535px' : '100%')};
+  margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
+  @media (max-width: 720px) {
+    width: 100%;
+  }
+`;
+
+interface DestinationWrapProps {
+  advanced: Boolean;
+}
+const DestinationWrap = styled.div<DestinationWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '100%' : '570px')};
+  @media (max-width: 1395px) {
+    flex-wrap: ${(props) => (props.advanced ? 'wrap' : 'nowrap')};
+    flex-direction: column;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
 `;
 
 const ContentBlockLeft = styled.div`
@@ -376,6 +480,11 @@ const FooterLayout = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 40.5px;
+  padding: 14px 25px 14px 25px;
+  width: 570px;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
 `;
 
 const DashboardLayout = styled.div`
@@ -404,4 +513,20 @@ const AdvancedOption = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
+`;
+
+interface ArrowContainerProps {
+  advanced: Boolean;
+}
+const ArrowContainer = styled.div<ArrowContainerProps>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  transform: ${(props) => (props.advanced ? 'rotate(-90deg)' : '')};
+  transition-duration: 0.2s;
+  @media (max-width: 1340px) {
+    transform: rotate(0deg);
+  }
 `;
