@@ -5,6 +5,8 @@ import DropdownCommon from '../../../components/Dropdown/Common';
 import Node from '../../../components/Node';
 import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
+import TitleInput from '../../../components/Input/TitleInput';
+import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
@@ -72,6 +74,17 @@ const Staking = () => {
     advanced: false,
     decentralized: false,
     supportus: false,
+  });
+  const [advancedSetting, setAdvancedSetting] = useState({
+    minSelfStake: undefined, // input amount
+    maxCommission: undefined, // input amount
+    identity: false, // switch
+    maxUnclaimedEras: undefined, // input amount
+    previousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: undefined, // input %
+    minInclusion: undefined, // input %
+    telemetry: false, // switch
   });
 
   const handleAdvancedOptionChange = useCallback(
@@ -144,6 +157,124 @@ const Staking = () => {
     setInputData((prev) => ({ ...prev, [name]: tmpValue }));
   };
 
+  const handleAdvancedFilter = (name) => (e) => {
+    // TODO: input validator, limit
+    switch (name) {
+      case 'minSelfStake':
+        console.log('value: ', e.target.value);
+        setAdvancedSetting((prev) => ({ ...prev, minSelfStake: e.target.value }));
+        break;
+      case 'maxCommission':
+        break;
+      case 'identity':
+        setAdvancedSetting((prev) => ({ ...prev, identity: e }));
+        break;
+      case 'maxUnclaimedEras':
+        break;
+      case 'previousSlashes':
+        setAdvancedSetting((prev) => ({ ...prev, previousSlashes: e }));
+        break;
+      case 'isSubIdentity':
+        setAdvancedSetting((prev) => ({ ...prev, isSubIdentity: e }));
+        break;
+      case 'historicalApy':
+        break;
+      case 'minInclusion':
+        break;
+      case 'telemetry':
+        setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  const advancedSettingDOM = useMemo(() => {
+    if (!advancedOption.advanced) {
+      return null;
+    }
+    return (
+      <>
+        <div style={{ height: 17 }}></div>
+        <AdvancedBlockWrap>
+          <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+            <ContentColumnLayout width="100%" justifyContent="flex-start">
+              <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
+              <AdvancedSettingWrap>
+                <TitleInput
+                  title="Min. Self Stake"
+                  placeholder="input minimal amount"
+                  inputLength={170}
+                  value={advancedSetting.minSelfStake}
+                  onChange={handleAdvancedFilter('minSelfStake')}
+                />
+                <TitleInput
+                  title="Max. Commission"
+                  placeholder="input maximum amount"
+                  inputLength={170}
+                  value={advancedSetting.maxCommission}
+                  onChange={handleAdvancedFilter('maxCommission')}
+                />
+                <TitleInput
+                  title="Max. Unclaimed Eras"
+                  placeholder="input maximum amount"
+                  inputLength={170}
+                  value={advancedSetting.maxUnclaimedEras}
+                  onChange={handleAdvancedFilter('maxUnclaimedEras')}
+                />
+                <TitleInput
+                  title="Historical APY"
+                  placeholder="0 - 100"
+                  unit="%"
+                  value={advancedSetting.historicalApy}
+                  onChange={handleAdvancedFilter('historicalApy')}
+                />
+                <TitleInput
+                  title="Min. Eras Inclusion Rate"
+                  placeholder="0 - 100"
+                  unit="%"
+                  value={advancedSetting.minInclusion}
+                  onChange={handleAdvancedFilter('minInclusion')}
+                />
+                <TitleSwitch
+                  title="Identity"
+                  checked={advancedSetting.identity}
+                  onChange={handleAdvancedFilter('identity')}
+                />
+                <TitleSwitch
+                  title="Prev. Slashes"
+                  checked={advancedSetting.previousSlashes}
+                  onChange={handleAdvancedFilter('previousSlashes')}
+                />
+                <TitleSwitch
+                  title="Is Sub-Identity"
+                  checked={advancedSetting.isSubIdentity}
+                  onChange={handleAdvancedFilter('isSubIdentity')}
+                />
+                <TitleSwitch
+                  title="Is Telemeterable"
+                  checked={advancedSetting.telemetry}
+                  onChange={handleAdvancedFilter('telemetry')}
+                />
+              </AdvancedSettingWrap>
+            </ContentColumnLayout>
+          </AdvancedBlock>
+        </AdvancedBlockWrap>
+      </>
+    );
+  }, [
+    advancedOption.advanced,
+    advancedSetting.minSelfStake,
+    advancedSetting.maxCommission,
+    advancedSetting.maxUnclaimedEras,
+    advancedSetting.historicalApy,
+    advancedSetting.minInclusion,
+    advancedSetting.identity,
+    advancedSetting.previousSlashes,
+    advancedSetting.isSubIdentity,
+    advancedSetting.telemetry,
+  ]);
+
   return (
     <>
       <CardHeader
@@ -155,59 +286,77 @@ const Staking = () => {
           />
         )}
       >
-        <ContentBlock>
-          <ContentBlockLeft>
-            <KSMLogo />
-            <LogoTitle>KSM</LogoTitle>
-          </ContentBlockLeft>
-          <ContentBlockRight>
-            <Balance>Balance: 23778.50331</Balance>
-            <Input
-              style={{ width: '80%' }}
-              onChange={handleInputChange('stakeAmount')}
-              value={inputData.stakeAmount}
-            />
-          </ContentBlockRight>
-        </ContentBlock>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4, marginBottom: 4 }}>
-          <GreenArrow />
-        </div>
-        <ContentBlock>
-          <ContentBlockLeft>
-            <ContentColumnLayout>
-              <ContentBlockTitle>Strategy</ContentBlockTitle>
-              <DropdownCommon
-                style={{ flex: 1, width: '90%' }}
-                options={strategyOptions}
-                value={inputData.strategy}
-                onChange={handleInputChange('strategy')}
+        <ContentBlockWrap advanced={advancedOption.advanced}>
+          <ContentBlock>
+            <ContentBlockLeft>
+              <KSMLogo />
+              <LogoTitle>KSM</LogoTitle>
+            </ContentBlockLeft>
+            <ContentBlockRight>
+              <Balance>Balance: 23778.50331</Balance>
+              <Input
+                style={{ width: '80%' }}
+                onChange={handleInputChange('stakeAmount')}
+                value={inputData.stakeAmount}
               />
-              <ContentBlockFooter />
-            </ContentColumnLayout>
-          </ContentBlockLeft>
-          <ContentBlockRight>
-            <ValueStyle>16.5%</ValueStyle>
-          </ContentBlockRight>
-        </ContentBlock>
+            </ContentBlockRight>
+          </ContentBlock>
+          <ArrowContainer advanced={advancedOption.advanced}>
+            <GreenArrow />
+          </ArrowContainer>
+          <ContentBlock>
+            <ContentBlockLeft>
+              <ContentColumnLayout>
+                <ContentBlockTitle>Strategy</ContentBlockTitle>
+                <DropdownCommon
+                  style={{ flex: 1, width: '90%' }}
+                  options={strategyOptions}
+                  value={inputData.strategy}
+                  onChange={handleInputChange('strategy')}
+                />
+                <ContentBlockFooter />
+              </ContentColumnLayout>
+            </ContentBlockLeft>
+            <ContentBlockRight>
+              <Balance>Calculated APY</Balance>
+              <ValueStyle>16.5%</ValueStyle>
+            </ContentBlockRight>
+          </ContentBlock>
+        </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
-        <ContentBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
-            <DropdownCommon
-              style={{ flex: 1, width: '100%' }}
-              options={[
-                { label: 'Specified payment account', value: 0, isDisabled: true },
-                { label: 'wallet 001', value: 1 },
-                { label: 'wallet 002', value: 2 },
-              ]}
-              value={inputData.rewardDestination}
-              onChange={handleInputChange('rewardDestination')}
-              theme="dark"
-            />
-            <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
-            <ContentBlockFooter style={{ minHeight: 50 }} />
-          </ContentColumnLayout>
-        </ContentBlock>
+        <RewardBlockWrap advanced={advancedOption.advanced}>
+          <RewardBlock
+            advanced={advancedOption.advanced}
+            style={{ backgroundColor: '#2E3843', height: 'auto' }}
+          >
+            <ContentColumnLayout width="100%" justifyContent="flex-start">
+              <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+              <DestinationWrap advanced={advancedOption.advanced}>
+                <RewardComponent advanced={advancedOption.advanced} marginTop={5}>
+                  <DropdownCommon
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                    }}
+                    options={[
+                      { label: 'Specified payment account', value: 0, isDisabled: true },
+                      { label: 'wallet 001', value: 1 },
+                      { label: 'wallet 002', value: 2 },
+                    ]}
+                    value={inputData.rewardDestination}
+                    onChange={handleInputChange('rewardDestination')}
+                    theme="dark"
+                  />
+                </RewardComponent>
+                <RewardComponent advanced={advancedOption.advanced}>
+                  <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+                </RewardComponent>
+              </DestinationWrap>
+              <ContentBlockFooter style={{ minHeight: advancedOption.advanced ? 0 : 50 }} />
+            </ContentColumnLayout>
+          </RewardBlock>
+        </RewardBlockWrap>
+        {advancedSettingDOM}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
             <Button
@@ -284,6 +433,93 @@ const ContentBlock = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 62px;
+  width: 570px;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface ContentBlockWrapProps {
+  advanced: Boolean;
+}
+const ContentBlockWrap = styled.div<ContentBlockWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '1200px' : '620px')};
+  @media (max-width: 1395px) {
+    flex-wrap: ${(props) => (props.advanced ? 'wrap' : 'nowrap')};
+    flex-direction: column;
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 100px);
+  }
+`;
+
+interface RewardBlockProps {
+  advanced: Boolean;
+}
+const RewardBlock = styled.div<RewardBlockProps>`
+  background-color: white;
+  border-radius: 6px;
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
+  width: ${(props) => (props.advanced ? '100%' : '570px')};
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface RewardBlockWrapProps {
+  advanced: Boolean;
+}
+const RewardBlockWrap = styled.div<RewardBlockWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '1200px' : '620px')};
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
+  }
+`;
+
+interface RewardComponentProps {
+  advanced: Boolean;
+  marginTop?: number;
+}
+const RewardComponent = styled.div<RewardComponentProps>`
+  width: ${(props) => (props.advanced ? '535px' : '100%')};
+  margin-top: ${(props) => (props.marginTop ? props.marginTop : 0)}px;
+  @media (max-width: 720px) {
+    width: 100%;
+  }
+`;
+
+interface DestinationWrapProps {
+  advanced: Boolean;
+}
+const DestinationWrap = styled.div<DestinationWrapProps>`
+  display: flex;
+  flex-direction: ${(props) => (props.advanced ? 'row' : 'column')};
+  justify-content: space-between;
+  align-items: center;
+  width: ${(props) => (props.advanced ? '100%' : '570px')};
+  @media (max-width: 1395px) {
+    flex-wrap: ${(props) => (props.advanced ? 'wrap' : 'nowrap')};
+    flex-direction: column;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
 `;
 
 const ContentBlockLeft = styled.div`
@@ -376,6 +612,11 @@ const FooterLayout = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 40.5px;
+  padding: 14px 25px 14px 25px;
+  width: 570px;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
 `;
 
 const DashboardLayout = styled.div`
@@ -404,4 +645,66 @@ const AdvancedOption = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
+`;
+
+interface ArrowContainerProps {
+  advanced: Boolean;
+}
+const ArrowContainer = styled.div<ArrowContainerProps>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  transform: ${(props) => (props.advanced ? 'rotate(-90deg)' : '')};
+  transition-duration: 0.2s;
+  @media (max-width: 1340px) {
+    transform: rotate(0deg);
+  }
+`;
+
+const AdvancedSettingWrap = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  // @media (max-width: 1395px) {
+  //   flex-wrap: wrap;
+  // }
+  // @media (max-width: 720px) {
+  //   width: calc(100vw - 160px);
+  // }
+`;
+
+const AdvancedBlock = styled.div`
+  background-color: white;
+  border-radius: 6px;
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
+  width: 100%;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+interface RewardBlockWrapProps {
+  advanced: Boolean;
+}
+const AdvancedBlockWrap = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 1200px;
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
+  }
 `;

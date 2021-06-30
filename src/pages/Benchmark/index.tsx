@@ -17,7 +17,6 @@ const Benchmark = () => {
     },
   ];
 
-  console.log('path: ', path);
   return (
     <BenchmarkLayout>
       <MainLayout>
@@ -44,11 +43,9 @@ const BenchmarkLayout = styled.div`
 `;
 
 const MainLayout = styled.div`
-  width: 570px;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  // background-color: white;
 `;

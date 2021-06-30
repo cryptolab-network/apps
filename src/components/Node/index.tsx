@@ -15,7 +15,7 @@ export default Node;
 
 const NodeLayout = styled.div`
   width: 100%;
-  margin-top: 16px;
+  margin-top: 5px;
   padding-bottom: 5px;
   display: flex;
   justify-content: space-between;
