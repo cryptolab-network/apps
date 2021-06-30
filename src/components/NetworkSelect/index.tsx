@@ -4,14 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
 import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
-// import { polkadotChain } from '../../instance/Network';
 import './index.css';
 import styled from 'styled-components';
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { networkChanged } from '../../redux';
 
 const NetworkSelect = () => {
   // state
   const [isOpen, setOpen] = useState(false);
-  const [currentNetwork, setCurrentNetwork] = useState('KSM');
+  // const [currentNetwork, setCurrentNetwork] = useState('KSM');
+  const networkName = useAppSelector(state => state.network.name);
+  const dispatch = useAppDispatch();
   //ref
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -51,24 +54,24 @@ const NetworkSelect = () => {
     // })();
 
     close();
-  }, [currentNetwork]);
+  }, [networkName]);
 
   const DisplayNetworkPanelDOM = useMemo(() => {
     let dom = {};
-    switch (currentNetwork) {
-      case 'KSM':
+    switch (networkName) {
+      case 'Kusama':
         dom = (
           <>
             <KSMLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>KSM</NetworkTitle>
+            <NetworkTitle>Kusama</NetworkTitle>
           </>
         );
         break;
-      case 'DOT':
+      case 'Polkadot':
         dom = (
           <>
             <DOTLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>DOT</NetworkTitle>
+            <NetworkTitle>Polkadot</NetworkTitle>
           </>
         );
         break;
@@ -76,7 +79,7 @@ const NetworkSelect = () => {
         break;
     }
     return dom;
-  }, [currentNetwork]);
+  }, [networkName]);
 
   return (
     <>
@@ -108,13 +111,13 @@ const NetworkSelect = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              <li className="li first" onClick={() => setCurrentNetwork('KSM')}>
+              <li className="li first" onClick={() => dispatch(networkChanged('Kusama'))}>
                 <KSMLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>KSM</NetworkTitleLight>
+                <NetworkTitleLight>Kusama</NetworkTitleLight>
               </li>
-              <li className="li last" onClick={() => setCurrentNetwork('DOT')}>
+              <li className="li last" onClick={() => dispatch(networkChanged('Polkadot'))}>
                 <DOTLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>DOT</NetworkTitleLight>
+                <NetworkTitleLight>Polkadot</NetworkTitleLight>
               </li>
             </motion.ul>
           )}
