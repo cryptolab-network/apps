@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, isWeb3Injected } from '@polkadot/extension-dapp';
 import { InjectedExtension, InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
@@ -20,7 +20,9 @@ const networkInfo = [
 export enum WalletStatus {
   IDLE,
   LOADING,
-  CONNECTED
+  CONNECTED,
+  DENIED,
+  NO_EXTENSION
 }
 
 export interface IInject {
@@ -30,15 +32,16 @@ export interface IInject {
 
 export interface IAccount {
   address: string,
-  name: string,
+  name?: string,
   source: string,
-  genesisHash: string | null
+  genesisHash?: string | null
 }
 
 export interface IWallet {
   status: WalletStatus;
   allInjected: IInject[];
   allAccounts: IAccount[];
+  filteredAccounts: IAccount[]; // Account is filtered by network
   selectedAccount: IAccount | null;
 }
 
@@ -46,29 +49,62 @@ const initialState: IWallet = {
   status: WalletStatus.IDLE,
   allInjected: [],
   allAccounts: [],
+  filteredAccounts: [],
   selectedAccount: null
 }
 
-export const connectWallet = createAsyncThunk('wallet/connectWallet', async (): Promise<any> => {
+export const connectWallet = createAsyncThunk('wallet/connectWallet', async (network: string): Promise<any> => {
   try {
-    const allInjected: InjectedExtension[] = await web3Enable('CryptoLab ');
-    const allAccounts: InjectedAccountWithMeta[] = await web3Accounts();
-    return {
-      allInjected: allInjected.map(inject => {
-        return {
-          name: inject.name,
-          version: inject.version
-        }
-      }),
-      allAccounts: allAccounts.map(account => {
-        return {
-          address: account.address,
-          name: account.meta.name,
-          source: account.meta.source,
-          genesisHash: account.meta.genesisHash
-        }
-      })
+    const injected: InjectedExtension[] = await web3Enable('CryptoLab');
+    const allInjected = injected.map(inject => {
+      return {
+        name: inject.name,
+        version: inject.version
+      }
+    });
+
+    if (!isWeb3Injected) {
+      console.log(`no extension`);
+      return {
+        allInjected: [],
+        allAccounts: [],
+        filteredAccounts: [],
+        selectedAccount: null,
+        status: WalletStatus.NO_EXTENSION
+      }
     }
+
+    if (allInjected.length === 0) {
+      console.log(`denied`);
+      return {
+        allInjected: [],
+        allAccounts: [],
+        filteredAccounts: [],
+        selectedAccount: null,
+        status: WalletStatus.DENIED
+      }
+    }
+
+    const accounts: InjectedAccountWithMeta[] = await web3Accounts();
+    const allAccounts = accounts.map((account: InjectedAccountWithMeta) => {
+      return {
+        address: account.address,
+        name: account.meta.name,
+        source: account.meta.source,
+        genesisHash: account.meta.genesisHash
+      }
+    });
+
+    const filteredAccounts = accountTransform(allAccounts, network);
+    const selectedAccount = (filteredAccounts.length > 1) ? filteredAccounts[0] : null
+    return {
+      allInjected,
+      allAccounts,
+      status: WalletStatus.CONNECTED,
+      filteredAccounts,
+      selectedAccount,
+    }
+
   } catch (err) {
     console.log(err);
     throw Error('connectWallet');
@@ -91,7 +127,9 @@ export const walletSlice = createSlice({
       .addCase(connectWallet.fulfilled, (state, action) => {
         state.allInjected = action.payload.allInjected;
         state.allAccounts = action.payload.allAccounts;
-        state.status = WalletStatus.CONNECTED;
+        state.filteredAccounts = action.payload.filteredAccounts;
+        state.selectedAccount = action.payload.selectedAccount;
+        state.status = action.payload.status;
       })
   }
 });

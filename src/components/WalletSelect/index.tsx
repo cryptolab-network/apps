@@ -4,25 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import './index.css';
 import { useAppSelector, useAppDispatch } from '../../hooks';
-import { connectWallet, selectAccount, WalletStatus, IAccount, accountTransform } from '../../redux';
+import { connectWallet, selectAccount, WalletStatus } from '../../redux';
 import Identicon from '@polkadot/react-identicon';
 
 const WalletSelect: React.FC = () => {
   const [isOpen, setOpen] = useState(false);
 
   const network = useAppSelector(state => state.network.name);
-  const status: WalletStatus = useAppSelector(state => state.wallet.status);
-  const allAccounts: IAccount[] = useAppSelector(state => state.wallet.allAccounts);
-
-  // filter and transfer account based on network
-  const accounts = accountTransform(allAccounts, network);
-  let selectedAccount: IAccount | null = useAppSelector(state => state.wallet.selectedAccount);
+  const { status, filteredAccounts, selectedAccount } = useAppSelector(state => state.wallet);
 
   const dispatch = useAppDispatch();
-
-  if (!selectedAccount && accounts.length > 1) {
-    dispatch(selectAccount(accounts[0]));
-  }
 
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -60,15 +51,15 @@ const WalletSelect: React.FC = () => {
   }, [selectedAccount?.address]);
 
   useEffect(() => {
-    if (status === WalletStatus.CONNECTED && accounts.length > 1) {
-      dispatch(selectAccount(accounts[0]));
+    if (status === WalletStatus.CONNECTED) {
+      dispatch(connectWallet(network));
     }
   }, [network])
 
   const handleConnect = async () => {
     try {
       if (status === WalletStatus.IDLE) {
-        dispatch(connectWallet());
+        dispatch(connectWallet(network));
       } else {
         setOpen(!isOpen);
       }
@@ -77,12 +68,13 @@ const WalletSelect: React.FC = () => {
     }
   };
 
-
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleConnect}>
-          {status === WalletStatus.IDLE && <Hint>Connect Wallet</Hint>}
+          {(status === WalletStatus.IDLE || status === WalletStatus.LOADING) && <Hint>Connect Wallet</Hint>}
+          {status === WalletStatus.NO_EXTENSION && <Hint>Install Extension</Hint>}
+          {status === WalletStatus.DENIED && <Hint>Please Allow</Hint>}
           {status === WalletStatus.CONNECTED && selectedAccount &&
             <div>
               <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
@@ -106,7 +98,7 @@ const WalletSelect: React.FC = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              {accounts.map((account, index) => {
+              {filteredAccounts.map((account, index) => {
                 if (index === 0) {
                   return <div key={index} >
                     <li className="li first" onClick={() => dispatch(selectAccount(account))}>
@@ -114,7 +106,7 @@ const WalletSelect: React.FC = () => {
                       <NetworkTitleLight>{account.name}</NetworkTitleLight>
                     </li>
                   </div>
-                } else if (index === accounts.length - 1) {
+                } else if (index === filteredAccounts.length - 1) {
                   return <div key={index} >
                     <li className="li last" onClick={() => dispatch(selectAccount(account))}>
                       <Identicon value={account.address} size={16} theme={'polkadot'} />
