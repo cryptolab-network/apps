@@ -1,13 +1,29 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
-import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
 import styled from 'styled-components';
 import './index.css';
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { connectWallet, selectAccount, WalletStatus, IAccount, accountTransform } from '../../redux';
+import Identicon from '@polkadot/react-identicon';
 
-const WalletSelect = () => {
+const WalletSelect: React.FC = () => {
   const [isOpen, setOpen] = useState(false);
+
+  const network = useAppSelector(state => state.network.name);
+  const status: WalletStatus = useAppSelector(state => state.wallet.status);
+  const allAccounts: IAccount[] = useAppSelector(state => state.wallet.allAccounts);
+
+  // filter and transfer account based on network
+  const accounts = accountTransform(allAccounts, network);
+  let selectedAccount: IAccount | null = useAppSelector(state => state.wallet.selectedAccount);
+
+  const dispatch = useAppDispatch();
+
+  if (!selectedAccount && accounts.length > 1) {
+    dispatch(selectAccount(accounts[0]));
+  }
+
   const btnRef = useRef<HTMLDivElement>(null);
 
   const close = () => {
@@ -39,19 +55,41 @@ const WalletSelect = () => {
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
+  useEffect(() => {
+    close();
+  }, [selectedAccount?.address]);
+
+  useEffect(() => {
+    if (status === WalletStatus.CONNECTED && accounts.length > 1) {
+      dispatch(selectAccount(accounts[0]));
+    }
+  }, [network])
+
   const handleConnect = async () => {
     try {
-      console.log('click');
+      if (status === WalletStatus.IDLE) {
+        dispatch(connectWallet());
+      } else {
+        setOpen(!isOpen);
+      }
     } catch (error) {
       console.log('error: ', error);
     }
   };
 
+
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleConnect}>
-          <Hint>Connect Wallet</Hint>
+          {status === WalletStatus.IDLE && <Hint>Connect Wallet</Hint>}
+          {status === WalletStatus.CONNECTED && selectedAccount &&
+            <div>
+              <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
+              <Hint>{selectedAccount.name}</Hint>
+            </div>
+          }
+          {status === WalletStatus.CONNECTED && !selectedAccount && <Hint>Select Address</Hint>}
         </Button>
       </ButtonLayout>
       {renderLayer(
@@ -68,14 +106,30 @@ const WalletSelect = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              <li className="li first">
-                <KSMLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>KSM</NetworkTitleLight>
-              </li>
-              <li className="li last">
-                <DOTLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>DOT</NetworkTitleLight>
-              </li>
+              {accounts.map((account, index) => {
+                if (index === 0) {
+                  return <div key={index} >
+                    <li className="li first" onClick={() => dispatch(selectAccount(account))}>
+                      <Identicon value={account.address} size={16} theme={'polkadot'} />
+                      <NetworkTitleLight>{account.name}</NetworkTitleLight>
+                    </li>
+                  </div>
+                } else if (index === accounts.length - 1) {
+                  return <div key={index} >
+                    <li className="li last" onClick={() => dispatch(selectAccount(account))}>
+                      <Identicon value={account.address} size={16} theme={'polkadot'} />
+                      <NetworkTitleLight>{account.name}</NetworkTitleLight>
+                    </li>
+                  </div>
+                } else {
+                  return <div key={index} >
+                    <li className="li" onClick={() => dispatch(selectAccount(account))}>
+                      <Identicon value={account.address} size={16} theme={'polkadot'} />
+                      <NetworkTitleLight>{account.name}</NetworkTitleLight>
+                    </li>
+                  </div>
+                }
+              })}
             </motion.ul>
           )}
         </AnimatePresence>
