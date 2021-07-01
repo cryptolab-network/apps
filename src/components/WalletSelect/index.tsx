@@ -73,7 +73,7 @@ const WalletSelect: React.FC = () => {
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleConnect}>
           {(status === WalletStatus.IDLE || status === WalletStatus.LOADING) && <Hint>Connect Wallet</Hint>}
-          {status === WalletStatus.NO_EXTENSION && <Hint>Install Extension</Hint>}
+          {status === WalletStatus.NO_EXTENSION && <Hint><a href='https://polkadot.js.org/extension/' target='_blank'>Install Wallet</a></Hint>}
           {status === WalletStatus.DENIED && <Hint>Please Allow</Hint>}
           {status === WalletStatus.CONNECTED && selectedAccount &&
             <div>
