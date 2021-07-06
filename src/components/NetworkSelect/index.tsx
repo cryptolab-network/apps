@@ -6,15 +6,16 @@ import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import './index.css';
 import styled from 'styled-components';
-import { useAppSelector, useAppDispatch } from '../../hooks';
-import { networkChanged } from '../../redux';
+import { useAppSelector } from '../../hooks';
 
-const NetworkSelect = () => {
+interface INetworkSelect {
+  onChange: Function;
+}
+
+const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
   // state
   const [isOpen, setOpen] = useState(false);
-  // const [currentNetwork, setCurrentNetwork] = useState('KSM');
-  const networkName = useAppSelector(state => state.network.name);
-  const dispatch = useAppDispatch();
+  const networkName = useAppSelector((state) => state.network.name);
   //ref
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -48,11 +49,6 @@ const NetworkSelect = () => {
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
   useEffect(() => {
-    // TODO: remove this, or update this network changing
-    // (async () => {
-    //   await polkadotChain.setNetwork(currentNetwork);
-    // })();
-
     close();
   }, [networkName]);
 
@@ -111,11 +107,21 @@ const NetworkSelect = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              <li className="li first" onClick={() => dispatch(networkChanged('Kusama'))}>
+              <li
+                className="li first"
+                onClick={() => {
+                  onChange('Kusama');
+                }}
+              >
                 <KSMLogo style={{ width: 36, height: 36 }} />
                 <NetworkTitleLight>Kusama</NetworkTitleLight>
               </li>
-              <li className="li last" onClick={() => dispatch(networkChanged('Polkadot'))}>
+              <li
+                className="li last"
+                onClick={() => {
+                  onChange('Polkadot');
+                }}
+              >
                 <DOTLogo style={{ width: 36, height: 36 }} />
                 <NetworkTitleLight>Polkadot</NetworkTitleLight>
               </li>

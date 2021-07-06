@@ -2,7 +2,9 @@ import styled from 'styled-components';
 // import Button from './components/Button';
 import NetworkSelect from './components/NetworkSelect';
 import WalletSelect from './components/WalletSelect';
-import { BrowserRouter, NavLink, Route, Switch } from 'react-router-dom';
+import Button from './components/Button';
+import NetworkWallet from './components/NetworkWallet';
+import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import './css/AppLayout.css';
@@ -12,12 +14,10 @@ import { ToastContainer } from 'react-toastify';
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
 
 // header
-const Header = () => {
-  const counter = useSelector((state: RootState) => state.counter);
+const Header: React.FC = () => {
+  let { pathname } = useLocation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -37,15 +37,13 @@ const Header = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
-        <div>{counter.value}</div>
-        <NetworkSelect />
-        <WalletSelect />
-        {/* <Button
-          title="Use Benchmark"
-          onClick={() => {
-            console.log('test');
-          }}
-        /> */}
+        {pathname !== '/' ? (
+          <NetworkWallet />
+        ) : (
+          <NavLink to="/benchmark">
+            <Button title="Use Benchmark" />
+          </NavLink>
+        )}
       </HeaderRightDiv>
     </HeaderDiv>
   );

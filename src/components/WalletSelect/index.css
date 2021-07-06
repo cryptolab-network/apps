@@ -2,18 +2,22 @@
   z-index: 1000;
 }
 
-.li.first {
+.li:first-child {
   border-top: 2px solid #23beb9;
   border-left: 2px solid #23beb9;
   border-right: 2px solid #23beb9;
   border-radius: 6px 6px 0px 0px;
 }
 
-.li.last {
+.li:last-child {
   border-bottom: 2px solid #23beb9;
   border-left: 2px solid #23beb9;
   border-right: 2px solid #23beb9;
   border-radius: 0px 0px 6px 6px;
+}
+
+.li:only-child {
+  border-radius: 6px;
 }
 
 .li {
@@ -42,4 +46,9 @@
   border-right: 2px solid #23beb9;
   list-style-type: none;
   background-color: #23beb9;
+  color: white;
+}
+
+.li:hover span {
+  color: white;
 }

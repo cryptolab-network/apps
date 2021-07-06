@@ -7,6 +7,7 @@ import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
 import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
+import Table from '../../../components/Table';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
@@ -86,6 +87,18 @@ const Staking = () => {
     minInclusion: undefined, // input %
     telemetry: false, // switch
   });
+
+  const columns = useMemo(() => {
+    return [
+      { Header: 'Select', accessor: 'select' },
+      { Header: 'Account', accessor: 'account' },
+      { Header: 'Self Stake', accessor: 'selfStake' },
+      { Header: 'Era Inclusion', accessor: 'eraInclusion' },
+      { Header: 'Unclaimed Eras', accessor: 'unclaimedEras' },
+      { Header: 'Avg APY', accessor: 'agvAPY' },
+      { Header: 'Active', accessor: 'active' },
+    ];
+  }, []);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -275,6 +288,27 @@ const Staking = () => {
     advancedSetting.telemetry,
   ]);
 
+  const advancedFilterResult = useMemo(() => {
+    if (!advancedOption.advanced) {
+      return null;
+    }
+    return (
+      <>
+        <div style={{ height: 17 }}></div>
+        <AdvancedBlockWrap>
+          <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+            <ContentColumnLayout width="100%" justifyContent="flex-start">
+              <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
+              <AdvancedFilterResultWrap>
+                <Table columns={columns} data={[]} />
+              </AdvancedFilterResultWrap>
+            </ContentColumnLayout>
+          </AdvancedBlock>
+        </AdvancedBlockWrap>
+      </>
+    );
+  }, [advancedOption.advanced, columns]);
+
   return (
     <>
       <CardHeader
@@ -357,6 +391,7 @@ const Staking = () => {
           </RewardBlock>
         </RewardBlockWrap>
         {advancedSettingDOM}
+        {advancedFilterResult}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
             <Button
@@ -670,12 +705,6 @@ const AdvancedSettingWrap = styled.div`
   align-items: center;
   width: 100%;
   flex-wrap: wrap;
-  // @media (max-width: 1395px) {
-  //   flex-wrap: wrap;
-  // }
-  // @media (max-width: 720px) {
-  //   width: calc(100vw - 160px);
-  // }
 `;
 
 const AdvancedBlock = styled.div`
@@ -707,4 +736,12 @@ const AdvancedBlockWrap = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 110px);
   }
+`;
+
+const AdvancedFilterResultWrap = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 `;
