@@ -92,11 +92,11 @@ const Staking = () => {
     return [
       { Header: 'Select', accessor: 'select' },
       { Header: 'Account', accessor: 'account' },
-      { Header: 'Self Stake', accessor: 'selfStake' },
-      { Header: 'Era Inclusion', accessor: 'eraInclusion' },
-      { Header: 'Unclaimed Eras', accessor: 'unclaimedEras' },
-      { Header: 'Avg APY', accessor: 'agvAPY' },
-      { Header: 'Active', accessor: 'active' },
+      { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
+      { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },
+      { Header: 'Unclaimed Eras', accessor: 'unclaimedEras', collapse: true },
+      { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
+      { Header: 'Active', accessor: 'active', collapse: true },
     ];
   }, []);
 
@@ -300,7 +300,38 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               <AdvancedFilterResultWrap>
-                <Table columns={columns} data={[]} />
+                <Table
+                  columns={columns}
+                  data={[
+                    {
+                      select: true,
+                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      selfStake: '5705',
+                      eraInclusion: '25.00% [21/84]',
+                      unclaimedEras: 5,
+                      avgAPY: '18.5%',
+                      active: true,
+                    },
+                    {
+                      select: true,
+                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      selfStake: '5705',
+                      eraInclusion: '25.00% [21/84]',
+                      unclaimedEras: 5,
+                      avgAPY: '18.5%',
+                      active: false,
+                    },
+                    {
+                      select: false,
+                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      selfStake: '5705',
+                      eraInclusion: '25.00% [21/84]',
+                      unclaimedEras: 5,
+                      avgAPY: '18.5%',
+                      active: false,
+                    },
+                  ]}
+                />
               </AdvancedFilterResultWrap>
             </ContentColumnLayout>
           </AdvancedBlock>
