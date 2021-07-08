@@ -110,16 +110,19 @@ const Style = styled.div`
       font-stretch: normal;
       font-style: normal;
       width: 1%;
-      text-align: center; /* But "collapsed" cells should be as small as possible */
+      text-align: center;
       &.collapse {
         width: 0.0000000001%;
       }
-
+      :first-child {
+        width: 0.00001%;
+      }
       :last-child {
         border-right: 0;
       }
       :nth-child(2) {
         text-align: left;
+        max-width: 250px;
       }
     }
   }

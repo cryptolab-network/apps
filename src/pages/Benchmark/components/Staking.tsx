@@ -8,10 +8,15 @@ import TimeCircle from '../../../components/Time/Circle';
 import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import Table from '../../../components/Table';
+import Account from '../../../components/Account';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
+import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.svg';
+import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
+import { ReactComponent as CheckTrue } from '../../../assets/images/check-true.svg';
+import { ReactComponent as CheckFalse } from '../../../assets/images/check-false.svg';
 import styled from 'styled-components';
 import _ from 'lodash';
 import Button from '../../../components/Button';
@@ -90,20 +95,32 @@ const Staking = () => {
 
   const columns = useMemo(() => {
     return [
-      { Header: 'Select', accessor: 'select' },
-      { Header: 'Account', accessor: 'account' },
+      {
+        Header: 'Select',
+        accessor: 'select',
+        maxWidth: 150,
+        Cell: ({ value }) => <span>{value ? <HandTrue /> : <HandFalse />}</span>,
+      },
+      {
+        Header: 'Account',
+        accessor: 'account',
+        Cell: ({ value }) => <Account address={value} />,
+      },
       { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
       { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },
       { Header: 'Unclaimed Eras', accessor: 'unclaimedEras', collapse: true },
       { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
-      { Header: 'Active', accessor: 'active', collapse: true },
+      {
+        Header: 'Active',
+        accessor: 'active',
+        collapse: true,
+        Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
+      },
     ];
   }, []);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
-      console.log('checked:', checked);
-      console.log('optionName:', optionName);
       switch (optionName) {
         case 'advanced':
           setAdvancedOption((prev) => ({ ...prev, advanced: checked }));
@@ -305,7 +322,7 @@ const Staking = () => {
                   data={[
                     {
                       select: true,
-                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
                       selfStake: '5705',
                       eraInclusion: '25.00% [21/84]',
                       unclaimedEras: 5,
@@ -314,7 +331,7 @@ const Staking = () => {
                     },
                     {
                       select: true,
-                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
                       selfStake: '5705',
                       eraInclusion: '25.00% [21/84]',
                       unclaimedEras: 5,
@@ -323,7 +340,7 @@ const Staking = () => {
                     },
                     {
                       select: false,
-                      account: 'GiCAS2RKmFajjJNvc39iCAS2RKmF…',
+                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
                       selfStake: '5705',
                       eraInclusion: '25.00% [21/84]',
                       unclaimedEras: 5,
