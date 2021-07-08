@@ -313,45 +313,45 @@ const Staking = () => {
       <>
         <div style={{ height: 17 }}></div>
         <AdvancedBlockWrap>
-          <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
+          <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
-              <AdvancedFilterResultWrap>
-                <Table
-                  columns={columns}
-                  data={[
-                    {
-                      select: true,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: true,
-                    },
-                    {
-                      select: true,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: false,
-                    },
-                    {
-                      select: false,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: false,
-                    },
-                  ]}
-                />
-              </AdvancedFilterResultWrap>
+              {/* <AdvancedFilterResultWrap> */}
+              <Table
+                columns={columns}
+                data={[
+                  {
+                    select: true,
+                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
+                    selfStake: '5705',
+                    eraInclusion: '25.00% [21/84]',
+                    unclaimedEras: 5,
+                    avgAPY: '18.5%',
+                    active: true,
+                  },
+                  {
+                    select: true,
+                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
+                    selfStake: '5705',
+                    eraInclusion: '25.00% [21/84]',
+                    unclaimedEras: 5,
+                    avgAPY: '18.5%',
+                    active: false,
+                  },
+                  {
+                    select: false,
+                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
+                    selfStake: '5705',
+                    eraInclusion: '25.00% [21/84]',
+                    unclaimedEras: 5,
+                    avgAPY: '18.5%',
+                    active: false,
+                  },
+                ]}
+              />
+              {/* </AdvancedFilterResultWrap> */}
             </ContentColumnLayout>
-          </AdvancedBlock>
+          </AdvancedFilterBlock>
         </AdvancedBlockWrap>
       </>
     );
@@ -763,7 +763,24 @@ const AdvancedBlock = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 62px;
+  max-width: 100%;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`;
+
+const AdvancedFilterBlock = styled.div`
+  background-color: white;
+  border-radius: 6px;
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
   width: 100%;
+  @media (max-width: 1395px) {
+    width: 570px;
+  }
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
   }
