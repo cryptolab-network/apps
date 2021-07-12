@@ -15,9 +15,28 @@ import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
 
+import { useSelector } from 'react-redux';
+import { RootState } from './store';
+import { useAppSelector, useAppDispatch } from './hooks';
+// import { createApi } from './redux';
+import Api from './components/Api';
+
+
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
+  const counter = useSelector((state: RootState) => state.counter);
+
+  const network = useAppSelector(state => state.network.name);
+  // const { handler, api } = useAppSelector(state => state.apiHandler);
+  // console.log(handler);
+  // console.log(api);
+  // const dispatch = useAppDispatch();
+  // if (handler === null) {
+  //   dispatch(createApi(network));
+  // }
+
+
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -55,26 +74,28 @@ const AppLayout = () => {
     <>
       <GradientLight>
         <BrowserRouter>
-          <Header />
-          <RouteContent>
-            <ToastContainer
-              position="top-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-            <Switch>
-              <Route exact path="/" component={Portal} />
-              <Route path="/guide" component={Guide} />
-              <Route path="/benchmark" component={Benchmark} />
-              <Route path="/management" component={Management} />
-            </Switch>
-          </RouteContent>
+          <Api>
+            <Header />
+            <RouteContent>
+              <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+              />
+              <Switch>
+                <Route exact path="/" component={Portal} />
+                <Route path="/guide" component={Guide} />
+                <Route path="/benchmark" component={Benchmark} />
+                <Route path="/management" component={Management} />
+              </Switch>
+            </RouteContent>
+          </Api>
         </BrowserRouter>
         <StarAnimation id="stars" />
         <StarAnimation id="stars2" />

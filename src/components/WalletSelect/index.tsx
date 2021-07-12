@@ -1,13 +1,20 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useContext } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import './index.css';
-import { useAppSelector } from '../../hooks';
-import { WalletStatus } from '../../redux';
-import Identicon from '@polkadot/react-identicon';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { connectWallet, IAccount, selectAccount, WalletStatus } from '../../redux';
+import Identicon from '@polkadot/react-identicon';
+import { ApiPromise } from '@polkadot/api';
+import { ApiContext } from '../Api';
+
+const balance = async (api: ApiPromise, account: IAccount) => {
+  const result = await api.derive.balances.account(account.address);
+  return result.freeBalance.toHuman();
+}
 
 interface IWallet {
   accountName: string;
@@ -22,11 +29,19 @@ interface IWalletSelect {
 }
 const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, selectedWallet }) => {
   const [isOpen, setOpen] = useState(false);
+  const [amount, setAmount] = useState('');
 
   const network = useAppSelector((state) => state.network.name);
-  // const { filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
+  const { filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
 
-  // const dispatch = useAppDispatch();
+  const api = useContext(ApiContext);
+  if (selectedAccount && !!api) {
+    balance(api, selectedAccount).then((value) => {
+      setAmount(value);
+    }).catch(console.log);
+  }
+
+  const dispatch = useAppDispatch();
 
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -205,7 +220,10 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
           {status === WalletStatus.CONNECTED && selectedAccount && (
             <div>
               <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-              <Hint>{selectedAccount.name}</Hint>
+              <div className='balance'>
+                <Hint>{selectedAccount.name}</Hint>
+                <Balance>{amount}</Balance>
+              </div>
             </div>
           )}
           {status === WalletStatus.CONNECTED && !selectedAccount && <Hint>Select Address</Hint>} */}

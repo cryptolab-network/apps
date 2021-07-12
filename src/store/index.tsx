@@ -5,7 +5,8 @@ const store = configureStore({
   reducer: {
     counter: counterSlice.reducer,
     network: networkSlice.reducer,
-    wallet: walletSlice.reducer
+    wallet: walletSlice.reducer,
+    // apiHandler: apiHandlerSlice.reducer,
   }
 });
 export default store;
