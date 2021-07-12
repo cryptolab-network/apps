@@ -25,7 +25,6 @@ import Api from './components/Api';
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-  const counter = useSelector((state: RootState) => state.counter);
 
   const network = useAppSelector(state => state.network.name);
   // const { handler, api } = useAppSelector(state => state.apiHandler);
