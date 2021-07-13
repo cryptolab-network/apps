@@ -26,15 +26,15 @@ export enum WalletStatus {
 }
 
 export interface IInject {
-  name: string,
-  version: string
+  name: string;
+  version: string;
 }
 
 export interface IAccount {
-  address: string,
-  name?: string,
-  source: string,
-  genesisHash?: string | null
+  address: string;
+  name?: string;
+  source: string;
+  genesisHash?: string | null;
 }
 
 export interface IWallet {

@@ -52,3 +52,17 @@
 .li:hover span {
   color: white;
 }
+
+.account {
+  display: flex;
+}
+
+.account Identicon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.balance {
+  display: block;
+  text-align: left;
+}

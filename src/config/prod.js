@@ -1,4 +1,4 @@
 module.exports = {
-  polkadotNetwork: process.env.POLKADOT_NETWORK,
-  kusamaNetwork: process.env.KUSAMA_NETWORK,
+  polkadotWSS: process.env.POLKADOT_WSS,
+  kusamaWSS: process.env.KUSAMA_WSS,
 };
