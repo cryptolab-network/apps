@@ -1,47 +1,26 @@
-import { useState, useRef, useMemo, useCallback, useContext } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import './index.css';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
-import { useAppSelector, useAppDispatch } from '../../hooks';
-import { connectWallet, IAccount, selectAccount, WalletStatus } from '../../redux';
+import { IAccount, WalletStatus } from '../../redux';
 import Identicon from '@polkadot/react-identicon';
-import { ApiPromise } from '@polkadot/api';
-import { ApiContext } from '../Api';
 
-const balance = async (api: ApiPromise, account: IAccount) => {
-  const result = await api.derive.balances.account(account.address);
-  return result.freeBalance.toHuman();
-}
-
-interface IWallet {
-  accountName: string;
-  address: string;
-  balance: string;
-}
+// interface IWallet {
+//   accountName: string;
+//   address: string;
+//   balance: string;
+// }
 interface IWalletSelect {
   onChange: Function;
-  walletList: Array<IWallet>;
+  accountList: Array<IAccount>;
   status: number;
-  selectedWallet?: IWallet;
+  selectedAccount?: IAccount | null;
 }
-const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, selectedWallet }) => {
+const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, selectedAccount }) => {
   const [isOpen, setOpen] = useState(false);
-  const [amount, setAmount] = useState('');
-
-  const network = useAppSelector((state) => state.network.name);
-  const { filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
-
-  const api = useContext(ApiContext);
-  if (selectedAccount && !!api) {
-    balance(api, selectedAccount).then((value) => {
-      setAmount(value);
-    }).catch(console.log);
-  }
-
-  const dispatch = useAppDispatch();
 
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -74,36 +53,12 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
-  // useEffect(() => {
-  //   close();
-  // }, [selectedAccount?.address]);
-
-  // useEffect(() => {
-  //   console.log('useEffect');
-  //   if (status === WalletStatus.CONNECTED) {
-  //     dispatch(connectWallet(network));
-  //   }
-  // }, [dispatch, network, status]);
-
-  // const handleClick = async () => {
-  //   console.log('handleClick');
-  //   try {
-  //     if (status === WalletStatus.IDLE) {
-  //       dispatch(connectWallet(network));
-  //     } else {
-  //       setOpen(!isOpen);
-  //     }
-  //   } catch (error) {
-  //     console.log('error: ', error);
-  //   }
-  // };
-
   const handleClick = useCallback(() => {
     if (status === WalletStatus.CONNECTED) {
       setOpen(!isOpen);
     }
-    onChange(selectedWallet);
-  }, [isOpen, onChange, selectedWallet, status]);
+    onChange(selectedAccount);
+  }, [isOpen, onChange, selectedAccount, status]);
 
   const css = `
     display: flex;
@@ -113,33 +68,33 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
     height: 100%;
   `;
 
-  const walletListDOM = useMemo(() => {
+  const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
-    if (walletList.length === 0) {
+    if (accountList.length === 0) {
       console.log('no length');
       dom.push(
         <li className="li">
-          (No available wallet)
+          (No available account)
           {/* <Identicon value={account.address} size={16} theme={'polkadot'} />
             <NetworkTitleLight>{account.name}</NetworkTitleLight> */}
         </li>
       );
     } else {
-      walletList.forEach((wallet, idx) => {
+      accountList.forEach((account, idx) => {
         dom.push(
           <li
             className="li"
             onClick={() => {
-              console.log('wallet in li: ', wallet);
-              onChange(wallet);
+              console.log('wallet in li: ', account);
+              onChange(account);
               close();
             }}
           >
-            <Identicon value={wallet.address} size={32} theme={'polkadot'} />
+            <Identicon value={account.address} size={32} theme={'polkadot'} />
             <WalletLayout>
-              <div>{wallet.accountName}</div>
+              <div>{account.name}</div>
               <div>
-                Balance : <BalanceNumber>{wallet.balance}</BalanceNumber>
+                Balance : <BalanceNumber>0</BalanceNumber>
               </div>
             </WalletLayout>
           </li>
@@ -147,7 +102,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
       });
     }
     return <div className="w-list">{dom}</div>;
-  }, [onChange, walletList]);
+  }, [onChange, accountList]);
 
   const walletDisplayDOM = useMemo(() => {
     switch (status) {
@@ -172,16 +127,17 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
       case WalletStatus.DENIED:
         return <Hint>Please Allow</Hint>;
       case WalletStatus.CONNECTED:
-        console.log('current wallet info: ', selectedWallet);
-        if (selectedWallet) {
+        console.log('current account info: ', selectedAccount);
+        if (selectedAccount) {
           return (
             <>
-              <Identicon value={selectedWallet.address} size={32} theme={'polkadot'} />
+              <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
               <WalletLayout>
-                <div>{selectedWallet.accountName}</div>
+                <div>{selectedAccount.name}</div>
                 <div>
-                  <BalanceTitle>Balance : </BalanceTitle>
-                  <BalanceNumber>{selectedWallet.balance}</BalanceNumber>
+                  Balance: <BalanceTitle>0</BalanceTitle>
+                  {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+                  {/* <BalanceNumber>123</BalanceNumber> */}
                 </div>
               </WalletLayout>
               <div style={{ width: 40 }}>
@@ -201,32 +157,13 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
       default:
         break;
     }
-  }, [status, css, selectedWallet, isOpen]);
+  }, [status, css, selectedAccount, isOpen]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleClick}>
           {walletDisplayDOM}
-          {/* {(status === WalletStatus.IDLE || status === WalletStatus.LOADING) && <Hint>Connect Wallet</Hint>}
-          {status === WalletStatus.NO_EXTENSION && (
-            <Hint>
-              <a href="https://polkadot.js.org/extension/" target="_blank" rel="noreferrer">
-                Install Wallet
-              </a>
-            </Hint>
-          )}
-          {status === WalletStatus.DENIED && <Hint>Please Allow</Hint>}
-          {status === WalletStatus.CONNECTED && selectedAccount && (
-            <div>
-              <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-              <div className='balance'>
-                <Hint>{selectedAccount.name}</Hint>
-                <Balance>{amount}</Balance>
-              </div>
-            </div>
-          )}
-          {status === WalletStatus.CONNECTED && !selectedAccount && <Hint>Select Address</Hint>} */}
         </Button>
       </ButtonLayout>
       {renderLayer(
@@ -243,37 +180,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, walletList, status, s
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              {walletListDOM}
-              {/* {filteredAccounts.map((account, index) => {
-                if (index === 0) {
-                  return (
-                    <div key={index}>
-                      <li className="li first" onClick={() => dispatch(selectAccount(account))}>
-                        <Identicon value={account.address} size={16} theme={'polkadot'} />
-                        <NetworkTitleLight>{account.name}</NetworkTitleLight>
-                      </li>
-                    </div>
-                  );
-                } else if (index === filteredAccounts.length - 1) {
-                  return (
-                    <div key={index}>
-                      <li className="li last" onClick={() => dispatch(selectAccount(account))}>
-                        <Identicon value={account.address} size={16} theme={'polkadot'} />
-                        <NetworkTitleLight>{account.name}</NetworkTitleLight>
-                      </li>
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div key={index}>
-                      <li className="li" onClick={() => dispatch(selectAccount(account))}>
-                        <Identicon value={account.address} size={16} theme={'polkadot'} />
-                        <NetworkTitleLight>{account.name}</NetworkTitleLight>
-                      </li>
-                    </div>
-                  );
-                }
-              })} */}
+              {accountListDOM}
             </motion.ul>
           )}
         </AnimatePresence>

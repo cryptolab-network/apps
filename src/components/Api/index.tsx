@@ -8,20 +8,12 @@ export { api };
 
 export const ApiContext = React.createContext({} as unknown as ApiPromise);
 
-const disconnect = async (api: ApiPromise): Promise<void> => {
-  console.log(`call disconnect`);
-  await api.disconnect();
-}
-
 const Api: React.FC = (props) => {
   const networkName = useAppSelector(state => state.network.name);
   const [isApiConnected, setIsApiConnected] = useState(false);
   const [isApiInitialized, setIsApiInitialized] = useState(false);
 
   useEffect(() => {
-    // if (!!api) {
-    //   disconnect(api);
-    // }
     const endpoint = (networkName === 'Polkadot') ? polkadotWSS : kusamaWSS;
     const provider = new WsProvider(endpoint, 1000);
     api = new ApiPromise({ provider });

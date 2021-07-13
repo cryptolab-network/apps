@@ -1,7 +1,4 @@
 import styled from 'styled-components';
-// import Button from './components/Button';
-import NetworkSelect from './components/NetworkSelect';
-import WalletSelect from './components/WalletSelect';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
 import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
@@ -14,9 +11,6 @@ import { ToastContainer } from 'react-toastify';
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
-
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
 import { useAppSelector, useAppDispatch } from './hooks';
 // import { createApi } from './redux';
 import Api from './components/Api';
