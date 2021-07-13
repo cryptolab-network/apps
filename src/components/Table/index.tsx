@@ -50,17 +50,25 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data }) => {
               prepareRow(row);
               return (
                 <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td
-                        {...cell.getCellProps({
-                          className: cell.column.collapse ? 'collapse' : '',
-                        })}
-                      >
-                        {cell.render('Cell')}
-                      </td>
-                    );
-                  })}
+                  {!row.canExpand && (
+                    <>
+                      <td colSpan={7}>{row.cells[4].render('Cell')}</td>
+                    </>
+                  )}
+                  {row.canExpand &&
+                    row.cells.map((cell, idx) => {
+                      return (
+                        <td
+                          style={{
+                            borderBottom:
+                              idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
+                          }}
+                          {...cell.getCellProps()}
+                        >
+                          {cell.render('Cell')}
+                        </td>
+                      );
+                    })}
                 </tr>
               );
             })}

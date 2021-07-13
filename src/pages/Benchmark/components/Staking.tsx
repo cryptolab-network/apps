@@ -108,7 +108,44 @@ const Staking = () => {
       },
       { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
       { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },
-      { Header: 'Unclaimed Eras', accessor: 'unclaimedEras', collapse: true },
+      {
+        Header: 'Unclaimed Eras',
+        accessor: 'unclaimedEras',
+        collapse: true,
+        Cell: ({ value, row, rows, toggleRowExpanded }) => (
+          <span
+            {...row.getToggleRowExpandedProps({
+              style: {
+                display: 'block',
+                overFlow: 'hidden',
+              },
+              onClick: () => {
+                const expandedRow = rows.find((row) => row.isExpanded);
+
+                if (expandedRow) {
+                  const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
+
+                  if (isSubItemOfRow) {
+                    const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
+
+                    if (expandedSubItem) {
+                      const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
+                      if (!isClickedOnExpandedSubItem) {
+                        toggleRowExpanded(expandedSubItem.id, false);
+                      }
+                    }
+                  } else {
+                    toggleRowExpanded(expandedRow.id, false);
+                  }
+                }
+                row.toggleRowExpanded();
+              },
+            })}
+          >
+            {value}
+          </span>
+        ),
+      },
       { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
       {
         Header: 'Active',
@@ -328,6 +365,7 @@ const Staking = () => {
                     unclaimedEras: 5,
                     avgAPY: '18.5%',
                     active: true,
+                    subRows: [{ unclaimedEras: 'test1' }],
                   },
                   {
                     select: true,
@@ -337,6 +375,7 @@ const Staking = () => {
                     unclaimedEras: 5,
                     avgAPY: '18.5%',
                     active: false,
+                    subRows: [{ unclaimedEras: 'test2' }],
                   },
                   {
                     select: false,
@@ -346,6 +385,7 @@ const Staking = () => {
                     unclaimedEras: 5,
                     avgAPY: '18.5%',
                     active: false,
+                    subRows: [{ unclaimedEras: 'test3' }],
                   },
                 ]}
               />
