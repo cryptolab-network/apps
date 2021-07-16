@@ -39,6 +39,7 @@
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
+    "startWin": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

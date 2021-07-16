@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import Slogan from './components/Slogan';
-import CardContent from './components/CardContent';
+import CardContent from '../../components/CardContent';
 import { ReactComponent as MicroScopeIcon } from '../../assets/images/microscope.svg';
 import { ReactComponent as EyeIcon } from '../../assets/images/eye.svg';
 import { ReactComponent as BeakerIcon } from '../../assets/images/beaker.svg';

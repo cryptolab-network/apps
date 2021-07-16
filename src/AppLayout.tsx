@@ -11,6 +11,7 @@ import { ToastContainer } from 'react-toastify';
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
+import Tools from './pages/Tools/Portal';
 import { useAppSelector, useAppDispatch } from './hooks';
 // import { createApi } from './redux';
 import Api from './components/Api';
@@ -86,6 +87,7 @@ const AppLayout = () => {
                 <Route path="/guide" component={Guide} />
                 <Route path="/benchmark" component={Benchmark} />
                 <Route path="/management" component={Management} />
+                <Route path="/tools" component={Tools} />
               </Switch>
             </RouteContent>
           </Api>
