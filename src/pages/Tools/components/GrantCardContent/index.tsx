@@ -6,26 +6,18 @@ import { ReactComponent as Web3BadgeIcon } from '../../../../assets/images/badge
 
 const GrantCardContent = ({ className = '' }) => {
   return (
-    <CardContentLayout className={className}>
-        <IconLayout>
-          <CryptoLabIconLayout>
-            <CryptoLabIcon/>
-          </CryptoLabIconLayout>
-          <XIconLayout>
-            <XIcon/>
-          </XIconLayout>
-          <Web3BadgeIconLayout>
-            <Web3BadgeIcon/>
-          </Web3BadgeIconLayout>
-          <RectangleLayout>
-            <GrantLayout>
-            CryptoLab Network 
-            <GrantLayoutSmall>Supported by </GrantLayoutSmall>
-            Web3 Foundation Grant 
-            </GrantLayout>
-          </RectangleLayout>
-        </IconLayout>
-    </CardContentLayout>
+    <GrantCardContentLayout className={className}>
+      <BadgeLayout>
+        <CryptoLabIcon />
+        <XIcon />
+        <Web3BadgeIcon />
+      </BadgeLayout>
+      <GrantLayout>
+        <GrantTitle>CryptoLab Network</GrantTitle>
+        <GrantSubTitle>Supported by </GrantSubTitle>
+        <GrantTitle>Web3 Foundation Grant</GrantTitle>
+      </GrantLayout>
+    </GrantCardContentLayout>
   );
 };
 
@@ -38,70 +30,49 @@ GrantCardContent.defaultProps = {
   className: '',
 };
 
-const CardContentLayout = styled.div`
-  width: 516.6px;
+const GrantCardContentLayout = styled.div`
+  display: flex;
+  width: 530px;
   height: 77.1px;
   margin: 0 0.4px 150px 0;
-  padding: 0 0 0 14px;
-  opacity: 1;
-  border-radius: 6px;
-  border: solid 1px #1faaa6;
-  background-color: #141b26;
 `;
 
-const IconLayout = styled.div`
-  object-fit: contain;
+const BadgeLayout = styled.div`
+  flex: 3;
   display: flex;
-  flex-direction: row;
-`
-
-const CryptoLabIconLayout = styled.div`
-  width: 108px;
-  height: 40px;
-  margin: 22.5px 12px 14.6px 0;
-  object-fit: contain;
-`
-
-const XIconLayout = styled.div`
-  width: 24px;
-  height: 24px;
-  margin: 31px 15.1px 22.1px 12px;
-  object-fit: contain;
-`
-
-const Web3BadgeIconLayout = styled.div`
-  width: 107.7px;
-  height: 36.9px;
-  margin: 22.5px 25.1px 17.7px 15.1px;
-  object-fit: contain;
-`
-
-const RectangleLayout = styled.div`
-  width: 210.6px;
-  height: 77.1px;
-  margin: 0 0 0 0;
-  opacity: 1;
-  background-color: #1faaa6;
-`
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px 0 16px;
+`;
 
 const GrantLayout = styled.div`
-  width: 199px;
-  height: 51px;
-  margin: 13.5px 0px 12.6px 12.5px;
+  flex: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 8px 0 8px;
+  background-color: #23beb9;
+  border: solid 0.5px #23beb9;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+`;
+
+const GrantTitle = styled.div`
+  text-align: left;
   font-family: Montserrat;
   font-size: 15px;
   font-weight: bold;
   font-stretch: normal;
   font-style: normal;
-  line-height: 1.27;
-  letter-spacing: normal;
-  text-align: left;
-  color: #fff;
-`
-
-const GrantLayoutSmall = styled.div`
+  color: white;
+`;
+const GrantSubTitle = styled.div`
   font-size: 10px;
   font-weight: 500;
-`
+  color: white;
+`;
 
 export default GrantCardContent;

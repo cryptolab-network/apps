@@ -5,7 +5,6 @@ import { ReactComponent as MedalIcon } from '../../../assets/images/medal.svg';
 import { ReactComponent as PeopleIcon } from '../../../assets/images/people.svg';
 import { ReactComponent as MonitorIcon } from '../../../assets/images/monitor.svg';
 
-
 const Portal = () => {
   return (
     <PortalLayout>
@@ -29,9 +28,7 @@ const Portal = () => {
           className="card-layout"
         />
       </CardsLayout>
-      <GrantCardContent
-          className="card-layout"
-      />
+      <GrantCardContent className="card-layout" />
     </PortalLayout>
   );
 };
