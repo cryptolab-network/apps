@@ -22,6 +22,7 @@ import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-fals
 import { ReactComponent as CheckTrue } from '../../../assets/images/check-true.svg';
 import { ReactComponent as CheckFalse } from '../../../assets/images/check-false.svg';
 import { eraStatus } from '../../../utils/status/era';
+import { tableType } from '../../../utils/status/table';
 import styled from 'styled-components';
 import _ from 'lodash';
 
@@ -378,6 +379,7 @@ const Staking = () => {
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {/* <AdvancedFilterResultWrap> */}
               <Table
+                type={tableType.stake}
                 columns={columns}
                 data={[
                   {
