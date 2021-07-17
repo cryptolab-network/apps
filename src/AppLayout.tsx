@@ -15,6 +15,7 @@ import Tools from './pages/Tools/Portal';
 import { useAppSelector, useAppDispatch } from './hooks';
 // import { createApi } from './redux';
 import Api from './components/Api';
+import ValNom from './pages/Tools/ValNom';
 
 
 // header
@@ -87,7 +88,8 @@ const AppLayout = () => {
                 <Route path="/guide" component={Guide} />
                 <Route path="/benchmark" component={Benchmark} />
                 <Route path="/management" component={Management} />
-                <Route path="/tools" component={Tools} />
+                <Route exact path="/tools" component={Tools} />
+                <Route path="/tools/valnom" component={ValNom} />
               </Switch>
             </RouteContent>
           </Api>
