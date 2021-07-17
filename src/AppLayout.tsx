@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
@@ -17,12 +18,13 @@ import { useAppSelector, useAppDispatch } from './hooks';
 import Api from './components/Api';
 import ValNom from './pages/Tools/ValNom';
 
+import keys from './config/keys';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
 
-  const network = useAppSelector(state => state.network.name);
+  const network = useAppSelector((state) => state.network.name);
   // const { handler, api } = useAppSelector(state => state.apiHandler);
   // console.log(handler);
   // console.log(api);
@@ -30,7 +32,6 @@ const Header: React.FC = () => {
   // if (handler === null) {
   //   dispatch(createApi(network));
   // }
-
 
   return (
     <HeaderDiv>
@@ -65,34 +66,43 @@ const Header: React.FC = () => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
+  const mainRender = useMemo(() => {
+    if (window.location.host.split('.')[0] === keys.toolDomain) {
+      return <div>ok</div>;
+    } else {
+      return (
+        <>
+          <Header />
+          <RouteContent>
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
+            <Switch>
+              <Route exact path="/" component={Portal} />
+              <Route path="/guide" component={Guide} />
+              <Route path="/benchmark" component={Benchmark} />
+              <Route path="/management" component={Management} />
+              <Route exact path="/tools" component={Tools} />
+              <Route path="/tools/valnom" component={ValNom} />
+            </Switch>
+          </RouteContent>
+        </>
+      );
+    }
+  }, []);
   return (
     <>
       <GradientLight>
         <BrowserRouter>
-          <Api>
-            <Header />
-            <RouteContent>
-              <ToastContainer
-                position="top-center"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-              />
-              <Switch>
-                <Route exact path="/" component={Portal} />
-                <Route path="/guide" component={Guide} />
-                <Route path="/benchmark" component={Benchmark} />
-                <Route path="/management" component={Management} />
-                <Route exact path="/tools" component={Tools} />
-                <Route path="/tools/valnom" component={ValNom} />
-              </Switch>
-            </RouteContent>
-          </Api>
+          <Api>{mainRender}</Api>
         </BrowserRouter>
         <StarAnimation id="stars" />
         <StarAnimation id="stars2" />
