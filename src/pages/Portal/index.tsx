@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import Slogan from './components/Slogan';
-import CardContent from './components/CardContent';
+import CardContent from '../../components/CardContent';
 import { ReactComponent as MicroScopeIcon } from '../../assets/images/microscope.svg';
 import { ReactComponent as EyeIcon } from '../../assets/images/eye.svg';
 import { ReactComponent as BeakerIcon } from '../../assets/images/beaker.svg';
+import ValidNomiator from '../../components/ValidNominator';
 
 const Portal = () => {
   return (
@@ -29,6 +30,15 @@ const Portal = () => {
           title={'Portfolio\nManagement'}
           detail="CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify …"
           className="card-layout"
+        />
+        <ValidNomiator
+          address="162YPZdNm2F12fG7WDqTw5xjqKHb4bbnr3Tdcq6r3ggJJcpU"
+          name="test"
+          activeAmount={123.23}
+          totalAmount={23.456}
+          apy={50}
+          count={17}
+          commission={58}
         />
       </CardsLayout>
     </PortalLayout>
