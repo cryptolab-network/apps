@@ -21,8 +21,9 @@ import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
 import { ReactComponent as CheckTrue } from '../../../assets/images/check-true.svg';
 import { ReactComponent as CheckFalse } from '../../../assets/images/check-false.svg';
-import { eraStatus } from '../../../utils/status/era';
-import { tableType } from '../../../utils/status/table';
+import { eraStatus } from '../../../utils/status/Era';
+import { tableType } from '../../../utils/status/Table';
+import { apiGetAllValidator } from '../../../apis/Validator';
 import styled from 'styled-components';
 import _ from 'lodash';
 
@@ -220,6 +221,13 @@ const Staking = () => {
         return { ...prev };
       }
     });
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let result = await apiGetAllValidator({ params: 'KSM', query: { size: 5, page: 1 } });
+      console.log('result: ', result);
+    })();
   }, []);
 
   const handleInputChange = (name) => (e) => {

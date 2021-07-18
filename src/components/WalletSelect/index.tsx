@@ -83,6 +83,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
       accountList.forEach((account, idx) => {
         dom.push(
           <li
+            key={`wallet-select-${idx}`}
             className="li"
             onClick={() => {
               console.log('wallet in li: ', account);

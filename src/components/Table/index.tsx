@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination } from 'react-table';
-import { tableType } from '../../utils/status/table';
+import { tableType } from '../../utils/status/Table';
 
 type ICOLUMN = {
   columns: Array<any>;

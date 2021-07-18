@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { eraStatus } from '../../../utils/status/era';
+import { eraStatus } from '../../../utils/status/Era';
 
 interface IEra {
   statusCode: eraStatus;
