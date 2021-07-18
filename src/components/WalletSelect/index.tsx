@@ -73,7 +73,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
     if (accountList.length === 0) {
       console.log('no length');
       dom.push(
-        <li className="li">
+        <li className="li" key={'wallet-select-non'}>
           (No available account)
           {/* <Identicon value={account.address} size={16} theme={'polkadot'} />
             <NetworkTitleLight>{account.name}</NetworkTitleLight> */}
