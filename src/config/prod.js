@@ -5,4 +5,5 @@ module.exports = {
   toolDomain: process.env.TOOL_DOMAIN,
   proxyTarget: process.env.REACT_APP_PROXY_TARGET,
   gaTrackingId: process.env.REACT_APP_GA_TRACKING_ID,
+  apiVersion: process.env.API_VERSION,
 };

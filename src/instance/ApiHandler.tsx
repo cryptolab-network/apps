@@ -3,11 +3,11 @@ import { polkadotWSS, kusamaWSS } from '../config/dev';
 
 export enum NetworkName {
   POLKADOT = 'Polkadot',
-  KUSAMA = 'Kusama'
+  KUSAMA = 'Kusama',
 }
 
 export interface INetwork {
-  name: NetworkName
+  name: NetworkName;
 }
 export class ApiHandler {
   private _api: ApiPromise;
@@ -19,7 +19,7 @@ export class ApiHandler {
 
   static async create(network: string): Promise<ApiHandler> {
     try {
-      const endpoint = (network === NetworkName.POLKADOT) ? polkadotWSS : kusamaWSS;
+      const endpoint = network === NetworkName.POLKADOT ? polkadotWSS : kusamaWSS;
       const api = await ApiPromise.create({
         provider: new WsProvider(endpoint, 1000),
       });
@@ -35,4 +35,3 @@ export class ApiHandler {
     return this._api;
   }
 }
-
