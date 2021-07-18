@@ -104,7 +104,7 @@ const Staking = () => {
       {
         Header: 'Account',
         accessor: 'account',
-        Cell: ({ value }) => <Account address={value} />,
+        Cell: ({ value }) => <Account address={value} display={value}/>,
       },
       { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
       { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },

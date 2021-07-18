@@ -3,13 +3,14 @@ import styled from 'styled-components';
 
 interface IAccount {
   address: string;
+  display: string;
 }
 
-const Account: React.FC<IAccount> = ({ address }) => {
+const Account: React.FC<IAccount> = ({ address, display = address }) => {
   return (
     <AccountLayout>
       <Identicon value={address} size={32} theme={'polkadot'} />
-      <Address>{address}</Address>
+      <Address>{display}</Address>
     </AccountLayout>
   );
 };
