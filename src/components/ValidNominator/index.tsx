@@ -6,15 +6,15 @@ import '../../css/ToolTip.css';
 export interface IValidNominator {
   address: string;
   name: string;
-  activeAmount: number;
-  totalAmount: number;
-  apy: number;
+  activeAmount: string;
+  totalAmount: string;
+  apy: string;
   count: number;
   commission: number;
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }
 
-const ValidNomiator: React.FC<IValidNominator> = ({
+const ValidNominator: React.FC<IValidNominator> = ({
   address,
   name,
   activeAmount,
@@ -24,8 +24,12 @@ const ValidNomiator: React.FC<IValidNominator> = ({
   commission,
   onClick,
 }) => {
+  let shortenName = name;
+  if (shortenName.length > 35) {
+    shortenName = shortenName.substring(0, 5) + '...' + shortenName.substring(shortenName.length - 5);
+  }
   return (
-    <ValidNomiatorLayout onClick={onClick}>
+    <ValidNominatorLayout onClick={onClick}>
       <ReactTooltip
         id="activeAmount"
         place="bottom"
@@ -43,14 +47,14 @@ const ValidNomiator: React.FC<IValidNominator> = ({
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
         <Identicon value={address} size={35} theme={'polkadot'} />
-        <Name>{name}</Name>
+        <Name>{shortenName}</Name>
         <ValuePart>
           <EnhanceValue data-for="activeAmount" data-tip="active amount">
-            {activeAmount} KSM
+            {activeAmount}
           </EnhanceValue>{' '}
           /{' '}
           <span data-for="totalAmount" data-tip="total amount">
-            {totalAmount} KSM
+            {totalAmount}
           </span>
           <div data-for="apy" data-tip="Annual Percentage Yield">
             APY：
@@ -66,15 +70,15 @@ const ValidNomiator: React.FC<IValidNominator> = ({
           Commission：<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
-    </ValidNomiatorLayout>
+    </ValidNominatorLayout>
   );
 };
 
-export default ValidNomiator;
+export default ValidNominator;
 
-const ValidNomiatorLayout = styled.div`
-  width: 174px;
-  height: 199px;
+const ValidNominatorLayout = styled.div`
+  width: 224px;
+  height: 270px;
   box-sizing: border-box;
   padding: 20px 2px 15px;
   margin: 4px;
