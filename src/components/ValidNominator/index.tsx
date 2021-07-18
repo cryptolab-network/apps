@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import Identicon from '@polkadot/react-identicon';
+import ReactTooltip from 'react-tooltip';
+import '../../css/ToolTip.css';
 
 export interface IValidNominator {
   address: string;
@@ -24,12 +26,33 @@ const ValidNomiator: React.FC<IValidNominator> = ({
 }) => {
   return (
     <ValidNomiatorLayout onClick={onClick}>
+      <ReactTooltip
+        id="activeAmount"
+        place="bottom"
+        effect="solid"
+        backgroundColor="#18232f"
+        textColor="#21aca8"
+      />
+      <ReactTooltip
+        id="totalAmount"
+        place="bottom"
+        effect="solid"
+        backgroundColor="#18232f"
+        textColor="#21aca8"
+      />
+      <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
         <Identicon value={address} size={35} theme={'polkadot'} />
         <Name>{name}</Name>
         <ValuePart>
-          <EnhanceValue>{activeAmount} KSM</EnhanceValue> / {totalAmount} KSM
-          <div>
+          <EnhanceValue data-for="activeAmount" data-tip="active amount">
+            {activeAmount} KSM
+          </EnhanceValue>{' '}
+          /{' '}
+          <span data-for="totalAmount" data-tip="total amount">
+            {totalAmount} KSM
+          </span>
+          <div data-for="apy" data-tip="Annual Percentage Yield">
             APY：
             <EnhanceValue>{apy}%</EnhanceValue>
           </div>
