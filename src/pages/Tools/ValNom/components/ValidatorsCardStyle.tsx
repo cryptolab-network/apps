@@ -9,6 +9,7 @@ import { CryptoLabHandler, IValidator } from '../../../../instance/CryptoLabHand
 import { formatBalance } from '@polkadot/util';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import ValidNominator from '../../../../components/ValidNominator';
+import { lsGetFavorites } from '../../../../utils/localStorage';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -90,21 +91,19 @@ const ValidatorGrid = () => {
       validators.unshift(...statusChangedValidators);
     }
     // read favorite from localstorage
-    let str = localStorage.getItem("favorite-validators");
-    if (str !== null) {
-      const favoriteValidatorsStr = JSON.parse(str);
-      favoriteValidatorsStr.map((id) => {
-        const favoriteValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-          if (v.id === id) {
-            acc.push(v);
-            v.favorite = true;
-            validators.splice(idx, 1);
-          }
-          return acc;
-        }, []);
-        validators.unshift(...favoriteValidators);
-      });
-    }
+    const favoriteValidatorsStr = lsGetFavorites();
+    // eslint-disable-next-line array-callback-return
+    favoriteValidatorsStr.map((id) => {
+      const favoriteValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+        if (v.id === id) {
+          acc.push(v);
+          v.favorite = true;
+          validators.splice(idx, 1);
+        }
+        return acc;
+      }, []);
+      validators.unshift(...favoriteValidators);
+    });
     // find favorites and put them to the top
     return validators;
   };

@@ -8,6 +8,7 @@ import '../../css/ToolTip.css';
 import { IStatusChange } from '../../instance/CryptoLabHandler';
 import { shortenStashId } from '../../utils/string';
 import { useCallback, useState } from 'react';
+import { lsSetFavorite, lsUnsetFavorite } from '../../utils/localStorage';
 
 export interface IValidNominator {
   address: string;
@@ -37,32 +38,13 @@ const ValidNominator: React.FC<IValidNominator> = ({
   onClick,
 }) => {
 
-  const Favorite = ({ address }) => {
-    const [favorite, setFavoriteIcon] = useState(false);
+  const Favorite = ({ address, _favorite }) => {
+    const [favorite, setFavoriteIcon] = useState(_favorite);
     const setFavorite = useCallback(() => {
-      let str = localStorage.getItem('favorite-validators');
-      let validators: string[] = [];
-      if (str === null) {
-        validators = [];
-      } else {
-        validators = JSON.parse(str);
-      }
-      validators.push(address);
-      localStorage.setItem('favorite-validators', JSON.stringify(validators));
+      lsSetFavorite(address);
     }, [address]);
     const unsetFavorite = useCallback(() => {
-      let str = localStorage.getItem("favorite-validators");
-      let validators: string[] = [];
-      if (str === null) {
-        validators = [];
-      } else {
-        validators = JSON.parse(str);
-      }
-      const idx = validators.indexOf(address)
-      if (idx >= 0) {
-        validators.splice(idx, 1);
-      }
-      localStorage.setItem('favorite-validators', JSON.stringify(validators));
+      lsUnsetFavorite(address);
     }, [address]);
     if (favorite) {
       return (<FavoriteIcon 
@@ -110,7 +92,8 @@ const ValidNominator: React.FC<IValidNominator> = ({
         <Identicon value={address} size={35} theme={'polkadot'} />
         <FavoriteLayout>
           <Favorite 
-          address={address}/>
+          address={address}
+          _favorite={favorite}/>
         </FavoriteLayout>
         <StatusLayout>
           <Status />
