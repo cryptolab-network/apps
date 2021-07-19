@@ -4,8 +4,10 @@ import GrantCardContent from '../components/GrantCardContent';
 import { ReactComponent as MedalIcon } from '../../../assets/images/medal.svg';
 import { ReactComponent as PeopleIcon } from '../../../assets/images/people.svg';
 import { ReactComponent as MonitorIcon } from '../../../assets/images/monitor.svg';
+import { useHistory } from 'react-router-dom';
 
 const Portal = () => {
+  const history = useHistory();
   return (
     <PortalLayout>
       <CardsLayout>
@@ -14,6 +16,9 @@ const Portal = () => {
           title={'Validator / Nominator Status'}
           detail="Useful criterias for both validators and nominators to monitor and evaluate your staking information."
           className="card-layout"
+          onClick = {() => {
+            history.push("/tools/valnom");
+          }}
         />
         <CardContent
           Icon={MonitorIcon}
