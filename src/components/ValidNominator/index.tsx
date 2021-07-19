@@ -1,7 +1,13 @@
 import styled from 'styled-components';
 import Identicon from '@polkadot/react-identicon';
 import ReactTooltip from 'react-tooltip';
+import { ReactComponent as FavoriteIcon } from '../../assets/images/favorite-selected.svg';
+import { ReactComponent as FavoriteUnselectedIcon } from '../../assets/images/favorite-unselected.svg';
+import { ReactComponent as UnclaimedPayoutsIcon } from '../../assets/images/unclaimed-payouts.svg';
 import '../../css/ToolTip.css';
+import { IStatusChange } from '../../instance/CryptoLabHandler';
+import { shortenStashId } from '../../utils/string';
+import { useCallback, useState } from 'react';
 
 export interface IValidNominator {
   address: string;
@@ -11,6 +17,9 @@ export interface IValidNominator {
   apy: string;
   count: number;
   commission: number;
+  statusChange: IStatusChange;
+  unclaimedPayouts: number;
+  favorite: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }
 
@@ -22,12 +31,64 @@ const ValidNominator: React.FC<IValidNominator> = ({
   apy,
   count,
   commission,
+  statusChange,
+  unclaimedPayouts,
+  favorite,
   onClick,
 }) => {
-  let shortenName = name;
-  if (shortenName.length > 35) {
-    shortenName = shortenName.substring(0, 5) + '...' + shortenName.substring(shortenName.length - 5);
+
+  const Favorite = ({ address }) => {
+    const [favorite, setFavoriteIcon] = useState(false);
+    const setFavorite = useCallback(() => {
+      let str = localStorage.getItem('favorite-validators');
+      let validators: string[] = [];
+      if (str === null) {
+        validators = [];
+      } else {
+        validators = JSON.parse(str);
+      }
+      validators.push(address);
+      localStorage.setItem('favorite-validators', JSON.stringify(validators));
+    }, [address]);
+    const unsetFavorite = useCallback(() => {
+      let str = localStorage.getItem("favorite-validators");
+      let validators: string[] = [];
+      if (str === null) {
+        validators = [];
+      } else {
+        validators = JSON.parse(str);
+      }
+      const idx = validators.indexOf(address)
+      if (idx >= 0) {
+        validators.splice(idx, 1);
+      }
+      localStorage.setItem('favorite-validators', JSON.stringify(validators));
+    }, [address]);
+    if (favorite) {
+      return (<FavoriteIcon 
+        onClick={() => {
+          unsetFavorite();
+          setFavoriteIcon(false);
+        }} />);
+    } else {
+      return (<FavoriteUnselectedIcon 
+        onClick={() => {
+          setFavorite();
+          setFavoriteIcon(true);
+        }
+        } />);
+    }
   }
+
+  const Status = () => {
+    if (unclaimedPayouts >= 20) {
+      return (<UnclaimedPayoutsIcon />);
+    } else {
+      return (<div></div>);
+    }
+  };
+
+  const shortenName = shortenStashId(name);
   return (
     <ValidNominatorLayout onClick={onClick}>
       <ReactTooltip
@@ -47,6 +108,13 @@ const ValidNominator: React.FC<IValidNominator> = ({
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
         <Identicon value={address} size={35} theme={'polkadot'} />
+        <FavoriteLayout>
+          <Favorite 
+          address={address}/>
+        </FavoriteLayout>
+        <StatusLayout>
+          <Status />
+        </StatusLayout>
         <Name>{shortenName}</Name>
         <ValuePart>
           <EnhanceValue data-for="activeAmount" data-tip="active amount">
@@ -57,7 +125,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
             {totalAmount}
           </span>
           <div data-for="apy" data-tip="Annual Percentage Yield">
-            APY：
+            Average APY：
             <EnhanceValue>{apy}%</EnhanceValue>
           </div>
         </ValuePart>
@@ -129,5 +197,23 @@ const SubInfo = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+`;
+
+const FavoriteLayout = styled.div`
+  flex: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
+  margin: -80px 48px 0 0;
+`;
+
+const StatusLayout = styled.div`
+  flex: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin: -20px 48px 0 0;
 `;

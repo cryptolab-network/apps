@@ -12,6 +12,14 @@ import ValidNominator from '../../../../components/ValidNominator';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
+interface IValidatorFilter {
+  favorite: boolean
+  commission: boolean
+  apy: boolean
+  cryptoLab: boolean
+  status: boolean
+}
+
 const ValNomHeader = () => {
   return (
     <HeaderLayout>
@@ -48,12 +56,71 @@ const ValidatorGrid = () => {
       }));
     }
   }, [chain]);
+  const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
+    // sort by apy or commission
+    if(filters.apy === true) {
+      validators = validators.sort((a: IValidator, b: IValidator) => {
+        if (a.averageApy > b.averageApy) {
+          return -1;
+        } else if (a.averageApy < b.averageApy) {
+          return 1;
+        }
+        return 0;
+      });
+    } else if(filters.commission === true) {
+      validators = validators.sort((a: IValidator, b: IValidator) => {
+        if (a.info.commission > b.info.commission) {
+          return -1;
+        } else if (a.info.commission < b.info.commission) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+    // put cryptoLab related to the top
+    // put status changed nodes to the top
+    if(filters.status === true) {
+      const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+        if (v.statusChange.commissionChange !== 0) {
+          acc.push(v);
+          validators.splice(idx, 1);
+        }
+        return acc;
+      }, []);
+      validators.unshift(...statusChangedValidators);
+    }
+    // read favorite from localstorage
+    let str = localStorage.getItem("favorite-validators");
+    if (str !== null) {
+      const favoriteValidatorsStr = JSON.parse(str);
+      favoriteValidatorsStr.map((id) => {
+        const favoriteValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+          if (v.id === id) {
+            acc.push(v);
+            v.favorite = true;
+            validators.splice(idx, 1);
+          }
+          return acc;
+        }, []);
+        validators.unshift(...favoriteValidators);
+      });
+    }
+    // find favorites and put them to the top
+    return validators;
+  };
   useEffect(() => {
     const apiHandler = new CryptoLabHandler();
     async function getValidators() {
       try {
-        const validators = await apiHandler.getAllValidators(chain);
-        setValidators(validators.slice(0, 100));
+        let validators = await apiHandler.getAllValidators(chain);
+        validators = sortValidators(validators, {
+          favorite: true,
+          commission: false,
+          apy: true,
+          cryptoLab: true,
+          status: true
+        });
+        setValidators(validators.slice(0, 24));
       } catch (err) {
         console.error(err);
       }
@@ -67,16 +134,20 @@ const ValidatorGrid = () => {
   const validatorComponents = useMemo(() => {
     return validators.map((v, idx) => {
       const x = idx % cols;
+      const y = Math.floor(idx / cols);
       return (
-        <div key={idx} data-grid={{x: x, y: 0, w: 1, h: 1, static: true}}>
+        <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
           <ValidNominator
           address={v.id}
           name={v.identity.display}
           activeAmount={_formatBalance(v.info.exposure.own)}
-          totalAmount={_formatBalance(v.info.exposure.total)}
+          totalAmount={_formatBalance(v.info.total)}
           apy={(v.averageApy * 100).toFixed(2)}
           commission={v.info.commission}
           count={v.info.nominatorCount}
+          statusChange={v.statusChange}
+          unclaimedPayouts={v.info.unclaimedEras.length}
+          favorite={v.favorite}
           ></ValidNominator>
         </div>);
       });
