@@ -7,6 +7,10 @@ export const validatorAxios = Axios.create({
   baseURL: `${keys.apiVersion}/api/v1/validators`,
 });
 
+export const singleValidatorAxios = Axios.create({
+  baseURL: `${keys.apiVersion}/api/v1/validator`,
+});
+
 export const nominatorAxios = Axios.create({
   baseURL: `${keys.apiVersion}nominator`,
 });

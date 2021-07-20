@@ -4,13 +4,26 @@ import styled from 'styled-components';
 interface IAccount {
   address: string;
   display: string;
+  showNominatedInfo?: boolean;
+  nominatedCount?: number;
+  amount?: number;
 }
 
-const Account: React.FC<IAccount> = ({ address, display = address }) => {
+const Account: React.FC<IAccount> = ({ address, display = address, nominatedCount = 0, amount = 0, showNominatedInfo = false }) => {
+  const AmountTag = () => {
+    if (showNominatedInfo) {
+      return (
+        <Amount>{amount}</Amount>
+      );
+    } else {
+      return (<div></div>);
+    }
+  }
   return (
     <AccountLayout>
       <Identicon value={address} size={32} theme={'polkadot'} />
       <Address>{display}</Address>
+      <AmountTag />
     </AccountLayout>
   );
 };
@@ -34,4 +47,9 @@ const Address = styled.div`
   margin-left: 7px;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const Amount = styled.div`
+  display: flex;
+  justify-content: flex-start;
 `;

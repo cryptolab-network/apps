@@ -10,6 +10,7 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+import { useHistory } from 'react-router-dom';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -37,6 +38,7 @@ const ValNomHeader = () => {
 };
 
 const ValidatorGrid = ({filters}) => {
+  const history = useHistory();
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
@@ -141,6 +143,9 @@ const ValidatorGrid = ({filters}) => {
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
   };
+  const openValidatorStatus = (id) => {
+    history.push(`/tools/validator/${id}/${chain}`);
+  };
   const validatorComponents = useMemo(() => {
     return validators.map((v, idx) => {
       const x = idx % cols;
@@ -150,7 +155,7 @@ const ValidatorGrid = ({filters}) => {
           <ValidNominator
           address={v.id}
           name={v.identity.display}
-          activeAmount={_formatBalance(v.info.exposure.own)}
+          activeAmount={_formatBalance(v.info.exposure.total)}
           totalAmount={_formatBalance(v.info.total)}
           apy={(v.averageApy * 100).toFixed(2)}
           commission={v.info.commission}
@@ -158,6 +163,7 @@ const ValidatorGrid = ({filters}) => {
           statusChange={v.statusChange}
           unclaimedPayouts={v.info.unclaimedEras.length}
           favorite={v.favorite}
+          onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
         </div>);
       });
