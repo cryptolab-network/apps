@@ -9,6 +9,10 @@ import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import Table from '../../../components/Table';
 import Account from '../../../components/Account';
+import Button from '../../../components/Button';
+import Tooltip from '../../../components/Tooltip';
+import Switch from '../../../components/Switch';
+import Era from '../../../components/Table/comopnents/Era';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
@@ -17,11 +21,11 @@ import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
 import { ReactComponent as CheckTrue } from '../../../assets/images/check-true.svg';
 import { ReactComponent as CheckFalse } from '../../../assets/images/check-false.svg';
+import { eraStatus } from '../../../utils/status/Era';
+import { tableType } from '../../../utils/status/Table';
+import { apiGetAllValidator } from '../../../apis/Validator';
 import styled from 'styled-components';
 import _ from 'lodash';
-import Button from '../../../components/Button';
-import Tooltip from '../../../components/Tooltip';
-import Switch from '../../../components/Switch';
 
 const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
   const advancedDOM = useMemo(() => {
@@ -112,39 +116,60 @@ const Staking = () => {
         Header: 'Unclaimed Eras',
         accessor: 'unclaimedEras',
         collapse: true,
-        Cell: ({ value, row, rows, toggleRowExpanded }) => (
-          <span
-            {...row.getToggleRowExpandedProps({
-              style: {
-                display: 'block',
-                overFlow: 'hidden',
-              },
-              onClick: () => {
-                const expandedRow = rows.find((row) => row.isExpanded);
-
-                if (expandedRow) {
-                  const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
-
-                  if (isSubItemOfRow) {
-                    const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
-
-                    if (expandedSubItem) {
-                      const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
-                      if (!isClickedOnExpandedSubItem) {
-                        toggleRowExpanded(expandedSubItem.id, false);
-                      }
-                    }
-                  } else {
-                    toggleRowExpanded(expandedRow.id, false);
-                  }
+        Cell: ({ value, row, rows, toggleRowExpanded }) => {
+          let renderComponent: Object[] = [];
+          if (Array.isArray(value)) {
+            for (let idx = 0; idx < 84; idx++) {
+              if (idx < value.length) {
+                if (value[idx] === eraStatus.active) {
+                  renderComponent.push(<Era statusCode={eraStatus.active} />);
+                } else if (value[idx] === eraStatus.inactive) {
+                  renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+                } else {
+                  renderComponent.push(<Era statusCode={eraStatus.unclaimed} />);
                 }
-                row.toggleRowExpanded();
-              },
-            })}
-          >
-            {value}
-          </span>
-        ),
+              } else {
+                renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+              }
+            }
+          } else {
+            renderComponent = value;
+          }
+
+          return (
+            <span
+              {...row.getToggleRowExpandedProps({
+                style: {
+                  display: 'block',
+                  overFlow: 'hidden',
+                },
+                onClick: () => {
+                  const expandedRow = rows.find((row) => row.isExpanded);
+
+                  if (expandedRow) {
+                    const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
+
+                    if (isSubItemOfRow) {
+                      const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
+
+                      if (expandedSubItem) {
+                        const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
+                        if (!isClickedOnExpandedSubItem) {
+                          toggleRowExpanded(expandedSubItem.id, false);
+                        }
+                      }
+                    } else {
+                      toggleRowExpanded(expandedRow.id, false);
+                    }
+                  }
+                  row.toggleRowExpanded();
+                },
+              })}
+            >
+              {renderComponent}
+            </span>
+          );
+        },
       },
       { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
       {
@@ -196,6 +221,13 @@ const Staking = () => {
         return { ...prev };
       }
     });
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      let result = await apiGetAllValidator({ params: 'KSM', query: { size: 5, page: 1 } });
+      console.log('result: ', result);
+    })();
   }, []);
 
   const handleInputChange = (name) => (e) => {
@@ -355,6 +387,7 @@ const Staking = () => {
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {/* <AdvancedFilterResultWrap> */}
               <Table
+                type={tableType.stake}
                 columns={columns}
                 data={[
                   {
@@ -365,7 +398,7 @@ const Staking = () => {
                     unclaimedEras: 5,
                     avgAPY: '18.5%',
                     active: true,
-                    subRows: [{ unclaimedEras: 'test1' }],
+                    subRows: [{ unclaimedEras: [1, 1, 1, 2, 0, 0, 0, 0, 0] }],
                   },
                   {
                     select: true,

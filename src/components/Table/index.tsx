@@ -1,12 +1,14 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination } from 'react-table';
+import { tableType } from '../../utils/status/Table';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
+  type?: tableType;
 };
 
-const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data }) => {
+const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tableType.common }) => {
   const {
     getTableProps,
     getTableBodyProps,
@@ -50,12 +52,27 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data }) => {
               prepareRow(row);
               return (
                 <tr {...row.getRowProps()}>
-                  {!row.canExpand && (
+                  {type === tableType.stake && !row.canExpand && (
                     <>
                       <td colSpan={7}>{row.cells[4].render('Cell')}</td>
                     </>
                   )}
-                  {row.canExpand &&
+                  {type === tableType.stake &&
+                    row.canExpand &&
+                    row.cells.map((cell, idx) => {
+                      return (
+                        <td
+                          style={{
+                            borderBottom:
+                              idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
+                          }}
+                          {...cell.getCellProps()}
+                        >
+                          {cell.render('Cell')}
+                        </td>
+                      );
+                    })}
+                  {type !== tableType.stake &&
                     row.cells.map((cell, idx) => {
                       return (
                         <td

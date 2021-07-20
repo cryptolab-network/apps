@@ -16,6 +16,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-redux": "^7.1.16",
+    "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "framer-motion": "^4.1.17",
     "lodash": "^4.17.21",
@@ -32,6 +33,7 @@
     "react-switch": "^6.0.0",
     "react-table": "^7.7.0",
     "react-toastify": "^7.0.4",
+    "react-tooltip": "^4.2.21",
     "react-visibility-sensor": "^5.1.1",
     "styled-components": "^5.3.0",
     "typescript": "^4.1.2",
@@ -39,6 +41,7 @@
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
+    "startWin": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -66,5 +69,6 @@
     "@types/styled-components": "^5.1.9",
     "node-sass": "^6.0.1",
     "sass-loader": "^12.0.0"
-  }
+  },
+  "proxy": "http://0.0.0.0:3030/"
 }
