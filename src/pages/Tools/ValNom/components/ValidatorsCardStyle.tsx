@@ -5,11 +5,11 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import { useAppSelector } from '../../../../hooks';
-import { CryptoLabHandler, IValidator } from '../../../../instance/CryptoLabHandler';
 import { formatBalance } from '@polkadot/util';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
+import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -119,10 +119,9 @@ const ValidatorGrid = ({filters}) => {
     return validators;
   };
   useEffect(() => {
-    const apiHandler = new CryptoLabHandler();
     async function getValidators() {
       try {
-        let validators = await apiHandler.getAllValidators(chain);
+        let validators = await apiGetAllValidator({ params: 'KSM'});
         validators = sortValidators(validators, {
           favorite: true,
           commission: false,

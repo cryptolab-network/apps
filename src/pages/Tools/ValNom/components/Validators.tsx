@@ -6,9 +6,9 @@ import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
 import { useAppSelector } from '../../../../hooks';
-import { CryptoLabHandler, IValidator } from '../../../../instance/CryptoLabHandler';
 import { formatBalance } from '@polkadot/util';
 import Account from '../../../../components/Account';
+import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
 
 const ValNomHeader = () => {
   return (
@@ -91,10 +91,9 @@ const ValidatorTable = () => {
   }, [_formatBalance]);
   const [validators, setValidators] = useState<IValidator[]>([]);
   useEffect(() => {
-    const apiHandler = new CryptoLabHandler();
     async function getValidators() {
       try {
-        const validators = await apiHandler.getAllValidators(chain);
+        const validators = await apiGetAllValidator({ params: 'KSM'});
         setValidators(validators);
       } catch (err) {
         console.error(err);

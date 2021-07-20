@@ -5,10 +5,10 @@ import { ReactComponent as FavoriteIcon } from '../../assets/images/favorite-sel
 import { ReactComponent as FavoriteUnselectedIcon } from '../../assets/images/favorite-unselected.svg';
 import { ReactComponent as UnclaimedPayoutsIcon } from '../../assets/images/unclaimed-payouts.svg';
 import '../../css/ToolTip.css';
-import { IStatusChange } from '../../instance/CryptoLabHandler';
 import { shortenStashId } from '../../utils/string';
 import { useCallback, useState } from 'react';
 import { lsSetFavorite, lsUnsetFavorite } from '../../utils/localStorage';
+import { IStatusChange } from '../../apis/Validator';
 
 export interface IValidNominator {
   address: string;
