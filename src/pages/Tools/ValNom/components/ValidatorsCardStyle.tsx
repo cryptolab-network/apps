@@ -19,6 +19,7 @@ interface IValidatorFilter {
   apy: boolean
   cryptoLab: boolean
   status: boolean
+  stashId: string
 }
 
 const ValNomHeader = () => {
@@ -35,7 +36,7 @@ const ValNomHeader = () => {
   );
 };
 
-const ValidatorGrid = () => {
+const ValidatorGrid = ({filters}) => {
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
@@ -58,52 +59,62 @@ const ValidatorGrid = () => {
     }
   }, [chain]);
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
-    // sort by apy or commission
-    if(filters.apy === true) {
-      validators = validators.sort((a: IValidator, b: IValidator) => {
-        if (a.averageApy > b.averageApy) {
-          return -1;
-        } else if (a.averageApy < b.averageApy) {
-          return 1;
-        }
-        return 0;
-      });
-    } else if(filters.commission === true) {
-      validators = validators.sort((a: IValidator, b: IValidator) => {
-        if (a.info.commission > b.info.commission) {
-          return -1;
-        } else if (a.info.commission < b.info.commission) {
-          return 1;
-        }
-        return 0;
-      });
-    }
-    // put cryptoLab related to the top
-    // put status changed nodes to the top
-    if(filters.status === true) {
-      const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-        if (v.statusChange.commissionChange !== 0) {
+    // if filters.stashId is not empty
+    if(filters.stashId.length > 0) {
+      return validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+        if (v.id === filters.stashId) {
           acc.push(v);
-          validators.splice(idx, 1);
         }
         return acc;
       }, []);
-      validators.unshift(...statusChangedValidators);
+    } else {
+      // sort by apy or commission
+      if(filters.apy === true) {
+        validators = validators.sort((a: IValidator, b: IValidator) => {
+          if (a.averageApy > b.averageApy) {
+            return -1;
+          } else if (a.averageApy < b.averageApy) {
+            return 1;
+          }
+          return 0;
+        });
+      } else if(filters.commission === true) {
+        validators = validators.sort((a: IValidator, b: IValidator) => {
+          if (a.info.commission > b.info.commission) {
+            return -1;
+          } else if (a.info.commission < b.info.commission) {
+            return 1;
+          }
+          return 0;
+        });
+      }
+      // put cryptoLab related to the top
+      // put status changed nodes to the top
+      if(filters.status === true) {
+        const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+          if (v.statusChange.commissionChange !== 0) {
+            acc.push(v);
+            validators.splice(idx, 1);
+          }
+          return acc;
+        }, []);
+        validators.unshift(...statusChangedValidators);
+      }
+      // read favorite from localstorage
+      const favoriteValidatorsStr = lsGetFavorites();
+      // eslint-disable-next-line array-callback-return
+      favoriteValidatorsStr.map((id) => {
+        const favoriteValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
+          if (v.id === id) {
+            acc.push(v);
+            v.favorite = true;
+            validators.splice(idx, 1);
+          }
+          return acc;
+        }, []);
+        validators.unshift(...favoriteValidators);
+      });
     }
-    // read favorite from localstorage
-    const favoriteValidatorsStr = lsGetFavorites();
-    // eslint-disable-next-line array-callback-return
-    favoriteValidatorsStr.map((id) => {
-      const favoriteValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-        if (v.id === id) {
-          acc.push(v);
-          v.favorite = true;
-          validators.splice(idx, 1);
-        }
-        return acc;
-      }, []);
-      validators.unshift(...favoriteValidators);
-    });
     // find favorites and put them to the top
     return validators;
   };
@@ -117,7 +128,8 @@ const ValidatorGrid = () => {
           commission: false,
           apy: true,
           cryptoLab: true,
-          status: true
+          status: true,
+          stashId: filters.stashId,
         });
         setValidators(validators.slice(0, 24));
       } catch (err) {
@@ -125,7 +137,7 @@ const ValidatorGrid = () => {
       }
     };
     getValidators();
-  }, [chain]);
+  }, [chain, filters.stashId]);
   const [cols, setCols] = useState(6);
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
@@ -194,7 +206,8 @@ const ValNomContent = () => {
           onChange={handleFilterChange('stashId')}
         />
       </OptionBar>
-      <ValidatorGrid />
+      <ValidatorGrid 
+        filters={filters}/>
     </ValNomContentLayout>
   );
 };
