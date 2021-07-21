@@ -50,12 +50,12 @@ const ValidatorGrid = ({filters}) => {
       }));
     } else if (chain === 'DOT') {
       console.log(value);
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'DOT'
       }));
     } else {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'Unit'
       }));
