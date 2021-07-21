@@ -149,8 +149,8 @@ const ValidatorTable = () => {
     };
     async function getValidators() {
       try {
-        let oneKV = await apiGetAllOneKVValidator({ params: 'KSM'});
-        const oneKVNominators = await apiGetOneKVNominators({ params: 'KSM' });
+        let oneKV = await apiGetAllOneKVValidator({ params: chain});
+        const oneKVNominators = await apiGetOneKVNominators({ params: chain });
         oneKV = mergeOneKVData(oneKV, oneKVNominators);
         setValidators(oneKV.valid);
       } catch (err) {
