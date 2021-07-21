@@ -10,7 +10,7 @@ export const validatorAxios = Axios.create({
 });
 
 export const singleValidatorAxios = Axios.create({
-  baseURL: `${keys.apiVersion}/api/v1/validator`,
+  baseURL: `${prefix}/validator`,
 });
 
 export const nominatorAxios = Axios.create({
@@ -22,9 +22,9 @@ export const nominatorsAxios = Axios.create({
 });
 
 export const validatorOneKVAxios = Axios.create({
-  baseURL: `${keys.apiVersion}/api/v1/1kv/validators`,
+  baseURL: `${prefix}/1kv/validators`,
 });
 
 export const nominatorOneKVAxios = Axios.create({
-  baseURL: `${keys.apiVersion}/api/v1/1kv/nominators`,
+  baseURL: `${prefix}/1kv/nominators`,
 });

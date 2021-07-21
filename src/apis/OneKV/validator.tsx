@@ -41,6 +41,7 @@ export interface IOneKVValidator {
   stakingInfo: StakingInfo,
   aggregate: Aggregate,
   electedBy?: string,
+  selfStake: string,
 }
 
 export interface IOneKVValidators {

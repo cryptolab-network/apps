@@ -105,7 +105,7 @@ const ValidatorTable = () => {
       },
       {
         Header: 'Self Stake',
-        accessor: 'info.exposure.own',
+        accessor: 'selfStake',
         maxWidth: 150,
         Cell: ({ value }) => {
           return (<span>{_formatBalance(value)}</span>);
