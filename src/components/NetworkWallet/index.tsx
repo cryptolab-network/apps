@@ -48,7 +48,7 @@ const NetworkWallet: React.FC = () => {
 
   const _connectWallet = () => {
     console.log('in connectWallet');
-    dispatch(connectWallet(networkName));;
+    dispatch(connectWallet(networkName));
   };
   const loadingWallet = () => {
     console.log('in loadingWallet');

@@ -1,4 +1,4 @@
-import { nominatorAxios } from '../../instance/Axios';
+import { nominatorAxios, nominatorsAxios } from '../../instance/Axios';
 
 export interface INominatorInfo {
   accountId: string;
@@ -25,7 +25,21 @@ export interface INominatorParams {
 export interface INominator {
   params: INominatorParams;
 }
+
+export interface INominatorsParams {
+  chain: string;
+}
+
+export interface INominators {
+  params: INominatorsParams;
+}
+
 export const apiGetInfoNominator = (data: INominator): Promise<INominatorInfo[]> =>
   nominatorAxios.get(`${data.params.id}/${data.params.chain}`).then((res) => {
+    return res.data;
+  });
+
+export const apiGetAllNominators = (data: INominators): Promise<INominatorInfo[]> =>
+  nominatorsAxios.get(`${data.params.chain}`).then((res) => {
     return res.data;
   });
