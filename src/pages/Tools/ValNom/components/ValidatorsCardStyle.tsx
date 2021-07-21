@@ -143,10 +143,10 @@ const ValidatorGrid = ({filters}) => {
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
   };
-  const openValidatorStatus = (id) => {
-    history.push(`/tools/validator/${id}/${chain}`);
-  };
   const validatorComponents = useMemo(() => {
+    const openValidatorStatus = (id) => {
+      history.push(`/tools/validator/${id}/${chain}`);
+    };
     return validators.map((v, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
@@ -167,7 +167,7 @@ const ValidatorGrid = ({filters}) => {
           ></ValidNominator>
         </div>);
       });
-  }, [_formatBalance, cols, validators])
+  }, [_formatBalance, chain, cols, history, validators])
   if (validatorComponents.length > 0) {
     return (
       <ResponsiveGridLayout className="layout"
