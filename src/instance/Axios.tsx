@@ -14,3 +14,11 @@ export const singleValidatorAxios = Axios.create({
 export const nominatorAxios = Axios.create({
   baseURL: `${keys.apiVersion}nominator`,
 });
+
+export const validatorOneKVAxios = Axios.create({
+  baseURL: `${keys.apiVersion}/api/v1/1kv/validators`,
+});
+
+export const nominatorOneKVAxios = Axios.create({
+  baseURL: `${keys.apiVersion}/api/v1/1kv/nominators`,
+});

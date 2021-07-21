@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18.602" height="18.602" viewBox="0 0 18.602 18.602">
+    <defs>
+        <style>
+            .cls-121{fill:#23beb9}.cls-122{fill:#2f3842}
+        </style>
+    </defs>
+    <g id="Group_4498" transform="translate(-1432 -301.699)">
+        <g id="fill-system" transform="translate(1432 301.699)">
+            <path id="Path_3136" d="M112.455 97H98.146A2.149 2.149 0 0 0 96 99.146v14.309a2.149 2.149 0 0 0 2.146 2.146h14.309a2.149 2.149 0 0 0 2.146-2.146V99.146A2.149 2.149 0 0 0 112.455 97z" class="cls-121" transform="translate(-96 -97)"/>
+            <path id="Path_3137" d="M352 290.431a1.431 1.431 0 1 0 1.431-1.431 1.431 1.431 0 0 0-1.431 1.431z" class="cls-121" transform="translate(-346.276 -284.707)"/>
+        </g>
+        <g id="Group_4497">
+            <rect id="Rectangle_173" width="1.5" height="5" class="cls-122" rx=".75" transform="translate(1435 313)"/>
+            <rect id="Rectangle_173-2" width="1.5" height="9" class="cls-122" rx=".75" transform="translate(1438.5 309)"/>
+            <rect id="Rectangle_173-3" width="1.5" height="7" class="cls-122" rx=".75" transform="translate(1442 311)"/>
+            <rect id="Rectangle_173-4" width="1.5" height="12" class="cls-122" rx=".75" transform="translate(1445.5 306)"/>
+        </g>
+    </g>
+</svg>

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { tableType } from '../../utils/status/Table';
+import Pagination from './comopnents/Pagination';
 
 type ICOLUMN = {
   columns: Array<any>;
@@ -30,9 +31,10 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
     {
       columns: userColumns,
       data,
+      initialState: {pageSize: 20}
     },
     useExpanded,
-    usePagination // Use the useExpanded plugin hook
+    usePagination, // Use the useExpanded plugin hook
   );
   return (
     <Style>
@@ -93,6 +95,15 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
         </table>
         <br />
       </div>
+      <Pagination
+        canPreviousPage={canPreviousPage}
+        canNextPage={canNextPage}
+        pageCount={pageCount}
+        gotoPage={gotoPage}
+        nextPage={nextPage}
+        previousPage={previousPage}
+        currentPage={pageIndex}
+      />
     </Style>
   );
 };

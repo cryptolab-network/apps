@@ -20,6 +20,7 @@ import ValNom from './pages/Tools/ValNom';
 
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
+import OneKV from './pages/Tools/OneKV';
 
 // header
 const Header: React.FC = () => {
@@ -94,6 +95,7 @@ const AppLayout = () => {
               <Route exact path="/tools" component={Tools} />
               <Route path="/tools/valnom" component={ValNom} />
               <Route path="/tools/validator/:id/:chain" component={ValidatorStatus} />
+              <Route path="/tools/oneKV/:chain" component={OneKV} />
             </Switch>
           </RouteContent>
         </>
