@@ -164,7 +164,7 @@ const AppLayout = () => {
               <Route exact path="/tools" component={ToolsPortal} />
               <Route path="/tools/valnom" component={ValNom} />
               <Route path="/tools/validator/:id/:chain" component={ValidatorStatus} />
-              <Route path="/tools/oneKV/:chain" component={OneKV} />
+              <Route path="/tools/oneKV" component={OneKV} />
             </Switch>
           </RouteContent>
         </>

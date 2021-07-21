@@ -205,7 +205,7 @@ export const OneKVStatus = () => {
         <OneKVHeader/>
       )}
     >
-      <ValNomContent/>
+      <ValNomContent />
     </CardHeader>
   );
 };

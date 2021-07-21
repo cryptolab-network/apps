@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { OneKVStatus } from './components/oneKVStatus';
 
-const OneKV = () => {
+const OneKV = (props) => {
   return (
     <OneKVLayout>
       <MainLayout>
