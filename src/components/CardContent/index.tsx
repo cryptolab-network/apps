@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const CardContent = ({ Icon, title = '', detail = '', className = '' }) => {
+const CardContent = ({ Icon, title = '', detail = '', className = '', onClick = () => {} }) => {
   return (
-    <CardContentLayout className={className}>
+    <CardContentLayout className={className} onClick={onClick}>
       <HalfUp>
         <IconLayout>
           <Icon style={{ height: '60px' }} />

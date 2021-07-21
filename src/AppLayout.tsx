@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
@@ -14,22 +14,26 @@ import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
 import Tools from './pages/Tools/Portal';
 import { useAppSelector, useAppDispatch } from './hooks';
-// import { createApi } from './redux';
+import { getNominators } from './redux';
 import Api from './components/Api';
+import ValNom from './pages/Tools/ValNom';
+
 import keys from './config/keys';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
 
-  const network = useAppSelector((state) => state.network.name);
-  // const { handler, api } = useAppSelector(state => state.apiHandler);
-  // console.log(handler);
-  // console.log(api);
-  // const dispatch = useAppDispatch();
-  // if (handler === null) {
-  //   dispatch(createApi(network));
-  // }
+  const networkName = useAppSelector((state) => state.network.name);
+
+  // TODO: move allNomiantors to new tools header
+  const allNominators = useAppSelector((state) => state.nominators);
+  console.log(allNominators);
+
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(getNominators(networkName));
+  }, [networkName]);
 
   return (
     <HeaderDiv>
@@ -88,7 +92,8 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
-              {/* <Route path="/tools" component={Tools} /> */}
+              <Route exact path="/tools" component={Tools} />
+              <Route path="/tools/valnom" component={ValNom} />
             </Switch>
           </RouteContent>
         </>
