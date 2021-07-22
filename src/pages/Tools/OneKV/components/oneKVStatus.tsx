@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
 import { ReactComponent as MonitorIcon } from '../../../../assets/images/monitor.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
@@ -87,12 +88,17 @@ const ValidatorTable = ({filter}) => {
       {
         Header: '1KV nominated',
         accessor: 'elected',
-        maxWidth: 60,
-        Cell: ({ value }) => {
+        maxWidth: 100,
+        Cell: ({ value, row }) => {
           if (value  === true) {
             return (<span><ActiveIcon /></span>);
           } else {
-            return (<span><InactiveIcon /></span>);
+            console.log(row);
+            return (
+            <OneKVNominated>
+              <InactiveIcon />
+              <LastNominationDate>({moment(row.original.nominatedAt).format('MM/DD')})</LastNominationDate>
+            </OneKVNominated>);
           }
         },
       },
@@ -276,4 +282,17 @@ const OptionBar = styled.div`
   padding: 12px 0px 0px 13.8px;
   border-radius: 6px;
   background-color: #2f3842;
+`;
+
+const OneKVNominated = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LastNominationDate = styled.div`
+  margin: 0 0 0 4px;
+  justify-content: center;
+  align-items: center;
 `;
