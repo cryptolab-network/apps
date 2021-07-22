@@ -63,8 +63,9 @@ const ValidatorStatusHeader = ({
           <ExposureActive>
             {_formatBalance(active)}
           </ExposureActive>
+          <span style={{color: 'white', margin:'0 4px 0 4px'}}>/</span>
           <ExposureTotal>
-            / {_formatBalance(total)}
+            {_formatBalance(total)}
           </ExposureTotal>
         </Exposure>
         <Value>
@@ -227,7 +228,7 @@ const Subtitle = styled.div`
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  width: 160px;
+  width: 240px;
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;

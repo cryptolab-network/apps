@@ -1,6 +1,5 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiGetAllNominators, INominatorInfo } from '../apis/Nominator';
-import { accountTransform } from './walletSlice';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { apiGetAllNominators } from '../apis/Nominator';
 
 export enum NominatorsStatus {
   IDLE,
