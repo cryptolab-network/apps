@@ -104,6 +104,16 @@ const ToolsHeader: React.FC = () => {
   )
 }
 
+const Footer: React.FC = () => {
+  return (
+    <CopyRightDiv>
+      <CopyRightTitleDiv>
+        @ 2021. Made with ❤️ &nbsp; by  CryptoLab
+      </CopyRightTitleDiv>
+    </CopyRightDiv>
+  )
+}
+
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
   const mainRender = useMemo(() => {
@@ -129,6 +139,7 @@ const AppLayout = () => {
               <Route path="/validator/:id/:chain" component={ValidatorStatus} />
             </Switch>
           </RouteContent>
+          <Footer />
         </>
       )
     } else {
@@ -154,6 +165,7 @@ const AppLayout = () => {
               <Route path="/management" component={Management} />
             </Switch>
           </RouteContent>
+          <Footer />
         </>
       );
     }
@@ -223,3 +235,27 @@ const GradientLight = styled.div`
   z-index: 100;
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
 `;
+
+const CopyRightDiv = styled.div`
+  heigth: 64px;
+  width: 100%;
+  margin: 72px 0 0;
+  padding: 25px 0px 25px;
+  background-color: #0d1119;
+  position: fixed;
+  bottom: 0px;
+  z-index: 99;
+`;
+
+const CopyRightTitleDiv = styled.div`
+  height: 16px;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
+  letter-spacing: normal;
+  color: white;
+  text-align: center;
+`
