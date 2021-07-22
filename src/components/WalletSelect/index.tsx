@@ -71,7 +71,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
     if (accountList.length === 0) {
-      console.log('no length');
+      // console.log('no length');
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
@@ -95,7 +95,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
             <WalletLayout>
               <div>{account.name}</div>
               <div>
-                Balance : <BalanceNumber>0</BalanceNumber>
+                Balance : <BalanceNumber>{account.balance}</BalanceNumber>
               </div>
             </WalletLayout>
           </li>
@@ -106,6 +106,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
   }, [onChange, accountList]);
 
   const walletDisplayDOM = useMemo(() => {
+    console.log('WalletSelect: status : ', status);
     switch (status) {
       case WalletStatus.IDLE:
         return <Hint>Connect Wallet</Hint>;
@@ -128,7 +129,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
       case WalletStatus.DENIED:
         return <Hint>Please Allow</Hint>;
       case WalletStatus.CONNECTED:
-        console.log('current account info: ', selectedAccount);
+        // console.log('current account info: ', selectedAccount);
         if (selectedAccount) {
           return (
             <>
@@ -136,7 +137,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
               <WalletLayout>
                 <div>{selectedAccount.name}</div>
                 <div>
-                  Balance: <BalanceTitle>0</BalanceTitle>
+                  Balance: <BalanceTitle>{selectedAccount.balance}</BalanceTitle>
                   {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
                   {/* <BalanceNumber>123</BalanceNumber> */}
                 </div>
