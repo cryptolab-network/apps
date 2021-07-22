@@ -29,15 +29,6 @@ const Header: React.FC = () => {
 
   const networkName = useAppSelector((state) => state.network.name);
 
-  // TODO: move allNomiantors to new tools header
-  const allNominators = useAppSelector((state) => state.nominators);
-  console.log(allNominators);
-
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(getNominators(networkName));
-  }, [networkName]);
-
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
