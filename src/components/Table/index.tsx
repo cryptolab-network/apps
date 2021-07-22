@@ -32,7 +32,6 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
       columns: userColumns,
       data,
       initialState: {pageSize: 20},
-      disableSortRemove: true,
     },
     useSortBy,
     useExpanded,
@@ -46,7 +45,16 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                  <th {...column.getSortByToggleProps()}>
+                    {column.render('Header')}
+                    <span>
+                    {column.isSorted
+                      ? column.isSortedDesc
+                        ? ' 🔽'
+                        : ' 🔼'
+                      : ''}
+                    </span>
+                  </th>
                 ))}
               </tr>
             ))}
@@ -120,7 +128,7 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 100%;
+    width: 80vw;
     height: 55vh;
     overflow-x: hidden;
     overflow-y: scroll;

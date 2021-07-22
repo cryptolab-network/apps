@@ -54,6 +54,7 @@ const ValidatorTable = ({filter}) => {
         Header: 'Dashboard',
         accessor: 'dashboard',
         maxWidth: 48,
+        disableSortBy: true,
         Cell: ( {row} ) => {
           return(<span><DashboardIcon 
             onClick={() => {onClickDashboard(row.values.stash)}}/></span>);
