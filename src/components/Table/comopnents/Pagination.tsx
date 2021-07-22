@@ -50,4 +50,9 @@ const PaginationInfo = styled.div`
 const PaginationButton = styled.div`
   margin: 15.8px 16.8px 9.4px 16.9px;
   object-fit: contain;
+  height: 19px;
+  cursor: pointer;
+  &:hover {
+    border: solid 1px #23beb9;
+  }
 `;
