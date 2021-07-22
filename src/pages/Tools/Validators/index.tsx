@@ -134,12 +134,14 @@ const ValidatorStatus = (props) => {
           <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
               <NominatorGrid
+              chain={props.match.params.chain}
               nominators={activeNominators}/>
           </ContentColumnLayout>
           <Space />
           <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Inactive Nominators</ContentBlockTitle>
               <NominatorGrid
+              chain={props.match.params.chain}
               nominators={nominators}/>
           </ContentColumnLayout>
         </CardHeader>
