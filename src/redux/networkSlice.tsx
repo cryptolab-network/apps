@@ -1,12 +1,21 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export enum NetworkStatus {
+  CONNECTED,
+  DISCONNECTED,
+  ERROR,
+  READY,
+}
+
 interface networkState {
   name: string;
+  status: NetworkStatus;
 }
 
 const initialState: networkState = {
-  name: 'Kusama'
-}
+  name: 'Kusama',
+  status: NetworkStatus.DISCONNECTED,
+};
 
 export const networkSlice = createSlice({
   name: 'network',
@@ -15,10 +24,17 @@ export const networkSlice = createSlice({
     networkChanged: (state, action: PayloadAction<string>) => {
       return {
         ...state,
-        name: action.payload
-      }
+        name: action.payload,
+        status: NetworkStatus.DISCONNECTED,
+      };
     },
-  }
+    networkStatusChanged: (state, action: PayloadAction<NetworkStatus>) => {
+      return {
+        ...state,
+        status: action.payload,
+      };
+    },
+  },
 });
 
-export const { networkChanged } = networkSlice.actions;
+export const { networkChanged, networkStatusChanged } = networkSlice.actions;

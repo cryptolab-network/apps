@@ -1,9 +1,18 @@
 import styled from 'styled-components';
 import WalletSelect from '../WalletSelect';
 import NetworkSelect from '../NetworkSelect';
-import { useCallback, useEffect, useContext } from 'react';
+import { useCallback, useEffect, useContext, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { networkChanged, WalletStatus, connectWallet, selectAccount, IAccount } from '../../redux';
+import {
+  networkChanged,
+  WalletStatus,
+  connectWallet,
+  selectAccount,
+  setWalletStatus,
+  NetworkStatus,
+  IAccount,
+  setFilteredAccounts,
+} from '../../redux';
 import { ApiContext } from '../Api';
 import { ApiPromise } from '@polkadot/api';
 
@@ -27,24 +36,90 @@ import { ApiPromise } from '@polkadot/api';
 // const mockWalletStatus: number = WalletStatus.DENIED;
 // const mockWalletStatus: number = WalletStatus.CONNECTED;
 
+const ParseNetworkStatus = (status) => {
+  switch (status) {
+    case NetworkStatus.CONNECTED:
+      return 'CONNECTED';
+    case NetworkStatus.DISCONNECTED:
+      return 'DISCONNECTED';
+    case NetworkStatus.ERROR:
+      return 'ERROR';
+    case NetworkStatus.READY:
+      return 'READY';
+
+    default:
+      break;
+  }
+};
 
 const NetworkWallet: React.FC = () => {
   const dispatch = useAppDispatch();
-  const networkName = useAppSelector((state) => state.network.name);
-  let { status, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
+  let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
+  let { status: walletStatus, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
+  const polkadotApi = useContext(ApiContext);
+  const [accountList, setAccountList] = useState<IAccount[]>([]);
+  const [localSelectedAccount, setLocalSeletedAccount] = useState<IAccount | null>(null);
 
   const handleNetworkChange = useCallback(
-    (networkName: string) => {
-      console.log('current select network: ', networkName);
+    async (networkName: string) => {
       dispatch(networkChanged(networkName));
     },
-    [dispatch]
+    [dispatch, polkadotApi]
   );
 
   useEffect(() => {
-    console.log('networkName: ', networkName);
-    dispatch(connectWallet(networkName));
-  }, [networkName]);
+    if (networkStatus === NetworkStatus.READY) {
+      dispatch(connectWallet(networkName));
+    } else {
+      // network is not ready, force wallet status loading
+      dispatch(setWalletStatus(WalletStatus.LOADING));
+    }
+  }, [networkName, networkStatus]);
+
+  const balance = useCallback(
+    async (account: IAccount) => {
+      if (polkadotApi) {
+        console.log('NetworkWallet: api ready');
+        const result = await polkadotApi.derive.balances.account(account.address);
+        return result.freeBalance.toHuman();
+      } else {
+        console.log('NetworkWallet: api IS NOT ready');
+        return '';
+      }
+    },
+    [polkadotApi]
+  );
+
+  useEffect(() => {
+    (async () => {
+      let tempAccounts: IAccount[] = [];
+      for (let idx = 0; idx < filteredAccounts.length; idx++) {
+        tempAccounts.push({
+          address: filteredAccounts[idx].address,
+          name: filteredAccounts[idx].name,
+          source: filteredAccounts[idx].source,
+          genesisHash: filteredAccounts[idx].genesisHash,
+          balance: await balance(filteredAccounts[idx]),
+        });
+      }
+      setAccountList(tempAccounts);
+    })();
+  }, [filteredAccounts]);
+
+  useEffect(() => {
+    (async () => {
+      if (selectedAccount) {
+        let tempSelectedAccount: IAccount = {
+          address: selectedAccount.address,
+          name: selectedAccount.name,
+          source: selectedAccount.source,
+          genesisHash: selectedAccount.genesisHash,
+          balance: await balance(selectedAccount),
+        };
+        setLocalSeletedAccount(tempSelectedAccount);
+      }
+    })();
+  }, [selectedAccount]);
 
   const _connectWallet = () => {
     console.log('in connectWallet');
@@ -61,24 +136,27 @@ const NetworkWallet: React.FC = () => {
     console.log('in deniedWallet');
   };
 
-  const handleWalletChange = useCallback((e) => {
-    console.log('status: ', status);
-    console.log('e: ', e);
-    switch (status) {
-      case WalletStatus.IDLE:
-        return _connectWallet();
-      case WalletStatus.LOADING:
-        return loadingWallet();
-      case WalletStatus.NO_EXTENSION:
-        return installWallet();
-      case WalletStatus.DENIED:
-        return deniedWallet();
-      case WalletStatus.CONNECTED:
-        return dispatch(selectAccount(e));
-      default:
-        break;
-    }
-  }, []);
+  const handleWalletChange = useCallback(
+    (e) => {
+      console.log('status: ', walletStatus);
+
+      switch (walletStatus) {
+        case WalletStatus.IDLE:
+          return _connectWallet();
+        case WalletStatus.LOADING:
+          return loadingWallet();
+        case WalletStatus.NO_EXTENSION:
+          return installWallet();
+        case WalletStatus.DENIED:
+          return deniedWallet();
+        case WalletStatus.CONNECTED:
+          return dispatch(selectAccount(e));
+        default:
+          break;
+      }
+    },
+    [walletStatus]
+  );
 
   return (
     <Layout>
@@ -87,9 +165,9 @@ const NetworkWallet: React.FC = () => {
         onChange={(e) => {
           handleWalletChange(e);
         }}
-        accountList={filteredAccounts}
-        status={status}
-        selectedAccount={selectedAccount}
+        accountList={accountList}
+        status={walletStatus}
+        selectedAccount={localSelectedAccount}
       />
     </Layout>
   );
