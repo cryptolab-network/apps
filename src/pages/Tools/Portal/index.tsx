@@ -6,7 +6,7 @@ import { ReactComponent as PeopleIcon } from '../../../assets/images/people.svg'
 import { ReactComponent as MonitorIcon } from '../../../assets/images/monitor.svg';
 import { useHistory } from 'react-router-dom';
 
-const Portal = () => {
+export const Portal = () => {
   const history = useHistory();
   return (
     <PortalLayout>
@@ -16,8 +16,8 @@ const Portal = () => {
           title={'Validator / Nominator Status'}
           detail="Useful criterias for both validators and nominators to monitor and evaluate your staking information."
           className="card-layout"
-          onClick = {() => {
-            history.push("/tools/valnom");
+          onClick={() => {
+            history.push("/valnom");
           }}
         />
         <CardContent
@@ -37,8 +37,6 @@ const Portal = () => {
     </PortalLayout>
   );
 };
-
-export default Portal;
 
 const PortalLayout = styled.div`
   width: 100%;

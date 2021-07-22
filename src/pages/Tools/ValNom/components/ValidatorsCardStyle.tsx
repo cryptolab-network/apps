@@ -36,7 +36,7 @@ const ValNomHeader = () => {
   );
 };
 
-const ValidatorGrid = ({filters}) => {
+const ValidatorGrid = ({ filters }) => {
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
@@ -47,6 +47,7 @@ const ValidatorGrid = ({filters}) => {
         withUnit: 'KSM'
       }));
     } else if (chain === 'DOT') {
+      console.log(value);
       return (formatBalance(value, {
         decimals: 10,
         withUnit: 'DOT'
@@ -60,7 +61,7 @@ const ValidatorGrid = ({filters}) => {
   }, [chain]);
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
-    if(filters.stashId.length > 0) {
+    if (filters.stashId.length > 0) {
       return validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
         if (v.id === filters.stashId) {
           acc.push(v);
@@ -69,7 +70,7 @@ const ValidatorGrid = ({filters}) => {
       }, []);
     } else {
       // sort by apy or commission
-      if(filters.apy === true) {
+      if (filters.apy === true) {
         validators = validators.sort((a: IValidator, b: IValidator) => {
           if (a.averageApy > b.averageApy) {
             return -1;
@@ -78,7 +79,7 @@ const ValidatorGrid = ({filters}) => {
           }
           return 0;
         });
-      } else if(filters.commission === true) {
+      } else if (filters.commission === true) {
         validators = validators.sort((a: IValidator, b: IValidator) => {
           if (a.info.commission > b.info.commission) {
             return -1;
@@ -90,7 +91,7 @@ const ValidatorGrid = ({filters}) => {
       }
       // put cryptoLab related to the top
       // put status changed nodes to the top
-      if(filters.status === true) {
+      if (filters.status === true) {
         const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
           if (v.statusChange.commissionChange !== 0) {
             acc.push(v);
@@ -119,9 +120,10 @@ const ValidatorGrid = ({filters}) => {
     return validators;
   };
   useEffect(() => {
+    console.log(`chain = ${chain}`);
     async function getValidators() {
       try {
-        let validators = await apiGetAllValidator({ params: 'KSM'});
+        let validators = await apiGetAllValidator({ params: chain });
         validators = sortValidators(validators, {
           favorite: true,
           commission: false,
@@ -146,32 +148,32 @@ const ValidatorGrid = ({filters}) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
       return (
-        <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
+        <div key={idx} data-grid={{ x: x, y: y, w: 1, h: 1, static: true }}>
           <ValidNominator
-          address={v.id}
-          name={v.identity.display}
-          activeAmount={_formatBalance(v.info.exposure.own)}
-          totalAmount={_formatBalance(v.info.total)}
-          apy={(v.averageApy * 100).toFixed(2)}
-          commission={v.info.commission}
-          count={v.info.nominatorCount}
-          statusChange={v.statusChange}
-          unclaimedPayouts={v.info.unclaimedEras.length}
-          favorite={v.favorite}
+            address={v.id}
+            name={v.identity.display}
+            activeAmount={_formatBalance(v.info.exposure.own)}
+            totalAmount={_formatBalance(v.info.total)}
+            apy={(v.averageApy * 100).toFixed(2)}
+            commission={v.info.commission}
+            count={v.info.nominatorCount}
+            statusChange={v.statusChange}
+            unclaimedPayouts={v.info.unclaimedEras.length}
+            favorite={v.favorite}
           ></ValidNominator>
         </div>);
-      });
+    });
   }, [_formatBalance, cols, validators])
   if (validatorComponents.length > 0) {
     return (
       <ResponsiveGridLayout className="layout"
-        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}
-        cols={{lg: 6, md: 4, sm: 3, xs: 2, xxs: 1}}
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+        cols={{ lg: 6, md: 4, sm: 3, xs: 2, xxs: 1 }}
         rowHeight={300}
         onBreakpointChange={onBreakpointChange}>
-          {
-            validatorComponents
-          }
+        {
+          validatorComponents
+        }
       </ResponsiveGridLayout>
     );
   } else {
@@ -205,8 +207,8 @@ const ValNomContent = () => {
           onChange={handleFilterChange('stashId')}
         />
       </OptionBar>
-      <ValidatorGrid 
-        filters={filters}/>
+      <ValidatorGrid
+        filters={filters} />
     </ValNomContentLayout>
   );
 };
@@ -215,10 +217,10 @@ const ValNomStatus = () => {
   return (
     <CardHeader
       Header={() => (
-        <ValNomHeader/>
+        <ValNomHeader />
       )}
     >
-      <ValNomContent/>
+      <ValNomContent />
     </CardHeader>
   );
 };
