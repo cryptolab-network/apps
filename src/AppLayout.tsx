@@ -21,6 +21,7 @@ import Api from './components/Api';
 import ValNom from './pages/Tools/ValNom';
 import { networkChanged } from './redux'
 import keys from './config/keys';
+import ValidatorStatus from './pages/Tools/Validators';
 
 // header
 const Header: React.FC = () => {
@@ -161,6 +162,7 @@ const AppLayout = () => {
               <Route path="/management" component={Management} />
               <Route exact path="/tools" component={ToolsPortal} />
               <Route path="/tools/valnom" component={ValNom} />
+              <Route path="/tools/validator/:id/:chain" component={ValidatorStatus} />
             </Switch>
           </RouteContent>
         </>

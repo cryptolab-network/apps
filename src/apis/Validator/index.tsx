@@ -1,4 +1,4 @@
-import { validatorAxios } from '../../instance/Axios';
+import { singleValidatorAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
   commissionChange: number
@@ -44,6 +44,14 @@ export interface IValidator {
   favorite: boolean
 }
 
+export interface IValidatorHistory {
+  id: string
+  statusChange: IStatusChange
+  identity: IIdentity
+  info: IEraInfo[]
+  averageApy: number
+}
+
 export interface IValidatorQuery {
   size?: number;
   page?: number;
@@ -61,4 +69,12 @@ export interface IValidatorRequest {
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
 validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
   return res.data;
+});
+export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
+singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+  if (res.data.length > 0) {
+    return res.data[0];
+  } else {
+    throw new Error('The stash is not a validaor');
+  }
 });

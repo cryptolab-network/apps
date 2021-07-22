@@ -1,25 +1,15 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { apiGetAllNominators } from '../apis/Nominator';
 
-enum NominatorsStatus {
+export enum NominatorsStatus {
   IDLE,
   LOADING,
   FULFILLED,
 }
 
-interface IBalance {
-  freeBalance: number;
-  lockedBalance: number;
-}
-
-interface INominator {
-  address: string;
-  balance: IBalance;
-}
-
 const initialState = {
   status: NominatorsStatus.IDLE,
-  elements: null,
+  elements: {},
 }
 
 export const getNominators = createAsyncThunk('nominators/getNominators', async (network: string): Promise<any> => {
@@ -29,9 +19,13 @@ export const getNominators = createAsyncThunk('nominators/getNominators', async 
         chain: (network === 'Kusama') ? 'KSM' : 'DOT'
       }
     });
+    const m = result.reduce((acc, n) => {
+      acc[n.accountId] = n;
+      return acc;
+    }, {});
     return {
       status: NominatorsStatus.FULFILLED,
-      elements: result
+      elements: m
     }
   } catch (err) {
     console.log(err);

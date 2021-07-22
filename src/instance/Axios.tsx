@@ -9,6 +9,10 @@ export const validatorAxios = Axios.create({
   baseURL: `${prefix}/validators`,
 });
 
+export const singleValidatorAxios = Axios.create({
+  baseURL: `${prefix}/validator`,
+});
+
 export const nominatorAxios = Axios.create({
   baseURL: `${prefix}/nominator`,
 });

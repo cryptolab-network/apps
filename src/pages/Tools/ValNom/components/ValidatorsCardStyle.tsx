@@ -10,16 +10,17 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+import { useHistory } from 'react-router-dom';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface IValidatorFilter {
-  favorite: boolean
-  commission: boolean
-  apy: boolean
-  cryptoLab: boolean
-  status: boolean
-  stashId: string
+  favorite: boolean;
+  commission: boolean;
+  apy: boolean;
+  cryptoLab: boolean;
+  status: boolean;
+  stashId: string;
 }
 
 const ValNomHeader = () => {
@@ -29,7 +30,9 @@ const ValNomHeader = () => {
         <PeopleIcon />
         <HeaderTitle>
           <Title>Validator / Nominator Status</Title>
-          <Subtitle>See filtered validator status or enter a nominator stash ID to see its nominated validators</Subtitle>
+          <Subtitle>
+            See filtered validator status or enter a nominator stash ID to see its nominated validators
+          </Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -37,28 +40,32 @@ const ValNomHeader = () => {
 };
 
 const ValidatorGrid = ({ filters }) => {
-  const networkName = useAppSelector(state => state.network.name);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const history = useHistory();
+  const networkName = useAppSelector((state) => state.network.name);
+  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      console.log(value);
-      return (formatBalance(value, {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(value, {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
-  }, [chain]);
+  const _formatBalance = useCallback(
+    (value: any) => {
+      if (chain === 'KSM') {
+        return formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM',
+        });
+      } else if (chain === 'DOT') {
+        console.log(value);
+        return formatBalance(value, {
+          decimals: 10,
+          withUnit: 'DOT',
+        });
+      } else {
+        return formatBalance(value, {
+          decimals: 10,
+          withUnit: 'Unit',
+        });
+      }
+    },
+    [chain]
+  );
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
     if (filters.stashId.length > 0) {
@@ -92,13 +99,16 @@ const ValidatorGrid = ({ filters }) => {
       // put cryptoLab related to the top
       // put status changed nodes to the top
       if (filters.status === true) {
-        const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-          if (v.statusChange.commissionChange !== 0) {
-            acc.push(v);
-            validators.splice(idx, 1);
-          }
-          return acc;
-        }, []);
+        const statusChangedValidators = validators.reduce(
+          (acc: Array<IValidator>, v: IValidator, idx: number) => {
+            if (v.statusChange.commissionChange !== 0) {
+              acc.push(v);
+              validators.splice(idx, 1);
+            }
+            return acc;
+          },
+          []
+        );
         validators.unshift(...statusChangedValidators);
       }
       // read favorite from localstorage
@@ -136,7 +146,7 @@ const ValidatorGrid = ({ filters }) => {
       } catch (err) {
         console.error(err);
       }
-    };
+    }
     getValidators();
   }, [chain, filters.stashId]);
   const [cols, setCols] = useState(6);
@@ -144,6 +154,9 @@ const ValidatorGrid = ({ filters }) => {
     setCols(newCols);
   };
   const validatorComponents = useMemo(() => {
+    const openValidatorStatus = (id) => {
+      history.push(`/tools/validator/${id}/${chain}`);
+    };
     return validators.map((v, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
@@ -152,7 +165,7 @@ const ValidatorGrid = ({ filters }) => {
           <ValidNominator
             address={v.id}
             name={v.identity.display}
-            activeAmount={_formatBalance(v.info.exposure.own)}
+            activeAmount={_formatBalance(v.info.exposure.total)}
             totalAmount={_formatBalance(v.info.total)}
             apy={(v.averageApy * 100).toFixed(2)}
             commission={v.info.commission}
@@ -160,24 +173,26 @@ const ValidatorGrid = ({ filters }) => {
             statusChange={v.statusChange}
             unclaimedPayouts={v.info.unclaimedEras.length}
             favorite={v.favorite}
+            onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </div>);
+        </div>
+      );
     });
-  }, [_formatBalance, cols, validators])
+  }, [_formatBalance, chain, cols, history, validators]);
   if (validatorComponents.length > 0) {
     return (
-      <ResponsiveGridLayout className="layout"
+      <ResponsiveGridLayout
+        className="layout"
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 6, md: 4, sm: 3, xs: 2, xxs: 1 }}
         rowHeight={300}
-        onBreakpointChange={onBreakpointChange}>
-        {
-          validatorComponents
-        }
+        onBreakpointChange={onBreakpointChange}
+      >
+        {validatorComponents}
       </ResponsiveGridLayout>
     );
   } else {
-    return (<div></div>);
+    return <div></div>;
   }
 };
 
@@ -207,19 +222,14 @@ const ValNomContent = () => {
           onChange={handleFilterChange('stashId')}
         />
       </OptionBar>
-      <ValidatorGrid
-        filters={filters} />
+      <ValidatorGrid filters={filters} />
     </ValNomContentLayout>
   );
 };
 
 const ValNomStatus = () => {
   return (
-    <CardHeader
-      Header={() => (
-        <ValNomHeader />
-      )}
-    >
+    <CardHeader Header={() => <ValNomHeader />}>
       <ValNomContent />
     </CardHeader>
   );
@@ -276,5 +286,5 @@ const OptionBar = styled.div`
 `;
 
 const ValNomContentLayout = styled.div`
-  width: 100%
+  width: 100%;
 `;
