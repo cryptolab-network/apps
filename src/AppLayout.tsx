@@ -126,6 +126,7 @@ const AppLayout = () => {
             <Switch>
               <Route exact path="/" component={ToolsPortal} />
               <Route path="/valnom" component={ValNom} />
+              <Route path="/validator/:id/:chain" component={ValidatorStatus} />
             </Switch>
           </RouteContent>
         </>
@@ -151,9 +152,6 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
-              <Route exact path="/tools" component={ToolsPortal} />
-              <Route path="/tools/valnom" component={ValNom} />
-              <Route path="/tools/validator/:id/:chain" component={ValidatorStatus} />
             </Switch>
           </RouteContent>
         </>
