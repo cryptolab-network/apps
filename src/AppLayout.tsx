@@ -108,7 +108,9 @@ const Footer: React.FC = () => {
   return (
     <CopyRightDiv>
       <CopyRightTitleDiv>
-        @ 2021. Made with ❤️ &nbsp; by  CryptoLab
+        @ 2021. Made with ❤️ &nbsp; by  CryptoLab &nbsp;| &nbsp;
+        <TextLinkA href="#">Disclaimer</TextLinkA> &nbsp;| &nbsp;
+        <TextLinkA href="#">Privacy</TextLinkA>
       </CopyRightTitleDiv>
     </CopyRightDiv>
   )
@@ -258,4 +260,8 @@ const CopyRightTitleDiv = styled.div`
   letter-spacing: normal;
   color: white;
   text-align: center;
+`
+const TextLinkA = styled.a`
+  text-decoration: none;
+  color: white;
 `
