@@ -12,6 +12,8 @@ const Pagination = ({
   canNextPage,
   pageCount,
   currentPage,
+  firstItemIndex,
+  lastItemIndex,
 }) => {
   return (
     <PaginationLayout>
@@ -22,6 +24,9 @@ const Pagination = ({
       <PaginationButton><PaginationPrevIcon onClick={() => previousPage()} /></PaginationButton>
       <PaginationButton><PaginationNextIcon onClick={() => nextPage()} /></PaginationButton>
       <PaginationButton><PaginationLastIcon onClick={() => gotoPage(pageCount - 1)}/></PaginationButton>
+      <PaginationInfo>
+        {firstItemIndex} - {lastItemIndex}
+      </PaginationInfo>
     </PaginationLayout>
   );
 };

@@ -28,7 +28,7 @@ const OneKVHeader = () => {
   );
 };
 
-const ValidatorTable = () => {
+const ValidatorTable = ({filter}) => {
   const history = useHistory();
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
@@ -97,10 +97,10 @@ const ValidatorTable = () => {
       },
       {
         Header: 'Nomination Order',
-        accessor: 'stash',
+        accessor: 'nominationOrder',
         maxWidth: 60,
-        Cell: ({ value, row }) => {
-          return (<span>{row.index + 1}</span>);
+        Cell: ({ value }) => {
+          return (<span>{value}</span>);
         },
       },
       {
@@ -129,7 +129,24 @@ const ValidatorTable = () => {
       },
     ]
   }, [_formatBalance, onClickDashboard]);
+
   const [validators, setValidators] = useState<IOneKVValidator[]>([]);
+  const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
+  useMemo(() => {
+    if (filter.stashId.length > 0) {
+      const displayValidators: IOneKVValidator[] = [];
+      validators.forEach((v) => {
+        if (v.stash.toLowerCase().includes(filter.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        } else if(v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        }
+      });
+      setDisplayValidators(displayValidators);
+    } else {
+      setDisplayValidators(validators);
+    }
+  }, [filter.stashId, validators]);
   useEffect(() => {
     const mergeOneKVData = (oneKV: IOneKVValidators, oneKVNominators: IOneKVNominators) => {
       oneKV.valid = oneKV.valid.map((v) => {
@@ -153,6 +170,7 @@ const ValidatorTable = () => {
         const oneKVNominators = await apiGetOneKVNominators({ params: chain });
         oneKV = mergeOneKVData(oneKV, oneKVNominators);
         setValidators(oneKV.valid);
+        setDisplayValidators(oneKV.valid);
       } catch (err) {
         console.error(err);
       }
@@ -162,7 +180,7 @@ const ValidatorTable = () => {
   return (
     <Table
       columns={columns}
-      data={validators}
+      data={displayValidators}
     />
   );
 };
@@ -187,13 +205,14 @@ const ValNomContent = () => {
         <IconInput
           Icon={Search}
           iconSize="16px"
-          placeholder="Polkadot/Kusama StashId"
+          placeholder="Polkadot/Kusama Stash ID or Name"
           inputLength={256}
           value={filters.stashId}
           onChange={handleFilterChange('stashId')}
         />
       </OptionBar>
-      <ValidatorTable />
+      <ValidatorTable
+        filter={filters} />
     </div>
   );
 };

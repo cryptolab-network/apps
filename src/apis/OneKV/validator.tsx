@@ -42,6 +42,7 @@ export interface IOneKVValidator {
   aggregate: Aggregate,
   electedBy?: string,
   selfStake: string,
+  nominationOrder: number
 }
 
 export interface IOneKVValidators {
@@ -61,6 +62,10 @@ validatorOneKVAxios.get(`${data.params}`, { params: data.query }).then((res) => 
       return 1;
     }
     return 0;
+  });
+  res.data.valid = res.data.valid.map((v, idx) => {
+    v.nominationOrder = idx + 1;
+    return v;
   });
   return res.data;
 });

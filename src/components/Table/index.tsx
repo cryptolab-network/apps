@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useTable, useExpanded, usePagination } from 'react-table';
+import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
 
@@ -31,8 +31,10 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
     {
       columns: userColumns,
       data,
-      initialState: {pageSize: 20}
+      initialState: {pageSize: 20},
+      disableSortRemove: true,
     },
+    useSortBy,
     useExpanded,
     usePagination, // Use the useExpanded plugin hook
   );
@@ -103,6 +105,8 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
         nextPage={nextPage}
         previousPage={previousPage}
         currentPage={pageIndex}
+        firstItemIndex={(pageSize * pageIndex) + 1}
+        lastItemIndex={Math.min((pageSize * pageIndex) + pageSize, data.length)}
       />
     </Style>
   );
@@ -117,8 +121,10 @@ const Style = styled.div`
   .tableWrap {
     display: block;
     width: 100%;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    height: 55vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 20px 0 0 0;
   }
 
   table {
