@@ -1,52 +1,57 @@
-import { string } from 'prop-types';
-import { validatorAxios } from '../../instance/Axios';
+import { singleValidatorAxios, validatorAxios } from '../../instance/Axios';
 
-export interface IValidatorInfoList {
-  id: string;
-  statusChange: {
-    commission: number;
-  };
-  identity: {
-    display: string;
-    parent: string;
-    sub: string;
-    isVerified: boolean;
-  };
-  stakerPoints: {
-    era: number;
-    points: number;
-  }[];
-  averageApy: number;
-  info: {
-    nominatorCount: number;
-    era: number;
-    commission: number;
-    apy: number;
-    total: number;
-    nominators: {
-      address: string;
-      balance: number;
-    }[];
-    exposure: {
-      total: number;
-      own: number;
-      others: {
-        who: string;
-        value: number;
-      }[];
-    };
-    unclaimedEras: number[];
-  };
-  slashes: {
-    era: number;
-    validator: string;
-    total: number;
-    others: {
-      address: string;
-      value: number;
-    }[];
-  }[];
+export interface IStatusChange {
+  commissionChange: number
 }
+
+export interface IIdentity {
+  display: string
+}
+
+export interface INominator {
+  address: string
+  balance: number
+}
+
+export interface IExposureOthers {
+  who: string
+  value: number
+}
+
+export interface IExposure {
+  total: number
+  own: number
+  others: IExposureOthers[]
+}
+
+export interface IEraInfo {
+  nominators: INominator[]
+  nominatorCount: number
+  era: number
+  exposure: IExposure
+  commission: number
+  apy: number
+  unclaimedEras: number[]
+  total: number
+}
+
+export interface IValidator {
+  id: string
+  statusChange: IStatusChange
+  identity: IIdentity
+  info: IEraInfo
+  averageApy: number
+  favorite: boolean
+}
+
+export interface IValidatorHistory {
+  id: string
+  statusChange: IStatusChange
+  identity: IIdentity
+  info: IEraInfo[]
+  averageApy: number
+}
+
 export interface IValidatorQuery {
   size?: number;
   page?: number;
@@ -57,11 +62,19 @@ export interface IValidatorQuery {
   commission_max?: number;
   has_verified_identity?: boolean;
 }
-export interface IValidator {
+export interface IValidatorRequest {
   params: string;
   query?: IValidatorQuery;
 }
-export const apiGetAllValidator = (data: IValidator): Promise<IValidatorInfoList[]> =>
-  validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-    return res.data;
-  });
+export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
+validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+  return res.data;
+});
+export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
+singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+  if (res.data.length > 0) {
+    return res.data[0];
+  } else {
+    throw new Error('The stash is not a validaor');
+  }
+});
