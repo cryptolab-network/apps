@@ -9,6 +9,7 @@ import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
+import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -130,9 +131,22 @@ const Footer: React.FC = () => {
           <TdDiv><DotDiv /><LinkA href="#">Medium</LinkA></TdDiv>
         </ColumnDiv>
         <ColumnDiv>
-          <TdDiv justify_content="space-around">
-            <a href="https://twitter.com/CryptolabN" target="_blank"><TwitterIcon width="36px" height="36px" /></a>
-            <a href="https://github.com/cryptolab-network" target="_blank"><GithubIcon width="36px" height="36px" /></a>
+          <TdDiv justify_content="flex-start">
+            <a href="https://twitter.com/CryptolabN" target="_blank">
+              <SocialMediaWrapper>
+                <TwitterIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
+            </a>
+            <a href="https://github.com/cryptolab-network" target="_blank">
+              <SocialMediaWrapper>
+                <GithubIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
+            </a>
+            <a href="#">
+              <SocialMediaWrapper>
+                <YoutubeIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
+            </a>
           </TdDiv>
           <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
@@ -395,4 +409,7 @@ const CopyRightTitleDiv = styled.div`
 const TextLinkA = styled.a`
   text-decoration: none;
   color: white;
+`
+const SocialMediaWrapper = styled.div`
+  margin-right: 15px;
 `
