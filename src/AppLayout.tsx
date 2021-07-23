@@ -24,6 +24,7 @@ import ValNom from './pages/Tools/ValNom';
 import { networkChanged } from './redux'
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
+import { getUrls } from './utils/url';
 
 // header
 const Header: React.FC = () => {
@@ -107,6 +108,7 @@ const ToolsHeader: React.FC = () => {
 }
 
 const Footer: React.FC = () => {
+  const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   return (
     <>
       <TableDiv>
@@ -118,8 +120,8 @@ const Footer: React.FC = () => {
         </ColumnDiv>
         <ColumnDiv>
           <ThDiv>Technology</ThDiv>
-          <TdDiv><DotDiv /><LinkA href="http://localhost:3001">Staking Service</LinkA></TdDiv>
-          <TdDiv><DotDiv /><LinkA href="http://tools.localhost:3001">Tools for Validators</LinkA></TdDiv>
+          <TdDiv><DotDiv /><LinkA href={staking_url}>Staking Service</LinkA></TdDiv>
+          <TdDiv><DotDiv /><LinkA href={tools_url}>Tools for Validators</LinkA></TdDiv>
           <TdDiv><DotDiv /><LinkA href="#">Telegram Bots</LinkA></TdDiv>
         </ColumnDiv>
         <ColumnDiv>
