@@ -45,28 +45,46 @@ export interface IOneKVValidator {
   nominationOrder: number
 }
 
+export interface IOneKVInvalidValidator {
+  name: string,
+  stash: string
+  reasons: string[],
+}
+
 export interface IOneKVValidators {
   activeEra: number,
   validatorCount: number,
   electedCount: number,
   electionRate: number,
   valid: IOneKVValidator[],
+  invalid: IOneKVInvalidValidator[],
   modifiedTime: number
 }
 
-export const apiGetAllOneKVValidator = (data: IValidatorRequest): Promise<IOneKVValidators> =>
+export const apiGetAllOneKVValidator = (data: IValidatorRequest, invalid = false): Promise<IOneKVValidators> =>
 validatorOneKVAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-  res.data.valid = res.data.valid.sort((a: IOneKVValidator, b: IOneKVValidator) => {
-    if(a.aggregate.total > b.aggregate.total) {
-      return -1;
-    } else if (a.aggregate.total < b.aggregate.total) {
-      return 1;
-    }
-    return 0;
-  });
-  res.data.valid = res.data.valid.map((v, idx) => {
-    v.nominationOrder = idx + 1;
-    return v;
-  });
-  return res.data;
+  if(invalid) {
+    // res.data.va
+  } else {
+    res.data._valid = res.data.valid;
+    res.data.valid = res.data._valid.filter(function(v) {
+      return v !== undefined && v.valid === true;
+    });
+    res.data.invalid = res.data._valid.filter(function(v) {
+      return (v !== undefined) && (v.valid === false);
+    })
+    res.data.valid = res.data.valid.sort((a: IOneKVValidator, b: IOneKVValidator) => {
+      if(a.aggregate.total > b.aggregate.total) {
+        return -1;
+      } else if (a.aggregate.total < b.aggregate.total) {
+        return 1;
+      }
+      return 0;
+    });
+    res.data.valid = res.data.valid.map((v, idx) => {
+      v.nominationOrder = idx + 1;
+      return v;
+    });
+    return res.data;
+  }
 });

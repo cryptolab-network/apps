@@ -71,7 +71,6 @@ const ValidatorTable = ({filter, chain, validators}) => {
           if (value  === true) {
             return (<span><ActiveIcon /></span>);
           } else {
-            console.log(row);
             return (
             <OneKVNominated>
               <InactiveIcon />
