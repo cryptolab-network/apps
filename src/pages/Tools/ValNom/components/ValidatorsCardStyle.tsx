@@ -155,7 +155,7 @@ const ValidatorGrid = ({ filters }) => {
   };
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
-      history.push(`/tools/validator/${id}/${chain}`);
+      history.push(`/validator/${id}/${chain}`);
     };
     return validators.map((v, idx) => {
       const x = idx % cols;
