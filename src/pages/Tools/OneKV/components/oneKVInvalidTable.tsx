@@ -8,7 +8,7 @@ import Table from "../../../../components/Table";
 const InvalidValidatorTable = ({filter, chain, validators}) => {
   const history = useHistory();
   const onClickDashboard = useCallback((id: string) => {
-    history.push(`/tools/validator/${id}/${chain}`);
+    history.push(`/validator/${id}/${chain}`);
   }, [chain, history]);
 
   const columns = useMemo(() => {

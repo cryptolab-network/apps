@@ -26,7 +26,7 @@ export const Portal = () => {
           detail="Information that allow 1kv node operators to predict when they will be nominated."
           className="card-layout"
           onClick = {() => {
-            history.push("/oneKV");
+            history.push("/onekv");
           }}
         />
         <CardContent

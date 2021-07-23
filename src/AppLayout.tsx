@@ -174,6 +174,7 @@ const AppLayout = () => {
               <Route exact path="/" component={ToolsPortal} />
               <Route path="/valnom" component={ValNom} />
               <Route path="/validator/:id/:chain" component={ValidatorStatus} />
+              <Route path="/onekv" component={OneKV} />
             </Switch>
           </RouteContent>
           <Footer />
@@ -200,7 +201,6 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
-              <Route path="/tools/oneKV" component={OneKV} />
             </Switch>
           </RouteContent>
           <Footer />

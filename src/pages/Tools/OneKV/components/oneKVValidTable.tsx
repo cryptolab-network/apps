@@ -12,7 +12,7 @@ import Table from "../../../../components/Table";
 const ValidatorTable = ({filter, chain, validators}) => {
   const history = useHistory();
   const onClickDashboard = useCallback((id: string) => {
-    history.push(`/tools/validator/${id}/${chain}`);
+    history.push(`/validator/${id}/${chain}`);
   }, [chain, history]);
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {
