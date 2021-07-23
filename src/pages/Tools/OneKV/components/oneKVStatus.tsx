@@ -29,10 +29,11 @@ const OneKVHeader = () => {
   );
 };
 
-const ValidatorTable = ({filter}) => {
+const ValidatorTable = ({filter, chain, validators}) => {
   const history = useHistory();
-  const networkName = useAppSelector(state => state.network.name);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const onClickDashboard = useCallback((id: string) => {
+    history.push(`/tools/validator/${id}/${chain}`);
+  }, [chain, history]);
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {
       return (<span>{formatBalance(value, {
@@ -46,9 +47,6 @@ const ValidatorTable = ({filter}) => {
       })}</span>);
     }
   }, [chain]);
-  const onClickDashboard = useCallback((id: string) => {
-    history.push(`/tools/validator/${id}/${chain}`);
-  }, [chain, history]);
   const columns = useMemo(() => {
     return [
       {
@@ -58,7 +56,7 @@ const ValidatorTable = ({filter}) => {
         disableSortBy: true,
         Cell: ( {row} ) => {
           return(<span><DashboardIcon 
-            onClick={() => {onClickDashboard(row.values.stash)}}/></span>);
+            onClick={() => {onClickDashboard(row.original.stash)}}/></span>);
         },
       },
       {
@@ -136,9 +134,10 @@ const ValidatorTable = ({filter}) => {
       },
     ]
   }, [_formatBalance, onClickDashboard]);
-
-  const [validators, setValidators] = useState<IOneKVValidator[]>([]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
+  useEffect(() => {
+    setDisplayValidators(validators);
+  }, [chain, validators]);
   useMemo(() => {
     if (filter.stashId.length > 0) {
       const displayValidators: IOneKVValidator[] = [];
@@ -154,6 +153,24 @@ const ValidatorTable = ({filter}) => {
       setDisplayValidators(validators);
     }
   }, [filter.stashId, validators]);
+  return (
+    <Table
+      columns={columns}
+      data={displayValidators}
+    />
+  );
+};
+
+const ValNomContent = () => {
+  const networkName = useAppSelector(state => state.network.name);
+  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  
+  const [validators, setValidators] = useState<IOneKVValidator[]>([]);
+  const [activeEra, setActiveEra] = useState<number>(0);
+  const [validValidators, setValidValidators] = useState<number>(0);
+  const [activeValidators, setActiveValidators] = useState<number>(0);
+  const [electedValidators, setElectedValidators] = useState<number>(0);
+  const [lastUpdatedTime, setlastUpdatedTime] = useState<string>('N/A');
   useEffect(() => {
     const mergeOneKVData = (oneKV: IOneKVValidators, oneKVNominators: IOneKVNominators) => {
       oneKV.valid = oneKV.valid.map((v) => {
@@ -174,25 +191,23 @@ const ValidatorTable = ({filter}) => {
     async function getValidators() {
       try {
         let oneKV = await apiGetAllOneKVValidator({ params: chain});
+        setActiveEra(oneKV.activeEra);
+        setValidValidators(oneKV.validatorCount);
+        setActiveValidators(oneKV.electedCount);
         const oneKVNominators = await apiGetOneKVNominators({ params: chain });
+        setElectedValidators(oneKVNominators.nominators.reduce((acc, n) => {
+          acc += n.current.length;
+          return acc;
+        }, 0));
         oneKV = mergeOneKVData(oneKV, oneKVNominators);
         setValidators(oneKV.valid);
-        setDisplayValidators(oneKV.valid);
+        setlastUpdatedTime(moment(oneKV.modifiedTime * 1000).toLocaleString());
       } catch (err) {
         console.error(err);
       }
     };
     getValidators();
   }, [chain]);
-  return (
-    <Table
-      columns={columns}
-      data={displayValidators}
-    />
-  );
-};
-
-const ValNomContent = () => {
   const [filters, setFilters] = useState({
     stashId: '',
   });
@@ -209,17 +224,40 @@ const ValNomContent = () => {
   return (
     <div>
       <OptionBar>
-        <IconInput
-          Icon={Search}
-          iconSize="16px"
-          placeholder="Polkadot/Kusama Stash ID or Name"
-          inputLength={256}
-          value={filters.stashId}
-          onChange={handleFilterChange('stashId')}
-        />
+        <HeaderLayout>
+          <HeaderLeft>
+            <IconInput
+              Icon={Search}
+              iconSize="16px"
+              placeholder="Polkadot/Kusama Stash ID or Name"
+              inputLength={256}
+              value={filters.stashId}
+              onChange={handleFilterChange('stashId')}
+            />
+          </HeaderLeft>
+          <HeaderRight>
+            <HeaderItem>
+              Era: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeEra}</span>
+            </HeaderItem>
+            <HeaderItem>
+              Valid Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{validValidators}</span>
+            </HeaderItem>
+            <HeaderItem>
+              Active Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeValidators}</span>
+            </HeaderItem>
+            <HeaderItem>
+              1KV Elected Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{electedValidators}</span>
+            </HeaderItem>
+            <HeaderItem>
+              Last Updated Time: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{lastUpdatedTime}</span>
+            </HeaderItem>
+          </HeaderRight>
+        </HeaderLayout>
       </OptionBar>
       <ValidatorTable
-        filter={filters} />
+        filter={filters}
+        chain={chain}
+        validators={validators}/>
     </div>
   );
 };
@@ -246,6 +284,12 @@ const HeaderLayout = styled.div`
 const HeaderLeft = styled.div`
   display: flex;
   justify-content: flex-start;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 `;
 
 const HeaderTitle = styled.div`
@@ -295,4 +339,20 @@ const LastNominationDate = styled.div`
   margin: 0 0 0 4px;
   justify-content: center;
   align-items: center;
+`;
+
+const HeaderItem = styled.div`
+  display: flex;
+  flex-direction: row;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.42;
+  letter-spacing: normal;
+  text-align: left;
+  color: white;
+  margin: 0 20px 0 20px;
+  align-item: center;
 `;

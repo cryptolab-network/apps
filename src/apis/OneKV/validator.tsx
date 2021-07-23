@@ -50,7 +50,8 @@ export interface IOneKVValidators {
   validatorCount: number,
   electedCount: number,
   electionRate: number,
-  valid: IOneKVValidator[]
+  valid: IOneKVValidator[],
+  modifiedTime: number
 }
 
 export const apiGetAllOneKVValidator = (data: IValidatorRequest): Promise<IOneKVValidators> =>
