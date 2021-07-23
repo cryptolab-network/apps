@@ -24,6 +24,7 @@ import ValNom from './pages/Tools/ValNom';
 import { networkChanged } from './redux'
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
+import { getUrls } from './utils/url';
 
 // header
 const Header: React.FC = () => {
@@ -107,6 +108,7 @@ const ToolsHeader: React.FC = () => {
 }
 
 const Footer: React.FC = () => {
+  const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   return (
     <>
       <TableDiv>
@@ -118,8 +120,8 @@ const Footer: React.FC = () => {
         </ColumnDiv>
         <ColumnDiv>
           <ThDiv>Technology</ThDiv>
-          <TdDiv><DotDiv /><LinkA href="http://localhost:3001">Staking Service</LinkA></TdDiv>
-          <TdDiv><DotDiv /><LinkA href="http://tools.localhost:3001">Tools for Validators</LinkA></TdDiv>
+          <TdDiv><DotDiv /><LinkA href={staking_url}>Staking Service</LinkA></TdDiv>
+          <TdDiv><DotDiv /><LinkA href={tools_url}>Tools for Validators</LinkA></TdDiv>
           <TdDiv><DotDiv /><LinkA href="#">Telegram Bots</LinkA></TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -132,7 +134,7 @@ const Footer: React.FC = () => {
             <a href="https://twitter.com/CryptolabN" target="_blank"><TwitterIcon width="36px" height="36px" /></a>
             <a href="https://github.com/cryptolab-network" target="_blank"><GithubIcon width="36px" height="36px" /></a>
           </TdDiv>
-          <TdDiv align_items="flex-end">Subscribe to hear about CryptoLab updates!</TdDiv>
+          <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
             <Input placeholder="Enter your email address"></Input>
             <SubmitButton>Subscribe</SubmitButton>
@@ -302,8 +304,12 @@ const ThDiv = styled.div`
   // border: 1px solid red;
 `
 
-const TdDiv = styled.div.attrs(props => {
-})`
+interface Td {
+  justify_content?: string;
+  align_items?: string;
+}
+
+const TdDiv = styled.div<Td>`
   display: inline-flex;
   height: 3em;
   justify-content: ${props => props.justify_content ? props.justify_content : 'left'};
