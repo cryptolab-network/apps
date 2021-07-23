@@ -32,12 +32,12 @@ const ValidatorStatusHeader = ({
         withUnit: 'KSM'
       }));
     } else if (chain === 'DOT') {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'DOT'
       }));
     } else {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'Unit'
       }));
@@ -102,7 +102,7 @@ const ValidatorStatus = (props) => {
   useEffect(() => {
     async function getValidator() {
       // load stash data from backend
-      let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/KSM` });
+      let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
       // TODO: error handling not yet
       setValidator(validator);
       if (validator.info.length > 0) {
@@ -120,7 +120,7 @@ const ValidatorStatus = (props) => {
       }
     }
     getValidator();
-  }, [props.match.params.id]);
+  }, [props.match.params.id, props.match.params.chain]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>

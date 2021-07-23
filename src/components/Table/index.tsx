@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-import { useTable, useExpanded, usePagination } from 'react-table';
+import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
+import Pagination from './comopnents/Pagination';
 
 type ICOLUMN = {
   columns: Array<any>;
@@ -30,9 +31,11 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
     {
       columns: userColumns,
       data,
+      initialState: {pageSize: 20},
     },
+    useSortBy,
     useExpanded,
-    usePagination // Use the useExpanded plugin hook
+    usePagination, // Use the useExpanded plugin hook
   );
   return (
     <Style>
@@ -42,7 +45,16 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                  <th {...column.getSortByToggleProps()}>
+                    {column.render('Header')}
+                    <span>
+                    {column.isSorted
+                      ? column.isSortedDesc
+                        ? ' 🔽'
+                        : ' 🔼'
+                      : ''}
+                    </span>
+                  </th>
                 ))}
               </tr>
             ))}
@@ -93,6 +105,17 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
         </table>
         <br />
       </div>
+      <Pagination
+        canPreviousPage={canPreviousPage}
+        canNextPage={canNextPage}
+        pageCount={pageCount}
+        gotoPage={gotoPage}
+        nextPage={nextPage}
+        previousPage={previousPage}
+        currentPage={pageIndex}
+        firstItemIndex={(pageSize * pageIndex) + 1}
+        lastItemIndex={Math.min((pageSize * pageIndex) + pageSize, data.length)}
+      />
     </Style>
   );
 };
@@ -105,9 +128,11 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 100%;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    width: 80vw;
+    height: 55vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 20px 0 0 0;
   }
 
   table {
