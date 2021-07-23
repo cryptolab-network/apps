@@ -129,8 +129,8 @@ const Footer: React.FC = () => {
         </ColumnDiv>
         <ColumnDiv>
           <TdDiv justify_content="space-around">
-            <a href="#" target="_blank"><TwitterIcon width="36px" height="36px" /></a>
-            <a href="#" target="_blank"><GithubIcon width="36px" height="36px" /></a>
+            <a href="https://twitter.com/CryptolabN" target="_blank"><TwitterIcon width="36px" height="36px" /></a>
+            <a href="https://github.com/cryptolab-network" target="_blank"><GithubIcon width="36px" height="36px" /></a>
           </TdDiv>
           <TdDiv align_items="flex-end">Subscribe to hear about CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
