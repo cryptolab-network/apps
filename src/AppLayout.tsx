@@ -134,7 +134,7 @@ const Footer: React.FC = () => {
             <a href="https://twitter.com/CryptolabN" target="_blank"><TwitterIcon width="36px" height="36px" /></a>
             <a href="https://github.com/cryptolab-network" target="_blank"><GithubIcon width="36px" height="36px" /></a>
           </TdDiv>
-          <TdDiv align_items="flex-end">Subscribe to hear about CryptoLab updates!</TdDiv>
+          <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
             <Input placeholder="Enter your email address"></Input>
             <SubmitButton>Subscribe</SubmitButton>
@@ -304,8 +304,12 @@ const ThDiv = styled.div`
   // border: 1px solid red;
 `
 
-const TdDiv = styled.div.attrs(props => {
-})`
+interface Td {
+  justify_content?: string;
+  align_items?: string;
+}
+
+const TdDiv = styled.div<Td>`
   display: inline-flex;
   height: 3em;
   justify-content: ${props => props.justify_content ? props.justify_content : 'left'};
