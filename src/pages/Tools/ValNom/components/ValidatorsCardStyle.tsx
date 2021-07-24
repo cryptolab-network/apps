@@ -15,12 +15,12 @@ import { useHistory } from 'react-router-dom';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface IValidatorFilter {
-  favorite: boolean
-  commission: boolean
-  apy: boolean
-  cryptoLab: boolean
-  status: boolean
-  stashId: string
+  favorite: boolean;
+  commission: boolean;
+  apy: boolean;
+  cryptoLab: boolean;
+  status: boolean;
+  stashId: string;
 }
 
 const ValNomHeader = () => {
@@ -30,7 +30,9 @@ const ValNomHeader = () => {
         <PeopleIcon />
         <HeaderTitle>
           <Title>Validator / Nominator Status</Title>
-          <Subtitle>See filtered validator status or enter a nominator stash ID to see its nominated validators</Subtitle>
+          <Subtitle>
+            See filtered validator status or enter a nominator stash ID to see its nominated validators
+          </Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -49,12 +51,13 @@ const ValidatorGrid = ({filters}) => {
         withUnit: 'KSM'
       }));
     } else if (chain === 'DOT') {
-      return (formatBalance(value, {
+      console.log(value);
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'DOT'
       }));
     } else {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'Unit'
       }));
@@ -62,7 +65,7 @@ const ValidatorGrid = ({filters}) => {
   }, [chain]);
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
-    if(filters.stashId.length > 0) {
+    if (filters.stashId.length > 0) {
       return validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
         if (v.id === filters.stashId) {
           acc.push(v);
@@ -71,7 +74,7 @@ const ValidatorGrid = ({filters}) => {
       }, []);
     } else {
       // sort by apy or commission
-      if(filters.apy === true) {
+      if (filters.apy === true) {
         validators = validators.sort((a: IValidator, b: IValidator) => {
           if (a.averageApy > b.averageApy) {
             return -1;
@@ -80,7 +83,7 @@ const ValidatorGrid = ({filters}) => {
           }
           return 0;
         });
-      } else if(filters.commission === true) {
+      } else if (filters.commission === true) {
         validators = validators.sort((a: IValidator, b: IValidator) => {
           if (a.info.commission > b.info.commission) {
             return -1;
@@ -92,14 +95,17 @@ const ValidatorGrid = ({filters}) => {
       }
       // put cryptoLab related to the top
       // put status changed nodes to the top
-      if(filters.status === true) {
-        const statusChangedValidators = validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-          if (v.statusChange.commissionChange !== 0) {
-            acc.push(v);
-            validators.splice(idx, 1);
-          }
-          return acc;
-        }, []);
+      if (filters.status === true) {
+        const statusChangedValidators = validators.reduce(
+          (acc: Array<IValidator>, v: IValidator, idx: number) => {
+            if (v.statusChange.commissionChange !== 0) {
+              acc.push(v);
+              validators.splice(idx, 1);
+            }
+            return acc;
+          },
+          []
+        );
         validators.unshift(...statusChangedValidators);
       }
       // read favorite from localstorage
@@ -121,9 +127,10 @@ const ValidatorGrid = ({filters}) => {
     return validators;
   };
   useEffect(() => {
+    console.log(`chain = ${chain}`);
     async function getValidators() {
       try {
-        let validators = await apiGetAllValidator({ params: 'KSM'});
+        let validators = await apiGetAllValidator({ params: chain });
         validators = sortValidators(validators, {
           favorite: true,
           commission: false,
@@ -136,7 +143,7 @@ const ValidatorGrid = ({filters}) => {
       } catch (err) {
         console.error(err);
       }
-    };
+    }
     getValidators();
   }, [chain, filters.stashId]);
   const [cols, setCols] = useState(6);
@@ -145,13 +152,13 @@ const ValidatorGrid = ({filters}) => {
   };
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
-      history.push(`/tools/validator/${id}/${chain}`);
+      history.push(`/validator/${id}/${chain}`);
     };
     return validators.map((v, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
       return (
-        <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
+        <div key={idx} data-grid={{ x: x, y: y, w: 1, h: 1, static: true }}>
           <ValidNominator
           address={v.id}
           name={v.identity.display}
@@ -170,18 +177,18 @@ const ValidatorGrid = ({filters}) => {
   }, [_formatBalance, chain, cols, history, validators])
   if (validatorComponents.length > 0) {
     return (
-      <ResponsiveGridLayout className="layout"
-        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}
-        cols={{lg: 6, md: 4, sm: 3, xs: 2, xxs: 1}}
+      <ResponsiveGridLayout
+        className="layout"
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+        cols={{ lg: 6, md: 4, sm: 3, xs: 2, xxs: 1 }}
         rowHeight={300}
-        onBreakpointChange={onBreakpointChange}>
-          {
-            validatorComponents
-          }
+        onBreakpointChange={onBreakpointChange}
+      >
+        {validatorComponents}
       </ResponsiveGridLayout>
     );
   } else {
-    return (<div></div>);
+    return <div></div>;
   }
 };
 
@@ -211,20 +218,15 @@ const ValNomContent = () => {
           onChange={handleFilterChange('stashId')}
         />
       </OptionBar>
-      <ValidatorGrid 
-        filters={filters}/>
+      <ValidatorGrid filters={filters} />
     </ValNomContentLayout>
   );
 };
 
 const ValNomStatus = () => {
   return (
-    <CardHeader
-      Header={() => (
-        <ValNomHeader/>
-      )}
-    >
-      <ValNomContent/>
+    <CardHeader Header={() => <ValNomHeader />}>
+      <ValNomContent />
     </CardHeader>
   );
 };
@@ -280,5 +282,5 @@ const OptionBar = styled.div`
 `;
 
 const ValNomContentLayout = styled.div`
-  width: 100%
+  width: 100%;
 `;

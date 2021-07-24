@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { useTable, useExpanded, usePagination } from 'react-table';
+import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
-import Pagination from '../Pagination';
+import Pagination from './comopnents/Pagination';
 
 type ICOLUMN = {
   columns: Array<any>;
@@ -26,19 +26,20 @@ const CustomTable: React.FC<ICOLUMN> = ({
     // The rest of these things are super handy, too ;)
     canPreviousPage,
     canNextPage,
-    pageOptions,
+    // pageOptions,
     pageCount,
     gotoPage,
     nextPage,
     previousPage,
     // setPageSize,
-    // state: { expanded, pageIndex, pageSize },
+    state: { pageIndex, pageSize },
   } = useTable(
     {
       columns: userColumns,
       data,
-      initialState: { pageIndex: 0 },
+      initialState: { pageSize: 20 },
     },
+    useSortBy,
     useExpanded,
     usePagination // Use the useExpanded plugin hook
   );
@@ -50,7 +51,10 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                  <th {...column.getSortByToggleProps()}>
+                    {column.render('Header')}
+                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                  </th>
                 ))}
               </tr>
             ))}
@@ -106,11 +110,13 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <Pagination
             canPreviousPage={canPreviousPage}
             canNextPage={canNextPage}
-            pageOptions={pageOptions}
             pageCount={pageCount}
             gotoPage={gotoPage}
             nextPage={nextPage}
             previousPage={previousPage}
+            currentPage={pageIndex}
+            firstItemIndex={pageSize * pageIndex + 1}
+            lastItemIndex={Math.min(pageSize * pageIndex + pageSize, data.length)}
           />
         ) : null}
       </div>
@@ -126,9 +132,11 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 100%;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    width: 80vw;
+    height: 55vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 20px 0 0 0;
   }
 
   table {
