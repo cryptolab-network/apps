@@ -67,7 +67,8 @@ const ValidatorGrid = ({filters}) => {
     // if filters.stashId is not empty
     if (filters.stashId.length > 0) {
       return validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-        if (v.id === filters.stashId) {
+        if (v.id.toLowerCase().includes(filters.stashId.toLowerCase())
+          || v.identity.display.toLowerCase().includes(filters.stashId.toLowerCase())) {
           acc.push(v);
         }
         return acc;
@@ -200,8 +201,6 @@ const ValNomContent = () => {
     strategy: filterOptions[0],
   });
   const handleFilterChange = (name) => (e) => {
-    // TODO: input validator, limit
-    console.log(e);
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
