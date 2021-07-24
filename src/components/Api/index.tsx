@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { polkadotWSS, kusamaWSS } from '../../config/keys';
+import keys from '../../config/keys';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { NetworkStatus } from '../../redux/networkSlice';
 import { networkStatusChanged } from '../../redux';
@@ -17,7 +17,7 @@ const Api: React.FC = (props) => {
   const [isApiInitialized, setIsApiInitialized] = useState(false);
 
   useEffect(() => {
-    const endpoint = networkName === 'Polkadot' ? polkadotWSS : kusamaWSS;
+    const endpoint = networkName === 'Polkadot' ? keys.polkadotWSS : keys.kusamaWSS;
     const provider = new WsProvider(endpoint, 1000);
     api = new ApiPromise({ provider });
 
