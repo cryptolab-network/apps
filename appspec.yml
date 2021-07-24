@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
  - source: .
-   destination: /home/ubuntu/polkadot-staking-site
+   destination: /home/ubuntu/apps
 hooks:
   AfterInstall:
    - location: scripts/copy_dist

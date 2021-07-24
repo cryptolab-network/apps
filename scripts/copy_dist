@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /home/ubuntu/backend
-aws s3 sync s3://polkadot-staking-site ./www/static --delete
+aws s3 sync s3://cryptolab-apps ./www/static --delete
 
