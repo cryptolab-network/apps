@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useContext } from 'react';
+import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
@@ -7,15 +8,11 @@ import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
 import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
-import Table from '../../../components/Table';
+import Table from './Table';
 import Account from '../../../components/Account';
 import Button from '../../../components/Button';
-import Tooltip from '../../../components/Tooltip';
-import Switch from '../../../components/Switch';
 import Era from '../../../components/Table/comopnents/Era';
-import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
-import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
 import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.svg';
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
@@ -23,52 +20,12 @@ import { ReactComponent as CheckTrue } from '../../../assets/images/check-true.s
 import { ReactComponent as CheckFalse } from '../../../assets/images/check-false.svg';
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
+import { networkCapitalCodeName } from '../../../utils/parser';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import styled from 'styled-components';
+import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { ApiContext } from '../../../components/Api';
 
-const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
-  const advancedDOM = useMemo(() => {
-    return (
-      <AdvancedOptionLayout>
-        <AdvancedOption>
-          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>Advanced</span>
-          <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.advanced} onChange={onChange('advanced')} />
-          </div>
-        </AdvancedOption>
-        <AdvancedOption>
-          <span style={{ color: advancedOption.decentralized ? '#23beb9' : '#fff' }}>Decentralized</span>
-          <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.decentralized} onChange={onChange('decentralized')} />
-          </div>
-        </AdvancedOption>
-        <AdvancedOption>
-          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>Support us</span>
-          <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.supportus} onChange={onChange('supportus')} />
-          </div>
-        </AdvancedOption>
-      </AdvancedOptionLayout>
-    );
-  }, [advancedOption.advanced, advancedOption.decentralized, advancedOption.supportus, onChange]);
-
-  return (
-    <HeaderLayout>
-      <HeaderLeft>
-        <BeakerSmall />
-        <HeaderTitle>
-          <Title>Staking</Title>
-          <Subtitle>Select the preferred type for evaluation</Subtitle>
-        </HeaderTitle>
-      </HeaderLeft>
-      <HeaderRight>
-        <Tooltip content={advancedDOM} visible={advancedOption.toggle} tooltipToggle={optionToggle}>
-          <OptionIcon />
-        </Tooltip>
-      </HeaderRight>
-    </HeaderLayout>
-  );
-};
+import StakingHeader from './Header';
 
 enum Strategy {
   LOW_RISK,
@@ -78,6 +35,12 @@ enum Strategy {
 }
 
 const Staking = () => {
+  // context
+  const polkadotApi = useContext(ApiContext);
+  // redux
+  let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
+
+  // const
   const strategyOptions = [
     { label: 'Low risk', value: Strategy.LOW_RISK },
     { label: 'High APY', value: Strategy.HIGH_APY },
@@ -85,6 +48,7 @@ const Staking = () => {
     { label: '1KV validators', value: Strategy.ONE_KV },
   ];
 
+  // state
   const [inputData, setInputData] = useState({
     stakeAmount: 0,
     strategy: Strategy.LOW_RISK,
@@ -106,6 +70,11 @@ const Staking = () => {
     historicalApy: undefined, // input %
     minInclusion: undefined, // input %
     telemetry: false, // switch
+  });
+  const [apiParams, setApiParams] = useState({
+    network: 'KSM',
+    page: 0,
+    size: 24,
   });
 
   const columns = useMemo(() => {
@@ -235,8 +204,18 @@ const Staking = () => {
   // }, []);
 
   useEffect(() => {
+    setApiParams((prev) => ({
+      ...prev,
+      network: networkCapitalCodeName(networkName),
+    }));
+  }, [networkName]);
+
+  useEffect(() => {
     (async () => {
-      let result = await apiGetAllValidator({ params: 'KSM', query: { size: 5, page: 1 } });
+      let result = await apiGetAllValidator({
+        params: apiParams.network,
+        query: { size: apiParams.size, page: apiParams.page },
+      });
       console.log('result: ', result);
     })();
   }, []);
@@ -550,51 +529,6 @@ const Staking = () => {
 
 export default Staking;
 
-const HeaderLayout = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const HeaderLeft = styled.div`
-  display: flex;
-  justify-content: flex-start;
-`;
-
-const HeaderRight = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-`;
-
-const HeaderTitle = styled.div`
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-left: 18px;
-`;
-
-const Title = styled.div`
-  font-family: Montserrat;
-  font-size: 18px;
-  font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.22;
-`;
-
-const Subtitle = styled.div`
-  font-family: Montserrat;
-  font-size: 11px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.55;
-`;
-
 const ContentBlock = styled.div`
   background-color: white;
   border-radius: 6px;
@@ -795,26 +729,6 @@ const DashboardLayout = styled.div`
   justify-content: space-around;
   align-items: center;
   margin-top: 32px;
-`;
-
-const AdvancedOptionLayout = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const AdvancedOption = styled.div`
-  margin-top: 4px;
-  margin-bottom: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #23beb9;
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.23;
 `;
 
 interface ArrowContainerProps {

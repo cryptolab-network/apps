@@ -9,10 +9,10 @@ import {
   connectWallet,
   selectAccount,
   setWalletStatus,
-  NetworkStatus,
   IAccount,
   // setFilteredAccounts,
 } from '../../redux';
+import { NetworkStatus } from '../../utils/status/Network';
 import { ApiContext } from '../Api';
 // import { ApiPromise } from '@polkadot/api';
 

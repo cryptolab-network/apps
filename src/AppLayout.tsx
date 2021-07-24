@@ -240,9 +240,9 @@ const AppLayout = () => {
         <BrowserRouter>
           <Api>{mainRender}</Api>
         </BrowserRouter>
-        <StarAnimation id="stars" />
+        {/* <StarAnimation id="stars" />
         <StarAnimation id="stars2" />
-        <StarAnimation id="stars3" />
+        <StarAnimation id="stars3" /> */}
       </GradientLight>
     </>
   );
@@ -264,8 +264,9 @@ const HeaderDiv = styled.div`
 
 const RouteContent = styled.div`
   display: flex;
-  min-height: calc(100vh - 93px);
-  overflow-y: scroll;
+  // height: 100%;
+  // min-height: calc(100vh - 93px);
+  overflow-y: visible;
 `;
 
 const HeaderLeftDiv = styled.div`
@@ -287,11 +288,11 @@ const HeaderRightDiv = styled.div`
   justify-content: flex-end;
 `;
 
-const StarAnimation = styled.div`
-  position: absolute;
-  z-index: -100;
-  overflow-y: hidden;
-`;
+// const StarAnimation = styled.div`
+//   position: absolute;
+//   z-index: -100;
+//   overflow-y: hidden;
+// `;
 
 const GradientLight = styled.div`
   width: 100%;
@@ -305,7 +306,7 @@ const TableDiv = styled.div`
   flex-flow: row;
   justify-content: space-between;
   height: 14em;
-  margin: 0;
+  margin: 80px 0 0 0;
   padding: 20px 15% 20px 15%;
 `;
 
