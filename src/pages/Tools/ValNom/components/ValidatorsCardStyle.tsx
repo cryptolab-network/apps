@@ -39,33 +39,30 @@ const ValNomHeader = () => {
   );
 };
 
-const ValidatorGrid = ({ filters }) => {
+const ValidatorGrid = ({filters}) => {
   const history = useHistory();
-  const networkName = useAppSelector((state) => state.network.name);
-  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
+  const networkName = useAppSelector(state => state.network.name);
+  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
-  const _formatBalance = useCallback(
-    (value: any) => {
-      if (chain === 'KSM') {
-        return formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM',
-        });
-      } else if (chain === 'DOT') {
-        console.log(value);
-        return formatBalance(value, {
-          decimals: 10,
-          withUnit: 'DOT',
-        });
-      } else {
-        return formatBalance(value, {
-          decimals: 10,
-          withUnit: 'Unit',
-        });
-      }
-    },
-    [chain]
-  );
+  const _formatBalance = useCallback((value: any) => {
+    if (chain === 'KSM') {
+      return (formatBalance(BigInt(value), {
+        decimals: 12,
+        withUnit: 'KSM'
+      }));
+    } else if (chain === 'DOT') {
+      console.log(value);
+      return (formatBalance(BigInt(value), {
+        decimals: 10,
+        withUnit: 'DOT'
+      }));
+    } else {
+      return (formatBalance(BigInt(value), {
+        decimals: 10,
+        withUnit: 'Unit'
+      }));
+    }
+  }, [chain]);
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
     if (filters.stashId.length > 0) {
@@ -163,22 +160,21 @@ const ValidatorGrid = ({ filters }) => {
       return (
         <div key={idx} data-grid={{ x: x, y: y, w: 1, h: 1, static: true }}>
           <ValidNominator
-            address={v.id}
-            name={v.identity.display}
-            activeAmount={_formatBalance(v.info.exposure.total)}
-            totalAmount={_formatBalance(v.info.total)}
-            apy={(v.averageApy * 100).toFixed(2)}
-            commission={v.info.commission}
-            count={v.info.nominatorCount}
-            statusChange={v.statusChange}
-            unclaimedPayouts={v.info.unclaimedEras.length}
-            favorite={v.favorite}
-            onClick={() => openValidatorStatus(v.id)}
+          address={v.id}
+          name={v.identity.display}
+          activeAmount={_formatBalance(v.info.exposure.total)}
+          totalAmount={_formatBalance(v.info.total)}
+          apy={(v.averageApy * 100).toFixed(2)}
+          commission={v.info.commission}
+          count={v.info.nominatorCount}
+          statusChange={v.statusChange}
+          unclaimedPayouts={v.info.unclaimedEras.length}
+          favorite={v.favorite}
+          onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </div>
-      );
-    });
-  }, [_formatBalance, chain, cols, history, validators]);
+        </div>);
+      });
+  }, [_formatBalance, chain, cols, history, validators])
   if (validatorComponents.length > 0) {
     return (
       <ResponsiveGridLayout

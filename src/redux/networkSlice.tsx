@@ -1,11 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-export enum NetworkStatus {
-  CONNECTED,
-  DISCONNECTED,
-  ERROR,
-  READY,
-}
+import { NetworkStatus } from '../utils/status/Network';
 
 interface networkState {
   name: string;
