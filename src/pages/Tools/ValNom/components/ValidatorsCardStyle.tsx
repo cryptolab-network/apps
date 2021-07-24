@@ -288,7 +288,7 @@ const ValNomStatus = () => {
 export default ValNomStatus;
 
 const HeaderLayout = styled.div`
-  width: 100%;
+  width: 80vw;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -343,7 +343,7 @@ const OptionBar = styled.div`
 `;
 
 const ValNomContentLayout = styled.div`
-  width: 100%;
+  width: 80vw;
 `;
 
 const FilterOptionLayout = styled.div`
