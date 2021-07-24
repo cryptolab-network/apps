@@ -11,10 +11,10 @@ import {
   setWalletStatus,
   NetworkStatus,
   IAccount,
-  setFilteredAccounts,
+  // setFilteredAccounts,
 } from '../../redux';
 import { ApiContext } from '../Api';
-import { ApiPromise } from '@polkadot/api';
+// import { ApiPromise } from '@polkadot/api';
 
 // TODO: please remove this mock data before production
 // const mockWalletList = [
@@ -36,21 +36,21 @@ import { ApiPromise } from '@polkadot/api';
 // const mockWalletStatus: number = WalletStatus.DENIED;
 // const mockWalletStatus: number = WalletStatus.CONNECTED;
 
-const ParseNetworkStatus = (status) => {
-  switch (status) {
-    case NetworkStatus.CONNECTED:
-      return 'CONNECTED';
-    case NetworkStatus.DISCONNECTED:
-      return 'DISCONNECTED';
-    case NetworkStatus.ERROR:
-      return 'ERROR';
-    case NetworkStatus.READY:
-      return 'READY';
+// const ParseNetworkStatus = (status) => {
+//   switch (status) {
+//     case NetworkStatus.CONNECTED:
+//       return 'CONNECTED';
+//     case NetworkStatus.DISCONNECTED:
+//       return 'DISCONNECTED';
+//     case NetworkStatus.ERROR:
+//       return 'ERROR';
+//     case NetworkStatus.READY:
+//       return 'READY';
 
-    default:
-      break;
-  }
-};
+//     default:
+//       break;
+//   }
+// };
 
 const NetworkWallet: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -64,7 +64,7 @@ const NetworkWallet: React.FC = () => {
     async (networkName: string) => {
       dispatch(networkChanged(networkName));
     },
-    [dispatch, polkadotApi]
+    [dispatch]
   );
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const NetworkWallet: React.FC = () => {
       // network is not ready, force wallet status loading
       dispatch(setWalletStatus(WalletStatus.LOADING));
     }
-  }, [networkName, networkStatus]);
+  }, [networkName, networkStatus, dispatch]);
 
   const balance = useCallback(
     async (account: IAccount) => {
@@ -104,7 +104,7 @@ const NetworkWallet: React.FC = () => {
       }
       setAccountList(tempAccounts);
     })();
-  }, [filteredAccounts]);
+  }, [filteredAccounts, balance]);
 
   useEffect(() => {
     (async () => {
@@ -119,12 +119,12 @@ const NetworkWallet: React.FC = () => {
         setLocalSeletedAccount(tempSelectedAccount);
       }
     })();
-  }, [selectedAccount]);
+  }, [selectedAccount, balance]);
 
-  const _connectWallet = () => {
+  const _connectWallet = useCallback(() => {
     console.log('in connectWallet');
     dispatch(connectWallet(networkName));
-  };
+  }, [dispatch, networkName]);
   const loadingWallet = () => {
     console.log('in loadingWallet');
   };
@@ -155,7 +155,7 @@ const NetworkWallet: React.FC = () => {
           break;
       }
     },
-    [walletStatus]
+    [walletStatus, _connectWallet, dispatch]
   );
 
   return (

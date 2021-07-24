@@ -1,14 +1,21 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination } from 'react-table';
 import { tableType } from '../../utils/status/Table';
+import Pagination from '../Pagination';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
   type?: tableType;
+  pagination?: boolean;
 };
 
-const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tableType.common }) => {
+const CustomTable: React.FC<ICOLUMN> = ({
+  columns: userColumns,
+  data,
+  type = tableType.common,
+  pagination = false,
+}) => {
   const {
     getTableProps,
     getTableBodyProps,
@@ -24,12 +31,13 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
     gotoPage,
     nextPage,
     previousPage,
-    setPageSize,
-    state: { expanded, pageIndex, pageSize },
+    // setPageSize,
+    // state: { expanded, pageIndex, pageSize },
   } = useTable(
     {
       columns: userColumns,
       data,
+      initialState: { pageIndex: 0 },
     },
     useExpanded,
     usePagination // Use the useExpanded plugin hook
@@ -92,6 +100,19 @@ const CustomTable: React.FC<ICOLUMN> = ({ columns: userColumns, data, type = tab
           </tbody>
         </table>
         <br />
+      </div>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {pagination ? (
+          <Pagination
+            canPreviousPage={canPreviousPage}
+            canNextPage={canNextPage}
+            pageOptions={pageOptions}
+            pageCount={pageCount}
+            gotoPage={gotoPage}
+            nextPage={nextPage}
+            previousPage={previousPage}
+          />
+        ) : null}
       </div>
     </Style>
   );

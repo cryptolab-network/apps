@@ -34,7 +34,7 @@ const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(getNominators(networkName));
-  }, [networkName]);
+  }, [networkName, dispatch]);
 
   return (
     <HeaderDiv>

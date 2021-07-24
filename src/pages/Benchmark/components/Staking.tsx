@@ -25,7 +25,6 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { apiGetAllValidator } from '../../../apis/Validator';
 import styled from 'styled-components';
-import _ from 'lodash';
 
 const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
   const advancedDOM = useMemo(() => {
@@ -71,14 +70,26 @@ const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
   );
 };
 
-interface iOption {
-  label: string;
-  value: number;
+enum Strategy {
+  LOW_RISK,
+  HIGH_APY,
+  DECENTRAL,
+  ONE_KV,
 }
 
 const Staking = () => {
-  const [inputData, setInputData] = useState({ stakeAmount: 0, strategy: {}, rewardDestination: null });
-  const [strategyOptions, setStrategyOptions] = useState<iOption[]>([]);
+  const strategyOptions = [
+    { label: 'Low risk', value: Strategy.LOW_RISK },
+    { label: 'High APY', value: Strategy.HIGH_APY },
+    { label: 'Decentralization', value: Strategy.DECENTRAL },
+    { label: '1KV validators', value: Strategy.ONE_KV },
+  ];
+
+  const [inputData, setInputData] = useState({
+    stakeAmount: 0,
+    strategy: Strategy.LOW_RISK,
+    rewardDestination: null,
+  });
   const [advancedOption, setAdvancedOption] = useState({
     toggle: false,
     advanced: false,
@@ -205,23 +216,23 @@ const Staking = () => {
     setAdvancedOption((prev) => ({ ...prev, toggle: visible }));
   }, []);
 
-  useEffect(() => {
-    // get strategy options
-    const result = [
-      { label: 'General', value: 1 },
-      { label: 'Aggressive', value: 2 },
-      { label: 'High frenquency ', value: 3 },
-    ];
+  // useEffect(() => {
+  //   // get strategy options
+  //   const result = [
+  //     { label: 'General', value: 1 },
+  //     { label: 'Aggressive', value: 2 },
+  //     { label: 'High frenquency ', value: 3 },
+  //   ];
 
-    setStrategyOptions(result);
-    setInputData((prev) => {
-      if (_.isEmpty(prev.strategy)) {
-        return { ...prev, strategy: result[0] };
-      } else {
-        return { ...prev };
-      }
-    });
-  }, []);
+  //   setStrategyOptions(result);
+  //   setInputData((prev) => {
+  //     if (_.isEmpty(prev.strategy)) {
+  //       return { ...prev, strategy: result[0] };
+  //     } else {
+  //       return { ...prev };
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     (async () => {
@@ -229,6 +240,10 @@ const Staking = () => {
       console.log('result: ', result);
     })();
   }, []);
+
+  const handleStrategyChange = (e) => {
+    console.log('current strategy: ', e);
+  };
 
   const handleInputChange = (name) => (e) => {
     let tmpValue;
@@ -242,9 +257,9 @@ const Staking = () => {
           return;
         }
         break;
-      case 'strategy':
-        tmpValue = e;
-        break;
+      // case 'strategy':
+      //   tmpValue = e;
+      //   break;
       case 'rewardDestination':
         tmpValue = e;
         break;
@@ -385,7 +400,6 @@ const Staking = () => {
           <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
-              {/* <AdvancedFilterResultWrap> */}
               <Table
                 type={tableType.stake}
                 columns={columns}
@@ -421,8 +435,8 @@ const Staking = () => {
                     subRows: [{ unclaimedEras: 'test3' }],
                   },
                 ]}
+                pagination
               />
-              {/* </AdvancedFilterResultWrap> */}
             </ContentColumnLayout>
           </AdvancedFilterBlock>
         </AdvancedBlockWrap>
@@ -467,7 +481,7 @@ const Staking = () => {
                   style={{ flex: 1, width: '90%' }}
                   options={strategyOptions}
                   value={inputData.strategy}
-                  onChange={handleInputChange('strategy')}
+                  onChange={handleStrategyChange}
                 />
                 <ContentBlockFooter />
               </ContentColumnLayout>
@@ -874,12 +888,4 @@ const AdvancedBlockWrap = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 110px);
   }
-`;
-
-const AdvancedFilterResultWrap = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
 `;

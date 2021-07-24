@@ -39,7 +39,7 @@ const Api: React.FC = (props) => {
     });
 
     setIsApiInitialized(true);
-  }, [networkName]);
+  }, [networkName, dispatch]);
 
   if (!isApiInitialized) {
     return null;
