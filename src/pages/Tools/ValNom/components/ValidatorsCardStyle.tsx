@@ -14,7 +14,7 @@ import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import Tooltip from '../../../../components/Tooltip';
 import DropdownCommon from '../../../../components/Dropdown/Common';
-import { filterOptionDropdownList, filterOptions, FilterState, IValidatorFilter, toValidatorFilter } from './filterOptions';
+import { filterOptionDropdownList, filterOptions, IValidatorFilter, toValidatorFilter } from './filterOptions';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -39,11 +39,10 @@ interface iOption {
   value: number;
 }
 
-const ValidatorGrid = ({filters}) => {
+const ValidatorGrid = ({filters, validators}) => {
   const history = useHistory();
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
-  const [validators, setValidators] = useState<IValidator[]>([]);
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {
       return (formatBalance(BigInt(value), {
@@ -136,19 +135,14 @@ const ValidatorGrid = ({filters}) => {
     // find favorites and put them to the top
     return validators;
   };
+  const [displayValidators, setDisplayValidators] = useState<IValidator[]>([]);
   useEffect(() => {
-    console.log(`chain = ${chain}`);
-    async function getValidators() {
-      try {
-        let validators = await apiGetAllValidator({ params: chain });
-        validators = sortValidators(validators, filters);
-        setValidators(validators.slice(0, 24));
-      } catch (err) {
-        console.error(err);
-      }
+    try {
+      setDisplayValidators(sortValidators(validators, filters).slice(0, 24));
+    } catch (err) {
+      console.error(err);
     }
-    getValidators();
-  }, [chain, filters]);
+  }, [filters, validators]);
   const [cols, setCols] = useState(6);
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
@@ -157,7 +151,7 @@ const ValidatorGrid = ({filters}) => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
     };
-    return validators.map((v, idx) => {
+    return displayValidators.map((v, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
       return (
@@ -177,7 +171,7 @@ const ValidatorGrid = ({filters}) => {
           ></ValidNominator>
         </div>);
       });
-  }, [_formatBalance, chain, cols, history, validators])
+  }, [_formatBalance, chain, cols, history, displayValidators]);
   if (validatorComponents.length > 0) {
     return (
       <ResponsiveGridLayout
@@ -200,6 +194,9 @@ const ValNomContent = () => {
     stashId: '',
     strategy: filterOptions[0],
   });
+  const networkName = useAppSelector(state => state.network.name);
+  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -215,7 +212,16 @@ const ValNomContent = () => {
   const [options, setFilterOptions] = useState<iOption[]>([]);
   useEffect(() => {
     setFilterOptions(filterOptionDropdownList);
-  }, []);
+    async function getValidators() {
+      try {
+        let validators = await apiGetAllValidator({ params: chain });
+        setValidators(validators);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    getValidators();
+  }, [chain]);
   const filtersDOM = useMemo(() => {
     return (
       <FilterOptionLayout>
@@ -263,7 +269,10 @@ const ValNomContent = () => {
         </HeaderRight>
       </HeaderLayout>
       </OptionBar>
-      <ValidatorGrid filters={toValidatorFilter(filters)} />
+      <ValidatorGrid
+        filters={toValidatorFilter(filters)}
+        validators={validators}
+      />
     </ValNomContentLayout>
   );
 };
