@@ -130,7 +130,7 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 80vw;
+    width: 100%;
     height: 55vh;
     overflow-x: hidden;
     overflow-y: scroll;

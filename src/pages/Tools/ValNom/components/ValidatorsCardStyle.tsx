@@ -7,7 +7,6 @@ import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import { useAppSelector } from '../../../../hooks';
 import { formatBalance } from '@polkadot/util';
-import { Responsive, WidthProvider } from 'react-grid-layout';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
@@ -15,8 +14,7 @@ import { useHistory } from 'react-router-dom';
 import Tooltip from '../../../../components/Tooltip';
 import DropdownCommon from '../../../../components/Dropdown/Common';
 import { filterOptionDropdownList, filterOptions, IValidatorFilter, toValidatorFilter } from './filterOptions';
-
-const ResponsiveGridLayout = WidthProvider(Responsive);
+import { Grid } from '@material-ui/core';
 
 const ValNomHeader = () => {
   return (
@@ -143,19 +141,13 @@ const ValidatorGrid = ({filters, validators}) => {
       console.error(err);
     }
   }, [filters, validators]);
-  const [cols, setCols] = useState(6);
-  const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
-    setCols(newCols);
-  };
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
     };
     return displayValidators.map((v, idx) => {
-      const x = idx % cols;
-      const y = Math.floor(idx / cols);
       return (
-        <div key={idx} data-grid={{ x: x, y: y, w: 1, h: 1, static: true }}>
+        <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
           <ValidNominator
           address={v.id}
           name={v.identity.display}
@@ -169,20 +161,14 @@ const ValidatorGrid = ({filters, validators}) => {
           favorite={v.favorite}
           onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </div>);
+        </Grid>);
       });
-  }, [_formatBalance, chain, cols, history, displayValidators]);
+  }, [_formatBalance, chain, history, displayValidators]);
   if (validatorComponents.length > 0) {
     return (
-      <ResponsiveGridLayout
-        className="layout"
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 6, md: 4, sm: 3, xs: 2, xxs: 1 }}
-        rowHeight={300}
-        onBreakpointChange={onBreakpointChange}
-      >
+      <Grid container spacing={3} style={{justifyContent: 'space-between'}}>
         {validatorComponents}
-      </ResponsiveGridLayout>
+      </Grid>
     );
   } else {
     return <div></div>;
@@ -340,6 +326,7 @@ const OptionBar = styled.div`
   padding: 12px 0px 0px 13.8px;
   border-radius: 6px;
   background-color: #2f3842;
+  margin: 0 0 9px 0;
 `;
 
 const ValNomContentLayout = styled.div`
