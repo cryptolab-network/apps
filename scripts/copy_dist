@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /home/ubuntu/backend
-aws s3 sync s3://cryptolab-apps ./www/static --delete
+cd /home/ubuntu/frontend
+aws s3 sync s3://cryptolab-apps . --delete
 
