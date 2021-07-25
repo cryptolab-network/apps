@@ -29,8 +29,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - name: debug
-        run: echo ${{ secrets.REACT_APP_KUSAMA_WSS }}
+
+      - name: check if the environment is set
+        run: |
+          echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS == 'wss://kusama-rpc.polkadot.io/' }}"
+          echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS != ''}}"
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
