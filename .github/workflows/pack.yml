@@ -21,6 +21,15 @@ jobs:
     # Use environment variables from Environments in setting page
     environment: staging
 
+    # Set env
+    env: 
+        REACT_APP_API_VERSION: ${{ secrets.REACT_APP_API_VERSION }}
+        REACT_APP_GA_TRACKING_ID: ${{ secrets.REACT_APP_GA_TRACKING_ID }}
+        REACT_APP_KUSAMA_WSS: ${{ secrets.REACT_APP_KUSAMA_WSS }}
+        REACT_APP_POLKADOT_WSS: ${{ secrets.REACT_APP_POLKADOT_WSS }}
+        REACT_APP_PROXY_TARGET: ${{ secrets.REACT_APP_PROXY_TARGET }}
+        REACT_APP_TOOL_DOMAIN: ${{ secrets.REACT_APP_TOOL_DOMAIN }}
+
     strategy:
       matrix:
         node-version: [16.x]
@@ -35,15 +44,6 @@ jobs:
           echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS == 'wss://kusama-rpc.polkadot.io/' }}"
           echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS != ''}}"
 
-      - name: set env
-        env: 
-            REACT_APP_API_VERSION: ${{ secrets.REACT_APP_API_VERSION }}
-            REACT_APP_GA_TRACKING_ID: ${{ secrets.REACT_APP_GA_TRACKING_ID }}
-            REACT_APP_KUSAMA_WSS: ${{ secrets.REACT_APP_KUSAMA_WSS }}
-            REACT_APP_POLKADOT_WSS: ${{ secrets.REACT_APP_POLKADOT_WSS }}
-            REACT_APP_PROXY_TARGET: ${{ secrets.REACT_APP_PROXY_TARGET }}
-            REACT_APP_TOOL_DOMAIN: ${{ secrets.REACT_APP_TOOL_DOMAIN }}
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -53,6 +53,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build --if-present
+        
       # Setup AWS config
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
