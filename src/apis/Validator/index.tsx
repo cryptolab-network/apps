@@ -33,6 +33,7 @@ export interface IEraInfo {
   apy: number
   unclaimedEras: number[]
   total: number
+  selfStake: number
 }
 
 export interface IValidator {

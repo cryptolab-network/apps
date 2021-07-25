@@ -25,6 +25,9 @@ export const Portal = () => {
           title={'One Thousand Validator Monitor'}
           detail="Information that allow 1kv node operators to predict when they will be nominated."
           className="card-layout"
+          onClick = {() => {
+            history.push("/onekv");
+          }}
         />
         <CardContent
           Icon={MedalIcon}

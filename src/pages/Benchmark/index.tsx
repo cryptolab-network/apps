@@ -21,7 +21,7 @@ const Benchmark = () => {
     <BenchmarkLayout>
       <MainLayout>
         <SwitchTab tabs={tabs} />
-        <div style={{ width: '100%', height: 250 }}>
+        <div style={{ width: '100%' }}>
           <Switch>
             <Route exact path={`${path}`} component={Staking} />
             <Route exact path={`${path}/charts`} component={() => <div>charts</div>} />

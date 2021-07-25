@@ -20,3 +20,11 @@ export const nominatorAxios = Axios.create({
 export const nominatorsAxios = Axios.create({
   baseURL: `${prefix}/nominators`,
 });
+
+export const validatorOneKVAxios = Axios.create({
+  baseURL: `${prefix}/1kv/validators`,
+});
+
+export const nominatorOneKVAxios = Axios.create({
+  baseURL: `${prefix}/1kv/nominators`,
+});

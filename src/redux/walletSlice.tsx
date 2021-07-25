@@ -3,8 +3,6 @@ import { web3Accounts, web3Enable, isWeb3Injected } from '@polkadot/extension-da
 import { InjectedExtension, InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
-import { useCallback, useEffect, useContext } from 'react';
-import { ApiContext } from '../components/Api';
 
 const networkInfo = [
   {
