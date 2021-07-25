@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { ReactComponent as PaginationPrevIcon } from '../../../assets/images/pagination-prev.svg';
-import { ReactComponent as PaginationNextIcon } from '../../../assets/images/pagination-next.svg';
-import { ReactComponent as PaginationFirstIcon } from '../../../assets/images/pagination-to-start.svg';
-import { ReactComponent as PaginationLastIcon } from '../../../assets/images/pagination-to-end.svg';
+import { ReactComponent as PaginationPrevIcon } from '../../../../../assets/images/pagination-prev.svg';
+import { ReactComponent as PaginationNextIcon } from '../../../../../assets/images/pagination-next.svg';
+import { ReactComponent as PaginationFirstIcon } from '../../../../../assets/images/pagination-to-start.svg';
+import { ReactComponent as PaginationLastIcon } from '../../../../../assets/images/pagination-to-end.svg';
 
 const Pagination = ({
   gotoPage,

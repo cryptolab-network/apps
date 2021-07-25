@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
-import styled from "styled-components";
-import { IOneKVValidator } from "../../../../apis/OneKV/validator";
-import Table from "../../../../components/Table";
+// import styled from 'styled-components';
+import { IOneKVValidator } from '../../../../apis/OneKV/validator';
+import Table from '../../../../components/Table';
 
-const InvalidValidatorTable = ({filter, chain, validators}) => {
+const InvalidValidatorTable = ({ filter, chain, validators }) => {
   const history = useHistory();
-  const onClickDashboard = useCallback((id: string) => {
-    history.push(`/validator/${id}/${chain}`);
-  }, [chain, history]);
+  const onClickDashboard = useCallback(
+    (id: string) => {
+      history.push(`/validator/${id}/${chain}`);
+    },
+    [chain, history]
+  );
 
   const columns = useMemo(() => {
     return [
@@ -18,9 +21,16 @@ const InvalidValidatorTable = ({filter, chain, validators}) => {
         accessor: 'dashboard',
         maxWidth: 48,
         disableSortBy: true,
-        Cell: ( {row} ) => {
-          return(<span><DashboardIcon 
-            onClick={() => {onClickDashboard(row.original.stash)}}/></span>);
+        Cell: ({ row }) => {
+          return (
+            <span>
+              <DashboardIcon
+                onClick={() => {
+                  onClickDashboard(row.original.stash);
+                }}
+              />
+            </span>
+          );
         },
       },
       {
@@ -41,17 +51,15 @@ const InvalidValidatorTable = ({filter, chain, validators}) => {
             return acc;
           }, []);
           let components = reasons.map((reason) => {
-            return (<li>{reason}</li>);
+            return <li>{reason}</li>;
           });
-          if(components.length === 0) {
-            components = (<div></div>);
+          if (components.length === 0) {
+            components = <div></div>;
           }
-          return (
-            <span style={{textAlign: 'left'}}>{components}
-            </span>);
+          return <span style={{ textAlign: 'left' }}>{components}</span>;
         },
       },
-    ]
+    ];
   }, [onClickDashboard]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
   useEffect(() => {
@@ -63,7 +71,7 @@ const InvalidValidatorTable = ({filter, chain, validators}) => {
       validators.forEach((v) => {
         if (v.stash.toLowerCase().includes(filter.stashId.toLowerCase())) {
           displayValidators.push(v);
-        } else if(v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
+        } else if (v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
           displayValidators.push(v);
         }
       });
@@ -72,25 +80,20 @@ const InvalidValidatorTable = ({filter, chain, validators}) => {
       setDisplayValidators(validators);
     }
   }, [filter.stashId, validators]);
-  return (
-    <Table
-      columns={columns}
-      data={displayValidators}
-    />
-  );
+  return <Table columns={columns} data={displayValidators} />;
 };
 
 export default InvalidValidatorTable;
 
-const OneKVNominated = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-`;
+// const OneKVNominated = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   justify-content: center;
+//   align-items: center;
+// `;
 
-const LastNominationDate = styled.div`
-  margin: 0 0 0 4px;
-  justify-content: center;
-  align-items: center;
-`;
+// const LastNominationDate = styled.div`
+//   margin: 0 0 0 4px;
+//   justify-content: center;
+//   align-items: center;
+// `;
