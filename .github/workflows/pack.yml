@@ -53,7 +53,7 @@ jobs:
           aws-region: eu-central-1
       - name: Upload artifacts to S3 with AWS CLI
         run: |
-          aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} --delete --exact-timestamps
      # Trigger code deploy 
       - name: Create CodeDeploy Deployment
         id: deploy
