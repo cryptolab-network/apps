@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import keys from '../../config/keys';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { NetworkStatus } from '../../redux/networkSlice';
+import { NetworkStatus } from '../../utils/status/Network';
 import { networkStatusChanged } from '../../redux';
 
 let api: ApiPromise;
@@ -39,7 +39,7 @@ const Api: React.FC = (props) => {
     });
 
     setIsApiInitialized(true);
-  }, [networkName]);
+  }, [networkName, dispatch]);
 
   if (!isApiInitialized) {
     return null;

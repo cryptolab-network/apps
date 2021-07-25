@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
-import { tableType } from '../../utils/status/Table';
+import { tableType } from '../../../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
 
 type ICOLUMN = {
@@ -132,11 +132,9 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 80vw;
-    height: 55vh;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    margin: 20px 0 0 0;
+    width: 100%;
+    overflow-x: scroll;
+    overflow-y: hidden;
   }
 
   table {
