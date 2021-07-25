@@ -18,6 +18,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     
+    # Use environment variables from Environments in setting page
+    environment: staging
+
     strategy:
       matrix:
         node-version: [16.x]
