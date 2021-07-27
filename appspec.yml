@@ -8,8 +8,4 @@ hooks:
    - location: scripts/copy_dist
      timeout: 3000
      runas: root
-  ApplicationStart:
-    - location: scripts/start_server
-      timeout: 300
-      runas: root
   

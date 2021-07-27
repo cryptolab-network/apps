@@ -39,11 +39,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: check if the environment is set
-        run: |
-          echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS == 'wss://kusama-rpc.polkadot.io/' }}"
-          echo "is_REACT_APP_KUSAMA_WSS_set: ${{ secrets.REACT_APP_KUSAMA_WSS != ''}}"
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -69,7 +64,7 @@ jobs:
         id: deploy
         run: |
           aws deploy create-deployment \
-            --application-name cryptolab-backend \
+            --application-name cryptolab-staging \
             --deployment-group-name apps-group \
             --file-exists-behavior OVERWRITE \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
