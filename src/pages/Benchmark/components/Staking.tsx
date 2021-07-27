@@ -11,7 +11,8 @@ import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import Table from './Table';
 import Account from '../../../components/Account';
 import Button from '../../../components/Button';
-import Era from '../../../components/Table/comopnents/Era';
+import Era from './Table/comopnents/Era';
+import EraInclusion from './Table/comopnents/EraInclusion';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
@@ -35,13 +36,16 @@ import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { NetworkStatus } from '../../../utils/status/Network';
 import { NetworkCodeName } from '../../../utils/constants/Network';
+import { lowRiskFilter, highApyFilter, decentralFilter, oneKvFilter, customFilter } from './utils';
 import { IValidator } from '../../../apis/Validator';
+import { BooleanLiteral } from 'typescript';
 
 enum Strategy {
   LOW_RISK,
   HIGH_APY,
   DECENTRAL,
   ONE_KV,
+  CUSTOM,
 }
 
 interface IStrategy {
@@ -49,7 +53,7 @@ interface IStrategy {
   value: Strategy;
 }
 
-interface IAdvancedSetting {
+export interface IAdvancedSetting {
   // minSelfStake: number | null; // input amount
   maxCommission?: string | null; // input amount
   identity?: boolean; // switch
@@ -59,6 +63,26 @@ interface IAdvancedSetting {
   historicalApy?: string | null; // input %
   minInclusion?: string | null; // input %
   telemetry?: boolean; // switch
+  highApy?: boolean; // switch
+  decentralized?: boolean; // switch
+  oneKv?: boolean; // switch
+}
+
+export interface IStakingTableData {
+  select: boolean;
+  account: string;
+  selfStake: number;
+  eraInclusion: {
+    rate: string;
+    activeCount: number;
+    total: number;
+  };
+  unclaimedEras: number;
+  avgAPY: number;
+  active: boolean;
+  subRows: {
+    unclaimedEras: number[];
+  }[];
 }
 
 interface IApiParams {
@@ -84,6 +108,9 @@ const StrategyConfig = {
     historicalApy: '', // input %
     minInclusion: '', // input %
     telemetry: true, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
   },
   HIGH_APY: {
     maxCommission: '', // input amount
@@ -94,6 +121,9 @@ const StrategyConfig = {
     historicalApy: '', // input %
     minInclusion: '', // input %
     telemetry: false, // switch
+    highApy: true, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
   },
   DECENTRAL: {
     maxCommission: '', // input amount
@@ -104,6 +134,9 @@ const StrategyConfig = {
     historicalApy: '', // input %
     minInclusion: '', // input %
     telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: true, // switch
+    oneKv: false, // switch
   },
   ONE_KV: {
     maxCommission: '', // input amount
@@ -114,8 +147,27 @@ const StrategyConfig = {
     historicalApy: '', // input %
     minInclusion: '', // input %
     telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: true, // switch
+  },
+  CUSTOM: {
+    maxCommission: '', // input amount
+    identity: false, // switch
+    maxUnclaimedEras: '', // input amount
+    previousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
   },
 };
+
+const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
+const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const Staking = () => {
   // context
@@ -123,25 +175,16 @@ const Staking = () => {
   // redux
   let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
 
-  // const
-  const strategyOptions = [
-    { label: 'Low risk', value: Strategy.LOW_RISK },
-    { label: 'High APY', value: Strategy.HIGH_APY },
-    { label: 'Decentralization', value: Strategy.DECENTRAL },
-    { label: '1KV validators', value: Strategy.ONE_KV },
-  ];
-
   // state
   const [inputData, setInputData] = useState({
     stakeAmount: 0,
-    strategy: strategyOptions[0],
+    strategy: BASIC_DEFAULT_STRATEGY,
     rewardDestination: null,
   });
 
   const [advancedOption, setAdvancedOption] = useState({
     toggle: false,
     advanced: false,
-    decentralized: false,
     supportus: false,
   });
   const [advancedSetting, setAdvancedSetting] = useState<IAdvancedSetting>(StrategyConfig.LOW_RISK);
@@ -151,6 +194,44 @@ const Staking = () => {
     size: 60,
   });
   const [apiLoading, setApiLoading] = useState(true);
+  const [stakingTableData, setStakingTableData] = useState<IStakingTableData[]>([]);
+
+  // memo
+  const strategyOptions = useMemo(() => {
+    // while advanced option is on, no strategy options is available
+    if (advancedOption.advanced) {
+      return [];
+    } else {
+      // while using basic mode, we use strategy in the list below
+      return [
+        { label: 'Low risk', value: Strategy.LOW_RISK },
+        { label: 'High APY', value: Strategy.HIGH_APY },
+        { label: 'Decentralization', value: Strategy.DECENTRAL },
+        { label: '1KV validators', value: Strategy.ONE_KV },
+      ];
+    }
+  }, [advancedOption.advanced]);
+
+  useEffect(() => {
+    // while advanced option is on, we use custom filter setting as their own strategy
+    if (advancedOption.advanced) {
+      setInputData((prev) => ({ ...prev, strategy: ADVANCED_DEFAULT_STRATEGY }));
+      setAdvancedSetting(StrategyConfig.CUSTOM);
+      setApiParams((prev) => ({
+        network: prev.network,
+      }));
+    } else {
+      // while using basic mode, we use strategy with default filter setting as strategy
+      // and default is 'low risk' strategy
+      setInputData((prev) => ({ ...prev, strategy: BASIC_DEFAULT_STRATEGY }));
+      setAdvancedSetting(StrategyConfig.LOW_RISK);
+      setApiParams((prev) => ({
+        network: prev.network,
+        has_verified_identity: true,
+        has_telemetry: true,
+      }));
+    }
+  }, [advancedOption.advanced]);
 
   const columns = useMemo(() => {
     return [
@@ -166,7 +247,15 @@ const Staking = () => {
         Cell: ({ value }) => <Account address={value} display={value} />,
       },
       { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
-      { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },
+      {
+        Header: 'Era Inclusion',
+        accessor: 'eraInclusion',
+        collapse: true,
+        Cell: ({ value }) => {
+          // 25.00%  [ 21/84 ]
+          return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
+        },
+      },
       {
         Header: 'Unclaimed Eras',
         accessor: 'unclaimedEras',
@@ -226,7 +315,14 @@ const Staking = () => {
           );
         },
       },
-      { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
+      {
+        Header: 'Avg APY',
+        accessor: 'avgAPY',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <div>{(value * 100).toFixed(1)}</div>;
+        },
+      },
       {
         Header: 'Active',
         accessor: 'active',
@@ -357,34 +453,38 @@ const Staking = () => {
       case 'telemetry':
         setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
         break;
+      case 'highApy':
+        setAdvancedSetting((prev) => ({ ...prev, highApy: e }));
+        break;
+      case 'decentralized':
+        setAdvancedSetting((prev) => ({ ...prev, decentralized: e }));
+        break;
+      case 'oneKv':
+        setAdvancedSetting((prev) => ({ ...prev, oneKv: e }));
+        break;
       default:
         break;
     }
   };
 
-  const lowRiskFilter = (data: IValidator[]) => {
-    console.log('first one:', data[0]);
-  };
-  const highApyFilter = (data: IValidator[]) => {};
-  const decentralFilter = (data: IValidator[]) => {};
-  const oneKvFilter = (data: IValidator[]) => {};
-
   const handleValidatorFiltered = useCallback(
-    (data: IValidator[]) => {
+    (data: IValidator[]): IStakingTableData[] => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskFilter(data);
+          return lowRiskFilter(data, advancedSetting);
         case Strategy.HIGH_APY:
-          return lowRiskFilter(data);
+          return highApyFilter(data, advancedSetting);
         case Strategy.DECENTRAL:
-          return lowRiskFilter(data);
+          return decentralFilter(data, advancedSetting);
         case Strategy.ONE_KV:
-          return lowRiskFilter(data);
+          return oneKvFilter(data, advancedSetting);
+        case Strategy.CUSTOM:
+          return customFilter(data, advancedSetting);
         default:
-          return data;
+          return [];
       }
     },
-    [inputData.strategy.value]
+    [inputData.strategy.value, advancedSetting]
   );
 
   // while network changing, set api parameter for network
@@ -410,12 +510,12 @@ const Staking = () => {
         });
         console.log('========== API RETURN ==========');
         console.log('result: ', result);
-        handleValidatorFiltered(result);
+        setStakingTableData(handleValidatorFiltered(result));
         //TODO: result need to be filtered
         setApiLoading(false);
       }
     })();
-  }, [networkStatus, apiParams]);
+  }, [networkStatus, apiParams, handleValidatorFiltered]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
@@ -484,6 +584,21 @@ const Staking = () => {
                   checked={advancedSetting.telemetry}
                   onChange={handleAdvancedFilter('telemetry')}
                 />
+                <TitleSwitch
+                  title="Highest Avg.APY"
+                  checked={advancedSetting.highApy}
+                  onChange={handleAdvancedFilter('highApy')}
+                />
+                <TitleSwitch
+                  title="Decentralized"
+                  checked={advancedSetting.decentralized}
+                  onChange={handleAdvancedFilter('decentralized')}
+                />
+                <TitleSwitch
+                  title="1kv programme"
+                  checked={advancedSetting.oneKv}
+                  onChange={handleAdvancedFilter('oneKv')}
+                />
               </AdvancedSettingWrap>
             </ContentColumnLayout>
           </AdvancedBlock>
@@ -500,6 +615,9 @@ const Staking = () => {
     advancedSetting.previousSlashes,
     advancedSetting.isSubIdentity,
     advancedSetting.telemetry,
+    advancedSetting.highApy,
+    advancedSetting.decentralized,
+    advancedSetting.oneKv,
   ]);
 
   const advancedFilterResult = useMemo(() => {
@@ -514,43 +632,7 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {!apiLoading ? (
-                <Table
-                  type={tableType.stake}
-                  columns={columns}
-                  data={[
-                    {
-                      select: true,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: true,
-                      subRows: [{ unclaimedEras: [1, 1, 1, 2, 0, 0, 0, 0, 0] }],
-                    },
-                    {
-                      select: true,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: false,
-                      subRows: [{ unclaimedEras: 'test2' }],
-                    },
-                    {
-                      select: false,
-                      account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                      selfStake: '5705',
-                      eraInclusion: '25.00% [21/84]',
-                      unclaimedEras: 5,
-                      avgAPY: '18.5%',
-                      active: false,
-                      subRows: [{ unclaimedEras: 'test3' }],
-                    },
-                  ]}
-                  pagination
-                />
+                <Table type={tableType.stake} columns={columns} data={stakingTableData} pagination />
               ) : (
                 <ScaleLoader />
               )}
@@ -559,7 +641,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns, apiLoading]);
+  }, [advancedOption.advanced, columns, apiLoading, stakingTableData]);
 
   return (
     <>
@@ -599,6 +681,7 @@ const Staking = () => {
                   options={strategyOptions}
                   value={inputData.strategy}
                   onChange={handleStrategyChange}
+                  disabled={advancedOption.advanced ? true : false}
                 />
                 <ContentBlockFooter />
               </ContentColumnLayout>
