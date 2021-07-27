@@ -216,7 +216,7 @@ export const OneKVStatus = () => {
 };
 
 const HeaderLayout = styled.div`
-  width: 100%;
+  width: 80vw;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -243,7 +243,7 @@ const HeaderTitle = styled.div`
 `;
 
 const Title = styled.div`
-  width: 800px;
+  max-width: 800px;
   font-family: Montserrat;
   font-size: 18px;
   font-weight: bold;
