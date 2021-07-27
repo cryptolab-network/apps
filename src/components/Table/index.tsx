@@ -2,6 +2,8 @@ import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
+import { ReactComponent as SortingDescIcon } from '../../assets/images/sorting-desc.svg';
+import { ReactComponent as SortingAscIcon } from '../../assets/images/sorting-asc.svg';
 
 type ICOLUMN = {
   columns: Array<any>;
@@ -53,7 +55,13 @@ const CustomTable: React.FC<ICOLUMN> = ({
                 {headerGroup.headers.map((column) => (
                   <th {...column.getSortByToggleProps()}>
                     {column.render('Header')}
-                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <span> {'  '}
+                    {column.isSorted
+                      ? column.isSortedDesc
+                        ? <SortingDescIcon />
+                        : <SortingAscIcon />
+                      : ''}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -132,7 +140,7 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 80vw;
+    width: 100%;
     height: 55vh;
     overflow-x: hidden;
     overflow-y: scroll;
