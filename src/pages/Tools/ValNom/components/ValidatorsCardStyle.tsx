@@ -13,7 +13,12 @@ import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import Tooltip from '../../../../components/Tooltip';
 import DropdownCommon from '../../../../components/Dropdown/Common';
-import { filterOptionDropdownList, filterOptions, IValidatorFilter, toValidatorFilter } from './filterOptions';
+import {
+  filterOptionDropdownList,
+  filterOptions,
+  IValidatorFilter,
+  toValidatorFilter,
+} from './filterOptions';
 import { Grid } from '@material-ui/core';
 
 const ValNomHeader = () => {
@@ -37,35 +42,40 @@ interface iOption {
   value: number;
 }
 
-const ValidatorGrid = ({filters, validators}) => {
+const ValidatorGrid = ({ filters, validators }) => {
   const history = useHistory();
-  const networkName = useAppSelector(state => state.network.name);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      console.log(value);
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
-  }, [chain]);
+  const networkName = useAppSelector((state) => state.network.name);
+  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
+  const _formatBalance = useCallback(
+    (value: any) => {
+      if (chain === 'KSM') {
+        return formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM',
+        });
+      } else if (chain === 'DOT') {
+        console.log(value);
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT',
+        });
+      } else {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit',
+        });
+      }
+    },
+    [chain]
+  );
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
     if (filters.stashId.length > 0) {
       return validators.reduce((acc: Array<IValidator>, v: IValidator, idx: number) => {
-        if (v.id.toLowerCase().includes(filters.stashId.toLowerCase())
-          || v.identity.display.toLowerCase().includes(filters.stashId.toLowerCase())) {
+        if (
+          v.id.toLowerCase().includes(filters.stashId.toLowerCase()) ||
+          v.identity.display.toLowerCase().includes(filters.stashId.toLowerCase())
+        ) {
           acc.push(v);
         }
         return acc;
@@ -149,24 +159,25 @@ const ValidatorGrid = ({filters, validators}) => {
       return (
         <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
           <ValidNominator
-          address={v.id}
-          name={v.identity.display}
-          activeAmount={_formatBalance(v.info.exposure.total)}
-          totalAmount={_formatBalance(v.info.total)}
-          apy={(v.averageApy * 100).toFixed(2)}
-          commission={v.info.commission}
-          count={v.info.nominatorCount}
-          statusChange={v.statusChange}
-          unclaimedPayouts={v.info.unclaimedEras.length}
-          favorite={v.favorite}
-          onClick={() => openValidatorStatus(v.id)}
+            address={v.id}
+            name={v.identity.display}
+            activeAmount={_formatBalance(v.info.exposure.total)}
+            totalAmount={_formatBalance(v.info.total)}
+            apy={(v.averageApy * 100).toFixed(2)}
+            commission={v.info.commission}
+            count={v.info.nominatorCount}
+            statusChange={v.statusChange}
+            unclaimedPayouts={v.info.unclaimedEras.length}
+            favorite={v.favorite}
+            onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </Grid>);
-      });
+        </Grid>
+      );
+    });
   }, [_formatBalance, chain, history, displayValidators]);
   if (validatorComponents.length > 0) {
     return (
-      <Grid container spacing={3} style={{justifyContent: 'space-between'}}>
+      <Grid container spacing={3} style={{ justifyContent: 'space-between' }}>
         {validatorComponents}
       </Grid>
     );
@@ -178,18 +189,19 @@ const ValidatorGrid = ({filters, validators}) => {
 const ValNomContent = () => {
   const [filters, setFilters] = useState({
     stashId: '',
-    strategy: filterOptions[0],
+    strategy: { label: filterOptions[0], value: 1 },
   });
-  const networkName = useAppSelector(state => state.network.name);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const networkName = useAppSelector((state) => state.network.name);
+  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {
+    console.log('e: ', e);
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
         break;
       case 'sorting':
-        setFilters((prev) => ({ ...prev, strategy: filterOptions[e.value - 1] }))
+        setFilters((prev) => ({ ...prev, strategy: e }));
         break;
       default:
         break;
@@ -219,6 +231,7 @@ const ValNomContent = () => {
               options={options}
               value={filters.strategy}
               onChange={handleFilterChange('sorting')}
+              theme="dark"
             />
           </div>
         </AdvancedOption>
@@ -235,30 +248,27 @@ const ValNomContent = () => {
   return (
     <ValNomContentLayout>
       <OptionBar>
-      <HeaderLayout>
-        <HeaderLeft>
-          <IconInput
-            Icon={Search}
-            iconSize="16px"
-            placeholder="Polkadot/Kusama StashId"
-            inputLength={256}
-            value={filters.stashId}
-            onChange={handleFilterChange('stashId')}
-          />
-        </HeaderLeft>
-        <HeaderRight>
-        <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
-          <div onClick={onShowFilters}>
-            <OptionIcon />
-          </div>
-        </Tooltip>
-        </HeaderRight>
-      </HeaderLayout>
+        <HeaderLayout>
+          <HeaderLeft>
+            <IconInput
+              Icon={Search}
+              iconSize="16px"
+              placeholder="Polkadot/Kusama StashId"
+              inputLength={256}
+              value={filters.stashId}
+              onChange={handleFilterChange('stashId')}
+            />
+          </HeaderLeft>
+          <HeaderRight>
+            <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
+              <div onClick={onShowFilters}>
+                <OptionIcon />
+              </div>
+            </Tooltip>
+          </HeaderRight>
+        </HeaderLayout>
       </OptionBar>
-      <ValidatorGrid
-        filters={toValidatorFilter(filters)}
-        validators={validators}
-      />
+      <ValidatorGrid filters={toValidatorFilter(filters)} validators={validators} />
     </ValNomContentLayout>
   );
 };

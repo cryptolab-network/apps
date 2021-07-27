@@ -8,12 +8,7 @@ export interface IValidatorFilter {
   alphabetical: boolean;
 }
 
-
-export const filterOptions = [
-  'Default',
-  'Alphabetical',
-  'APY'
-];
+export const filterOptions = ['Default', 'Alphabetical', 'APY'];
 
 export const filterOptionDropdownList = filterOptions.map((o, idx) => {
   return {
@@ -23,13 +18,16 @@ export const filterOptionDropdownList = filterOptions.map((o, idx) => {
 });
 
 export interface FilterState {
-  stashId: string
-  strategy: string
+  stashId: string;
+  strategy: {
+    label: string;
+    value: number;
+  };
 }
 
 export function toValidatorFilter(state: FilterState): IValidatorFilter {
   if (state.stashId.length > 0) {
-    return  {
+    return {
       favorite: false,
       commission: false,
       apy: false,
@@ -39,7 +37,7 @@ export function toValidatorFilter(state: FilterState): IValidatorFilter {
       alphabetical: false,
     };
   }
-  if (state.strategy === filterOptions[1]) {
+  if (state.strategy.label === filterOptions[1]) {
     return {
       favorite: false,
       commission: false,
@@ -50,7 +48,7 @@ export function toValidatorFilter(state: FilterState): IValidatorFilter {
       alphabetical: true,
     };
   }
-  if (state.strategy === filterOptions[2]) {
+  if (state.strategy.label === filterOptions[2]) {
     return {
       favorite: false,
       commission: false,
