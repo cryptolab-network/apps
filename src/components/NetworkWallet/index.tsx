@@ -78,7 +78,7 @@ const NetworkWallet: React.FC = () => {
 
   const balance = useCallback(
     async (account: IAccount) => {
-      if (polkadotApi) {
+      if (polkadotApi && networkStatus === NetworkStatus.READY) {
         console.log('NetworkWallet: api ready');
         const result = await polkadotApi.derive.balances.account(account.address);
         return result.freeBalance.toHuman();
@@ -87,7 +87,7 @@ const NetworkWallet: React.FC = () => {
         return '';
       }
     },
-    [polkadotApi]
+    [polkadotApi, networkStatus]
   );
 
   useEffect(() => {

@@ -15,6 +15,7 @@ import Era from './Table/comopnents/Era';
 import EraInclusion from './Table/comopnents/EraInclusion';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
+import { ReactComponent as DOTLogo } from '../../../assets/images/dot-logo.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
 import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.svg';
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
@@ -174,6 +175,7 @@ const Staking = () => {
   const polkadotApi = useContext(ApiContext);
   // redux
   let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
+  let { status: walletStatus, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
 
   // state
   const [inputData, setInputData] = useState({
@@ -211,6 +213,32 @@ const Staking = () => {
       ];
     }
   }, [advancedOption.advanced]);
+
+  const walletBalance = useMemo(() => {
+    if (selectedAccount) {
+      return selectedAccount.balance;
+    } else {
+      return '(please select a wallet)';
+    }
+  }, [selectedAccount]);
+
+  const networkDisplayDOM = useMemo(() => {
+    if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
+      return (
+        <>
+          <KSMLogo />
+          <LogoTitle>KSM</LogoTitle>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <DOTLogo />
+          <LogoTitle>DOT</LogoTitle>
+        </>
+      );
+    }
+  }, [networkName]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -524,6 +552,10 @@ const Staking = () => {
     //TODO: new api query parameter
   }, [advancedSetting]);
 
+  useEffect(() => {
+    console.log('filtered account: ', selectedAccount);
+  }, [selectedAccount]);
+
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
       return null;
@@ -656,12 +688,9 @@ const Staking = () => {
       >
         <ContentBlockWrap advanced={advancedOption.advanced}>
           <ContentBlock>
-            <ContentBlockLeft>
-              <KSMLogo />
-              <LogoTitle>KSM</LogoTitle>
-            </ContentBlockLeft>
+            <ContentBlockLeft>{networkDisplayDOM}</ContentBlockLeft>
             <ContentBlockRight>
-              <Balance>Balance: 23778.50331</Balance>
+              <Balance>Balance: {walletBalance}</Balance>
               <Input
                 style={{ width: '80%' }}
                 onChange={handleInputChange('stakeAmount')}
@@ -853,6 +882,7 @@ const ContentBlockLeft = styled.div`
   justify-content: flex-start;
   align-items: center;
   width: 100%;
+  background-color: red;
 `;
 
 const LogoTitle = styled.div`
