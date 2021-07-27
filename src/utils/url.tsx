@@ -9,6 +9,11 @@ export const getUrls = (location: Location, subdomain: string): [string, string]
   }
 
   if (location.hostname.indexOf('staging') !== -1) {
+    if (domain.indexOf('staging') !== -1) {
+      const staking_url = `${protocol}//${domain}${(port !== '') ? ':' + port : port}`
+      const tools_url = `${protocol}//${subdomain}.${domain}${(port !== '') ? ':' + port : port}`;
+      return [staking_url, tools_url];
+    }
     const staking_url = `${protocol}//staging.${domain}${(port !== '') ? ':' + port : port}`
     const tools_url = `${protocol}//${subdomain}.staging.${domain}${(port !== '') ? ':' + port : port}`;
     return [staking_url, tools_url];
