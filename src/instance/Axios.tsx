@@ -28,3 +28,12 @@ export const validatorOneKVAxios = Axios.create({
 export const nominatorOneKVAxios = Axios.create({
   baseURL: `${prefix}/1kv/nominators`,
 });
+
+export const stashRewardsAxios = Axios.create({
+  baseURL: `${prefix}/stash/`
+});
+
+export const nominatedValidatorsAxios = Axios.create({
+  baseURL: `${prefix}/nominated/`
+});
+
