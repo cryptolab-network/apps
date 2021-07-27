@@ -882,7 +882,6 @@ const ContentBlockLeft = styled.div`
   justify-content: flex-start;
   align-items: center;
   width: 100%;
-  background-color: red;
 `;
 
 const LogoTitle = styled.div`
