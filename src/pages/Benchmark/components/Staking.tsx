@@ -31,7 +31,7 @@ import {
 } from '../../../utils/constants/Validator';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { useAppSelector } from '../../../hooks';
 import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
