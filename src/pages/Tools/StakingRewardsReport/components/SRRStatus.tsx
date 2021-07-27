@@ -19,6 +19,17 @@ import { useAppSelector } from "../../../../hooks";
 import { formatBalance } from '@polkadot/util';
 import { useHistory } from "react-router-dom";
 import ValidNominator from "../../../../components/ValidNominator";
+import CustomScaleLoader from "../../../../components/Spinner/ScaleLoader";
+import Tooltip from "../../../../components/Tooltip";
+import FilterOptions from "./FilterOptions";
+import DownloadOptions from "./DownloadOptions";
+
+interface ISRRFilters {
+  stashId: string;
+  startDate: string;
+  endDate: string;
+  currency: string;
+}
 
 const ValidatorComponents = ({chain, validators}) => {
   const history = useHistory();
@@ -75,20 +86,31 @@ const ValidatorComponents = ({chain, validators}) => {
   }
 };
 
+enum State {
+  EMPTY,
+  LOADING,
+  LOADING_VALIDATORS,
+  LOADED,
+  ERROR
+}
+
 const SRRContent = ({ filters }) => {
   const networkName = useAppSelector(state => state.network.name);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
+  const [state, setState] = useState<State>(State.EMPTY);
   const [stashData, setStashData] = useState<IStashRewards>({
     stash: '',
     eraRewards: [],
   });
   useEffect(() => {
+    setState(State.EMPTY);
     setStashData({
       stash: '',
       eraRewards: [],
     });
     async function getStashRewards() {
+      setState(State.LOADING);
       const s = await apiGetStashRewards({
         params: filters.stashId,
         query: {
@@ -96,18 +118,61 @@ const SRRContent = ({ filters }) => {
           endDate: moment().format('YYYY-MM-DD'),
           currency: 'USD'
         }
+      }).catch((err) => {
+        setState(State.ERROR);
       });
-      setStashData(s);
-      const validators = await apiGetNominatedValidators({
-        params: `/stash/${s.stash}/${chain}`
-      })
-      setValidators(validators);
+      if (s === null) {
+        return;
+      }
+      setStashData(s!);
+      try {
+        setState(State.LOADING_VALIDATORS);
+        const validators = await apiGetNominatedValidators({
+          params: `/stash/${s!.stash}/${chain}`
+        })
+        setValidators(validators);
+      } finally {
+        setState(State.LOADED);
+      }
     }; 
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
   }, [chain, filters.stashId]);
-  if (filters.stashId.length === 0) {
+
+  const [showFilters, toggleFilters] = useState(false);
+  const onShowFilters = useCallback(() => {
+    toggleFilters(true);
+  }, []);
+  const handleOptionToggle = useCallback((visible) => {
+    toggleFilters(visible);
+  }, []);
+
+  const [showDownload, toggleDownload] = useState(false);
+  const onShowDownload = useCallback(() => {
+    toggleDownload(true);
+  }, []);
+  const handleDownloadToggle = useCallback((visible) => {
+    toggleDownload(visible);
+  }, []);
+
+  const FilterOptionsLayout = useMemo(() => {
+    return (
+      <FilterOptions
+        startDate={filters.startDate}
+        endDate={filters.endDate}
+        currency={filters.currency}
+      />
+    );
+  }, [filters.currency, filters.endDate, filters.startDate]);
+  const DownloadOptionsLayout = useMemo(() => {
+    return (
+      <DownloadOptions
+        stashId={filters.stashId}
+      />
+    );
+  }, []);
+  if (state === State.EMPTY) {
     return (
       <EmptyStashIconLayout>
         <EmptyStashIcon />
@@ -116,25 +181,30 @@ const SRRContent = ({ filters }) => {
         </EmptyStashDescription>
       </EmptyStashIconLayout>
     );
-  } else {
+  } else if (state === State.LOADED || state === State.LOADING_VALIDATORS) {
     return (
       <StashRewardsLayout>
         <StashInformationLayout>
           <StashInformation
             stashId={filters.stashId}
             stashData={stashData}
+            currency={filters.currency}
           />
         </StashInformationLayout>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
             <Toolbar>
-              <IconButton
-                Icon={() => <DownloadIcon />}
-              />
+              <Tooltip content={DownloadOptionsLayout} visible={showDownload} tooltipToggle={handleDownloadToggle}>
+                <IconButton onClick={onShowDownload}
+                  Icon={() => <DownloadIcon />}
+                />
+              </Tooltip>
               <div style={{margin: '0 0 0 16px'}}></div>
-              <IconButton
-                Icon={() => <FiltersIcon />}
-              />
+              <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
+                <IconButton onClick={onShowFilters}
+                  Icon={() => <FiltersIcon />}
+                />
+              </Tooltip>
               <div style={{margin: '0 16px 0 0'}}></div>
             </Toolbar>
             <SRRTable
@@ -149,13 +219,23 @@ const SRRContent = ({ filters }) => {
         />
       </StashRewardsLayout>
     );
+  } else if (state === State.LOADING) {
+    return (
+      <CustomScaleLoader
+      />
+    )
+  } else {
+    return (<div></div>);
   }
   
 };
 
 const SRRLayout = () => {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<ISRRFilters>({
     stashId: '',
+    startDate: '2020-01-01',
+    endDate: moment().format('YYYY-MM-DD'),
+    currency: 'USD',
   });
   const handleFilterChange = (name) => (e) => {
     switch (name) {
@@ -267,3 +347,4 @@ const Toolbar = styled.div`
   flex-direction: row;
   justify-content: flex-end;
 `;
+

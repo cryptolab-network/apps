@@ -1,9 +1,9 @@
 import styled from "styled-components";
 
-const IconButton = ({Icon}) => {
+const IconButton = ({Icon, onClick = () => {}}) => {
   return (
     <IconButtonLayout>
-      <Icon />
+      <Icon onClick={onclick}/>
     </IconButtonLayout>
   );
 };

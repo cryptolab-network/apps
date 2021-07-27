@@ -1,9 +1,13 @@
+import moment from "moment";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Account from "../../../../components/Account";
 
-const StashInformation = ({ stashId, stashData }) => {
+const StashInformation = ({ stashId, stashData, currency }) => {
   const [totalRewards, setTotalRewards] = useState(0);
+  const [totalInFiat, setTotalInFiat] = useState(0);
+  const [firstRewardDate, setFirstRewardDate] = useState('N/A');
+  const [lastRewardDate, setLastRewardDate] = useState('N/A');
   useEffect(() => {
     console.log(stashData);
     if (stashData.eraRewards !== undefined && stashData.eraRewards !== null) {
@@ -11,7 +15,16 @@ const StashInformation = ({ stashId, stashData }) => {
         acc += r.amount;
         return acc;
       }, 0.0);
+      const totalInFiat = stashData.eraRewards.reduce((acc, r) => {
+        acc += r.total;
+        return acc;
+      }, 0.0);
+      const firstRewardDate = stashData.eraRewards[stashData.eraRewards.length - 1].timestamp;
+      const lastRewardDate = stashData.eraRewards[0].timestamp;
       setTotalRewards(totalRewards);
+      setTotalInFiat(totalInFiat);
+      setFirstRewardDate(moment(firstRewardDate).format('YYYY-MM-DD'));
+      setLastRewardDate(moment(lastRewardDate).format('YYYY-MM-DD'));
     }
   }, [stashData, stashData.eraRewards]);
   return (
@@ -32,7 +45,14 @@ const StashInformation = ({ stashId, stashData }) => {
         <InformationTitle>
           Total Rewards
         </InformationTitle>
-          {totalRewards} KSM
+        <InformationContent>
+          <div style={{margin: '0 16px 0 0'}}>
+            <span style={{color: '#23beb9'}}>{totalRewards.toFixed(4)} KSM</span>&nbsp; / &nbsp;{totalInFiat.toFixed(2)} {currency}
+          </div>
+          <div>
+            (From &nbsp;<span style={{color: '#23beb9'}}>{firstRewardDate}</span>&nbsp; to &nbsp;<span style={{color: '#23beb9'}}>{lastRewardDate}</span>)
+          </div>
+          </InformationContent>
       </InformationItem>
     </div>
   );
@@ -85,4 +105,11 @@ const InformationItem = styled.div`
 const InformationTitle = styled.div`
   height: 16px;
   margin: 0 116px 0 0;
+`;
+
+const InformationContent = styled.div`
+  flex-direction: row;
+  justify-content: left;
+  display: flex;
+  flex-wrap: wrap;
 `;
