@@ -49,7 +49,7 @@
   "scripts": {
     "start": "PORT=3001 react-scripts start",
     "startWin": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_NODE_ENV=production GENERATE_SOURCEMAP=false CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

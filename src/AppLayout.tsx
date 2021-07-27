@@ -9,6 +9,7 @@ import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
+import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -24,6 +25,7 @@ import ValNom from './pages/Tools/ValNom';
 import { networkChanged } from './redux';
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
+import { getUrls } from './utils/url';
 import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 
@@ -107,6 +109,7 @@ const ToolsHeader: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
+  const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   return (
     <>
       <TableDiv>
@@ -129,11 +132,11 @@ const Footer: React.FC = () => {
           <ThDiv>Technology</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="http://localhost:3001">Staking Service</LinkA>
+            <LinkA href={staking_url}>Staking Service</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="http://tools.localhost:3001">Tools for Validators</LinkA>
+            <LinkA href={tools_url}>Tools for Validators</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
@@ -152,15 +155,24 @@ const Footer: React.FC = () => {
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
-          <TdDiv justify_content="space-around">
-            <a href="https://twitter.com/CryptolabN" target="_blank" rel="noreferrer">
-              <TwitterIcon width="36px" height="36px" />
+          <TdDiv justify_content="flex-start">
+            <a href="https://twitter.com/CryptolabN" target="_blank">
+              <SocialMediaWrapper>
+                <TwitterIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
             </a>
-            <a href="https://github.com/cryptolab-network" target="_blank" rel="noreferrer">
-              <GithubIcon width="36px" height="36px" />
+            <a href="https://github.com/cryptolab-network" target="_blank">
+              <SocialMediaWrapper>
+                <GithubIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
+            </a>
+            <a href="#">
+              <SocialMediaWrapper>
+                <YoutubeIcon width="36px" height="36px" />
+              </SocialMediaWrapper>
             </a>
           </TdDiv>
-          <TdDiv align_items="flex-end">Subscribe to hear about CryptoLab updates!</TdDiv>
+          <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
             <Input placeholder="Enter your email address"></Input>
             <SubmitButton>Subscribe</SubmitButton>
@@ -333,7 +345,12 @@ const ThDiv = styled.div`
   // border: 1px solid red;
 `;
 
-const TdDiv = styled.div.attrs((props) => {})`
+interface Td {
+  justify_content?: string;
+  align_items?: string;
+}
+
+const TdDiv = styled.div<Td>`
   display: inline-flex;
   height: 3em;
   justify-content: ${(props) => (props.justify_content ? props.justify_content : 'left')};
@@ -419,4 +436,7 @@ const CopyRightTitleDiv = styled.div`
 const TextLinkA = styled.a`
   text-decoration: none;
   color: white;
-`;
+`
+const SocialMediaWrapper = styled.div`
+  margin-right: 15px;
+`

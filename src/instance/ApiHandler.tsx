@@ -1,5 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { polkadotWSS, kusamaWSS } from '../config/dev';
+import keys from '../config/keys';
 
 export enum NetworkName {
   POLKADOT = 'Polkadot',
@@ -19,7 +19,7 @@ export class ApiHandler {
 
   static async create(network: string): Promise<ApiHandler> {
     try {
-      const endpoint = network === NetworkName.POLKADOT ? polkadotWSS : kusamaWSS;
+      const endpoint = network === NetworkName.POLKADOT ? keys.polkadotWSS : keys.kusamaWSS;
       const api = await ApiPromise.create({
         provider: new WsProvider(endpoint, 1000),
       });
