@@ -29,12 +29,12 @@ const ValidatorTable = () => {
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {
-      return (<span>{formatBalance(value, {
+      return (<span>{formatBalance(BigInt(value), {
         decimals: 12,
         withUnit: 'KSM'
       })}</span>);
     } else if (chain === 'DOT') {
-      return (<span>{formatBalance(value, {
+      return (<span>{formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'DOT'
       })}</span>);

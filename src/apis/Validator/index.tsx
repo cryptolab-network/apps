@@ -11,9 +11,14 @@ export interface IIdentity {
   isVerified?: boolean;
 }
 
+export interface Balance {
+  freeBalance: number;
+  lockedBalance: number;
+}
+
 export interface INominator {
   address: string;
-  balance: number;
+  balance: Balance;
 }
 
 export interface IExposureOthers {

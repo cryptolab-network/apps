@@ -20,12 +20,12 @@ export const NominatorGrid = ({
         withUnit: 'KSM'
       }));
     } else if (chain === 'DOT') {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'DOT'
       }));
     } else {
-      return (formatBalance(value, {
+      return (formatBalance(BigInt(value), {
         decimals: 10,
         withUnit: 'Unit'
       }));
