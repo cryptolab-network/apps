@@ -1,4 +1,5 @@
 #!/bin/bash
-cd /home/ubuntu/frontend
+#cd /home/ubuntu/frontend
+cd /var/www/cryptolab.network/html
 aws s3 sync s3://cryptolab-apps . --delete --exact-timestamps
 
