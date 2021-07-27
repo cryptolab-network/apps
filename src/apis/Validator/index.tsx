@@ -1,56 +1,76 @@
 import { nominatedValidatorsAxios, singleValidatorAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
-  commissionChange: number
+  commissionChange: number;
 }
 
 export interface IIdentity {
-  display: string
+  display: string;
+  parent?: string | null;
+  sub?: string | null;
+  isVerified?: boolean;
 }
 
 export interface INominator {
-  address: string
-  balance: number
+  address: string;
+  balance: number;
 }
 
 export interface IExposureOthers {
-  who: string
-  value: number
+  who: string;
+  value: number;
 }
 
 export interface IExposure {
-  total: number
-  own: number
-  others: IExposureOthers[]
+  total: number;
+  own: number;
+  others: IExposureOthers[];
 }
 
 export interface IEraInfo {
-  nominators: INominator[]
-  nominatorCount: number
-  era: number
-  exposure: IExposure
-  commission: number
-  apy: number
-  unclaimedEras: number[]
-  total: number
-  selfStake: number
+  nominators: INominator[];
+  nominatorCount: number;
+  era: number;
+  exposure: IExposure;
+  commission: number;
+  apy: number;
+  unclaimedEras: number[];
+  total: number;
+  selfStake: number;
+}
+
+export interface IStakerPoints {
+  era: number;
+  points: number;
+}
+
+export interface ISlash {
+  era: number;
+  validator: string;
+  total: number;
+  others: {
+    address: string;
+    value: number;
+  }[];
 }
 
 export interface IValidator {
-  id: string
-  statusChange: IStatusChange
-  identity: IIdentity
-  info: IEraInfo
-  averageApy: number
-  favorite: boolean
+  id: string;
+  statusChange: IStatusChange;
+  identity: IIdentity;
+  stakerPoints: IStakerPoints[];
+  info: IEraInfo;
+  averageApy: number;
+  slashes: ISlash[];
+  favorite: boolean;
 }
 
 export interface IValidatorHistory {
-  id: string
-  statusChange: IStatusChange
-  identity: IIdentity
-  info: IEraInfo[]
-  averageApy: number
+  id: string;
+  statusChange: IStatusChange;
+  identity: IIdentity;
+  info: IEraInfo[];
+  averageApy: number;
 }
 
 export interface IValidatorQuery {
@@ -68,9 +88,9 @@ export interface IValidatorRequest {
   query?: IValidatorQuery;
 }
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
-validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-  return res.data;
-});
+  validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+    return res.data;
+  });
 export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
 singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
   if (res.data.length > 0) {

@@ -62,8 +62,10 @@ const DropdownCommon = ({ options, ...props }) => {
         isSearchable={false}
         styles={customStyles}
         components={{ DropdownIndicator }}
-        value={props.value ? props.value : options[0]}
-        onChange={props.onChange}
+        value={props.value ? props.value : options[1]}
+        onChange={(e) => {
+          props.onChange(e);
+        }}
       />
     </DropdownLayout>
   );

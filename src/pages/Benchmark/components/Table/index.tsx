@@ -26,7 +26,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
     // The rest of these things are super handy, too ;)
     canPreviousPage,
     canNextPage,
-    // pageOptions,
+    pageOptions,
     pageCount,
     gotoPage,
     nextPage,
@@ -110,6 +110,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <Pagination
             canPreviousPage={canPreviousPage}
             canNextPage={canNextPage}
+            pageOptions={pageOptions}
             pageCount={pageCount}
             gotoPage={gotoPage}
             nextPage={nextPage}
