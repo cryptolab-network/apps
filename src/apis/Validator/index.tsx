@@ -8,9 +8,14 @@ export interface IIdentity {
   display: string
 }
 
+export interface Balance {
+  freeBalance: number;
+  lockedBalance: number;
+}
+
 export interface INominator {
-  address: string
-  balance: number
+  address: string;
+  balance: Balance;
 }
 
 export interface IExposureOthers {

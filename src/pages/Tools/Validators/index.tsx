@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
-import { apiGetSingleValidator, INominator, IValidatorHistory } from '../../../apis/Validator';
+import { apiGetSingleValidator, IEraInfo, INominator, IValidatorHistory } from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
+
+const findLastEra = (info: IEraInfo[]): IEraInfo => {
+  let lastEraInfo = info[0];
+  info.forEach((eraInfo, i) => {
+    if(eraInfo.era > lastEraInfo.era) {
+      lastEraInfo = eraInfo;
+    }
+  });
+  return lastEraInfo;
+};
 
 const ValidatorStatusHeader = ({
   chain,
@@ -18,12 +28,13 @@ const ValidatorStatusHeader = ({
   let nominatorCount = 0;
   let commission = 0;
   if (validator.info.length > 0) {
-    active = validator.info[validator.info.length - 1].exposure.total;
-    total = validator.info[validator.info.length - 1].nominators.reduce((acc, n) => {
+    const lastEraInfo = findLastEra(validator.info);
+    active = lastEraInfo.exposure.total;
+    total = lastEraInfo.nominators.reduce((acc, n) => {
       return acc += n.balance.lockedBalance;
     }, 0);
-    nominatorCount = validator.info[validator.info.length - 1].nominatorCount;
-    commission = validator.info[validator.info.length - 1].commission;
+    nominatorCount = lastEraInfo.nominatorCount;
+    commission = lastEraInfo.commission;
   }
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {
@@ -106,14 +117,9 @@ const ValidatorStatus = (props) => {
       // TODO: error handling not yet
       setValidator(validator);
       if (validator.info.length > 0) {
-        const _nominators = validator.info[validator.info.length - 1].nominators;
-        const active = validator.info[validator.info.length - 1].exposure.others.reduce((acc: INominator[], v) => {
-          acc.push({
-            address: v.who,
-            balance: v.value,
-          });
-          return acc;
-        }, []);
+        const lastEraInfo = findLastEra(validator.info);
+        const _nominators = lastEraInfo.nominators;
+        const active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
         setActiveNominators(active);
         const inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
         setNominators(inactive);
