@@ -37,7 +37,14 @@ import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { NetworkStatus } from '../../../utils/status/Network';
 import { NetworkCodeName } from '../../../utils/constants/Network';
-import { lowRiskFilter, highApyFilter, decentralFilter, oneKvFilter, customFilter } from './utils';
+import {
+  lowRiskFilter,
+  highApyFilter,
+  decentralFilter,
+  oneKvFilter,
+  customFilter,
+  advancedConditionFilter,
+} from './utils';
 import { IValidator } from '../../../apis/Validator';
 import { BooleanLiteral } from 'typescript';
 
@@ -69,7 +76,7 @@ export interface IAdvancedSetting {
   oneKv?: boolean; // switch
 }
 
-export interface IStakingTableData {
+export interface ITableData {
   select: boolean;
   account: string;
   selfStake: number;
@@ -84,6 +91,9 @@ export interface IStakingTableData {
   subRows: {
     unclaimedEras: number[];
   }[];
+  commission: number;
+  hasSlash: boolean;
+  isSubIdentity: boolean;
 }
 
 interface IApiParams {
@@ -196,7 +206,8 @@ const Staking = () => {
     size: 60,
   });
   const [apiLoading, setApiLoading] = useState(true);
-  const [stakingTableData, setStakingTableData] = useState<IStakingTableData[]>([]);
+  const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
+  const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
 
   // memo
   const strategyOptions = useMemo(() => {
@@ -460,13 +471,28 @@ const Staking = () => {
    */
   const handleAdvancedFilter = (name) => (e) => {
     // TODO: input validator, limit
+    console.log('filter change: ', e);
+    if (e && e.target && e.target.value) {
+      console.log('filter change: ', e.target.value);
+    }
+
     switch (name) {
       case 'maxCommission':
+        setApiParams((prev) => ({
+          ...prev,
+          commission_max: Number(e.target.value) / 100,
+        }));
+        setAdvancedSetting((prev) => ({ ...prev, maxCommission: e.target.value }));
         break;
       case 'identity':
+        setApiParams((prev) => ({
+          ...prev,
+          has_verified_identity: e,
+        }));
         setAdvancedSetting((prev) => ({ ...prev, identity: e }));
         break;
       case 'maxUnclaimedEras':
+        setAdvancedSetting((prev) => ({ ...prev, maxUnclaimedEras: e.target.value }));
         break;
       case 'previousSlashes':
         setAdvancedSetting((prev) => ({ ...prev, previousSlashes: e }));
@@ -475,10 +501,20 @@ const Staking = () => {
         setAdvancedSetting((prev) => ({ ...prev, isSubIdentity: e }));
         break;
       case 'historicalApy':
+        setApiParams((prev) => ({
+          ...prev,
+          apy_min: Number(e.target.value) / 100,
+        }));
+        setAdvancedSetting((prev) => ({ ...prev, historicalApy: e.target.value }));
         break;
       case 'minInclusion':
+        setAdvancedSetting((prev) => ({ ...prev, minInclusion: e.target.value }));
         break;
       case 'telemetry':
+        setApiParams((prev) => ({
+          ...prev,
+          has_telemetry: e,
+        }));
         setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
         break;
       case 'highApy':
@@ -488,6 +524,10 @@ const Staking = () => {
         setAdvancedSetting((prev) => ({ ...prev, decentralized: e }));
         break;
       case 'oneKv':
+        setApiParams((prev) => ({
+          ...prev,
+          has_joined_1kv: e,
+        }));
         setAdvancedSetting((prev) => ({ ...prev, oneKv: e }));
         break;
       default:
@@ -496,7 +536,7 @@ const Staking = () => {
   };
 
   const handleValidatorFiltered = useCallback(
-    (data: IValidator[]): IStakingTableData[] => {
+    (data: IValidator[]): ITableData[] => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
           return lowRiskFilter(data, advancedSetting);
@@ -532,13 +572,14 @@ const Staking = () => {
       console.log('network status: ', networkStatus);
       if (networkStatus === NetworkStatus.READY) {
         console.log('========== API Launch ==========');
+        // TODO: table data loading start
         let result = await apiGetAllValidator({
           params: apiParams.network,
-          query: apiParams,
+          query: { ...apiParams, page: 0, size: 60 },
         });
         console.log('========== API RETURN ==========');
         console.log('result: ', result);
-        setStakingTableData(handleValidatorFiltered(result));
+        setApiFilteredTableData(handleValidatorFiltered(result));
         //TODO: result need to be filtered
         setApiLoading(false);
       }
@@ -549,8 +590,21 @@ const Staking = () => {
    * user changing the advanced setting mannually, we set the new api query parameter
    */
   useEffect(() => {
-    //TODO: new api query parameter
-  }, [advancedSetting]);
+    if (advancedOption.advanced) {
+      // is in advanced mode, need advanced filtered
+      const filteredResult = advancedConditionFilter(
+        advancedSetting,
+        apiFilteredTableData,
+        advancedOption.supportus
+      );
+      setFinalFilteredTableData(filteredResult);
+    } else {
+      // is in basic mode, no further filtered needed
+      console.log('no further filtered needed, first item: ', apiFilteredTableData[0]);
+      setFinalFilteredTableData(apiFilteredTableData);
+    }
+    // TODO: table data loading end
+  }, [advancedSetting, apiFilteredTableData, advancedOption.advanced, advancedOption.supportus]);
 
   useEffect(() => {
     console.log('filtered account: ', selectedAccount);
@@ -664,7 +718,7 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {!apiLoading ? (
-                <Table type={tableType.stake} columns={columns} data={stakingTableData} pagination />
+                <Table type={tableType.stake} columns={columns} data={finalFilteredTableData} pagination />
               ) : (
                 <ScaleLoader />
               )}
@@ -673,7 +727,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns, apiLoading, stakingTableData]);
+  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData]);
 
   return (
     <>
