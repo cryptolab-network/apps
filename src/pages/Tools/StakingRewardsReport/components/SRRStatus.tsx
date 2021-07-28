@@ -121,7 +121,7 @@ const SRRContent = ({ filters }) => {
       }).catch((err) => {
         setState(State.ERROR);
       });
-      if (s === null) {
+      if (s === undefined || s === null) {
         return;
       }
       setStashData(s!);
@@ -171,7 +171,7 @@ const SRRContent = ({ filters }) => {
         stashId={filters.stashId}
       />
     );
-  }, []);
+  }, [filters.stashId]);
   if (state === State.EMPTY) {
     return (
       <EmptyStashIconLayout>
