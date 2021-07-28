@@ -16,12 +16,6 @@ const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
           </div>
         </AdvancedOption>
         <AdvancedOption>
-          <span style={{ color: advancedOption.decentralized ? '#23beb9' : '#fff' }}>Decentralized</span>
-          <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.decentralized} onChange={onChange('decentralized')} />
-          </div>
-        </AdvancedOption>
-        <AdvancedOption>
           <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>Support us</span>
           <div style={{ marginLeft: 16 }}>
             <Switch checked={advancedOption.supportus} onChange={onChange('supportus')} />
@@ -29,7 +23,7 @@ const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
         </AdvancedOption>
       </AdvancedOptionLayout>
     );
-  }, [advancedOption.advanced, advancedOption.decentralized, advancedOption.supportus, onChange]);
+  }, [advancedOption.advanced, advancedOption.supportus, onChange]);
 
   return (
     <HeaderLayout>

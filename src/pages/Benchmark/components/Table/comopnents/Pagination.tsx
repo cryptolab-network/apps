@@ -1,66 +1,110 @@
+import { ReactComponent as ArrowIcon } from '../../../../../assets/images/dropdown.svg';
 import styled from 'styled-components';
-import { ReactComponent as PaginationPrevIcon } from '../../../../../assets/images/pagination-prev.svg';
-import { ReactComponent as PaginationNextIcon } from '../../../../../assets/images/pagination-next.svg';
-import { ReactComponent as PaginationFirstIcon } from '../../../../../assets/images/pagination-to-start.svg';
-import { ReactComponent as PaginationLastIcon } from '../../../../../assets/images/pagination-to-end.svg';
+import { useMemo } from 'react';
 
 const Pagination = ({
-  gotoPage,
-  previousPage,
-  nextPage,
   canPreviousPage,
   canNextPage,
+  pageOptions,
   pageCount,
+  gotoPage,
+  nextPage,
+  previousPage,
   currentPage,
   firstItemIndex,
   lastItemIndex,
 }) => {
+  const pageNumDOM = useMemo(() => {
+    console.log('attribute :', {
+      canPreviousPage,
+      canNextPage,
+      pageOptions,
+      pageCount,
+      gotoPage,
+      nextPage,
+      previousPage,
+    });
+    return null;
+  }, [canPreviousPage, canNextPage, pageOptions, pageCount, gotoPage, nextPage, previousPage]);
+
   return (
-    <PaginationLayout>
-      <PaginationInfo>
-        Page {currentPage + 1}/{pageCount}
-      </PaginationInfo>
-      <PaginationButton>
-        <PaginationFirstIcon onClick={() => gotoPage(0)} />
-      </PaginationButton>
-      <PaginationButton>
-        <PaginationPrevIcon onClick={() => previousPage()} />
-      </PaginationButton>
-      <PaginationButton>
-        <PaginationNextIcon onClick={() => nextPage()} />
-      </PaginationButton>
-      <PaginationButton>
-        <PaginationLastIcon onClick={() => gotoPage(pageCount - 1)} />
-      </PaginationButton>
-      <PaginationInfo>
-        {firstItemIndex} - {lastItemIndex}
-      </PaginationInfo>
-    </PaginationLayout>
+    <MainLayout>
+      <ToPageButton style={{ marginRight: 9 }} onClick={() => gotoPage(0)}>
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(180deg)',
+          }}
+        />
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(180deg)',
+          }}
+        />
+      </ToPageButton>
+      <ToPageButton style={{ marginRight: 9 }} disabled={!canPreviousPage} onClick={() => previousPage()}>
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(180deg)',
+          }}
+        />
+      </ToPageButton>
+      <Pages>{pageNumDOM}</Pages>
+      <ToPageButton style={{ marginLeft: 9 }} disabled={!canNextPage} onClick={() => nextPage()}>
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(0deg)',
+          }}
+        />
+      </ToPageButton>
+      <ToPageButton style={{ marginLeft: 9 }} onClick={() => gotoPage(pageCount - 1)}>
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(0deg)',
+          }}
+        />
+        <ArrowIcon
+          style={{
+            stroke: '#2f3842',
+            transform: 'rotate(0deg)',
+          }}
+        />
+      </ToPageButton>
+    </MainLayout>
   );
 };
 
 export default Pagination;
 
-const PaginationLayout = styled.div`
-  flex: 1;
-  width: 100%;
-  height 100%;
+const MainLayout = styled.div`
+  height: 32px;
+  width: 250px;
   display: flex;
-  flex-direction: row;
+  justify-content: center;
   align-items: center;
 `;
 
-const PaginationInfo = styled.div`
-  color: white;
-  margin: 15.8px 37.1px 8.1px 15.4px;
+interface IPage {
+  disabled?: boolean;
+}
+
+const ToPageButton = styled.div<IPage>`
+  width: 19px;
+  height: 19px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: ${(props) => (!props.disabled ? '#1ea9a5' : '#4b5352')};
+  border-radius: 2px;
+  &:hover {
+    background-color: white;
+  }
 `;
 
-const PaginationButton = styled.div`
-  margin: 15.8px 16.8px 9.4px 16.9px;
-  object-fit: contain;
-  height: 19px;
-  cursor: pointer;
-  &:hover {
-    border: solid 1px #23beb9;
-  }
+const Pages = styled.div`
+  max-width: 250px;
 `;

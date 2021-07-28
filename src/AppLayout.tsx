@@ -155,12 +155,12 @@ const Footer: React.FC = () => {
         </ColumnDiv>
         <ColumnDiv>
           <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" target="_blank">
+            <a href="https://twitter.com/CryptolabN" target="_blank" rel="noreferrer">
               <SocialMediaWrapper>
                 <TwitterIcon width="36px" height="36px" />
               </SocialMediaWrapper>
             </a>
-            <a href="https://github.com/cryptolab-network" target="_blank">
+            <a href="https://github.com/cryptolab-network" target="_blank" rel="noreferrer">
               <SocialMediaWrapper>
                 <GithubIcon width="36px" height="36px" />
               </SocialMediaWrapper>
@@ -434,7 +434,7 @@ const CopyRightTitleDiv = styled.div`
 const TextLinkA = styled.a`
   text-decoration: none;
   color: white;
-`
+`;
 const SocialMediaWrapper = styled.div`
   margin-right: 15px;
-`
+`;

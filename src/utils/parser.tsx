@@ -1,7 +1,4 @@
-enum NetworkNameLowerCase {
-  KSM = 'kusama',
-  DOT = 'polkadot',
-}
+import { NetworkNameLowerCase } from './constants/Network';
 
 export const networkCapitalCodeName = (inputNetworkName: string): string => {
   if (String(inputNetworkName).toLowerCase() === NetworkNameLowerCase.KSM) {
@@ -9,6 +6,6 @@ export const networkCapitalCodeName = (inputNetworkName: string): string => {
   } else if (String(inputNetworkName).toLowerCase() === NetworkNameLowerCase.DOT) {
     return 'DOT';
   } else {
-    return '???';
+    return '---';
   }
 };
