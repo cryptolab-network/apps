@@ -23,6 +23,7 @@ import CustomScaleLoader from "../../../../components/Spinner/ScaleLoader";
 import Tooltip from "../../../../components/Tooltip";
 import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
+import { validateAddress } from "../../../../utils/string";
 
 interface ISRRFilters {
   stashId: string;
@@ -110,6 +111,9 @@ const SRRContent = ({ filters }) => {
       eraRewards: [],
     });
     async function getStashRewards() {
+      if (!validateAddress(filters.stashId)) {
+        return;
+      }
       setState(State.LOADING);
       const s = await apiGetStashRewards({
         params: filters.stashId,
