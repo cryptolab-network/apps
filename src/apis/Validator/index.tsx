@@ -110,3 +110,11 @@ export const apiGetNominatedValidators = (
   nominatedValidatorsAxios.get(`${data.params}`, { params: data.query }).then((res) => {
     return res.data;
   });
+
+
+export const apiGetValidatorUnclaimedEras = (
+  data: IValidatorRequest,
+): Promise<number[]> => 
+singleValidatorAxios.get(`${data.params}`).then((res) => {
+  return res.data;
+});
