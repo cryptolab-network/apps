@@ -539,20 +539,20 @@ const Staking = () => {
     (data: IValidator[]): ITableData[] => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskFilter(data, advancedSetting);
+          return lowRiskFilter(data, advancedSetting, advancedOption.supportus, networkName);
         case Strategy.HIGH_APY:
-          return highApyFilter(data, advancedSetting);
+          return highApyFilter(data, advancedSetting, advancedOption.supportus, networkName);
         case Strategy.DECENTRAL:
-          return decentralFilter(data, advancedSetting);
+          return decentralFilter(data, advancedSetting, advancedOption.supportus, networkName);
         case Strategy.ONE_KV:
-          return oneKvFilter(data, advancedSetting);
+          return oneKvFilter(data, advancedSetting, advancedOption.supportus, networkName);
         case Strategy.CUSTOM:
-          return customFilter(data, advancedSetting);
+          return customFilter(data, advancedSetting, advancedOption.supportus, networkName);
         default:
           return [];
       }
     },
-    [inputData.strategy.value, advancedSetting]
+    [inputData.strategy.value, advancedSetting, advancedOption.supportus, networkName]
   );
 
   // while network changing, set api parameter for network
@@ -573,9 +573,10 @@ const Staking = () => {
       if (networkStatus === NetworkStatus.READY) {
         console.log('========== API Launch ==========');
         // TODO: table data loading start
+        // TODO: remove page:0, size: 60
         let result = await apiGetAllValidator({
           params: apiParams.network,
-          query: { ...apiParams, page: 0, size: 60 },
+          query: { ...apiParams },
         });
         console.log('========== API RETURN ==========');
         console.log('result: ', result);
