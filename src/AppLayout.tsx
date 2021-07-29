@@ -27,6 +27,7 @@ import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
 import { getUrls } from './utils/url';
 import OneKV from './pages/Tools/OneKV';
+import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 
 // header
 const Header: React.FC = () => {
@@ -213,6 +214,7 @@ const AppLayout = () => {
               <Route path="/valnom" component={ValNom} />
               <Route path="/validator/:id/:chain" component={ValidatorStatus} />
               <Route path="/onekv" component={OneKV} />
+              <Route path="/rewards" component={StakingRewardsReport} />
             </Switch>
           </RouteContent>
           <Footer />

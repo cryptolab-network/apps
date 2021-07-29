@@ -10,6 +10,7 @@ type ICOLUMN = {
   data: Array<any>;
   type?: tableType;
   pagination?: boolean;
+  pgSize?: number;
 };
 
 const CustomTable: React.FC<ICOLUMN> = ({
@@ -17,6 +18,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
   data,
   type = tableType.common,
   pagination = false,
+  pgSize = 20,
 }) => {
   const {
     getTableProps,
@@ -39,11 +41,11 @@ const CustomTable: React.FC<ICOLUMN> = ({
     {
       columns: userColumns,
       data,
-      initialState: { pageSize: 20 },
+      initialState: { pageSize: pgSize },
     },
     useSortBy,
     useExpanded,
-    usePagination // Use the useExpanded plugin hook
+    usePagination, // Use the useExpanded plugin hook,
   );
   return (
     <Style>
@@ -175,9 +177,6 @@ const Style = styled.div`
       text-align: center;
       &.collapse {
         width: 0.0000000001%;
-      }
-      :first-child {
-        width: 0.00001%;
       }
       :last-child {
         border-right: 0;
