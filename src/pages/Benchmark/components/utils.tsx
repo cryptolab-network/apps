@@ -1,5 +1,5 @@
 import { IValidator } from '../../../apis/Validator';
-import { IAdvancedSetting, ITableData } from './Staking';
+import { IAdvancedSetting, ITableData, IStakingInfo } from './Staking';
 import { eraStatus } from '../../../utils/status/Era';
 import { isElementAccessExpression } from 'typescript';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
@@ -55,6 +55,22 @@ interface ISelectResult {
   selectableCount: number;
 }
 
+export const sortSelectedTableData = (
+  tableData: ITableData[],
+  selectedFirst: boolean = true
+): ITableData[] => {
+  tableData.sort((a, b) => {
+    if (a.select && !b.select) {
+      return selectedFirst ? -1 : 1;
+    } else if (!a.select && b.select) {
+      return selectedFirst ? 1 : -1;
+    } else {
+      return 0;
+    }
+  });
+  return tableData;
+};
+
 export const supportCryptoLabSelect = (
   tableData: ITableData[],
   selectableCount: number,
@@ -72,16 +88,6 @@ export const supportCryptoLabSelect = (
       selectableCount--;
     }
   }
-  // sort the tag one to the top of the list
-  tableData.sort((a, b) => {
-    if (a.select && !b.select) {
-      return -1;
-    } else if (!a.select && b.select) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
 
   console.log('after support us, selectableCount:', selectableCount);
 
@@ -109,7 +115,7 @@ export const lowRiskFilter = (
   advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
-) => {
+): IStakingInfo => {
   console.log('first one:', data[0]);
   let filteredResult = data.filter(
     (validator) => validator.info.unclaimedEras.length < 16 && validator.slashes.length === 0
@@ -129,53 +135,75 @@ export const lowRiskFilter = (
     tempSelectableCount = selectableCount;
   }
   // random select the rest available count
-  const { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
+  let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
+  // sort the tagged one to the top of the list
+  resultData = sortSelectedTableData(resultData);
+  let tempApyInfo = {
+    sum: 0,
+    counter: 0,
+  };
 
-  return resultData;
+  for (let idx = 0; idx < resultData.length; idx++) {
+    if (resultData[idx].select) {
+      tempApyInfo.sum += resultData[idx].avgAPY;
+      tempApyInfo.counter += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    tableData: resultData,
+    calculatedApy: tempApyInfo.counter >= 1 ? tempApyInfo.sum / tempApyInfo.counter : 0,
+  };
 };
 export const highApyFilter = (
   data: IValidator[],
   advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
-) => {
+): IStakingInfo => {
   // TODO: update filter, below is draft from lowRiskFilter
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
-  return formatToTableData(filteredResult);
+  let formatedData = formatToTableData(filteredResult);
+  return { tableData: [], calculatedApy: 0 };
 };
 export const decentralFilter = (
   data: IValidator[],
   advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
-) => {
+): IStakingInfo => {
   // TODO: update filter, below is draft from lowRiskFilter
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
-  return formatToTableData(filteredResult);
+  let formatedData = formatToTableData(filteredResult);
+  return { tableData: [], calculatedApy: 0 };
 };
 export const oneKvFilter = (
   data: IValidator[],
   advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
-) => {
+): IStakingInfo => {
   // TODO: update filter, below is draft from lowRiskFilter
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
-  return formatToTableData(filteredResult);
+  let formatedData = formatToTableData(filteredResult);
+  return { tableData: [], calculatedApy: 0 };
 };
 export const customFilter = (
   data: IValidator[],
   advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
-) => {
+): IStakingInfo => {
   // TODO: update filter, below is draft from lowRiskFilter
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
-  return formatToTableData(filteredResult);
+  let formatedData = formatToTableData(filteredResult);
+  return { tableData: [], calculatedApy: 0 };
 };
 
 export const highApySoring = (tableData: ITableData[]): ITableData[] => {
@@ -192,11 +220,11 @@ export const highApySoring = (tableData: ITableData[]): ITableData[] => {
 
 export const advancedConditionFilter = (
   filtered: IAdvancedSetting,
-  originTableData: ITableData[],
+  originTableData: IStakingInfo,
   isSupportUs: boolean
-): ITableData[] => {
+): IStakingInfo => {
   console.log('origin table data: ', originTableData);
-  let tempTableData = originTableData.filter((data) => {
+  let tempTableData = originTableData.tableData.filter((data) => {
     // max commission, already done in api query
     // identity, already done in api query
     // max unclaimed eras
@@ -244,5 +272,5 @@ export const advancedConditionFilter = (
     // TODO: select random node
   }
 
-  return tempTableData;
+  return { tableData: [], calculatedApy: 0 };
 };

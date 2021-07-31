@@ -76,6 +76,11 @@ export interface IAdvancedSetting {
   oneKv?: boolean; // switch
 }
 
+export interface IStakingInfo {
+  tableData: ITableData[];
+  calculatedApy: number;
+}
+
 export interface ITableData {
   select: boolean;
   account: string;
@@ -206,8 +211,14 @@ const Staking = () => {
     size: 60,
   });
   const [apiLoading, setApiLoading] = useState(true);
-  const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
-  const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
+  const [apiFilteredTableData, setApiFilteredTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+  });
+  const [finalFilteredTableData, setFinalFilteredTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+  });
 
   // memo
   const strategyOptions = useMemo(() => {
@@ -536,7 +547,7 @@ const Staking = () => {
   };
 
   const handleValidatorFiltered = useCallback(
-    (data: IValidator[]): ITableData[] => {
+    (data: IValidator[]): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
           return lowRiskFilter(data, advancedSetting, advancedOption.supportus, networkName);
@@ -549,7 +560,7 @@ const Staking = () => {
         case Strategy.CUSTOM:
           return customFilter(data, advancedSetting, advancedOption.supportus, networkName);
         default:
-          return [];
+          return { tableData: [], calculatedApy: 0 };
       }
     },
     [inputData.strategy.value, advancedSetting, advancedOption.supportus, networkName]
@@ -600,8 +611,8 @@ const Staking = () => {
       );
       setFinalFilteredTableData(filteredResult);
     } else {
-      // is in basic mode, no further filtered needed
-      console.log('no further filtered needed, first item: ', apiFilteredTableData[0]);
+      // is in basic mode, no further filtered needed, we handle it in each strategy filter already
+      console.log('no further filtered needed, first item: ', apiFilteredTableData.tableData[0]);
       setFinalFilteredTableData(apiFilteredTableData);
     }
     // TODO: table data loading end
@@ -719,7 +730,12 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {!apiLoading ? (
-                <Table type={tableType.stake} columns={columns} data={finalFilteredTableData} pagination />
+                <Table
+                  type={tableType.stake}
+                  columns={columns}
+                  data={finalFilteredTableData.tableData}
+                  pagination
+                />
               ) : (
                 <ScaleLoader />
               )}
@@ -772,7 +788,7 @@ const Staking = () => {
             </ContentBlockLeft>
             <ContentBlockRight>
               <Balance>Calculated APY</Balance>
-              <ValueStyle>16.5%</ValueStyle>
+              <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
             </ContentBlockRight>
           </ContentBlock>
         </ContentBlockWrap>
