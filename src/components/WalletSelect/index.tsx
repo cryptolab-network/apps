@@ -95,7 +95,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
             <WalletLayout>
               <div>{account.name}</div>
               <div>
-                Balance : <BalanceNumber>{account.balance}</BalanceNumber>
+                Balance : <BalanceNumber>{account.balances.totalBalance}</BalanceNumber>
               </div>
             </WalletLayout>
           </li>
@@ -137,7 +137,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
               <WalletLayout>
                 <div>{selectedAccount.name}</div>
                 <div>
-                  Balance: <BalanceTitle>{selectedAccount.balance}</BalanceTitle>
+                  Balance: <BalanceTitle>{selectedAccount.balances.totalBalance}</BalanceTitle>
                   {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
                   {/* <BalanceNumber>123</BalanceNumber> */}
                 </div>

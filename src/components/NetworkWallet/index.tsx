@@ -10,55 +10,17 @@ import {
   selectAccount,
   setWalletStatus,
   IAccount,
-  // setFilteredAccounts,
+  setFilteredAccounts,
+  setSelectedAccountBalances,
 } from '../../redux';
 import { NetworkStatus } from '../../utils/status/Network';
 import { ApiContext } from '../Api';
-// import { ApiPromise } from '@polkadot/api';
-
-// TODO: please remove this mock data before production
-// const mockWalletList = [
-//   {
-//     accountName: 'CryptoLab01',
-//     address: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-//     balance: '1234',
-//   },
-//   {
-//     accountName: 'CryptoLab02',
-//     address: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-//     balance: '2345',
-//   },
-// ];
-// TODO: please remove this mock data before production
-// const mockWalletStatus: number = WalletStatus.IDLE;
-// const mockWalletStatus: number = WalletStatus.LOADING;
-// const mockWalletStatus: number = WalletStatus.NO_EXTENSION;
-// const mockWalletStatus: number = WalletStatus.DENIED;
-// const mockWalletStatus: number = WalletStatus.CONNECTED;
-
-// const ParseNetworkStatus = (status) => {
-//   switch (status) {
-//     case NetworkStatus.CONNECTED:
-//       return 'CONNECTED';
-//     case NetworkStatus.DISCONNECTED:
-//       return 'DISCONNECTED';
-//     case NetworkStatus.ERROR:
-//       return 'ERROR';
-//     case NetworkStatus.READY:
-//       return 'READY';
-
-//     default:
-//       break;
-//   }
-// };
 
 const NetworkWallet: React.FC = () => {
   const dispatch = useAppDispatch();
   let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
   let { status: walletStatus, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
   const polkadotApi = useContext(ApiContext);
-  const [accountList, setAccountList] = useState<IAccount[]>([]);
-  const [localSelectedAccount, setLocalSeletedAccount] = useState<IAccount | null>(null);
 
   const handleNetworkChange = useCallback(
     async (networkName: string) => {
@@ -80,11 +42,23 @@ const NetworkWallet: React.FC = () => {
     async (account: IAccount) => {
       if (polkadotApi && networkStatus === NetworkStatus.READY) {
         console.log('NetworkWallet: api ready');
-        const result = await polkadotApi.derive.balances.account(account.address);
-        return result.freeBalance.toHuman();
+        const result = await polkadotApi.derive.balances.all(account.address);
+        return {
+          totalBalance: result.freeBalance.add(result.reservedBalance).toString(),
+          freeBalance: result.freeBalance.toString(),
+          reservedBalance: result.reservedBalance.toString(),
+          lockedBalance: result.lockedBalance.toString(),
+          availableBalance: result.availableBalance.toString(0),
+        }
       } else {
         console.log('NetworkWallet: api IS NOT ready');
-        return '';
+        return {
+          totalBalance: '0',
+          freeBalance: '0',
+          reservedBalance: '0',
+          lockedBalance: '0',
+          availableBalance: '0',
+        };
       }
     },
     [polkadotApi, networkStatus]
@@ -92,31 +66,54 @@ const NetworkWallet: React.FC = () => {
 
   useEffect(() => {
     (async () => {
+      let update = false;
       let tempAccounts: IAccount[] = [];
       for (let idx = 0; idx < filteredAccounts.length; idx++) {
+        console.log(`idx = ${idx}`);
+        const result = await balance(filteredAccounts[idx]);
         tempAccounts.push({
           address: filteredAccounts[idx].address,
           name: filteredAccounts[idx].name,
           source: filteredAccounts[idx].source,
           genesisHash: filteredAccounts[idx].genesisHash,
-          balance: await balance(filteredAccounts[idx]),
+          balances: result
         });
+        if (filteredAccounts[idx].balances.totalBalance !== result.totalBalance ||
+            filteredAccounts[idx].balances.freeBalance !== result.freeBalance ||
+            filteredAccounts[idx].balances.reservedBalance !== result.reservedBalance ||
+            filteredAccounts[idx].balances.lockedBalance !== result.lockedBalance ||
+            filteredAccounts[idx].balances.availableBalance !== result.availableBalance
+        ) {
+          update = true;
+        }
       }
-      setAccountList(tempAccounts);
+      if (update) {
+        dispatch(setFilteredAccounts(tempAccounts));
+      }
     })();
   }, [filteredAccounts, balance]);
 
   useEffect(() => {
     (async () => {
       if (selectedAccount) {
+        let update = false;
+        const result = await balance(selectedAccount);
         let tempSelectedAccount: IAccount = {
           address: selectedAccount.address,
           name: selectedAccount.name,
           source: selectedAccount.source,
           genesisHash: selectedAccount.genesisHash,
-          balance: await balance(selectedAccount),
+          balances: result
         };
-        setLocalSeletedAccount(tempSelectedAccount);
+        if (selectedAccount.balances.totalBalance !== result.totalBalance ||
+          selectedAccount.balances.freeBalance !== result.freeBalance ||
+          selectedAccount.balances.reservedBalance !== result.reservedBalance ||
+          selectedAccount.balances.lockedBalance !== result.lockedBalance ||
+          selectedAccount.balances.availableBalance !== result.availableBalance
+        ) {
+          update = true;
+          dispatch(setSelectedAccountBalances(result));
+        }
       }
     })();
   }, [selectedAccount, balance]);
@@ -165,9 +162,9 @@ const NetworkWallet: React.FC = () => {
         onChange={(e) => {
           handleWalletChange(e);
         }}
-        accountList={accountList}
+        accountList={filteredAccounts}
         status={walletStatus}
-        selectedAccount={localSelectedAccount}
+        selectedAccount={selectedAccount}
       />
     </Layout>
   );

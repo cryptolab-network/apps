@@ -227,7 +227,7 @@ const Staking = () => {
 
   const walletBalance = useMemo(() => {
     if (selectedAccount) {
-      return selectedAccount.balance;
+      return selectedAccount.balances.totalBalance;
     } else {
       return '(please select a wallet)';
     }

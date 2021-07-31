@@ -30,12 +30,20 @@ export interface IInject {
   version: string;
 }
 
+export interface IBalance {
+  totalBalance: string;
+  freeBalance: string;
+  reservedBalance: string;
+  lockedBalance: string;
+  availableBalance: string;
+}
+
 export interface IAccount {
   address: string;
   name?: string;
   source: string;
   genesisHash?: string | null;
-  balance?: string;
+  balances: IBalance;
 }
 
 export interface IWallet {
@@ -95,6 +103,13 @@ export const connectWallet = createAsyncThunk(
           name: account.meta.name,
           source: account.meta.source,
           genesisHash: account.meta.genesisHash,
+          balances: {
+            totalBalance: '0',
+            freeBalance: '0',
+            reservedBalance: '0',
+            lockedBalance: '0',
+            availableBalance: '0',
+          }
         };
       });
 
@@ -128,10 +143,17 @@ export const walletSlice = createSlice({
       };
     },
     setFilteredAccounts: (state, action: PayloadAction<IAccount[]>) => {
+      console.log(`action.payload`);
+      console.log(action.payload);
       return {
         ...state,
         filteredAccounts: [...action.payload],
       };
+    },
+    setSelectedAccountBalances: (state, action: PayloadAction<IBalance>) => {
+      if (state.selectedAccount) {
+        state.selectedAccount.balances = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -165,9 +187,9 @@ export const accountTransform = (accounts: IAccount[], network: string): IAccoun
       name: account.name,
       source: account.source,
       genesisHash: account.genesisHash,
-      balance: '0',
+      balances: account.balances,
     };
   });
 };
 
-export const { selectAccount, setWalletStatus, setFilteredAccounts } = walletSlice.actions;
+export const { selectAccount, setWalletStatus, setFilteredAccounts, setSelectedAccountBalances } = walletSlice.actions;
