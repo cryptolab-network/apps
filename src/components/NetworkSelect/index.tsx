@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo, useEffect, useContext } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
@@ -6,16 +6,13 @@ import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import './index.css';
 import styled from 'styled-components';
-import { useAppSelector } from '../../hooks';
+import { ApiContext } from '../Api';
 
-interface INetworkSelect {
-  onChange: Function;
-}
-
-const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
+const NetworkSelect: React.FC = () => {
+  // context
+  const {network, changeNetwork} = useContext(ApiContext);
   // state
   const [isOpen, setOpen] = useState(false);
-  const networkName = useAppSelector((state) => state.network.name);
   //ref
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -50,11 +47,11 @@ const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
 
   useEffect(() => {
     close();
-  }, [networkName]);
+  }, [network]);
 
   const DisplayNetworkPanelDOM = useMemo(() => {
     let dom = {};
-    switch (networkName) {
+    switch (network) {
       case 'Kusama':
         dom = (
           <>
@@ -75,7 +72,7 @@ const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
         break;
     }
     return dom;
-  }, [networkName]);
+  }, [network]);
 
   return (
     <>
@@ -110,7 +107,8 @@ const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
               <li
                 className="li first"
                 onClick={() => {
-                  onChange('Kusama');
+                  console.log(`Kusama`);
+                  changeNetwork('Kusama');
                 }}
               >
                 <KSMLogo style={{ width: 36, height: 36 }} />
@@ -119,7 +117,8 @@ const NetworkSelect: React.FC<INetworkSelect> = ({ onChange }) => {
               <li
                 className="li last"
                 onClick={() => {
-                  onChange('Polkadot');
+                  console.log(`Polkadot`);
+                  changeNetwork('Polkadot');
                 }}
               >
                 <DOTLogo style={{ width: 36, height: 36 }} />

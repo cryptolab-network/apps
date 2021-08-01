@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { networkSlice, walletSlice, nominatorsSlice } from '../redux';
+import { walletSlice, nominatorsSlice } from '../redux';
 
 const store = configureStore({
   reducer: {
-    network: networkSlice.reducer,
+    // network: networkSlice.reducer,
     wallet: walletSlice.reducer,
     nominators: nominatorsSlice.reducer,
   }

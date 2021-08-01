@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useContext } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
@@ -22,11 +22,12 @@ import { useAppSelector, useAppDispatch } from './hooks';
 import { getNominators } from './redux';
 import Api from './components/Api';
 import ValNom from './pages/Tools/ValNom';
-import { networkChanged } from './redux';
+// import { networkChanged } from './redux';
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
 import { getUrls } from './utils/url';
 import OneKV from './pages/Tools/OneKV';
+import { ApiContext } from './components/Api';
 
 // header
 const Header: React.FC = () => {
@@ -65,7 +66,8 @@ const Header: React.FC = () => {
 
 // tools header
 const ToolsHeader: React.FC = () => {
-  const networkName = useAppSelector((state) => state.network.name);
+  // const networkName = useAppSelector((state) => state.network.name);
+  const { network: networkName, changeNetwork } = useContext(ApiContext);
   const allNominators = useAppSelector((state) => state.nominators);
   console.log(allNominators);
 
@@ -77,7 +79,7 @@ const ToolsHeader: React.FC = () => {
   const handleNetworkChange = useCallback(
     (networkName: string) => {
       console.log('current select network: ', networkName);
-      dispatch(networkChanged(networkName));
+      changeNetwork(networkName);
     },
     [dispatch]
   );
@@ -101,7 +103,7 @@ const ToolsHeader: React.FC = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
-        <NetworkSelect onChange={handleNetworkChange} />
+        <NetworkSelect />
       </HeaderRightDiv>
     </HeaderDiv>
   );
@@ -191,6 +193,7 @@ const Footer: React.FC = () => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
+
   const mainRender = useMemo(() => {
     if (window.location.host.split('.')[0] === keys.toolDomain) {
       return (
@@ -250,7 +253,7 @@ const AppLayout = () => {
     <>
       <GradientLight>
         <BrowserRouter>
-          <Api>{mainRender}</Api>
+            <Api>{mainRender}</Api>
         </BrowserRouter>
         {/* <StarAnimation id="stars" />
         <StarAnimation id="stars2" />
