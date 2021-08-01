@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
-import { apiGetSingleValidator, IEraInfo, INominator, IValidatorHistory } from '../../../apis/Validator';
+import { apiGetSingleValidator, apiGetValidatorUnclaimedEras, IEraInfo, INominator, IValidatorHistory } from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
@@ -29,7 +29,6 @@ const ValidatorStatusHeader = ({
   let commission = 0;
   if (validator.info.length > 0) {
     const lastEraInfo = findLastEra(validator.info);
-    active = lastEraInfo.exposure.total;
     total = lastEraInfo.nominators.reduce((acc, n) => {
       return acc += n.balance.lockedBalance;
     }, 0);
@@ -99,6 +98,8 @@ const ValidatorStatusHeader = ({
 const ValidatorStatus = (props) => {
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
+  const [selfStake, setSelfStake] = useState<string>('0');
+  const [unclaimedEras, setUnclaimedEras] = useState<string>('None');
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
@@ -110,23 +111,57 @@ const ValidatorStatus = (props) => {
     info: [],
     averageApy: 0
   });
+  const chain = props.match.params.chain;
+  const _formatBalance = useCallback((value: any) => {
+    if (chain === 'KSM') {
+      return (formatBalance(BigInt(value), {
+        decimals: 12,
+        withUnit: 'KSM'
+      }));
+    } else if (chain === 'DOT') {
+      return (formatBalance(BigInt(value), {
+        decimals: 10,
+        withUnit: 'DOT'
+      }));
+    } else {
+      return (formatBalance(BigInt(value), {
+        decimals: 10,
+        withUnit: 'Unit'
+      }));
+    }
+  }, [chain]);
   useEffect(() => {
     async function getValidator() {
       // load stash data from backend
       let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
+      let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
       // TODO: error handling not yet
       setValidator(validator);
       if (validator.info.length > 0) {
         const lastEraInfo = findLastEra(validator.info);
         const _nominators = lastEraInfo.nominators;
+        setSelfStake(_formatBalance(lastEraInfo.selfStake));
         const active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
         setActiveNominators(active);
         const inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
         setNominators(inactive);
+        _setUnclaimedEras(unclaimedEras);
+      }
+
+      function _setUnclaimedEras(unclaimedEras: number[]) {
+        if (unclaimedEras === undefined || unclaimedEras === null) {
+          setUnclaimedEras('None');
+        } else {
+          if (unclaimedEras.length > 0) {
+            setUnclaimedEras(unclaimedEras.length.toString() + ' eras');
+          } else {
+            setUnclaimedEras('None');
+          }
+        }
       }
     }
     getValidator();
-  }, [props.match.params.id, props.match.params.chain]);
+  }, [props.match.params.id, props.match.params.chain, _formatBalance]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>
@@ -138,6 +173,21 @@ const ValidatorStatus = (props) => {
             />
           )}
         >
+          <ValidatorInfoLayout>
+            <InfoTitle>
+              Self Stake:
+            </InfoTitle>
+            <InfoItem>
+              {selfStake}
+            </InfoItem>
+            <InfoDivider />
+            <InfoTitle>
+              Unclaimed Eras:
+            </InfoTitle>
+            <InfoItem>
+              {unclaimedEras}
+            </InfoItem>
+          </ValidatorInfoLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
               <NominatorGrid
@@ -286,6 +336,9 @@ const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
   justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'space-between')};
   align-items: flex-start;
   width: ${(props) => (props.width ? props.width : '90%')};
+  background-color: #2f3842;
+  padding: 13px 18.7px 15.7px 16px;
+  border-radius: 6px;
 `;
 const ContentBlockTitle = styled.div`
   flex: 1;
@@ -300,9 +353,54 @@ const ContentBlockTitle = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
-  margin-left: -8px;
 `;
 
 const Space = styled.div`
   margin: 40px 0 0 0;
+`;
+
+const ValidatorInfoLayout = styled.div`
+  width: 100%;
+  height: 50px;
+  margin: 9.6px 0 10.1px 0;
+  padding: 13px 0 18.4px 0;
+  display: flex;
+  flex-direction: row;
+  border-radius: 6px;
+  background-color: #2f3842;
+  padding: 0 0 0 18px;
+  align-items: center;
+`;
+
+const InfoTitle = styled.div`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
+  letter-spacing: normal;
+  text-align: left;
+  color: white;
+  margin: 0 0 0 25.4px;
+`;
+
+const InfoItem = styled.div`
+  margin: 0 25.4px 0 19px;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
+  letter-spacing: normal;
+  text-align: left;
+  color: #21aca8;
+`;
+
+const InfoDivider = styled.div`
+  width: 0px;
+  height: 16px;
+  border: 1px solid;
+  color: white;
 `;
