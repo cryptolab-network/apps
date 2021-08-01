@@ -1,11 +1,9 @@
 import { IValidator } from '../../../apis/Validator';
 import { IAdvancedSetting, ITableData, IStakingInfo } from './Staking';
 import { eraStatus } from '../../../utils/status/Era';
-import { isElementAccessExpression } from 'typescript';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from '../../../utils/constants/Validator';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
-import { domainToASCII } from 'url';
 
 const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
@@ -190,21 +188,15 @@ export const decentralizedFilter = (tableData: ITableData[]): ITableData[] => {
       }
     }
   });
-  console.log('parent group: ', parentGroup);
-  console.log('length before push parent: ', filteredTableData.length);
-  console.log('big: ', tableData.map((data) => data.account).join(','));
   Object.keys(parentGroup).forEach((key) => {
     const randomIdx = Math.floor(Math.random() * parentGroup[`${key}`].length);
     let findIdx = tableData.findIndex((data) => data.account === parentGroup[`${key}`][randomIdx]);
     if (findIdx !== -1) {
-      // console.log('findIdx: ', findIdx);
-      // console.log('find data: ', tableData[findIdx]);
       filteredTableData.push(tableData[findIdx]);
     } else {
       console.error('cannot find the index, this shouldn not happen');
     }
   });
-  console.log('length after push parent: ', filteredTableData.length);
 
   return filteredTableData;
 };
@@ -224,17 +216,20 @@ export const lowRiskStrategy = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  console.log('first one:', data[0]);
+  // low risk data filtered
   let filteredResult = data.filter(
     (validator) => validator.info.unclaimedEras.length < 16 && validator.slashes.length === 0
   );
-
+  // format the data to fit the frontend table
   let tempTableData = formatToTableData(filteredResult);
+  // unselected all
   tempTableData = resetSelected(tempTableData);
+  // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
 
   // if support us
   if (isSupportUs) {
+    // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
       tempTableData,
       tempSelectableCount,
@@ -248,6 +243,7 @@ export const lowRiskStrategy = (
   // sort the tagged one to the top of the list
   resultData = sortSelectedTableData(resultData);
 
+  // get the calculation apy of the selected validators
   return apyCalculation(resultData);
 };
 export const highApyStrategy = (
@@ -255,15 +251,29 @@ export const highApyStrategy = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskStrategy
-  console.log('first one:', data[0]);
+  // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
+  // format the data to fit the frontend table
   let tempTableData = formatToTableData(data);
+  // unselected all
   tempTableData = resetSelected(tempTableData);
+  // if support us
+  if (isSupportUs) {
+    // select our validators, decrease the selectable number
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+  // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
   tempTableData = sortSelectedTableData(tempTableData);
 
+  // get the calculation apy of the selected validators
   return apyCalculation(tempTableData);
 };
 export const decentralStrategy = (
@@ -271,30 +281,67 @@ export const decentralStrategy = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskStrategy
-  console.log('first one:', data[0]);
-  let filteredResult = data.filter((validator) => true);
-  let formatedData = formatToTableData(filteredResult);
-  return { tableData: [], calculatedApy: 0 };
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // format the data to fit the frontend table
+  let tempTableData = formatToTableData(data);
+  // unselected all
+  tempTableData = resetSelected(tempTableData);
+  // filtered the data, make sure the candidates are all decentralized
+  tempTableData = decentralizedFilter(tempTableData);
+  if (isSupportUs) {
+    // select our validators, decrease the selectable number
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+  // select the high apy validators, decrease the selectable number
+  const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
+  tempTableData = highApySelectResult.tableData;
+
+  // get the calculation apy of the selected validators
+  return apyCalculation(tempTableData);
 };
 export const oneKvStrategy = (
   data: IValidator[],
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskStrategy
-  console.log('first one:', data[0]);
-  let filteredResult = data.filter((validator) => true);
-  let formatedData = formatToTableData(filteredResult);
-  return { tableData: [], calculatedApy: 0 };
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // format the data to fit the frontend table
+  let tempTableData = formatToTableData(data);
+  // unselected all
+  tempTableData = resetSelected(tempTableData);
+  if (isSupportUs) {
+    // select our validators, decrease the selectable number
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+  // random select the rest available count
+  const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
+  tempTableData = randomSelectResult.tableData;
+
+  // get the calculation apy of the selected validators
+  return apyCalculation(tempTableData);
 };
 export const customStrategy = (
   data: IValidator[],
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskStrategy
-  console.log('first one:', data[0]);
+  // for custom strategy, most of the things are doing in the 'advancedConditionFilter' below
+
+  // get the calculation apy of the selected validators
   return apyCalculation(formatToTableData(data));
 };
 
@@ -307,31 +354,25 @@ export const advancedConditionFilter = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  console.log('origin table data: ', originTableData);
   let tempTableData = resetSelected(originTableData.tableData);
-  console.log('after reset selected: ', tempTableData);
   tempTableData = originTableData.tableData.filter((data) => {
     // max commission, already done in api query
     // identity, already done in api query
     // max unclaimed eras
     if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
-      console.log('maxUnclaimedEras: ', filtered.maxUnclaimedEras);
       return false;
     }
     // prev.slashes
     if (!filtered.previousSlashes && data.hasSlash) {
-      console.log('previousSlashes: ', filtered.previousSlashes);
       return false;
     }
     // is sub identity
     if (!filtered.isSubIdentity && data.isSubIdentity) {
-      // console.log('isSubIdentity: ', filtered.isSubIdentity);
       return false;
     }
     // historycal apy, already done in api query
     // min inclusion
     if (filtered.minInclusion && Number(data.eraInclusion.rate) < Number(filtered.minInclusion)) {
-      console.log('minInclusion: ', filtered.minInclusion);
       return false;
     }
     // has telemetry, already done in api query
@@ -340,22 +381,24 @@ export const advancedConditionFilter = (
     // oneKv, already done in api query
     return true;
   });
-  console.log('in advancedConditionFilter, tableData: ', tempTableData);
 
   /**
    * decentralized filter
    */
   if (filtered.decentralized) {
+    // filtered the data, make sure the candidates are all decentralized
     tempTableData = decentralizedFilter(tempTableData);
   }
 
   /**
    * Selected part
    */
+  // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
 
   // if support us
   if (isSupportUs) {
+    // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
       tempTableData,
       tempSelectableCount,
@@ -366,13 +409,13 @@ export const advancedConditionFilter = (
   }
 
   if (filtered.highApy) {
-    // select by the order of high apy
+    // select the high apy validators, decrease the selectable number
     const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
     tempTableData = highApySelectResult.tableData;
   } else {
-    // random select
-    const ramdomSelectResult = randomSelect(tempTableData, tempSelectableCount);
-    tempTableData = ramdomSelectResult.tableData;
+    // random select the rest available count
+    const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
+    tempTableData = randomSelectResult.tableData;
   }
 
   tempTableData = sortSelectedTableData(tempTableData);

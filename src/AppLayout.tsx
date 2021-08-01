@@ -155,12 +155,12 @@ const Footer: React.FC = () => {
         </ColumnDiv>
         <ColumnDiv>
           <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" target="_blank" rel="noreferrer">
+            <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
               <SocialMediaWrapper>
                 <TwitterIcon width="36px" height="36px" />
               </SocialMediaWrapper>
             </a>
-            <a href="https://github.com/cryptolab-network" target="_blank" rel="noreferrer">
+            <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
               <SocialMediaWrapper>
                 <GithubIcon width="36px" height="36px" />
               </SocialMediaWrapper>

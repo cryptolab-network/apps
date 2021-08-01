@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, useContext } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -24,15 +24,8 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
-import {
-  CryptolabDOTValidators,
-  CryptolabKSMValidators,
-  CandidateNumber,
-} from '../../../utils/constants/Validator';
-import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { apiGetAllValidator } from '../../../apis/Validator';
 import { useAppSelector } from '../../../hooks';
-import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
 import { NetworkStatus } from '../../../utils/status/Network';
@@ -189,11 +182,9 @@ const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const Staking = () => {
-  // context
-  const polkadotApi = useContext(ApiContext);
   // redux
   let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
-  let { status: walletStatus, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
+  let { selectedAccount } = useAppSelector((state) => state.wallet);
 
   // state
   const [inputData, setInputData] = useState({
@@ -384,10 +375,6 @@ const Staking = () => {
       },
     ];
   }, []);
-
-  const candidateNumber = useMemo(() => {
-    return getCandidateNumber(networkName);
-  }, [networkName]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -585,7 +572,6 @@ const Staking = () => {
     let tempId = Math.round(Math.random() * 100);
     const validatorAxiosSource = axios.CancelToken.source();
     (async () => {
-      console.log('network status: ', networkStatus);
       if (networkStatus === NetworkStatus.READY) {
         try {
           console.log('========== API Launch ==========', tempId);
@@ -598,7 +584,6 @@ const Staking = () => {
           console.log('========== API RETURN ==========', tempId);
           console.log('result: ', result);
           setApiFilteredTableData(handleValidatorStrategy(result));
-          //TODO: result need to be filtered
         } catch (error) {
           console.log('error: ', error);
         }
@@ -619,6 +604,7 @@ const Staking = () => {
    */
   useEffect(() => {
     if (advancedOption.advanced) {
+      console.log('this is advanced strategy mode');
       // is in advanced mode, need advanced filtered
       const filteredResult = advancedConditionFilter(
         {
@@ -634,11 +620,10 @@ const Staking = () => {
       setFinalFilteredTableData(filteredResult);
     } else {
       // is in basic mode, no further filtered needed, we handle it in each strategy filter already
-      console.log('no further filtered needed, first item: ', apiFilteredTableData.tableData[0]);
+      console.log('this is basic strategy mode');
       setFinalFilteredTableData(apiFilteredTableData);
     }
     setApiLoading(false);
-    // TODO: table data loading end
   }, [
     advancedSetting.maxUnclaimedEras,
     advancedSetting.previousSlashes,
@@ -649,10 +634,6 @@ const Staking = () => {
     advancedOption.supportus,
     networkName,
   ]);
-
-  useEffect(() => {
-    console.log('filtered account: ', selectedAccount);
-  }, [selectedAccount]);
 
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -744,7 +725,6 @@ const Staking = () => {
     advancedSetting.identity,
     advancedSetting.previousSlashes,
     advancedSetting.isSubIdentity,
-    advancedSetting.telemetry,
     advancedSetting.highApy,
     advancedSetting.decentralized,
     advancedSetting.oneKv,
