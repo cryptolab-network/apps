@@ -139,11 +139,12 @@ export const highApySelect = (tableData: ITableData[], selectableCount: number):
     selectableData.splice(idx, 1);
     selectableCount--;
   }
-
   return { tableData, selectableCount };
 };
 
 export const apyCalculation = (tableData: ITableData[]): IStakingInfo => {
+  //
+  tableData = sortSelectedTableData(tableData);
   let tempApyInfo = {
     sum: 0,
     counter: 0,
@@ -240,8 +241,6 @@ export const lowRiskStrategy = (
   }
   // random select the rest available count
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
-  // sort the tagged one to the top of the list
-  resultData = sortSelectedTableData(resultData);
 
   // get the calculation apy of the selected validators
   return apyCalculation(resultData);
@@ -271,7 +270,6 @@ export const highApyStrategy = (
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
-  tempTableData = sortSelectedTableData(tempTableData);
 
   // get the calculation apy of the selected validators
   return apyCalculation(tempTableData);
@@ -299,6 +297,7 @@ export const decentralStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
@@ -417,8 +416,6 @@ export const advancedConditionFilter = (
     const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
     tempTableData = randomSelectResult.tableData;
   }
-
-  tempTableData = sortSelectedTableData(tempTableData);
 
   return apyCalculation(tempTableData);
 };
