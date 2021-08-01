@@ -7,9 +7,10 @@ import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import Identicon from '@polkadot/react-identicon';
 import { ApiContext } from '../Api';
+import { formatBalance } from '@polkadot/util';
 
 const WalletSelect: React.FC = () => {
-  const { hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } = useContext(ApiContext);
+  const { network, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } = useContext(ApiContext);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -74,6 +75,28 @@ const WalletSelect: React.FC = () => {
     height: 100%;
   `;
 
+  const _formatBalance = useCallback(
+    (value: string = '0') => {
+      if (network === 'Kusama') {
+        return (formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM'
+        }));
+      } else if (network === 'Polkadot') {
+        return (formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT'
+        }));
+      } else {
+        return (formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit'
+        }));
+      }
+    },
+    [network]
+  )
+
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
     if (accounts.length === 0) {
@@ -101,7 +124,7 @@ const WalletSelect: React.FC = () => {
             <WalletLayout>
               <div>{account.name}</div>
               <div>
-                Balance : <BalanceNumber>{account.balances.totalBalance}</BalanceNumber>
+                Balance : <BalanceNumber>{_formatBalance(account.balances.totalBalance)}</BalanceNumber>
               </div>
             </WalletLayout>
           </li>
@@ -137,7 +160,7 @@ const WalletSelect: React.FC = () => {
             <WalletLayout>
               <div>{selectedAccount.name}</div>
               <div>
-                Balance: <BalanceTitle>{selectedAccount?.balances?.totalBalance}</BalanceTitle>
+                Balance: <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
                 {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
                 {/* <BalanceNumber>123</BalanceNumber> */}
               </div>

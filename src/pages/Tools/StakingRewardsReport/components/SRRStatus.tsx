@@ -6,7 +6,7 @@ import { ReactComponent as EmptyStashIcon } from '../../../../assets/images/empt
 import { ReactComponent as DownloadIcon } from '../../../../assets/images/download.svg';
 import { ReactComponent as FiltersIcon } from '../../../../assets/images/filter.svg';
 import SRRHeader from "./SRRHeader";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useContext } from "react";
 import StashInformation from "./StashInformation";
 import { useEffect } from "react";
 import { apiGetStashRewards, IStashRewards } from "../../../../apis/StashRewards";
@@ -24,6 +24,7 @@ import Tooltip from "../../../../components/Tooltip";
 import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
 import { validateAddress } from "../../../../utils/string";
+import { ApiContext } from "../../../../components/Api";
 
 interface ISRRFilters {
   stashId: string;
@@ -96,7 +97,8 @@ enum State {
 }
 
 const SRRContent = ({ filters }) => {
-  const networkName = useAppSelector(state => state.network.name);
+  // const networkName = useAppSelector(state => state.network.name);
+  const { network: networkName } = useContext(ApiContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
