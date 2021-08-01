@@ -5,6 +5,7 @@ import { isElementAccessExpression } from 'typescript';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from '../../../utils/constants/Validator';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
+import { domainToASCII } from 'url';
 
 const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
@@ -130,7 +131,19 @@ export const randomSelect = (tableData: ITableData[], selectableCount: number): 
   return { tableData, selectableCount };
 };
 
-export const highApySelect = () => {};
+export const highApySelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
+  let selectableData = tableData.filter((data) => data.select === false);
+  selectableData = sortHighApy(selectableData);
+
+  for (let idx = 0; idx < selectableData.length && selectableCount > 0; idx++) {
+    let selectedIdx = tableData.findIndex((data) => data.account === selectableData[idx].account);
+    tableData[selectedIdx].select = true;
+    selectableData.splice(idx, 1);
+    selectableCount--;
+  }
+
+  return { tableData, selectableCount };
+};
 
 export const apyCalculation = (tableData: ITableData[]): IStakingInfo => {
   let tempApyInfo = {
@@ -196,6 +209,13 @@ export const decentralizedFilter = (tableData: ITableData[]): ITableData[] => {
   return filteredTableData;
 };
 
+export const resetSelected = (tableData: ITableData[]): ITableData[] => {
+  return tableData.map((data) => {
+    data.select = false;
+    return data;
+  });
+};
+
 /**
  * for strategy selection filter
  */
@@ -210,6 +230,7 @@ export const lowRiskStrategy = (
   );
 
   let tempTableData = formatToTableData(filteredResult);
+  tempTableData = resetSelected(tempTableData);
   let tempSelectableCount = getCandidateNumber(networkName);
 
   // if support us
@@ -282,7 +303,9 @@ export const advancedConditionFilter = (
   networkName: string
 ): IStakingInfo => {
   console.log('origin table data: ', originTableData);
-  let tempTableData = originTableData.tableData.filter((data) => {
+  let tempTableData = resetSelected(originTableData.tableData);
+  console.log('after reset selected: ', tempTableData);
+  tempTableData = originTableData.tableData.filter((data) => {
     // max commission, already done in api query
     // identity, already done in api query
     // max unclaimed eras
@@ -322,14 +345,6 @@ export const advancedConditionFilter = (
   }
 
   /**
-   * high apy, sorting
-   */
-  // if (filtered.highApy) {
-  //   console.log('high apy sorting');
-
-  // }
-
-  /**
    * Selected part
    */
   let tempSelectableCount = getCandidateNumber(networkName);
@@ -347,7 +362,8 @@ export const advancedConditionFilter = (
 
   if (filtered.highApy) {
     // select by the order of high apy
-    tempTableData = sortHighApy(tempTableData);
+    const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
+    tempTableData = highApySelectResult.tableData;
   } else {
     // random select
     const ramdomSelectResult = randomSelect(tempTableData, tempSelectableCount);

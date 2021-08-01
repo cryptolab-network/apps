@@ -589,8 +589,7 @@ const Staking = () => {
       if (networkStatus === NetworkStatus.READY) {
         try {
           console.log('========== API Launch ==========', tempId);
-          // TODO: table data loading start
-          // TODO: remove page:0, size: 60
+          setApiLoading(true);
           let result = await apiGetAllValidator({
             params: apiParams.network,
             query: { ...apiParams },
@@ -600,10 +599,11 @@ const Staking = () => {
           console.log('result: ', result);
           setApiFilteredTableData(handleValidatorStrategy(result));
           //TODO: result need to be filtered
-          setApiLoading(false);
         } catch (error) {
           console.log('error: ', error);
         }
+      } else {
+        setApiLoading(true);
       }
     })();
     return () => {
@@ -621,7 +621,12 @@ const Staking = () => {
     if (advancedOption.advanced) {
       // is in advanced mode, need advanced filtered
       const filteredResult = advancedConditionFilter(
-        advancedSetting,
+        {
+          maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
+          previousSlashes: advancedSetting.previousSlashes,
+          isSubIdentity: advancedSetting.isSubIdentity,
+          minInclusion: advancedSetting.minInclusion,
+        },
         apiFilteredTableData,
         advancedOption.supportus,
         networkName
@@ -632,8 +637,19 @@ const Staking = () => {
       console.log('no further filtered needed, first item: ', apiFilteredTableData.tableData[0]);
       setFinalFilteredTableData(apiFilteredTableData);
     }
+    console.log('WHY false ?');
+    setApiLoading(false);
     // TODO: table data loading end
-  }, [advancedSetting, apiFilteredTableData, advancedOption.advanced, advancedOption.supportus, networkName]);
+  }, [
+    advancedSetting.maxUnclaimedEras,
+    advancedSetting.previousSlashes,
+    advancedSetting.isSubIdentity,
+    advancedSetting.minInclusion,
+    apiFilteredTableData,
+    advancedOption.advanced,
+    advancedOption.supportus,
+    networkName,
+  ]);
 
   useEffect(() => {
     console.log('filtered account: ', selectedAccount);
@@ -694,11 +710,11 @@ const Staking = () => {
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
-                <TitleSwitch
+                {/* <TitleSwitch
                   title="Is Telemeterable"
                   checked={advancedSetting.telemetry}
                   onChange={handleAdvancedFilter('telemetry')}
-                />
+                /> */}
                 <TitleSwitch
                   title="Highest Avg.APY"
                   checked={advancedSetting.highApy}
