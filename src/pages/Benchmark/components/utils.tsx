@@ -250,16 +250,21 @@ export const lowRiskStrategy = (
 
   return apyCalculation(resultData);
 };
-export const highApyFilter = (
+export const highApyStrategy = (
   data: IValidator[],
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
   // TODO: update filter, below is draft from lowRiskStrategy
   console.log('first one:', data[0]);
-  let filteredResult = data.filter((validator) => true);
-  let formatedData = formatToTableData(filteredResult);
-  return { tableData: [], calculatedApy: 0 };
+  let tempSelectableCount = getCandidateNumber(networkName);
+  let tempTableData = formatToTableData(data);
+  tempTableData = resetSelected(tempTableData);
+  const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
+  tempTableData = highApySelectResult.tableData;
+  tempTableData = sortSelectedTableData(tempTableData);
+
+  return apyCalculation(tempTableData);
 };
 export const decentralStrategy = (
   data: IValidator[],

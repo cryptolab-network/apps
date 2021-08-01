@@ -39,7 +39,7 @@ import { NetworkStatus } from '../../../utils/status/Network';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
   lowRiskStrategy,
-  highApyFilter,
+  highApyStrategy,
   decentralStrategy,
   oneKvStrategy,
   customStrategy,
@@ -555,7 +555,7 @@ const Staking = () => {
         case Strategy.LOW_RISK:
           return lowRiskStrategy(data, advancedOption.supportus, networkName);
         case Strategy.HIGH_APY:
-          return highApyFilter(data, advancedOption.supportus, networkName);
+          return highApyStrategy(data, advancedOption.supportus, networkName);
         case Strategy.DECENTRAL:
           return decentralStrategy(data, advancedOption.supportus, networkName);
         case Strategy.ONE_KV:
@@ -637,7 +637,6 @@ const Staking = () => {
       console.log('no further filtered needed, first item: ', apiFilteredTableData.tableData[0]);
       setFinalFilteredTableData(apiFilteredTableData);
     }
-    console.log('WHY false ?');
     setApiLoading(false);
     // TODO: table data loading end
   }, [
