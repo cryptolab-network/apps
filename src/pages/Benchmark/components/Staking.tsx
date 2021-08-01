@@ -35,7 +35,8 @@ import { useAppSelector } from '../../../hooks';
 import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
-import { NetworkStatus } from '../../../utils/status/Network';
+// import { NetworkStatus } from '../../../utils/status/Network';
+import { ApiState } from '../../../components/Api';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
   lowRiskFilter,
@@ -46,7 +47,7 @@ import {
   advancedConditionFilter,
 } from './utils';
 import { IValidator } from '../../../apis/Validator';
-import { BooleanLiteral } from 'typescript';
+import { formatBalance } from '@polkadot/util';
 
 enum Strategy {
   LOW_RISK,
@@ -181,12 +182,8 @@ const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const Staking = () => {
-  // context
-  const polkadotApi = useContext(ApiContext);
-  // redux
-  let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
-  let { status: walletStatus, filteredAccounts, selectedAccount } = useAppSelector((state) => state.wallet);
-
+  // context 
+  let { network: networkName, apiState: networkStatus, accounts: filteredAccounts, selectedAccount } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState({
     stakeAmount: 0,
@@ -209,6 +206,28 @@ const Staking = () => {
   const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
   const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
 
+  const _formatBalance = useCallback(
+    (value: string = '0') => {
+      if (networkName === 'Kusama') {
+        return (formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM'
+        }));
+      } else if (networkName === 'Polkadot') {
+        return (formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT'
+        }));
+      } else {
+        return (formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit'
+        }));
+      }
+    },
+    [networkName]
+  )
+
   // memo
   const strategyOptions = useMemo(() => {
     // while advanced option is on, no strategy options is available
@@ -224,10 +243,10 @@ const Staking = () => {
       ];
     }
   }, [advancedOption.advanced]);
-
+  
   const walletBalance = useMemo(() => {
     if (selectedAccount) {
-      return selectedAccount.balance;
+      return _formatBalance(selectedAccount?.balances?.totalBalance);
     } else {
       return '(please select a wallet)';
     }
@@ -570,7 +589,7 @@ const Staking = () => {
   useEffect(() => {
     (async () => {
       console.log('network status: ', networkStatus);
-      if (networkStatus === NetworkStatus.READY) {
+      if (networkStatus === ApiState.READY) {
         console.log('========== API Launch ==========');
         // TODO: table data loading start
         let result = await apiGetAllValidator({

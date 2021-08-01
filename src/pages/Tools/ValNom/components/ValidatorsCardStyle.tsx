@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as PeopleIcon } from '../../../../assets/images/people.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
@@ -20,6 +20,7 @@ import {
   toValidatorFilter,
 } from './filterOptions';
 import { Grid } from '@material-ui/core';
+import { ApiContext } from '../../../../components/Api';
 
 const ValNomHeader = () => {
   return (
@@ -44,7 +45,8 @@ interface iOption {
 
 const ValidatorGrid = ({ filters, validators }) => {
   const history = useHistory();
-  const networkName = useAppSelector((state) => state.network.name);
+  // const networkName = useAppSelector((state) => state.network.name);
+  const { network: networkName } = useContext(ApiContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const _formatBalance = useCallback(
     (value: any) => {
@@ -191,7 +193,8 @@ const ValNomContent = () => {
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
   });
-  const networkName = useAppSelector((state) => state.network.name);
+  // const networkName = useAppSelector((state) => state.network.name);
+  const { network: networkName } = useContext(ApiContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {
