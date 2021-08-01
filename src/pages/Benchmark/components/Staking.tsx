@@ -38,15 +38,15 @@ import StakingHeader from './Header';
 import { NetworkStatus } from '../../../utils/status/Network';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
-  lowRiskFilter,
+  lowRiskStrategy,
   highApyFilter,
-  decentralFilter,
-  oneKvFilter,
-  customFilter,
+  decentralStrategy,
+  oneKvStrategy,
+  customStrategy,
   advancedConditionFilter,
 } from './utils';
 import { IValidator } from '../../../apis/Validator';
-import { BooleanLiteral } from 'typescript';
+import axios from 'axios';
 
 enum Strategy {
   LOW_RISK,
@@ -99,6 +99,9 @@ export interface ITableData {
   commission: number;
   hasSlash: boolean;
   isSubIdentity: boolean;
+  identity: {
+    parent: string | null | undefined;
+  };
 }
 
 interface IApiParams {
@@ -546,24 +549,24 @@ const Staking = () => {
     }
   };
 
-  const handleValidatorFiltered = useCallback(
+  const handleValidatorStrategy = useCallback(
     (data: IValidator[]): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskFilter(data, advancedSetting, advancedOption.supportus, networkName);
+          return lowRiskStrategy(data, advancedOption.supportus, networkName);
         case Strategy.HIGH_APY:
-          return highApyFilter(data, advancedSetting, advancedOption.supportus, networkName);
+          return highApyFilter(data, advancedOption.supportus, networkName);
         case Strategy.DECENTRAL:
-          return decentralFilter(data, advancedSetting, advancedOption.supportus, networkName);
+          return decentralStrategy(data, advancedOption.supportus, networkName);
         case Strategy.ONE_KV:
-          return oneKvFilter(data, advancedSetting, advancedOption.supportus, networkName);
+          return oneKvStrategy(data, advancedOption.supportus, networkName);
         case Strategy.CUSTOM:
-          return customFilter(data, advancedSetting, advancedOption.supportus, networkName);
+          return customStrategy(data, advancedOption.supportus, networkName);
         default:
           return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value, advancedSetting, advancedOption.supportus, networkName]
+    [inputData.strategy.value, advancedOption.supportus, networkName]
   );
 
   // while network changing, set api parameter for network
@@ -579,24 +582,37 @@ const Staking = () => {
    * to get the new list
    */
   useEffect(() => {
+    let tempId = Math.round(Math.random() * 100);
+    const validatorAxiosSource = axios.CancelToken.source();
     (async () => {
       console.log('network status: ', networkStatus);
       if (networkStatus === NetworkStatus.READY) {
-        console.log('========== API Launch ==========');
-        // TODO: table data loading start
-        // TODO: remove page:0, size: 60
-        let result = await apiGetAllValidator({
-          params: apiParams.network,
-          query: { ...apiParams },
-        });
-        console.log('========== API RETURN ==========');
-        console.log('result: ', result);
-        setApiFilteredTableData(handleValidatorFiltered(result));
-        //TODO: result need to be filtered
-        setApiLoading(false);
+        try {
+          console.log('========== API Launch ==========', tempId);
+          // TODO: table data loading start
+          // TODO: remove page:0, size: 60
+          let result = await apiGetAllValidator({
+            params: apiParams.network,
+            query: { ...apiParams },
+            cancelToken: validatorAxiosSource.token,
+          });
+          console.log('========== API RETURN ==========', tempId);
+          console.log('result: ', result);
+          setApiFilteredTableData(handleValidatorStrategy(result));
+          //TODO: result need to be filtered
+          setApiLoading(false);
+        } catch (error) {
+          console.log('error: ', error);
+        }
       }
     })();
-  }, [networkStatus, apiParams, handleValidatorFiltered]);
+    return () => {
+      if (networkStatus === NetworkStatus.READY) {
+        console.log('========== API CANCEL ==========', tempId);
+        validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
+      }
+    };
+  }, [networkStatus, apiParams, handleValidatorStrategy]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
@@ -607,7 +623,8 @@ const Staking = () => {
       const filteredResult = advancedConditionFilter(
         advancedSetting,
         apiFilteredTableData,
-        advancedOption.supportus
+        advancedOption.supportus,
+        networkName
       );
       setFinalFilteredTableData(filteredResult);
     } else {
@@ -616,7 +633,7 @@ const Staking = () => {
       setFinalFilteredTableData(apiFilteredTableData);
     }
     // TODO: table data loading end
-  }, [advancedSetting, apiFilteredTableData, advancedOption.advanced, advancedOption.supportus]);
+  }, [advancedSetting, apiFilteredTableData, advancedOption.advanced, advancedOption.supportus, networkName]);
 
   useEffect(() => {
     console.log('filtered account: ', selectedAccount);

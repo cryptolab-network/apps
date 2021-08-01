@@ -25,7 +25,6 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
         eraStatusBar[idx] = eraStatus.unclaimed;
       }
     }
-
     return {
       select: false,
       account: validator.id,
@@ -46,6 +45,9 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
       commission: validator.info.commission,
       hasSlash: validator.slashes.length > 0 ? true : false,
       isSubIdentity: validator.identity.sub ? true : false,
+      identity: {
+        parent: validator.identity.parent,
+      },
     };
   });
 };
@@ -64,6 +66,24 @@ export const sortSelectedTableData = (
       return selectedFirst ? -1 : 1;
     } else if (!a.select && b.select) {
       return selectedFirst ? 1 : -1;
+    } else {
+      return 0;
+    }
+  });
+  return tableData;
+};
+
+enum OrderBy {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export const sortHighApy = (tableData: ITableData[], orderBy: OrderBy = OrderBy.DESC): ITableData[] => {
+  tableData.sort((a, b) => {
+    if (a.avgAPY > b.avgAPY) {
+      return orderBy === OrderBy.DESC ? -1 : 1;
+    } else if (a.avgAPY < b.avgAPY) {
+      return orderBy === OrderBy.DESC ? 1 : -1;
     } else {
       return 0;
     }
@@ -110,9 +130,77 @@ export const randomSelect = (tableData: ITableData[], selectableCount: number): 
   return { tableData, selectableCount };
 };
 
-export const lowRiskFilter = (
+export const highApySelect = () => {};
+
+export const apyCalculation = (tableData: ITableData[]): IStakingInfo => {
+  let tempApyInfo = {
+    sum: 0,
+    counter: 0,
+  };
+  for (let idx = 0; idx < tableData.length; idx++) {
+    if (tableData[idx].select) {
+      tempApyInfo.sum += tableData[idx].avgAPY;
+      tempApyInfo.counter += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    tableData: tableData,
+    calculatedApy: tempApyInfo.counter >= 1 ? tempApyInfo.sum / tempApyInfo.counter : 0,
+  };
+};
+
+export const decentralizedFilter = (tableData: ITableData[]): ITableData[] => {
+  let parentGroup = {};
+  let filteredTableData: ITableData[] = [];
+  tableData.forEach((data) => {
+    // no parent, no group
+    if (
+      data.identity.parent === null ||
+      data.identity.parent === undefined ||
+      data.identity.parent.length === 0
+    ) {
+      filteredTableData.push(data);
+    } else {
+      if (`${data.identity.parent}` in parentGroup) {
+        parentGroup = {
+          ...parentGroup,
+          [`${data.identity.parent}`]: [...parentGroup[`${data.identity.parent}`], data.account],
+        };
+      } else {
+        parentGroup = {
+          ...parentGroup,
+          [`${data.identity.parent}`]: [data.account],
+        };
+      }
+    }
+  });
+  console.log('parent group: ', parentGroup);
+  console.log('length before push parent: ', filteredTableData.length);
+  console.log('big: ', tableData.map((data) => data.account).join(','));
+  Object.keys(parentGroup).forEach((key) => {
+    const randomIdx = Math.floor(Math.random() * parentGroup[`${key}`].length);
+    let findIdx = tableData.findIndex((data) => data.account === parentGroup[`${key}`][randomIdx]);
+    if (findIdx !== -1) {
+      // console.log('findIdx: ', findIdx);
+      // console.log('find data: ', tableData[findIdx]);
+      filteredTableData.push(tableData[findIdx]);
+    } else {
+      console.error('cannot find the index, this shouldn not happen');
+    }
+  });
+  console.log('length after push parent: ', filteredTableData.length);
+
+  return filteredTableData;
+};
+
+/**
+ * for strategy selection filter
+ */
+export const lowRiskStrategy = (
   data: IValidator[],
-  advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
@@ -138,90 +226,60 @@ export const lowRiskFilter = (
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
   // sort the tagged one to the top of the list
   resultData = sortSelectedTableData(resultData);
-  let tempApyInfo = {
-    sum: 0,
-    counter: 0,
-  };
 
-  for (let idx = 0; idx < resultData.length; idx++) {
-    if (resultData[idx].select) {
-      tempApyInfo.sum += resultData[idx].avgAPY;
-      tempApyInfo.counter += 1;
-    } else {
-      break;
-    }
-  }
-
-  return {
-    tableData: resultData,
-    calculatedApy: tempApyInfo.counter >= 1 ? tempApyInfo.sum / tempApyInfo.counter : 0,
-  };
+  return apyCalculation(resultData);
 };
 export const highApyFilter = (
   data: IValidator[],
-  advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskFilter
+  // TODO: update filter, below is draft from lowRiskStrategy
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
   let formatedData = formatToTableData(filteredResult);
   return { tableData: [], calculatedApy: 0 };
 };
-export const decentralFilter = (
+export const decentralStrategy = (
   data: IValidator[],
-  advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskFilter
+  // TODO: update filter, below is draft from lowRiskStrategy
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
   let formatedData = formatToTableData(filteredResult);
   return { tableData: [], calculatedApy: 0 };
 };
-export const oneKvFilter = (
+export const oneKvStrategy = (
   data: IValidator[],
-  advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskFilter
+  // TODO: update filter, below is draft from lowRiskStrategy
   console.log('first one:', data[0]);
   let filteredResult = data.filter((validator) => true);
   let formatedData = formatToTableData(filteredResult);
   return { tableData: [], calculatedApy: 0 };
 };
-export const customFilter = (
+export const customStrategy = (
   data: IValidator[],
-  advanced: IAdvancedSetting,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  // TODO: update filter, below is draft from lowRiskFilter
+  // TODO: update filter, below is draft from lowRiskStrategy
   console.log('first one:', data[0]);
-  let filteredResult = data.filter((validator) => true);
-  let formatedData = formatToTableData(filteredResult);
-  return { tableData: [], calculatedApy: 0 };
+  return apyCalculation(formatToTableData(data));
 };
 
-export const highApySoring = (tableData: ITableData[]): ITableData[] => {
-  return tableData.sort((a, b) => {
-    if (a.avgAPY > b.avgAPY) {
-      return -1;
-    } else if (a.avgAPY < b.avgAPY) {
-      return 1;
-    } else {
-      return 0;
-    }
-  });
-};
-
+/**
+ * for advanaced
+ */
 export const advancedConditionFilter = (
   filtered: IAdvancedSetting,
   originTableData: IStakingInfo,
-  isSupportUs: boolean
+  isSupportUs: boolean,
+  networkName: string
 ): IStakingInfo => {
   console.log('origin table data: ', originTableData);
   let tempTableData = originTableData.tableData.filter((data) => {
@@ -229,19 +287,23 @@ export const advancedConditionFilter = (
     // identity, already done in api query
     // max unclaimed eras
     if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
+      console.log('maxUnclaimedEras: ', filtered.maxUnclaimedEras);
       return false;
     }
     // prev.slashes
     if (!filtered.previousSlashes && data.hasSlash) {
+      console.log('previousSlashes: ', filtered.previousSlashes);
       return false;
     }
     // is sub identity
     if (!filtered.isSubIdentity && data.isSubIdentity) {
+      // console.log('isSubIdentity: ', filtered.isSubIdentity);
       return false;
     }
     // historycal apy, already done in api query
     // min inclusion
     if (filtered.minInclusion && Number(data.eraInclusion.rate) < Number(filtered.minInclusion)) {
+      console.log('minInclusion: ', filtered.minInclusion);
       return false;
     }
     // has telemetry, already done in api query
@@ -250,27 +312,49 @@ export const advancedConditionFilter = (
     // oneKv, already done in api query
     return true;
   });
+  console.log('in advancedConditionFilter, tableData: ', tempTableData);
 
-  // high apy, sorting
-  if (filtered.highApy) {
-    console.log('apy sorting trigger');
-    // TODO: maybe we don't sort, we just selected the top rank node instead?
-    tempTableData = highApySoring(tempTableData);
+  /**
+   * decentralized filter
+   */
+  if (filtered.decentralized) {
+    tempTableData = decentralizedFilter(tempTableData);
   }
+
+  /**
+   * high apy, sorting
+   */
+  // if (filtered.highApy) {
+  //   console.log('high apy sorting');
+
+  // }
 
   /**
    * Selected part
    */
-  // support us
+  let tempSelectableCount = getCandidateNumber(networkName);
+
+  // if support us
   if (isSupportUs) {
-    // select support us
-    // TODO: select our node
-  }
-  if (filtered.decentralized) {
-    // TODO: select decentralized node
-  } else {
-    // TODO: select random node
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
   }
 
-  return { tableData: [], calculatedApy: 0 };
+  if (filtered.highApy) {
+    // select by the order of high apy
+    tempTableData = sortHighApy(tempTableData);
+  } else {
+    // random select
+    const ramdomSelectResult = randomSelect(tempTableData, tempSelectableCount);
+    tempTableData = ramdomSelectResult.tableData;
+  }
+
+  tempTableData = sortSelectedTableData(tempTableData);
+
+  return apyCalculation(tempTableData);
 };
