@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as PeopleIcon } from '../../../../assets/images/people.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
-import { useAppSelector } from '../../../../hooks';
 import { formatBalance } from '@polkadot/util';
 import Account from '../../../../components/Account';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+// import { ApiContext } from '../../../../components/Api';
+import { DataContext } from '../../components/Data';
 
 const ValNomHeader = () => {
   return (
@@ -25,7 +26,7 @@ const ValNomHeader = () => {
 };
 
 const ValidatorTable = () => {
-  const networkName = useAppSelector(state => state.network.name);
+  const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const _formatBalance = useCallback((value: any) => {
     if (chain === 'KSM') {

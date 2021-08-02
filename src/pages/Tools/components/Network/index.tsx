@@ -1,16 +1,16 @@
 import { useState, useRef, useMemo, useEffect, useContext } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
-import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
-import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
+import { ReactComponent as KSMLogo } from '../../../../assets/images/ksm-logo.svg';
+import { ReactComponent as DOTLogo } from '../../../../assets/images/dot-logo.svg';
+import { ReactComponent as DropDownIcon } from '../../../../assets/images/dropdown.svg';
 import './index.css';
 import styled from 'styled-components';
-import { ApiContext } from '../Api';
+import { DataContext } from '../Data';
 
-const NetworkSelect: React.FC = () => {
+const Network: React.FC = () => {
   // context
-  const {network, changeNetwork} = useContext(ApiContext);
+  const {network, changeNetwork} = useContext(DataContext);
   // state
   const [isOpen, setOpen] = useState(false);
   //ref
@@ -132,7 +132,7 @@ const NetworkSelect: React.FC = () => {
   );
 };
 
-export default NetworkSelect;
+export default Network;
 
 const ButtonLayout = styled.div`
   background-color: transparent;

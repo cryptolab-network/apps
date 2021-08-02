@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useContext } from "react";
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import styled from "styled-components";
 import { formatBalance } from '@polkadot/util';
 import { INominator } from "../../../apis/Validator";
 import Account from "../../../components/Account";
-import { useAppSelector } from "../../../hooks";
-import { NominatorsStatus } from "../../../redux/nominatorsSlice";
+import { DataContext } from "../components/Data";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -31,8 +30,7 @@ export const NominatorGrid = ({
       }));
     }
   }, [chain]);
-  const isNominatedLoaded: NominatorsStatus = useAppSelector((state) => state.nominators.status);
-  const nominatorDetail = useAppSelector((state) => state.nominators.elements);
+  const { isNominatedLoaded, nominators: nominatorDetail } = useContext(DataContext);
   const [cols, setCols] = useState(8);
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
@@ -41,7 +39,7 @@ export const NominatorGrid = ({
     return nominators.map((n: INominator, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
-      if(isNominatedLoaded === NominatorsStatus.FULFILLED) {
+      if(isNominatedLoaded) {
         return (
           <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
             <AccountLayout>
