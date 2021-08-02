@@ -20,7 +20,8 @@ import {
   toValidatorFilter,
 } from './filterOptions';
 import { Grid } from '@material-ui/core';
-import { ApiContext } from '../../../../components/Api';
+// import { ApiContext } from '../../../../components/Api';
+import { DataContext } from '../../components/Data';
 
 const ValNomHeader = () => {
   return (
@@ -46,7 +47,7 @@ interface iOption {
 const ValidatorGrid = ({ filters, validators }) => {
   const history = useHistory();
   // const networkName = useAppSelector((state) => state.network.name);
-  const { network: networkName } = useContext(ApiContext);
+  const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const _formatBalance = useCallback(
     (value: any) => {
@@ -194,7 +195,7 @@ const ValNomContent = () => {
     strategy: { label: filterOptions[0], value: 1 },
   });
   // const networkName = useAppSelector((state) => state.network.name);
-  const { network: networkName } = useContext(ApiContext);
+  const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {

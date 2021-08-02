@@ -29,6 +29,8 @@ import { getUrls } from './utils/url';
 import OneKV from './pages/Tools/OneKV';
 import { ApiContext } from './components/Api';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
+import Data from './pages/Tools/components/Data';
+import Network from './pages/Tools/components/Network';
 
 // header
 const Header: React.FC = () => {
@@ -104,7 +106,7 @@ const ToolsHeader: React.FC = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
-        <NetworkSelect />
+        <Network />
       </HeaderRightDiv>
     </HeaderDiv>
   );
@@ -194,9 +196,9 @@ const Footer: React.FC = () => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
-
+  const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
   const mainRender = useMemo(() => {
-    if (window.location.host.split('.')[0] === keys.toolDomain) {
+    if (isToolsSite) {
       return (
         <>
           <ToolsHeader />
@@ -251,11 +253,13 @@ const AppLayout = () => {
       );
     }
   }, []);
+  
   return (
     <>
       <GradientLight>
         <BrowserRouter>
-            <Api>{mainRender}</Api>
+          {isToolsSite? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
+            {/* <Api>{mainRender}</Api> */}
         </BrowserRouter>
         {/* <StarAnimation id="stars" />
         <StarAnimation id="stars2" />

@@ -24,7 +24,8 @@ import Tooltip from "../../../../components/Tooltip";
 import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
 import { validateAddress } from "../../../../utils/string";
-import { ApiContext } from "../../../../components/Api";
+// import { ApiContext } from "../../../../components/Api";
+import { DataContext } from "../../components/Data";
 
 interface ISRRFilters {
   stashId: string;
@@ -98,7 +99,7 @@ enum State {
 
 const SRRContent = ({ filters }) => {
   // const networkName = useAppSelector(state => state.network.name);
-  const { network: networkName } = useContext(ApiContext);
+  const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
