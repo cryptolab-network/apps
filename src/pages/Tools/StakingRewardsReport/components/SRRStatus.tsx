@@ -15,7 +15,6 @@ import { Grid } from '@material-ui/core';
 import SRRTable from "./SRRTable";
 import IconButton from "../../../../components/Button/IconButton";
 import { apiGetNominatedValidators, IValidator } from "../../../../apis/Validator";
-import { useAppSelector } from "../../../../hooks";
 import { formatBalance } from '@polkadot/util';
 import { useHistory } from "react-router-dom";
 import ValidNominator from "../../../../components/ValidNominator";
@@ -24,7 +23,7 @@ import Tooltip from "../../../../components/Tooltip";
 import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
 import { validateAddress } from "../../../../utils/string";
-import { ApiContext } from "../../../../components/Api";
+import { DataContext } from "../../components/Data";
 
 interface ISRRFilters {
   stashId: string;
@@ -97,8 +96,7 @@ enum State {
 }
 
 const SRRContent = ({ filters }) => {
-  // const networkName = useAppSelector(state => state.network.name);
-  const { network: networkName } = useContext(ApiContext);
+  const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
