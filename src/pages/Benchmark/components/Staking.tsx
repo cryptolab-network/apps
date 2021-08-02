@@ -582,7 +582,6 @@ const Staking = () => {
             cancelToken: validatorAxiosSource.token,
           });
           console.log('========== API RETURN ==========', tempId);
-          console.log('result: ', result);
           setApiFilteredTableData(handleValidatorStrategy(result));
         } catch (error) {
           console.log('error: ', error);
@@ -604,7 +603,6 @@ const Staking = () => {
    */
   useEffect(() => {
     if (advancedOption.advanced) {
-      console.log('this is advanced strategy mode');
       // is in advanced mode, need advanced filtered
       const filteredResult = advancedConditionFilter(
         {
@@ -612,28 +610,39 @@ const Staking = () => {
           previousSlashes: advancedSetting.previousSlashes,
           isSubIdentity: advancedSetting.isSubIdentity,
           minInclusion: advancedSetting.minInclusion,
+          highApy: advancedSetting.highApy,
+          decentralized: advancedSetting.decentralized,
         },
         apiFilteredTableData,
         advancedOption.supportus,
         networkName
       );
       setFinalFilteredTableData(filteredResult);
-    } else {
-      // is in basic mode, no further filtered needed, we handle it in each strategy filter already
-      console.log('this is basic strategy mode');
-      setFinalFilteredTableData(apiFilteredTableData);
+      setApiLoading(false);
     }
-    setApiLoading(false);
   }, [
     advancedSetting.maxUnclaimedEras,
     advancedSetting.previousSlashes,
     advancedSetting.isSubIdentity,
     advancedSetting.minInclusion,
+    advancedSetting.highApy,
+    advancedSetting.decentralized,
     apiFilteredTableData,
     advancedOption.advanced,
     advancedOption.supportus,
     networkName,
   ]);
+
+  /**
+   * user changing the advanced setting mannually, we set the new api query parameter
+   */
+  useEffect(() => {
+    if (!advancedOption.advanced) {
+      // is in basic mode, no further filtered needed, we handle it in each strategy filter already
+      setFinalFilteredTableData(apiFilteredTableData);
+      setApiLoading(false);
+    }
+  }, [apiFilteredTableData, advancedOption.advanced]);
 
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -800,7 +809,11 @@ const Staking = () => {
             </ContentBlockLeft>
             <ContentBlockRight>
               <Balance>Calculated APY</Balance>
-              <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
+              {!apiLoading ? (
+                <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
+              ) : (
+                <ScaleLoader />
+              )}
             </ContentBlockRight>
           </ContentBlock>
         </ContentBlockWrap>
@@ -841,13 +854,17 @@ const Staking = () => {
         {advancedFilterResult}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
-            <Button
-              title="Nominate"
-              onClick={() => {
-                console.log('Nominate');
-              }}
-              style={{ width: 220 }}
-            />
+            {!apiLoading ? (
+              <Button
+                title="Nominate"
+                onClick={() => {
+                  console.log('Nominate');
+                }}
+                style={{ width: 220 }}
+              />
+            ) : (
+              <ScaleLoader />
+            )}
           </div>
           <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
         </FooterLayout>
