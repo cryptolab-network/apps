@@ -7,8 +7,6 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
-import { useAppSelector } from '../../../../hooks';
-// import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
 
 import { apiGetAllOneKVValidator, IOneKVInvalidValidator, IOneKVValidator, IOneKVValidators } from '../../../../apis/OneKV/validator';
@@ -120,7 +118,6 @@ const ValNomContent = ({ valid, chain, validators, activeEra, validValidators, a
 };
 
 export const OneKVStatus = () => {
-  // const networkName = useAppSelector(state => state.network.name);
   const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IOneKVValidator[]>([]);

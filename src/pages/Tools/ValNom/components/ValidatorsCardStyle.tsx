@@ -5,7 +5,6 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import { ReactComponent as OptionIcon } from '../../../../assets/images/option-icon.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
-import { useAppSelector } from '../../../../hooks';
 import { formatBalance } from '@polkadot/util';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
@@ -46,7 +45,6 @@ interface iOption {
 
 const ValidatorGrid = ({ filters, validators }) => {
   const history = useHistory();
-  // const networkName = useAppSelector((state) => state.network.name);
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const _formatBalance = useCallback(
@@ -194,7 +192,6 @@ const ValNomContent = () => {
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
   });
-  // const networkName = useAppSelector((state) => state.network.name);
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);

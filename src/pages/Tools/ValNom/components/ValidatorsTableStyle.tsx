@@ -5,7 +5,6 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
-import { useAppSelector } from '../../../../hooks';
 import { formatBalance } from '@polkadot/util';
 import Account from '../../../../components/Account';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
@@ -27,7 +26,6 @@ const ValNomHeader = () => {
 };
 
 const ValidatorTable = () => {
-  // const networkName = useAppSelector(state => state.network.name);
   const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const _formatBalance = useCallback((value: any) => {

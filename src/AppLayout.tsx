@@ -2,7 +2,6 @@ import { useMemo, useEffect, useCallback, useContext } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
-import NetworkSelect from './components/NetworkSelect';
 import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
@@ -18,16 +17,12 @@ import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
 import Management from './pages/Management';
 import { Portal as ToolsPortal } from './pages/Tools/Portal';
-import { useAppSelector, useAppDispatch } from './hooks';
-import { getNominators } from './redux';
 import Api from './components/Api';
 import ValNom from './pages/Tools/ValNom';
-// import { networkChanged } from './redux';
 import keys from './config/keys';
 import ValidatorStatus from './pages/Tools/Validators';
 import { getUrls } from './utils/url';
 import OneKV from './pages/Tools/OneKV';
-import { ApiContext } from './components/Api';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
@@ -69,24 +64,6 @@ const Header: React.FC = () => {
 
 // tools header
 const ToolsHeader: React.FC = () => {
-  // const networkName = useAppSelector((state) => state.network.name);
-  const { network: networkName, changeNetwork } = useContext(ApiContext);
-  const allNominators = useAppSelector((state) => state.nominators);
-  console.log(allNominators);
-
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(getNominators(networkName));
-  }, [networkName, dispatch]);
-
-  const handleNetworkChange = useCallback(
-    (networkName: string) => {
-      console.log('current select network: ', networkName);
-      changeNetwork(networkName);
-    },
-    [dispatch]
-  );
-
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
