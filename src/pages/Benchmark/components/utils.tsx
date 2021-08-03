@@ -114,7 +114,7 @@ export const supportCryptoLabSelect = (
 };
 
 export const randomSelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
-  let selectableData = tableData.filter((data) => data.select === false);
+  let selectableData = tableData.filter((data) => data.select === false && data.commission <= 20);
 
   for (; selectableCount > 0 && selectableData.length > 0; ) {
     let selectIdx = Math.floor(Math.random() * selectableData.length); // random from 0~ length-1
