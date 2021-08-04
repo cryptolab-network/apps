@@ -34,6 +34,9 @@ export const Portal = () => {
           title={'Staking Rewards'}
           detail="Exportable reports of your staking rewards."
           className="card-layout"
+          onClick = {() => {
+            history.push("/rewards");
+          }}
         />
       </CardsLayout>
       <GrantCardContent className="card-layout" />

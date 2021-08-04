@@ -1,5 +1,5 @@
 import { CancelToken } from 'axios';
-import { singleValidatorAxios, validatorAxios } from '../../instance/Axios';
+import { nominatedValidatorsAxios, singleValidatorAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
   commissionChange: number;
@@ -110,4 +110,13 @@ export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidat
     } else {
       throw new Error('The stash is not a validaor');
     }
+  });
+export const apiGetNominatedValidators = (data: IValidatorRequest): Promise<IValidator[]> =>
+  nominatedValidatorsAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+    return res.data;
+  });
+
+export const apiGetValidatorUnclaimedEras = (data: IValidatorRequest): Promise<number[]> =>
+  singleValidatorAxios.get(`${data.params}`).then((res) => {
+    return res.data;
   });

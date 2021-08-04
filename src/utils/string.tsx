@@ -1,3 +1,5 @@
+const { decodeAddress, encodeAddress } = require('@polkadot/keyring');
+const { hexToU8a, isHex } = require('@polkadot/util');
 
 export function shortenStashId(address): string {
   let shortenAddress = address;
@@ -6,3 +8,16 @@ export function shortenStashId(address): string {
   }
   return shortenAddress;
 };
+
+export function validateAddress(address): boolean {
+  try {
+    encodeAddress(
+      isHex(address)
+        ? hexToU8a(address)
+        : decodeAddress(address)
+    );
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

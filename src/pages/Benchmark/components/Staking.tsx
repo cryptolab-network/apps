@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useContext } from 'react';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -25,10 +25,11 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { useAppSelector } from '../../../hooks';
+import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
-import { NetworkStatus } from '../../../utils/status/Network';
+// import { NetworkStatus } from '../../../utils/status/Network';
+import { ApiState } from '../../../components/Api';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
   lowRiskStrategy,
@@ -42,6 +43,7 @@ import {
 import { IValidator } from '../../../apis/Validator';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { formatBalance } from '@polkadot/util';
 
 enum Strategy {
   LOW_RISK,
@@ -185,10 +187,8 @@ const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const Staking = () => {
-  // redux
-  let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
-  let { selectedAccount } = useAppSelector((state) => state.wallet);
-
+  // context
+  let { network: networkName, apiState: networkStatus, selectedAccount } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState({
     stakeAmount: 0,
@@ -219,6 +219,28 @@ const Staking = () => {
     selectableCount: 0,
   });
 
+  const _formatBalance = useCallback(
+    (value: string = '0') => {
+      if (networkName === 'Kusama') {
+        return formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM',
+        });
+      } else if (networkName === 'Polkadot') {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT',
+        });
+      } else {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit',
+        });
+      }
+    },
+    [networkName]
+  );
+
   // memo
   const strategyOptions = useMemo(() => {
     // while advanced option is on, no strategy options is available
@@ -237,11 +259,11 @@ const Staking = () => {
 
   const walletBalance = useMemo(() => {
     if (selectedAccount) {
-      return selectedAccount.balance;
+      return _formatBalance(selectedAccount?.balances?.totalBalance);
     } else {
       return '(please select a wallet)';
     }
-  }, [selectedAccount]);
+  }, [_formatBalance, selectedAccount]);
 
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
@@ -620,7 +642,7 @@ const Staking = () => {
     let tempId = Math.round(Math.random() * 100);
     const validatorAxiosSource = axios.CancelToken.source();
     (async () => {
-      if (networkStatus === NetworkStatus.READY) {
+      if (networkStatus === ApiState.READY) {
         try {
           console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
@@ -639,7 +661,7 @@ const Staking = () => {
       }
     })();
     return () => {
-      if (networkStatus === NetworkStatus.READY) {
+      if (networkStatus === ApiState.READY) {
         console.log('========== API CANCEL ==========', tempId);
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }

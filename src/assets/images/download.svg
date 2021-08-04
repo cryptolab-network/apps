@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18.602" height="18.602" viewBox="0 0 18.602 18.602">
+    <defs>
+        <style>
+            .cls-140{fill:#fff}.cls-141{fill:#2e3843}
+        </style>
+    </defs>
+    <g id="Group_4552" transform="translate(-934 -586.299)">
+        <g id="fill-system" transform="translate(934 586.299)">
+            <path id="Path_3136" d="M112.455 97H98.146A2.149 2.149 0 0 0 96 99.146v14.309a2.149 2.149 0 0 0 2.146 2.146h14.309a2.149 2.149 0 0 0 2.146-2.146V99.146A2.149 2.149 0 0 0 112.455 97z" class="cls-140" transform="translate(-96 -97)"/>
+            <path id="Path_3137" d="M352 290.431a1.431 1.431 0 1 0 1.431-1.431 1.431 1.431 0 0 0-1.431 1.431z" class="cls-140" transform="translate(-346.276 -284.707)"/>
+            <path id="Path_3138" d="M544 610.431a1.431 1.431 0 1 0 1.431-1.431 1.431 1.431 0 0 0-1.431 1.431z" class="cls-140" transform="translate(-533.984 -597.553)"/>
+        </g>
+        <g id="Group_4551">
+            <g id="Group_4550" transform="translate(-16.7)">
+                <rect id="Rectangle_176" width="1.4" height="9" class="cls-141" rx=".7" transform="translate(959.301 589)"/>
+                <rect id="Rectangle_177" width="1.4" height="7" class="cls-141" rx=".7" transform="translate(960.991 598.86) rotate(135)"/>
+                <rect id="Rectangle_178" width="1.4" height="7" class="cls-141" rx=".7" transform="translate(963.961 593.91) rotate(45)"/>
+            </g>
+            <rect id="Rectangle_179" width="1.4" height="9" class="cls-141" rx=".7" transform="translate(947.801 600.8) rotate(90)"/>
+        </g>
+    </g>
+</svg>

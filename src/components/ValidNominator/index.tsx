@@ -89,13 +89,15 @@ const ValidNominator: React.FC<IValidNominator> = ({
       />
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
-        <Identicon value={address} size={35} theme={'polkadot'} />
-        <FavoriteLayout>
+        <div onClick={(e) => {e.stopPropagation();}}>
+          <Identicon value={address} size={35} theme={'polkadot'} />
+        </div>
+        <FavoriteLayout onClick={(e) => {e.stopPropagation();}}>
           <Favorite 
           address={address}
           _favorite={favorite}/>
         </FavoriteLayout>
-        <StatusLayout>
+        <StatusLayout onClick={(e) => {e.stopPropagation();}}>
           <Status />
         </StatusLayout>
         <Name>{shortenName}</Name>
