@@ -4,6 +4,9 @@ import { eraStatus } from '../../../utils/status/Era';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from '../../../utils/constants/Validator';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
+import _ from 'lodash';
+
+const ROUND = 10;
 
 const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
@@ -26,7 +29,7 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
     }
     return {
       select: false,
-      account: validator.id,
+      account: validator.identity.display,
       selfStake: validator.info.selfStake,
       eraInclusion: {
         rate: ((activeCount / total) * 100).toFixed(2),
@@ -114,19 +117,50 @@ export const supportCryptoLabSelect = (
 };
 
 export const randomSelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
-  let selectableData = tableData.filter((data) => data.select === false && data.commission <= 20);
+  // filter out the selectable and commission <= 20's validators
+  const tableDataOrigin = _.cloneDeep(tableData);
+  const selectableDataOrigin = tableData.filter((data) => data.select === false && data.commission <= 20);
+  const selectableCountOrigin = selectableCount;
 
-  for (; selectableCount > 0 && selectableData.length > 0; ) {
-    let selectIdx = Math.floor(Math.random() * selectableData.length); // random from 0~ length-1
-    let selectedIdx = tableData.findIndex((data) => data.account === selectableData[selectIdx].account);
-    tableData[selectedIdx].select = true;
-    selectableData.splice(selectIdx, 1);
-    selectableCount--;
+  interface ITempScore {
+    data: ITableData[];
+    score: number;
+    count: number;
   }
 
-  console.log('after random select, selectableCount:', selectableCount);
+  let roundScoreInfo: ITempScore[] = [];
 
-  return { tableData, selectableCount };
+  // run ROUND loop, choose the top apy (score) one
+  for (let round = 0; round < ROUND; round++) {
+    let tempTableData = _.cloneDeep(tableDataOrigin);
+    let tempSelectableData = selectableDataOrigin.slice();
+    let tempSelectableCount = selectableCountOrigin;
+    for (; tempSelectableCount > 0 && tempSelectableData.length > 0; ) {
+      let selectIdx = Math.floor(Math.random() * tempSelectableData.length); // random from 0~ length-1
+      let selectedIdx = tempTableData.findIndex(
+        (data) => data.account === tempSelectableData[selectIdx].account
+      );
+      tempTableData[selectedIdx].select = true;
+      tempSelectableData.splice(selectIdx, 1);
+      tempSelectableCount--;
+    }
+    roundScoreInfo.push({
+      data: tempTableData,
+      score: apyCalculation(tempTableData).calculatedApy,
+      count: tempSelectableCount,
+    });
+  }
+
+  roundScoreInfo.sort((a, b) => {
+    if (a.score > b.score) {
+      return -1;
+    } else if (a.score < b.score) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+  return { tableData: roundScoreInfo[0].data, selectableCount: roundScoreInfo[0].count };
 };
 
 export const highApySelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
