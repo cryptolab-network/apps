@@ -37,9 +37,11 @@ import {
   oneKvStrategy,
   customStrategy,
   advancedConditionFilter,
+  apyCalculation,
 } from './utils';
 import { IValidator } from '../../../apis/Validator';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 enum Strategy {
   LOW_RISK,
@@ -72,6 +74,7 @@ export interface IAdvancedSetting {
 export interface IStakingInfo {
   tableData: ITableData[];
   calculatedApy: number;
+  selectableCount?: number;
 }
 
 export interface ITableData {
@@ -208,10 +211,12 @@ const Staking = () => {
   const [apiFilteredTableData, setApiFilteredTableData] = useState<IStakingInfo>({
     tableData: [],
     calculatedApy: 0,
+    selectableCount: 0,
   });
   const [finalFilteredTableData, setFinalFilteredTableData] = useState<IStakingInfo>({
     tableData: [],
     calculatedApy: 0,
+    selectableCount: 0,
   });
 
   // memo
@@ -256,6 +261,18 @@ const Staking = () => {
     }
   }, [networkName]);
 
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
     if (advancedOption.advanced) {
@@ -283,7 +300,38 @@ const Staking = () => {
         Header: 'Select',
         accessor: 'select',
         maxWidth: 150,
-        Cell: ({ value }) => <span>{value ? <HandTrue /> : <HandFalse />}</span>,
+        Cell: ({ value, row, rows }) => {
+          return (
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                let tempTableData = finalFilteredTableData;
+                if (tempTableData.tableData[row.index].select) {
+                  // unselect
+                  tempTableData.tableData[row.index].select = false;
+                  tempTableData.selectableCount =
+                    tempTableData.selectableCount !== undefined
+                      ? (tempTableData.selectableCount += 1)
+                      : tempTableData.selectableCount;
+                  tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                  setFinalFilteredTableData(tempTableData);
+                } else {
+                  // select
+                  if (tempTableData.selectableCount !== undefined && tempTableData.selectableCount > 0) {
+                    tempTableData.tableData[row.index].select = true;
+                    tempTableData.selectableCount -= 1;
+                    tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                    setFinalFilteredTableData(tempTableData);
+                  } else {
+                    notifyWarn('maximum nomination has reached.');
+                  }
+                }
+              }}
+            >
+              {value ? <HandTrue /> : <HandFalse />}
+            </span>
+          );
+        },
       },
       {
         Header: 'Account',
@@ -374,7 +422,7 @@ const Staking = () => {
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
       },
     ];
-  }, []);
+  }, [finalFilteredTableData]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -617,6 +665,7 @@ const Staking = () => {
         advancedOption.supportus,
         networkName
       );
+      console.log('filterResult: ', filteredResult);
       setFinalFilteredTableData(filteredResult);
       setApiLoading(false);
     }

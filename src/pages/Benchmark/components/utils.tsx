@@ -142,7 +142,7 @@ export const highApySelect = (tableData: ITableData[], selectableCount: number):
   return { tableData, selectableCount };
 };
 
-export const apyCalculation = (tableData: ITableData[]): IStakingInfo => {
+export const apyCalculation = (tableData: ITableData[], selectableCount?: number): IStakingInfo => {
   //
   tableData = sortSelectedTableData(tableData);
   let tempApyInfo = {
@@ -161,6 +161,7 @@ export const apyCalculation = (tableData: ITableData[]): IStakingInfo => {
   return {
     tableData: tableData,
     calculatedApy: tempApyInfo.counter >= 1 ? tempApyInfo.sum / tempApyInfo.counter : 0,
+    selectableCount: selectableCount,
   };
 };
 
@@ -411,11 +412,13 @@ export const advancedConditionFilter = (
     // select the high apy validators, decrease the selectable number
     const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
     tempTableData = highApySelectResult.tableData;
+    tempSelectableCount = highApySelectResult.selectableCount;
   } else {
     // random select the rest available count
     const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
     tempTableData = randomSelectResult.tableData;
+    tempSelectableCount = randomSelectResult.selectableCount;
   }
 
-  return apyCalculation(tempTableData);
+  return apyCalculation(tempTableData, tempSelectableCount);
 };
