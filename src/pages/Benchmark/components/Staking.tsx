@@ -422,7 +422,7 @@ const Staking = () => {
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
       },
     ];
-  }, [finalFilteredTableData]);
+  }, [finalFilteredTableData, notifyWarn]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
