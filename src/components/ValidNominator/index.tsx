@@ -4,9 +4,10 @@ import ReactTooltip from 'react-tooltip';
 import { ReactComponent as FavoriteIcon } from '../../assets/images/favorite-selected.svg';
 import { ReactComponent as FavoriteUnselectedIcon } from '../../assets/images/favorite-unselected.svg';
 import { ReactComponent as UnclaimedPayoutsIcon } from '../../assets/images/unclaimed-payouts.svg';
+import { ReactComponent as ActiveBannerIcon } from '../../assets/images/active-banner.svg';
 import '../../css/ToolTip.css';
 import { shortenStashId } from '../../utils/string';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { lsSetFavorite, lsUnsetFavorite } from '../../utils/localStorage';
 import { IStatusChange } from '../../apis/Validator';
 
@@ -70,6 +71,18 @@ const ValidNominator: React.FC<IValidNominator> = ({
     }
   };
 
+  const activeBanner = useMemo(() => {
+    if (parseFloat(activeAmount) > 0) {
+      return (
+        <ActiveBannerLayout>
+          <ActiveBannerIcon />
+        </ActiveBannerLayout>
+      );
+    } else {
+      return (<div></div>);
+    }
+  }, []);
+
   const shortenName = shortenStashId(name);
   return (
     <ValidNominatorLayout onClick={onClick}>
@@ -89,9 +102,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
       />
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
-        <div onClick={(e) => {e.stopPropagation();}}>
-          <Identicon value={address} size={35} theme={'polkadot'} />
-        </div>
+        {activeBanner}
         <FavoriteLayout onClick={(e) => {e.stopPropagation();}}>
           <Favorite 
           address={address}
@@ -100,6 +111,9 @@ const ValidNominator: React.FC<IValidNominator> = ({
         <StatusLayout onClick={(e) => {e.stopPropagation();}}>
           <Status />
         </StatusLayout>
+        <div onClick={(e) => {e.stopPropagation();}}>
+          <Identicon value={address} size={35} theme={'polkadot'} />
+        </div>
         <Name>{shortenName}</Name>
         <ValuePart>
           <EnhanceValue data-for="activeAmount" data-tip="active amount">
@@ -163,6 +177,8 @@ const Name = styled.div`
   font-style: normal;
   text-align: center;
   color: white;
+  word-wrap: break-word;
+  width: 90%
 `;
 const ValuePart = styled.div`
   font-family: Montserrat;
@@ -191,7 +207,16 @@ const FavoriteLayout = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  margin: -80px 48px 0 0;
+  margin: -29px 36px 0 0;
+`;
+
+const ActiveBannerLayout = styled.div`
+  flex: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin: 0 0 0 0;
 `;
 
 const StatusLayout = styled.div`
