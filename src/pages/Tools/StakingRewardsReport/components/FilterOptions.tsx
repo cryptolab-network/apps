@@ -1,13 +1,16 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import styled from "styled-components";
-import moment from "moment";
+import styled from 'styled-components';
+import moment from 'moment';
+import { useCallback } from 'react';
+import { useState } from 'react';
 
 const FilterOptions = ({ startDate, endDate, currency }) => {
-  const handleDateChange = (date) => {
-    startDate = moment(date).format('YYYY-MM-DD');
-  };
+  const [sDate, setSDate] = useState(startDate);
+  const handleDateChange = useCallback((date) => {
+    setSDate(moment(date).format('YYYY-MM-DD'));
+  }, []);
   const filtersDOM = useMemo(() => {
     return (
       <FilterOptionLayout>
@@ -15,27 +18,27 @@ const FilterOptions = ({ startDate, endDate, currency }) => {
         <HorizontalBar />
         <AdvancedOption>
           <FilterItem>
-            <div style={{color: 'white'}}>
-            <MuiPickersUtilsProvider utils={MomentUtils}>
-              <DatePicker
-                disableToolbar
-                variant="inline"
-                format="YYYY-MM-DD"
-                margin="normal"
-                id="date-picker-inline"
-                label="Start Date"
-                value={moment(startDate).format('YYYY-MM-DD')}
-                onChange={handleDateChange}
-              />
-            </MuiPickersUtilsProvider>
+            <div style={{ color: 'white' }}>
+              <MuiPickersUtilsProvider utils={MomentUtils}>
+                <DatePicker
+                  disableToolbar
+                  variant="inline"
+                  format="YYYY-MM-DD"
+                  margin="normal"
+                  id="date-picker-inline"
+                  label="Start Date"
+                  value={sDate}
+                  onChange={handleDateChange}
+                />
+              </MuiPickersUtilsProvider>
             </div>
           </FilterItem>
         </AdvancedOption>
       </FilterOptionLayout>
     );
-  }, [handleDateChange, startDate]);
+  }, [handleDateChange, sDate]);
 
-  return (<div>{filtersDOM}</div>);
+  return <div>{filtersDOM}</div>;
 };
 
 export default FilterOptions;
@@ -70,7 +73,7 @@ const FiltersTitle = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: white;
-  `;
+`;
 
 const HorizontalBar = styled.div`
   width: 100%;
@@ -82,17 +85,4 @@ const HorizontalBar = styled.div`
 const FilterItem = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const FilterTitle = styled.div`
-  height: 14px;
-  font-family: Montserrat;
-  font-size: 11px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.27;
-  letter-spacing: normal;
-  text-align: left;
-  color: #535a62;
 `;
