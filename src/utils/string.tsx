@@ -9,7 +9,7 @@ export function shortenStashId(address): string {
   return shortenAddress;
 };
 
-export function validateAddress(address): boolean {
+export function validateAddress(address: string): boolean {
   try {
     encodeAddress(
       isHex(address)
