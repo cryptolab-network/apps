@@ -4,19 +4,7 @@ import keys from '../../config/keys';
 import { web3Enable, isWeb3Injected, web3Accounts } from '@polkadot/extension-dapp';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
-
-const networkInfo = [
-  {
-    name: 'Polkadot',
-    prefix: 0,
-    genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
-  },
-  {
-    name: 'Kusama',
-    prefix: 2,
-    genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-  },
-];
+import { NetworkConfig } from '../../utils/constants/Network';
 
 export enum ApiState {
   DISCONNECTED,
@@ -52,15 +40,15 @@ export interface ApiProps {
 }
 
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
-  const info = networkInfo.find((info) => info.name === network);
+  const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
-    return account.genesisHash === null || account.genesisHash === info?.genesisHash;
+    return account.genesisHash === null || account.genesisHash === networkConfig?.genesisHash;
   });
 
   return filtered.map((account) => {
     const address = encodeAddress(
       isHex(account.address) ? hexToU8a(account.address) : decodeAddress(account.address),
-      info?.prefix
+      networkConfig?.prefix
     );
     return {
       address,
@@ -99,7 +87,7 @@ export { api };
 export const ApiContext = React.createContext({} as unknown as ApiProps);
 
 const Api: React.FC = (props) => {
-  const [network, setNetwork] = useState('Kusama');
+  const [network, setNetwork] = useState(keys.defaultNetwork);
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiState, setApiState] = useState(ApiState.DISCONNECTED);
   const [hasWeb3Injected, setHasWeb3Injected] = useState(isWeb3Injected);
@@ -191,7 +179,7 @@ const Api: React.FC = (props) => {
   }, [isWeb3AccessDenied, hasWeb3Injected, apiState, network]);
 
   useEffect(() => {
-    const endpoint = network === 'Polkadot' ? keys.polkadotWSS : keys.kusamaWSS;
+    const endpoint = NetworkConfig[network]?.wss;
     const provider = new WsProvider(endpoint, 1000);
     api = new ApiPromise({ provider });
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiGetAllNominators } from '../../../../apis/Nominator';
+import keys from '../../../../config/keys';
+import { NetworkConfig } from '../../../../utils/constants/Network';
 
 export interface DataProps {
   network: string;
@@ -12,7 +14,7 @@ export interface DataProps {
 export const DataContext = React.createContext({} as unknown as DataProps);
 
 const Data: React.FC = (props) => {
-  const [network, setNetwork] = useState('Kusama');
+  const [network, setNetwork] = useState(keys.defaultNetwork);
   const [nominators, setNominators] = useState({} as unknown as {});
   const [isNominatedLoaded, setIsNominatedLoaded] = useState(false);
 
@@ -32,7 +34,7 @@ const Data: React.FC = (props) => {
     setIsNominatedLoaded(false);
     apiGetAllNominators({
       params: {
-        chain: network === 'Kusama' ? 'KSM' : 'DOT',
+        chain: NetworkConfig[network].token,
       },
     })
       .then((result) => {

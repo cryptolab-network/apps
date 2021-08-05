@@ -115,6 +115,7 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
 
     switch (network) {
       case 'Kusama':
+      case 'Westend':
         mainValue = (type === 'era') ? 6 : 1;
         mainUnit = (type === 'era') ? ' hrs' : ' hr';
         if (leftHour > 0) {

@@ -5,6 +5,8 @@ export const networkCapitalCodeName = (inputNetworkName: string): string => {
     return 'KSM';
   } else if (String(inputNetworkName).toLowerCase() === NetworkNameLowerCase.DOT) {
     return 'DOT';
+  } else if (String(inputNetworkName).toLowerCase() === NetworkNameLowerCase.WND) {
+    return 'WND';
   } else {
     return '---';
   }

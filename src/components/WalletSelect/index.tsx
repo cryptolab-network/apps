@@ -7,7 +7,6 @@ import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import Identicon from '@polkadot/react-identicon';
 import { ApiContext } from '../Api';
-import { formatBalance } from '@polkadot/util';
 import { balanceUnit } from '../../utils/string';
 
 const WalletSelect: React.FC = () => {

@@ -7,9 +7,9 @@ import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
 import Account from '../../../../components/Account';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
-// import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
 import { balanceUnit } from '../../../../utils/string';
+import { NetworkConfig } from '../../../../utils/constants/Network';
 
 const ValNomHeader = () => {
   return (
@@ -27,7 +27,7 @@ const ValNomHeader = () => {
 
 const ValidatorTable = () => {
   const { network: networkName } = useContext(DataContext);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const chain = NetworkConfig[networkName].token;
   const _formatBalance = useCallback((value: any) => {
     return (<span>{balanceUnit(chain, value)}</span>);
   }, [chain]);
