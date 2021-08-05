@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { formatBalance } from '@polkadot/util';
 import { ReactComponent as ActiveIcon } from '../../../../assets/images/active.svg';
 import { ReactComponent as InactiveIcon } from '../../../../assets/images/inactive.svg';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
@@ -8,6 +7,7 @@ import styled from "styled-components";
 import moment from "moment";
 import { IOneKVValidator } from "../../../../apis/OneKV/validator";
 import Table from "../../../../components/Table";
+import { balanceUnit } from "../../../../utils/string";
 
 const ValidatorTable = ({filter, chain, validators}) => {
   const history = useHistory();
@@ -15,17 +15,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
     history.push(`/validator/${id}/${chain}`);
   }, [chain, history]);
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (<span>{formatBalance(value, {
-        decimals: 12,
-        withUnit: 'KSM'
-      })}</span>);
-    } else if (chain === 'DOT') {
-      return (<span>{formatBalance(value, {
-        decimals: 10,
-        withUnit: 'DOT'
-      })}</span>);
-    }
+    return (<span>{balanceUnit(chain, value)}</span>);
   }, [chain]);
   const columns = useMemo(() => {
     return [

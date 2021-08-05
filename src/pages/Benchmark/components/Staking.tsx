@@ -24,6 +24,7 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
+import { hasValues} from '../../../utils/helper';
 import {
   CryptolabDOTValidators,
   CryptolabKSMValidators,
@@ -31,7 +32,6 @@ import {
 } from '../../../utils/constants/Validator';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { useAppSelector } from '../../../hooks';
 import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
@@ -48,6 +48,8 @@ import {
 } from './utils';
 import { IValidator } from '../../../apis/Validator';
 import { formatBalance } from '@polkadot/util';
+import { ApiPromise } from '@polkadot/api';
+import { balanceUnit } from '../../../utils/string';
 
 enum Strategy {
   LOW_RISK,
@@ -57,9 +59,71 @@ enum Strategy {
   CUSTOM,
 }
 
+enum RewardDestinationType {
+  NULL,
+  STAKED,
+  STASH,
+  CONTROLLER,
+  ACCOUNT
+}
+
+const rewardDestinationOptions = [
+  {
+    label: '--- Select one ---', 
+    value: RewardDestinationType.NULL, 
+    isDisabled: true
+  },
+  {
+    label: 'Stash account (increase the amount at stake)', 
+    value: RewardDestinationType.STAKED
+  },
+  {
+    label: 'Stash account (do not increase the amount at stake)', 
+    value: RewardDestinationType.STASH
+  },
+  {
+    label: 'Controller account', 
+    value: RewardDestinationType.CONTROLLER
+  },
+  {
+    label: 'Specified payment account', 
+    value: RewardDestinationType.ACCOUNT
+  }
+];
+
+enum AccountRole {
+  VALIDATOR,
+  CONTROLLER,
+  NOMINATOR,
+  OTHER
+}
+
 interface IStrategy {
   label: string;
   value: Strategy;
+}
+
+interface IStakingInfo {
+  role: AccountRole;
+  controller: string | undefined;
+  nominators: string[];
+  rewardDestination: RewardDestinationType,
+  rewardDestinationAddress: string | null,
+  bonded: string;
+  redeemable: string;
+}
+
+// session and epoch are same.
+export interface IEraInfo {
+  activeEra: number;
+  activeEraStart: number;
+  currentEra: number;
+  currentSessionIndex: number;
+  eraLength: number;
+  eraProgress: number;
+  isEpoch: boolean;
+  sessionLength: number;
+  sessionPerEra: number;
 }
 
 export interface IAdvancedSetting {
@@ -181,11 +245,64 @@ const StrategyConfig = {
 const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
+const queryStakingInfo = async (address, api: ApiPromise) => {
+  const [info, isController] = await Promise.all([
+    api.derive.staking.account(address),
+    api.query.staking.ledger(address)
+  ]);
+
+  const role = (info.nextSessionIds.length !== 0) ? AccountRole.VALIDATOR : 
+    (!isController.isNone) ? AccountRole.CONTROLLER : 
+      (info.nominators.length !== 0) ? AccountRole.NOMINATOR : AccountRole.OTHER;
+
+  const rewardDestination = 
+    (info.rewardDestination.isStaked) ? RewardDestinationType.STAKED : 
+      (info.rewardDestination.isStash) ? RewardDestinationType.STASH : 
+        (info.rewardDestination.isController) ? RewardDestinationType.CONTROLLER : 
+          RewardDestinationType.ACCOUNT;
+  const rewardDestinationAddress = (rewardDestination === RewardDestinationType.ACCOUNT) ? info.rewardDestination.asAccount.toString() : null;
+  return {
+    role,
+    controller: info.controllerId?.toHuman(),
+    nominators: info.nominators.map((n) => n.toHuman()),
+    rewardDestination,
+    rewardDestinationAddress,
+    bonded: info.stakingLedger.total.unwrap().toHex(),
+    redeemable: (info.redeemable) ? info.redeemable.toHex() : '0'
+  }
+}
+
+const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
+  const {activeEra, activeEraStart, currentEra, eraLength, eraProgress, isEpoch, sessionLength, sessionsPerEra} = await api.derive.session.progress();
+  return {
+    activeEra: activeEra.toNumber(),
+    activeEraStart: activeEraStart.unwrap().toNumber(),
+    currentEra: currentEra.toNumber(),
+    currentSessionIndex: eraProgress.divRound(sessionLength).toNumber(),
+    eraLength: eraLength.toNumber(),
+    eraProgress: eraProgress.toNumber(),
+    isEpoch: isEpoch,
+    sessionLength: sessionLength.toNumber(),
+    sessionPerEra: sessionsPerEra.toNumber()
+  }
+}
+
+interface IOptions {
+  label: string,
+  value: Strategy | RewardDestinationType,
+  isDisabled?: boolean
+}
+interface IInputData {
+  stakeAmount: number,
+  strategy: IOptions,
+  rewardDestination: IOptions | null
+}
+
 const Staking = () => {
   // context 
-  let { network: networkName, apiState: networkStatus, accounts: filteredAccounts, selectedAccount } = useContext(ApiContext);
+  let { network: networkName, api: polkadotApi, apiState: networkStatus, accounts: filteredAccounts, selectedAccount } = useContext(ApiContext);
   // state
-  const [inputData, setInputData] = useState({
+  const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
     strategy: BASIC_DEFAULT_STRATEGY,
     rewardDestination: null,
@@ -205,25 +322,12 @@ const Staking = () => {
   const [apiLoading, setApiLoading] = useState(true);
   const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
   const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
+  const [stakingInfo, setStakingInfo] = useState<IStakingInfo>();
+  const [eraInfo, setEraInfo] = useState<IEraInfo>();
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      if (networkName === 'Kusama') {
-        return (formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM'
-        }));
-      } else if (networkName === 'Polkadot') {
-        return (formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT'
-        }));
-      } else {
-        return (formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit'
-        }));
-      }
+      return balanceUnit(networkName, value, true);
     },
     [networkName]
   )
@@ -270,6 +374,22 @@ const Staking = () => {
     }
   }, [networkName]);
 
+  const eraInfoDisplayDom = useMemo(() => {
+    if (eraInfo) {
+      return (
+        <>
+          <TimeCircle type="epoch" eraInfo={eraInfo} network={networkName} />
+          <TimeCircle type="era" eraInfo={eraInfo} network={networkName}/>
+        </>
+      )
+    } else {
+      return (
+        <>
+        </>
+      )
+    }
+  }, [eraInfo, networkName]);
+
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
     if (advancedOption.advanced) {
@@ -290,6 +410,22 @@ const Staking = () => {
       }));
     }
   }, [advancedOption.advanced]);
+
+  useEffect(() => {
+    if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
+      queryStakingInfo(selectedAccount.address, polkadotApi)
+      .then(setStakingInfo)
+      .catch(console.error);
+    }
+  }, [selectedAccount, networkStatus, setStakingInfo]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY) {
+      queryEraInfo(polkadotApi)
+      .then(setEraInfo)
+      .catch(console.error);
+    }
+  }, [networkStatus, networkName]);
 
   const columns = useMemo(() => {
     return [
@@ -410,6 +546,27 @@ const Staking = () => {
     []
   );
 
+  const renderRewardDestinationNode = useMemo(() => {
+    switch(inputData.rewardDestination?.value) {
+      case RewardDestinationType.STAKED:
+        return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
+      case RewardDestinationType.STASH:
+        return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
+      case RewardDestinationType.CONTROLLER:
+        // todo: Jack
+        if (stakingInfo?.controller) {
+          return (<Node title={'Controller'} address={stakingInfo?.controller} />);
+        } else {
+          return (<Node title={'controller account'} address='enter an address' />);
+        }
+      case RewardDestinationType.ACCOUNT:
+        // todo: Jack
+        return (<Node title={'Account'} address='enter an address' />);
+      default:
+        return (<></>);
+    }
+  }, [inputData, stakingInfo, selectedAccount]);
+
   /**
    * for Header, option toggle
    */
@@ -475,6 +632,7 @@ const Staking = () => {
         }
         break;
       case 'rewardDestination':
+        console.log(e);
         tmpValue = e;
         break;
       default:
@@ -573,6 +731,16 @@ const Staking = () => {
     },
     [inputData.strategy.value, advancedSetting]
   );
+  
+  /**
+   * handle nominate transaction
+   */
+  //  const handleNominate = useCallback(
+  //   () => {
+  //     console.log('Nominate');
+  //   },
+  //   [inputData]
+  //  );
 
   // while network changing, set api parameter for network
   useEffect(() => {
@@ -771,6 +939,13 @@ const Staking = () => {
               />
             </ContentBlockRight>
           </ContentBlock>
+          <BalanceContextBlock>
+            <DetailedBalance color='white'>Role: {stakingInfo?.role}</DetailedBalance>
+            <DetailedBalance color='white'>bonded: {_formatBalance(stakingInfo?.bonded)}</DetailedBalance>
+            <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
+            <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
+            <DetailedBalance color='white'>redeemable: {_formatBalance(stakingInfo?.redeemable)}</DetailedBalance>
+          </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
           </ArrowContainer>
@@ -809,18 +984,14 @@ const Staking = () => {
                       flex: 1,
                       width: '100%',
                     }}
-                    options={[
-                      { label: 'Specified payment account', value: 0, isDisabled: true },
-                      { label: 'wallet 001', value: 1 },
-                      { label: 'wallet 002', value: 2 },
-                    ]}
+                    options={rewardDestinationOptions}
                     value={inputData.rewardDestination}
                     onChange={handleInputChange('rewardDestination')}
                     theme="dark"
                   />
                 </RewardComponent>
                 <RewardComponent advanced={advancedOption.advanced}>
-                  <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+                  {renderRewardDestinationNode}
                 </RewardComponent>
               </DestinationWrap>
               <ContentBlockFooter style={{ minHeight: advancedOption.advanced ? 0 : 50 }} />
@@ -839,12 +1010,13 @@ const Staking = () => {
               style={{ width: 220 }}
             />
           </div>
-          <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
+          {/* <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." /> */}
         </FooterLayout>
       </CardHeader>
       <DashboardLayout>
-        <TimeCircle type="epoch" percentage={68} />
-        <TimeCircle type="era" percentage={75} />
+        {/* <TimeCircle type="epoch" eraInfo={eraInfo ? eraInfo : null} network={networkName} />
+        <TimeCircle type="era" eraInfo={eraInfo ? eraInfo : null} network={networkName}/> */}
+        {eraInfoDisplayDom}
       </DashboardLayout>
     </>
   );
@@ -854,7 +1026,7 @@ export default Staking;
 
 const ContentBlock = styled.div`
   background-color: white;
-  border-radius: 6px;
+  border-radius: 6px 6px 0px 0px;
   padding: 14px 25px 14px 25px;
   display: flex;
   justify-content: space-between;
@@ -864,6 +1036,38 @@ const ContentBlock = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
   }
+`;
+
+const BalanceContextBlock = styled.div`
+  background-color: #0b0d13;
+  border-radius: 0px 0px 6px 6px;
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+  align-content: space-between;
+  flex-wrap: wrap;
+  padding: 25px;
+  height: 62px;
+  width: 570px;
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+  }
+`
+
+type BalanceProps = {
+  color?: string;
+}
+
+const DetailedBalance = styled.div<BalanceProps>`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.23;
+  color: ${(props) => (props.color) ? props.color : 'black'};
 `;
 
 interface ContentBlockWrapProps {
@@ -969,7 +1173,7 @@ const LogoTitle = styled.div`
   line-height: 1.22;
 `;
 
-const Balance = styled.div`
+const Balance = styled.div<BalanceProps>`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;

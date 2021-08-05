@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState, useContext } from "react";
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import styled from "styled-components";
-import { formatBalance } from '@polkadot/util';
 import { INominator } from "../../../apis/Validator";
 import Account from "../../../components/Account";
 import { DataContext } from "../components/Data";
+import { balanceUnit } from "../../../utils/string";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -13,22 +13,7 @@ export const NominatorGrid = ({
   nominators
 }) => {
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
+    return balanceUnit(chain, value);
   }, [chain]);
   const { isNominatedLoaded, nominators: nominatorDetail } = useContext(DataContext);
   const [cols, setCols] = useState(8);

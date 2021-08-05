@@ -80,7 +80,7 @@ const queryBalances = async (accounts: IAccount[], api: ApiPromise) => {
           name: account.name,
           genesisHash: account.genesisHash,
           balances: {
-            totalBalance: balances.freeBalance.add(balances.freeBalance).toString(),
+            totalBalance: balances.freeBalance.add(balances.reservedBalance).toString(),
             freeBalance: balances.freeBalance.toString(),
             reservedBalance: balances.reservedBalance.toString(),
             lockedBalance: balances.lockedBalance.toString(),
@@ -111,6 +111,7 @@ const Api: React.FC = (props) => {
   const changeNetwork = useCallback(
     (target: string) => {
       if (target !== network) {
+        setApiState(ApiState.DISCONNECTED);
         setNetwork(target);
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);

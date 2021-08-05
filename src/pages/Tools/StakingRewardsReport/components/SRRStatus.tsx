@@ -15,14 +15,13 @@ import { Grid } from '@material-ui/core';
 import SRRTable from "./SRRTable";
 import IconButton from "../../../../components/Button/IconButton";
 import { apiGetNominatedValidators, IValidator } from "../../../../apis/Validator";
-import { formatBalance } from '@polkadot/util';
 import { useHistory } from "react-router-dom";
 import ValidNominator from "../../../../components/ValidNominator";
 import CustomScaleLoader from "../../../../components/Spinner/ScaleLoader";
 import Tooltip from "../../../../components/Tooltip";
 import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
-import { validateAddress } from "../../../../utils/string";
+import { balanceUnit, validateAddress } from "../../../../utils/string";
 import { DataContext } from "../../components/Data";
 
 interface ISRRFilters {
@@ -35,23 +34,7 @@ interface ISRRFilters {
 const ValidatorComponents = ({chain, validators}) => {
   const history = useHistory();
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      console.log(value);
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
+    return balanceUnit(chain, value);
   }, [chain]);
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {

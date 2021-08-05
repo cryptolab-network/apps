@@ -7,6 +7,7 @@ import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
+import { balanceUnit } from '../../../utils/string';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -36,22 +37,7 @@ const ValidatorStatusHeader = ({
     commission = lastEraInfo.commission;
   }
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
+    return balanceUnit(chain, value);
   }, [chain]);
   return (
     <HeaderLayout>
