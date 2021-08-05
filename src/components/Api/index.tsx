@@ -73,7 +73,7 @@ const accountTransform = (accounts: IAccount[], network: string): IAccount[] => 
 
 const queryBalances = async (accounts: IAccount[], api: ApiPromise) => {
   const temp = await Promise.all(
-    accounts.map((account) => 
+    accounts.map((account) =>
       api.derive.balances.all(account.address).then((balances) => {
         return {
           address: account.address,
@@ -84,14 +84,14 @@ const queryBalances = async (accounts: IAccount[], api: ApiPromise) => {
             freeBalance: balances.freeBalance.toString(),
             reservedBalance: balances.reservedBalance.toString(),
             lockedBalance: balances.lockedBalance.toString(),
-            availableBalance: balances.availableBalance.toString()
-          }
-        }
+            availableBalance: balances.availableBalance.toString(),
+          },
+        };
       })
     )
-  )
+  );
   return temp;
-}
+};
 
 let api: ApiPromise;
 export { api };
@@ -127,41 +127,67 @@ const Api: React.FC = (props) => {
   );
 
   const value = useMemo<ApiProps>(
-    () => ({network, changeNetwork, api, isApiInitialized, apiState, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading}),
-    [network, changeNetwork, api, isApiInitialized, apiState, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading]
+    () => ({
+      network,
+      changeNetwork,
+      api,
+      isApiInitialized,
+      apiState,
+      hasWeb3Injected,
+      isWeb3AccessDenied,
+      accounts,
+      selectedAccount,
+      selectAccount,
+      isLoading,
+    }),
+    [
+      network,
+      changeNetwork,
+      isApiInitialized,
+      apiState,
+      hasWeb3Injected,
+      isWeb3AccessDenied,
+      accounts,
+      selectedAccount,
+      selectAccount,
+      isLoading,
+    ]
   );
 
   useEffect(() => {
     if (apiState === ApiState.READY) {
-      web3Accounts().then((injected: any) => {
-        const all = injected.map((account) => {
-          return {
-            address: account.address,
-            name: account.meta.name,
-            source: account.meta.source,
-            genesisHash: account.meta.genesisHash,
-            balances: {
-              totalBalance: '0',
-              freeBalance: '0',
-              reservedBalance: '0',
-              lockedBalance: '0',
-              availableBalance: '0',
-            }
-          }
-        });
-        
-        const accounts = accountTransform(all, network);
-        queryBalances(accounts, api).then((accountsWithBalances) => {
-          setAccounts(accountsWithBalances);
-          if (accountsWithBalances.length > 0) {
-            setSelectedAccount(accountsWithBalances[0]);
-          }
-          setIsLoading(false);
-        }).catch(console.error);
-  
-      }).catch(console.error);
+      web3Accounts()
+        .then((injected: any) => {
+          const all = injected.map((account) => {
+            return {
+              address: account.address,
+              name: account.meta.name,
+              source: account.meta.source,
+              genesisHash: account.meta.genesisHash,
+              balances: {
+                totalBalance: '0',
+                freeBalance: '0',
+                reservedBalance: '0',
+                lockedBalance: '0',
+                availableBalance: '0',
+              },
+            };
+          });
+
+          const accounts = accountTransform(all, network);
+          queryBalances(accounts, api)
+            .then((accountsWithBalances) => {
+              setAccounts(accountsWithBalances);
+              if (accountsWithBalances.length > 0) {
+                setSelectedAccount(accountsWithBalances[0]);
+              }
+              setIsLoading(false);
+            })
+            .catch(console.error);
+        })
+        .catch(console.error);
     }
-  }, [isWeb3AccessDenied, hasWeb3Injected, apiState])
+  }, [isWeb3AccessDenied, hasWeb3Injected, apiState, network]);
 
   useEffect(() => {
     const endpoint = network === 'Polkadot' ? keys.polkadotWSS : keys.kusamaWSS;
@@ -184,21 +210,22 @@ const Api: React.FC = (props) => {
       setApiState(ApiState.READY);
       console.log(`api is ready for ${endpoint}`);
 
-      web3Enable('CryptoLab').then((injected) => {
-        if (isWeb3Injected !== hasWeb3Injected) {
-          setHasWeb3Injected(isWeb3Injected);
-        }
-        if (injected.length === 0) {
-          setIsWeb3AccessDenied(true);
-        } else {
-          setIsWeb3AccessDenied(false);
-        }
-      }).catch(console.error);
-
+      web3Enable('CryptoLab')
+        .then((injected) => {
+          if (isWeb3Injected !== hasWeb3Injected) {
+            setHasWeb3Injected(isWeb3Injected);
+          }
+          if (injected.length === 0) {
+            setIsWeb3AccessDenied(true);
+          } else {
+            setIsWeb3AccessDenied(false);
+          }
+        })
+        .catch(console.error);
     });
 
     setIsApiInitialized(true);
-  }, [network]);
+  }, [hasWeb3Injected, network]);
 
   if (!isApiInitialized) {
     return null;
