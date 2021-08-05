@@ -5,7 +5,6 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import { ReactComponent as OptionIcon } from '../../../../assets/images/option-icon.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
-import { formatBalance } from '@polkadot/util';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
@@ -21,6 +20,7 @@ import {
 import { Grid } from '@material-ui/core';
 // import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
+import { balanceUnit } from '../../../../utils/string';
 
 const ValNomHeader = () => {
   return (
@@ -49,23 +49,7 @@ const ValidatorGrid = ({ filters, validators }) => {
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const _formatBalance = useCallback(
     (value: any) => {
-      if (chain === 'KSM') {
-        return formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM',
-        });
-      } else if (chain === 'DOT') {
-        console.log(value);
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT',
-        });
-      } else {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit',
-        });
-      }
+      return balanceUnit(chain, value);
     },
     [chain]
   );

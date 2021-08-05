@@ -5,11 +5,11 @@ import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
-import { formatBalance } from '@polkadot/util';
 import Account from '../../../../components/Account';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
 // import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
+import { balanceUnit } from '../../../../utils/string';
 
 const ValNomHeader = () => {
   return (
@@ -29,17 +29,7 @@ const ValidatorTable = () => {
   const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (<span>{formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      })}</span>);
-    } else if (chain === 'DOT') {
-      return (<span>{formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      })}</span>);
-    }
+    return (<span>{balanceUnit(chain, value)}</span>);
   }, [chain]);
   const columns = useMemo(() => {
     return [

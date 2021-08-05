@@ -8,6 +8,7 @@ import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg
 import Identicon from '@polkadot/react-identicon';
 import { ApiContext } from '../Api';
 import { formatBalance } from '@polkadot/util';
+import { balanceUnit } from '../../utils/string';
 
 const WalletSelect: React.FC = () => {
   const {
@@ -84,22 +85,7 @@ const WalletSelect: React.FC = () => {
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      if (network === 'Kusama') {
-        return formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM',
-        });
-      } else if (network === 'Polkadot') {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT',
-        });
-      } else {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit',
-        });
-      }
+      return balanceUnit(network, value, true);
     },
     [network]
   );
