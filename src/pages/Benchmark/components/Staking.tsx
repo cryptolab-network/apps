@@ -16,6 +16,7 @@ import EraInclusion from './Table/comopnents/EraInclusion';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
 import { ReactComponent as DOTLogo } from '../../../assets/images/dot-logo.svg';
+import { ReactComponent as WNDLogo } from '../../../assets/images/wnd-logo.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
 import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.svg';
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
@@ -50,9 +51,9 @@ import {
 import { IValidator } from '../../../apis/Validator';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { formatBalance } from '@polkadot/util';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
+import keys from '../../../config/keys';
 
 enum Strategy {
   LOW_RISK,
@@ -327,7 +328,7 @@ const Staking = () => {
   });
   const [advancedSetting, setAdvancedSetting] = useState<IAdvancedSetting>(StrategyConfig.LOW_RISK);
   const [apiParams, setApiParams] = useState<IApiParams>({
-    network: 'KSM',
+    network: keys.defaultNetwork,
     page: 0,
     size: 60,
   });
@@ -386,11 +387,18 @@ const Staking = () => {
           <LogoTitle>KSM</LogoTitle>
         </>
       );
-    } else {
+    } else if (networkCapitalCodeName(networkName) === NetworkCodeName.DOT) {
       return (
         <>
           <DOTLogo />
           <LogoTitle>DOT</LogoTitle>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <WNDLogo />
+          <LogoTitle>WND</LogoTitle>
         </>
       );
     }
