@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
-import { apiGetSingleValidator, apiGetValidatorUnclaimedEras, IEraInfo, INominator, IValidatorHistory } from '../../../apis/Validator';
+import { apiGetSingleValidator, apiGetValidatorSlashes, apiGetValidatorUnclaimedEras, IEraInfo, INominator, IValidatorHistory, IValidatorSlash } from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
@@ -86,6 +86,7 @@ const ValidatorStatus = (props) => {
   const [nominators, setNominators] = useState<INominator[]>([]);
   const [selfStake, setSelfStake] = useState<string>('0');
   const [unclaimedEras, setUnclaimedEras] = useState<string>('None');
+  const [slashes, setSlashes] = useState<IValidatorSlash[]>([]);
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
@@ -121,6 +122,7 @@ const ValidatorStatus = (props) => {
       // load stash data from backend
       let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
       let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
+      let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({ params: `${props.match.params.id}/slashes/${props.match.params.chain}` });
       // TODO: error handling not yet
       setValidator(validator);
       if (validator.info.length > 0) {
@@ -132,6 +134,7 @@ const ValidatorStatus = (props) => {
         const inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
         setNominators(inactive);
         _setUnclaimedEras(unclaimedEras);
+        _setSlashes(slashes);
       }
 
       function _setUnclaimedEras(unclaimedEras: number[]) {
@@ -142,6 +145,18 @@ const ValidatorStatus = (props) => {
             setUnclaimedEras(unclaimedEras.length.toString() + ' eras');
           } else {
             setUnclaimedEras('None');
+          }
+        }
+      }
+
+      function _setSlashes(slashes: IValidatorSlash[]) {
+        if (slashes === undefined || slashes === null) {
+          setSlashes([]);
+        } else {
+          if (slashes.length > 0) {
+            setSlashes(slashes);
+          } else {
+            setSlashes([]);
           }
         }
       }
@@ -172,6 +187,13 @@ const ValidatorStatus = (props) => {
             </InfoTitle>
             <InfoItem>
               {unclaimedEras}
+            </InfoItem>
+            <InfoDivider />
+            <InfoTitle>
+              Slashes:
+            </InfoTitle>
+            <InfoItem>
+              {slashes.length === 0 ? 'None' : slashes.length}
             </InfoItem>
           </ValidatorInfoLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">

@@ -79,6 +79,18 @@ export interface IValidatorHistory {
   averageApy: number;
 }
 
+export interface IValidatorSlashedNominator {
+  address: string;
+  value: number;
+}
+
+export interface IValidatorSlash {
+  address: string;
+  total: number;
+  era: number;
+  others: IValidatorSlashedNominator[];
+}
+
 export interface IValidatorQuery {
   size?: number;
   page?: number;
@@ -116,7 +128,17 @@ export const apiGetNominatedValidators = (data: IValidatorRequest): Promise<IVal
     return res.data;
   });
 
-export const apiGetValidatorUnclaimedEras = (data: IValidatorRequest): Promise<number[]> =>
-  singleValidatorAxios.get(`${data.params}`).then((res) => {
-    return res.data;
-  });
+
+export const apiGetValidatorUnclaimedEras = (
+  data: IValidatorRequest,
+): Promise<number[]> => 
+singleValidatorAxios.get(`${data.params}`).then((res) => {
+  return res.data;
+});
+
+export const apiGetValidatorSlashes = (
+  data: IValidatorRequest,
+): Promise<IValidatorSlash[]> => 
+singleValidatorAxios.get(`${data.params}`).then((res) => {
+  return res.data;
+});
