@@ -1,3 +1,4 @@
+import { CancelToken } from 'axios';
 import { nominatedValidatorsAxios, singleValidatorAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
@@ -103,22 +104,26 @@ export interface IValidatorQuery {
 export interface IValidatorRequest {
   params: string;
   query?: IValidatorQuery;
+  cancelToken?: CancelToken;
 }
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
-  validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-    return res.data;
-  });
+  validatorAxios
+    .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err;
+    });
 export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
-singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-  if (res.data.length > 0) {
-    return res.data[0];
-  } else {
-    throw new Error('The stash is not a validaor');
-  }
-});
-export const apiGetNominatedValidators = (
-  data: IValidatorRequest,
-): Promise<IValidator[]> => 
+  singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+    if (res.data.length > 0) {
+      return res.data[0];
+    } else {
+      throw new Error('The stash is not a validaor');
+    }
+  });
+export const apiGetNominatedValidators = (data: IValidatorRequest): Promise<IValidator[]> =>
   nominatedValidatorsAxios.get(`${data.params}`, { params: data.query }).then((res) => {
     return res.data;
   });

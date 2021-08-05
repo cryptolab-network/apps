@@ -24,14 +24,7 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
-import {
-  CryptolabDOTValidators,
-  CryptolabKSMValidators,
-  CandidateNumber,
-} from '../../../utils/constants/Validator';
-import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { useAppSelector } from '../../../hooks';
 import { ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
@@ -39,14 +32,17 @@ import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
-  lowRiskFilter,
-  highApyFilter,
-  decentralFilter,
-  oneKvFilter,
-  customFilter,
+  lowRiskStrategy,
+  highApyStrategy,
+  decentralStrategy,
+  oneKvStrategy,
+  customStrategy,
   advancedConditionFilter,
+  apyCalculation,
 } from './utils';
 import { IValidator } from '../../../apis/Validator';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { formatBalance } from '@polkadot/util';
 
 enum Strategy {
@@ -77,6 +73,12 @@ export interface IAdvancedSetting {
   oneKv?: boolean; // switch
 }
 
+export interface IStakingInfo {
+  tableData: ITableData[];
+  calculatedApy: number;
+  selectableCount?: number;
+}
+
 export interface ITableData {
   select: boolean;
   account: string;
@@ -95,6 +97,9 @@ export interface ITableData {
   commission: number;
   hasSlash: boolean;
   isSubIdentity: boolean;
+  identity: {
+    parent: string | null | undefined;
+  };
 }
 
 interface IApiParams {
@@ -182,8 +187,8 @@ const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const Staking = () => {
-  // context 
-  let { network: networkName, apiState: networkStatus, accounts: filteredAccounts, selectedAccount } = useContext(ApiContext);
+  // context
+  let { network: networkName, apiState: networkStatus, selectedAccount } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState({
     stakeAmount: 0,
@@ -203,30 +208,38 @@ const Staking = () => {
     size: 60,
   });
   const [apiLoading, setApiLoading] = useState(true);
-  const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
-  const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
+  const [apiFilteredTableData, setApiFilteredTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+    selectableCount: 0,
+  });
+  const [finalFilteredTableData, setFinalFilteredTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+    selectableCount: 0,
+  });
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
       if (networkName === 'Kusama') {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 12,
-          withUnit: 'KSM'
-        }));
+          withUnit: 'KSM',
+        });
       } else if (networkName === 'Polkadot') {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 10,
-          withUnit: 'DOT'
-        }));
+          withUnit: 'DOT',
+        });
       } else {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 10,
-          withUnit: 'Unit'
-        }));
+          withUnit: 'Unit',
+        });
       }
     },
     [networkName]
-  )
+  );
 
   // memo
   const strategyOptions = useMemo(() => {
@@ -243,14 +256,14 @@ const Staking = () => {
       ];
     }
   }, [advancedOption.advanced]);
-  
+
   const walletBalance = useMemo(() => {
     if (selectedAccount) {
       return _formatBalance(selectedAccount?.balances?.totalBalance);
     } else {
       return '(please select a wallet)';
     }
-  }, [selectedAccount]);
+  }, [_formatBalance, selectedAccount]);
 
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
@@ -269,6 +282,18 @@ const Staking = () => {
       );
     }
   }, [networkName]);
+
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -297,7 +322,38 @@ const Staking = () => {
         Header: 'Select',
         accessor: 'select',
         maxWidth: 150,
-        Cell: ({ value }) => <span>{value ? <HandTrue /> : <HandFalse />}</span>,
+        Cell: ({ value, row, rows }) => {
+          return (
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                let tempTableData = finalFilteredTableData;
+                if (tempTableData.tableData[row.index].select) {
+                  // unselect
+                  tempTableData.tableData[row.index].select = false;
+                  tempTableData.selectableCount =
+                    tempTableData.selectableCount !== undefined
+                      ? (tempTableData.selectableCount += 1)
+                      : tempTableData.selectableCount;
+                  tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                  setFinalFilteredTableData(tempTableData);
+                } else {
+                  // select
+                  if (tempTableData.selectableCount !== undefined && tempTableData.selectableCount > 0) {
+                    tempTableData.tableData[row.index].select = true;
+                    tempTableData.selectableCount -= 1;
+                    tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                    setFinalFilteredTableData(tempTableData);
+                  } else {
+                    notifyWarn('maximum nomination has reached.');
+                  }
+                }
+              }}
+            >
+              {value ? <HandTrue /> : <HandFalse />}
+            </span>
+          );
+        },
       },
       {
         Header: 'Account',
@@ -388,11 +444,7 @@ const Staking = () => {
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
       },
     ];
-  }, []);
-
-  const candidateNumber = useMemo(() => {
-    return getCandidateNumber(networkName);
-  }, [networkName]);
+  }, [finalFilteredTableData, notifyWarn]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -554,24 +606,24 @@ const Staking = () => {
     }
   };
 
-  const handleValidatorFiltered = useCallback(
-    (data: IValidator[]): ITableData[] => {
+  const handleValidatorStrategy = useCallback(
+    (data: IValidator[]): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskFilter(data, advancedSetting);
+          return lowRiskStrategy(data, advancedOption.supportus, networkName);
         case Strategy.HIGH_APY:
-          return highApyFilter(data, advancedSetting);
+          return highApyStrategy(data, advancedOption.supportus, networkName);
         case Strategy.DECENTRAL:
-          return decentralFilter(data, advancedSetting);
+          return decentralStrategy(data, advancedOption.supportus, networkName);
         case Strategy.ONE_KV:
-          return oneKvFilter(data, advancedSetting);
+          return oneKvStrategy(data, advancedOption.supportus, networkName);
         case Strategy.CUSTOM:
-          return customFilter(data, advancedSetting);
+          return customStrategy(data, advancedOption.supportus, networkName);
         default:
-          return [];
+          return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value, advancedSetting]
+    [inputData.strategy.value, advancedOption.supportus, networkName]
   );
 
   // while network changing, set api parameter for network
@@ -587,23 +639,34 @@ const Staking = () => {
    * to get the new list
    */
   useEffect(() => {
+    let tempId = Math.round(Math.random() * 100);
+    const validatorAxiosSource = axios.CancelToken.source();
     (async () => {
-      console.log('network status: ', networkStatus);
       if (networkStatus === ApiState.READY) {
-        console.log('========== API Launch ==========');
-        // TODO: table data loading start
-        let result = await apiGetAllValidator({
-          params: apiParams.network,
-          query: { ...apiParams, page: 0, size: 60 },
-        });
-        console.log('========== API RETURN ==========');
-        console.log('result: ', result);
-        setApiFilteredTableData(handleValidatorFiltered(result));
-        //TODO: result need to be filtered
-        setApiLoading(false);
+        try {
+          console.log('========== API Launch ==========', tempId);
+          setApiLoading(true);
+          let result = await apiGetAllValidator({
+            params: apiParams.network,
+            query: { ...apiParams },
+            cancelToken: validatorAxiosSource.token,
+          });
+          console.log('========== API RETURN ==========', tempId);
+          setApiFilteredTableData(handleValidatorStrategy(result));
+        } catch (error) {
+          console.log('error: ', error);
+        }
+      } else {
+        setApiLoading(true);
       }
     })();
-  }, [networkStatus, apiParams, handleValidatorFiltered]);
+    return () => {
+      if (networkStatus === ApiState.READY) {
+        console.log('========== API CANCEL ==========', tempId);
+        validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
+      }
+    };
+  }, [networkStatus, apiParams, handleValidatorStrategy]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
@@ -612,22 +675,45 @@ const Staking = () => {
     if (advancedOption.advanced) {
       // is in advanced mode, need advanced filtered
       const filteredResult = advancedConditionFilter(
-        advancedSetting,
+        {
+          maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
+          previousSlashes: advancedSetting.previousSlashes,
+          isSubIdentity: advancedSetting.isSubIdentity,
+          minInclusion: advancedSetting.minInclusion,
+          highApy: advancedSetting.highApy,
+          decentralized: advancedSetting.decentralized,
+        },
         apiFilteredTableData,
-        advancedOption.supportus
+        advancedOption.supportus,
+        networkName
       );
+      console.log('filterResult: ', filteredResult);
       setFinalFilteredTableData(filteredResult);
-    } else {
-      // is in basic mode, no further filtered needed
-      console.log('no further filtered needed, first item: ', apiFilteredTableData[0]);
-      setFinalFilteredTableData(apiFilteredTableData);
+      setApiLoading(false);
     }
-    // TODO: table data loading end
-  }, [advancedSetting, apiFilteredTableData, advancedOption.advanced, advancedOption.supportus]);
+  }, [
+    advancedSetting.maxUnclaimedEras,
+    advancedSetting.previousSlashes,
+    advancedSetting.isSubIdentity,
+    advancedSetting.minInclusion,
+    advancedSetting.highApy,
+    advancedSetting.decentralized,
+    apiFilteredTableData,
+    advancedOption.advanced,
+    advancedOption.supportus,
+    networkName,
+  ]);
 
+  /**
+   * user changing the advanced setting mannually, we set the new api query parameter
+   */
   useEffect(() => {
-    console.log('filtered account: ', selectedAccount);
-  }, [selectedAccount]);
+    if (!advancedOption.advanced) {
+      // is in basic mode, no further filtered needed, we handle it in each strategy filter already
+      setFinalFilteredTableData(apiFilteredTableData);
+      setApiLoading(false);
+    }
+  }, [apiFilteredTableData, advancedOption.advanced]);
 
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -684,11 +770,11 @@ const Staking = () => {
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
-                <TitleSwitch
+                {/* <TitleSwitch
                   title="Is Telemeterable"
                   checked={advancedSetting.telemetry}
                   onChange={handleAdvancedFilter('telemetry')}
-                />
+                /> */}
                 <TitleSwitch
                   title="Highest Avg.APY"
                   checked={advancedSetting.highApy}
@@ -719,7 +805,6 @@ const Staking = () => {
     advancedSetting.identity,
     advancedSetting.previousSlashes,
     advancedSetting.isSubIdentity,
-    advancedSetting.telemetry,
     advancedSetting.highApy,
     advancedSetting.decentralized,
     advancedSetting.oneKv,
@@ -737,7 +822,12 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
               {!apiLoading ? (
-                <Table type={tableType.stake} columns={columns} data={finalFilteredTableData} pagination />
+                <Table
+                  type={tableType.stake}
+                  columns={columns}
+                  data={finalFilteredTableData.tableData}
+                  pagination
+                />
               ) : (
                 <ScaleLoader />
               )}
@@ -790,7 +880,11 @@ const Staking = () => {
             </ContentBlockLeft>
             <ContentBlockRight>
               <Balance>Calculated APY</Balance>
-              <ValueStyle>16.5%</ValueStyle>
+              {!apiLoading ? (
+                <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
+              ) : (
+                <ScaleLoader />
+              )}
             </ContentBlockRight>
           </ContentBlock>
         </ContentBlockWrap>
@@ -831,13 +925,17 @@ const Staking = () => {
         {advancedFilterResult}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
-            <Button
-              title="Nominate"
-              onClick={() => {
-                console.log('Nominate');
-              }}
-              style={{ width: 220 }}
-            />
+            {!apiLoading ? (
+              <Button
+                title="Nominate"
+                onClick={() => {
+                  console.log('Nominate');
+                }}
+                style={{ width: 220 }}
+              />
+            ) : (
+              <ScaleLoader />
+            )}
           </div>
           <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
         </FooterLayout>

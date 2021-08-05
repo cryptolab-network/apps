@@ -10,7 +10,15 @@ import { ApiContext } from '../Api';
 import { formatBalance } from '@polkadot/util';
 
 const WalletSelect: React.FC = () => {
-  const { network, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } = useContext(ApiContext);
+  const {
+    network,
+    hasWeb3Injected,
+    isWeb3AccessDenied,
+    accounts,
+    selectedAccount,
+    selectAccount,
+    isLoading,
+  } = useContext(ApiContext);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -63,7 +71,6 @@ const WalletSelect: React.FC = () => {
     } else if (accounts.length > 0) {
       setOpen(!isOpen);
     } else {
-      
     }
   }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, isOpen, accounts]);
 
@@ -78,24 +85,24 @@ const WalletSelect: React.FC = () => {
   const _formatBalance = useCallback(
     (value: string = '0') => {
       if (network === 'Kusama') {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 12,
-          withUnit: 'KSM'
-        }));
+          withUnit: 'KSM',
+        });
       } else if (network === 'Polkadot') {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 10,
-          withUnit: 'DOT'
-        }));
+          withUnit: 'DOT',
+        });
       } else {
-        return (formatBalance(BigInt(value), {
+        return formatBalance(BigInt(value), {
           decimals: 10,
-          withUnit: 'Unit'
-        }));
+          withUnit: 'Unit',
+        });
       }
     },
     [network]
-  )
+  );
 
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
@@ -132,7 +139,7 @@ const WalletSelect: React.FC = () => {
       });
     }
     return <div className="w-list">{dom}</div>;
-  }, [accounts, selectAccount]);
+  }, [_formatBalance, accounts, selectAccount]);
 
   const walletDisplayDOM = useMemo(() => {
     if (!hasWeb3Injected) {
@@ -154,32 +161,31 @@ const WalletSelect: React.FC = () => {
         </div>
       );
     } else if (selectedAccount) {
-        return (
-          <>
-            <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-            <WalletLayout>
-              <div>{selectedAccount.name}</div>
-              <div>
-                Balance: <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
-                {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-                {/* <BalanceNumber>123</BalanceNumber> */}
-              </div>
-            </WalletLayout>
-            <div style={{ width: 40 }}>
-              <DropDownIcon
-                style={{
-                  stroke: 'black',
-                  transform: isOpen ? 'rotate(90deg)' : 'none',
-                  transitionDuration: '0.2s',
-                }}
-              />
+      return (
+        <>
+          <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
+          <WalletLayout>
+            <div>{selectedAccount.name}</div>
+            <div>
+              Balance: <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
+              {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+              {/* <BalanceNumber>123</BalanceNumber> */}
             </div>
-          </>
-        );
+          </WalletLayout>
+          <div style={{ width: 40 }}>
+            <DropDownIcon
+              style={{
+                stroke: 'black',
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transitionDuration: '0.2s',
+              }}
+            />
+          </div>
+        </>
+      );
     } else {
-      
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, selectedAccount, isLoading, css, isOpen]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen]);
 
   return (
     <>
