@@ -25,7 +25,7 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
-import { hasValues} from '../../../utils/helper';
+import { hasValues } from '../../../utils/helper';
 import {
   CryptolabDOTValidators,
   CryptolabKSMValidators,
@@ -68,38 +68,38 @@ enum RewardDestinationType {
   STAKED,
   STASH,
   CONTROLLER,
-  ACCOUNT
+  ACCOUNT,
 }
 
 const rewardDestinationOptions = [
   {
-    label: '--- Select one ---', 
-    value: RewardDestinationType.NULL, 
-    isDisabled: true
+    label: '--- Select one ---',
+    value: RewardDestinationType.NULL,
+    isDisabled: true,
   },
   {
-    label: 'Stash account (increase the amount at stake)', 
-    value: RewardDestinationType.STAKED
+    label: 'Stash account (increase the amount at stake)',
+    value: RewardDestinationType.STAKED,
   },
   {
-    label: 'Stash account (do not increase the amount at stake)', 
-    value: RewardDestinationType.STASH
+    label: 'Stash account (do not increase the amount at stake)',
+    value: RewardDestinationType.STASH,
   },
   {
-    label: 'Controller account', 
-    value: RewardDestinationType.CONTROLLER
+    label: 'Controller account',
+    value: RewardDestinationType.CONTROLLER,
   },
   {
-    label: 'Specified payment account', 
-    value: RewardDestinationType.ACCOUNT
-  }
+    label: 'Specified payment account',
+    value: RewardDestinationType.ACCOUNT,
+  },
 ];
 
 enum AccountRole {
   VALIDATOR,
   CONTROLLER,
   NOMINATOR,
-  OTHER
+  OTHER,
 }
 
 interface IStrategy {
@@ -111,8 +111,8 @@ interface IChainInfo {
   role: AccountRole;
   controller: string | undefined;
   nominators: string[];
-  rewardDestination: RewardDestinationType,
-  rewardDestinationAddress: string | null,
+  rewardDestination: RewardDestinationType;
+  rewardDestinationAddress: string | null;
   bonded: string;
   redeemable: string;
 }
@@ -261,19 +261,27 @@ const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 const queryStakingInfo = async (address, api: ApiPromise) => {
   const [info, isController] = await Promise.all([
     api.derive.staking.account(address),
-    api.query.staking.ledger(address)
+    api.query.staking.ledger(address),
   ]);
 
-  const role = (info.nextSessionIds.length !== 0) ? AccountRole.VALIDATOR : 
-    (!isController.isNone) ? AccountRole.CONTROLLER : 
-      (info.nominators.length !== 0) ? AccountRole.NOMINATOR : AccountRole.OTHER;
+  const role =
+    info.nextSessionIds.length !== 0
+      ? AccountRole.VALIDATOR
+      : !isController.isNone
+      ? AccountRole.CONTROLLER
+      : info.nominators.length !== 0
+      ? AccountRole.NOMINATOR
+      : AccountRole.OTHER;
 
-  const rewardDestination = 
-    (info.rewardDestination.isStaked) ? RewardDestinationType.STAKED : 
-      (info.rewardDestination.isStash) ? RewardDestinationType.STASH : 
-        (info.rewardDestination.isController) ? RewardDestinationType.CONTROLLER : 
-          RewardDestinationType.ACCOUNT;
-  const rewardDestinationAddress = (rewardDestination === RewardDestinationType.ACCOUNT) ? info.rewardDestination.asAccount.toString() : null;
+  const rewardDestination = info.rewardDestination.isStaked
+    ? RewardDestinationType.STAKED
+    : info.rewardDestination.isStash
+    ? RewardDestinationType.STASH
+    : info.rewardDestination.isController
+    ? RewardDestinationType.CONTROLLER
+    : RewardDestinationType.ACCOUNT;
+  const rewardDestinationAddress =
+    rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
   return {
     role,
     controller: info.controllerId?.toHuman(),
@@ -281,12 +289,21 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     rewardDestination,
     rewardDestinationAddress,
     bonded: info.stakingLedger.total.unwrap().toHex(),
-    redeemable: (info.redeemable) ? info.redeemable.toHex() : '0'
-  }
-}
+    redeemable: info.redeemable ? info.redeemable.toHex() : '0',
+  };
+};
 
 const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
-  const {activeEra, activeEraStart, currentEra, eraLength, eraProgress, isEpoch, sessionLength, sessionsPerEra} = await api.derive.session.progress();
+  const {
+    activeEra,
+    activeEraStart,
+    currentEra,
+    eraLength,
+    eraProgress,
+    isEpoch,
+    sessionLength,
+    sessionsPerEra,
+  } = await api.derive.session.progress();
   return {
     activeEra: activeEra.toNumber(),
     activeEraStart: activeEraStart.unwrap().toNumber(),
@@ -296,24 +313,30 @@ const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
     eraProgress: eraProgress.toNumber(),
     isEpoch: isEpoch,
     sessionLength: sessionLength.toNumber(),
-    sessionPerEra: sessionsPerEra.toNumber()
-  }
-}
+    sessionPerEra: sessionsPerEra.toNumber(),
+  };
+};
 
 interface IOptions {
-  label: string,
-  value: Strategy | RewardDestinationType,
-  isDisabled?: boolean
+  label: string;
+  value: Strategy | RewardDestinationType;
+  isDisabled?: boolean;
 }
 interface IInputData {
-  stakeAmount: number,
-  strategy: IOptions,
-  rewardDestination: IOptions | null
+  stakeAmount: number;
+  strategy: IOptions;
+  rewardDestination: IOptions | null;
 }
 
 const Staking = () => {
-  // context 
-  let { network: networkName, api: polkadotApi, apiState: networkStatus, accounts: filteredAccounts, selectedAccount } = useContext(ApiContext);
+  // context
+  let {
+    network: networkName,
+    api: polkadotApi,
+    apiState: networkStatus,
+    accounts: filteredAccounts,
+    selectedAccount,
+  } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
@@ -409,14 +432,11 @@ const Staking = () => {
       return (
         <>
           <TimeCircle type="epoch" eraInfo={eraInfo} network={networkName} />
-          <TimeCircle type="era" eraInfo={eraInfo} network={networkName}/>
+          <TimeCircle type="era" eraInfo={eraInfo} network={networkName} />
         </>
-      )
+      );
     } else {
-      return (
-        <>
-        </>
-      )
+      return <></>;
     }
   }, [eraInfo, networkName]);
 
@@ -455,17 +475,13 @@ const Staking = () => {
 
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
-      queryStakingInfo(selectedAccount.address, polkadotApi)
-      .then(setChainInfo)
-      .catch(console.error);
+      queryStakingInfo(selectedAccount.address, polkadotApi).then(setChainInfo).catch(console.error);
     }
   }, [selectedAccount, networkStatus, setChainInfo]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
-      queryEraInfo(polkadotApi)
-      .then(setEraInfo)
-      .catch(console.error);
+      queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
     }
   }, [networkStatus, networkName]);
 
@@ -507,13 +523,15 @@ const Staking = () => {
             </span>
           );
         },
+        sortType: 'basic',
       },
       {
         Header: 'Account',
         accessor: 'account',
         Cell: ({ value }) => <Account address={value} display={value} />,
+        sortType: 'basic',
       },
-      { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
+      { Header: 'Self Stake', accessor: 'selfStake', collapse: true, sortType: 'basic' },
       {
         Header: 'Era Inclusion',
         accessor: 'eraInclusion',
@@ -522,6 +540,7 @@ const Staking = () => {
           // 25.00%  [ 21/84 ]
           return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
         },
+        sortType: 'basic',
       },
       {
         Header: 'Unclaimed Eras',
@@ -581,6 +600,7 @@ const Staking = () => {
             </span>
           );
         },
+        sortType: 'basic',
       },
       {
         Header: 'Avg APY',
@@ -589,12 +609,14 @@ const Staking = () => {
         Cell: ({ value }) => {
           return <div>{(value * 100).toFixed(1)}</div>;
         },
+        sortType: 'basic',
       },
       {
         Header: 'Active',
         accessor: 'active',
         collapse: true,
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
+        sortType: 'basic',
       },
     ];
   }, [finalFilteredTableData, notifyWarn]);
@@ -616,23 +638,23 @@ const Staking = () => {
   );
 
   const renderRewardDestinationNode = useMemo(() => {
-    switch(inputData.rewardDestination?.value) {
+    switch (inputData.rewardDestination?.value) {
       case RewardDestinationType.STAKED:
-        return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
+        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.STASH:
-        return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
+        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.CONTROLLER:
         // todo: Jack
         if (chainInfo?.controller) {
-          return (<Node title={'Controller'} address={chainInfo?.controller} />);
+          return <Node title={'Controller'} address={chainInfo?.controller} />;
         } else {
-          return (<Node title={'controller account'} address='enter an address' />);
+          return <Node title={'controller account'} address="enter an address" />;
         }
       case RewardDestinationType.ACCOUNT:
         // todo: Jack
-        return (<Node title={'Account'} address='enter an address' />);
+        return <Node title={'Account'} address="enter an address" />;
       default:
-        return (<></>);
+        return <></>;
     }
   }, [inputData, chainInfo, selectedAccount]);
 
@@ -800,7 +822,7 @@ const Staking = () => {
     },
     [inputData.strategy.value, advancedOption.supportus, networkName]
   );
-  
+
   /**
    * handle nominate transaction
    */
@@ -1047,11 +1069,17 @@ const Staking = () => {
             </ContentBlockRight>
           </ContentBlock>
           <BalanceContextBlock>
-            <DetailedBalance color='white'>Role: {chainInfo?.role}</DetailedBalance>
-            <DetailedBalance color='white'>bonded: {_formatBalance(chainInfo?.bonded)}</DetailedBalance>
-            <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
-            <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
-            <DetailedBalance color='white'>redeemable: {_formatBalance(chainInfo?.redeemable)}</DetailedBalance>
+            <DetailedBalance color="white">Role: {chainInfo?.role}</DetailedBalance>
+            <DetailedBalance color="white">bonded: {_formatBalance(chainInfo?.bonded)}</DetailedBalance>
+            <DetailedBalance color="white">
+              transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}
+            </DetailedBalance>
+            <DetailedBalance color="white">
+              reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}
+            </DetailedBalance>
+            <DetailedBalance color="white">
+              redeemable: {_formatBalance(chainInfo?.redeemable)}
+            </DetailedBalance>
           </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
@@ -1169,11 +1197,11 @@ const BalanceContextBlock = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
   }
-`
+`;
 
 type BalanceProps = {
   color?: string;
-}
+};
 
 const DetailedBalance = styled.div<BalanceProps>`
   font-family: Montserrat;
@@ -1182,7 +1210,7 @@ const DetailedBalance = styled.div<BalanceProps>`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
-  color: ${(props) => (props.color) ? props.color : 'black'};
+  color: ${(props) => (props.color ? props.color : 'black')};
 `;
 
 interface ContentBlockWrapProps {
