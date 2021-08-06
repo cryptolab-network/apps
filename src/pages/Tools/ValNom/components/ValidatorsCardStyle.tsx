@@ -170,10 +170,11 @@ const ValidatorGrid = ({ filters, validators }) => {
   }, [_formatBalance, chain, history, displayValidators]);
   if (validatorComponents.length > 0) {
     return (
-      <div>
+      <GridLayout>
         <Grid container spacing={3} style={{ justifyContent: 'flex-start' }}>
           {validatorComponents}
         </Grid>
+        <div style={{margin: '20px 0 0 0'}}></div>
         <Pagination
           canNextPage={page < pageCount ? true: false}
           canPreviousPage={page > 0 ? true: false}
@@ -193,7 +194,7 @@ const ValidatorGrid = ({ filters, validators }) => {
             }
           }}
         ></Pagination>
-      </div>
+      </GridLayout>
     );
   } else {
     return <div></div>;
@@ -401,4 +402,11 @@ const AdvancedOption = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
+`;
+
+const GridLayout = styled.div`
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
