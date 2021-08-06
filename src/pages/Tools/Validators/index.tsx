@@ -8,6 +8,7 @@ import CardHeader from '../../../components/Card/CardHeader';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit } from '../../../utils/string';
+import { toast } from 'react-toastify';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -117,26 +118,57 @@ const ValidatorStatus = (props) => {
       }));
     }
   }, [chain]);
+  const notifyError = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
   useEffect(() => {
     async function getValidator() {
       // load stash data from backend
-      let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
-      let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
-      let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({ params: `${props.match.params.id}/slashes/${props.match.params.chain}` });
-      // TODO: error handling not yet
-      setValidator(validator);
-      if (validator.info.length > 0) {
-        const lastEraInfo = findLastEra(validator.info);
-        const _nominators = lastEraInfo.nominators;
-        setSelfStake(_formatBalance(lastEraInfo.selfStake));
-        const active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
-        setActiveNominators(active);
-        const inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
-        setNominators(inactive);
-        _setUnclaimedEras(unclaimedEras);
-        _setSlashes(slashes);
+      try {
+        let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
+        let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
+        let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({ params: `${props.match.params.id}/slashes/${props.match.params.chain}` });
+        // TODO: error handling not yet
+        setValidator(validator);
+        if (validator.info.length > 0) {
+          const lastEraInfo = findLastEra(validator.info);
+          const _nominators = lastEraInfo.nominators;
+          setSelfStake(_formatBalance(lastEraInfo.selfStake));
+          let active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
+          active = active.sort((a, b) => {
+            if (a.balance.lockedBalance > b.balance.lockedBalance) {
+              return -1;
+            } else if(a.balance.lockedBalance < b.balance.lockedBalance) {
+              return 1;
+            }
+            return 0;
+          });
+          setActiveNominators(active);
+          let inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
+          inactive = inactive.sort((a, b) => {
+            if (a.balance.lockedBalance > b.balance.lockedBalance) {
+              return -1;
+            } else if(a.balance.lockedBalance < b.balance.lockedBalance) {
+              return 1;
+            }
+            return 0;
+          });
+          setNominators(inactive);
+          _setUnclaimedEras(unclaimedEras);
+          _setSlashes(slashes);
+        }
+      } catch (err) {
+        notifyError(err);
       }
-
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
           setUnclaimedEras('None');

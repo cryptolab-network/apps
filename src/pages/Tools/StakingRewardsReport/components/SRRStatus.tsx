@@ -23,6 +23,7 @@ import FilterOptions from "./FilterOptions";
 import DownloadOptions from "./DownloadOptions";
 import { balanceUnit, validateAddress } from "../../../../utils/string";
 import { DataContext } from "../../components/Data";
+import { toast } from "react-toastify";
 
 interface ISRRFilters {
   stashId: string;
@@ -87,6 +88,17 @@ const SRRContent = ({ filters }) => {
     stash: '',
     eraRewards: [],
   });
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
   useEffect(() => {
     setState(State.EMPTY);
     setStashData({
@@ -107,6 +119,7 @@ const SRRContent = ({ filters }) => {
         }
       }).catch((err) => {
         setState(State.ERROR);
+        notifyWarn('No rewards are found. Please make sure that this address is a stash.');
       });
       if (s === undefined || s === null) {
         return;
@@ -125,7 +138,7 @@ const SRRContent = ({ filters }) => {
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, filters.stashId]);
+  }, [chain, filters.stashId, notifyWarn]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -212,7 +225,14 @@ const SRRContent = ({ filters }) => {
       />
     )
   } else {
-    return (<div></div>);
+    return (
+      <EmptyStashIconLayout>
+        <EmptyStashIcon />
+        <EmptyStashDescription>
+          Enter a Stash ID to see its rewards.
+        </EmptyStashDescription>
+      </EmptyStashIconLayout>
+    );
   }
   
 };

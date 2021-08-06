@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="54" height="18" viewBox="0 0 54 18">
     <defs>
         <style>
-            .cls-1{fill:#23beb9}
+            .cls-160{fill:#23beb9}
         </style>
     </defs>
     <g id="Group_4600" transform="translate(-781 -359)">
         <g id="Group_4599" transform="translate(-183)">
-            <path id="Rectangle_205" d="M0 0H45V18H0z" class="cls-1" transform="translate(964 359)"/>
-            <path id="Path_3626" d="M0 0h9L0 9z" class="cls-1" transform="translate(1009 359)"/>
-            <path id="Path_3627" d="M0 0l9 9H0z" class="cls-1" transform="translate(1009 368)"/>
+            <path id="Rectangle_205" d="M0 0H45V18H0z" class="cls-160" transform="translate(964 359)"/>
+            <path id="Path_3626" d="M0 0h9L0 9z" class="cls-160" transform="translate(1009 359)"/>
+            <path id="Path_3627" d="M0 0l9 9H0z" class="cls-160" transform="translate(1009 368)"/>
         </g>
-        <text id="active" fill="#fff" font-family="Montserrat-Bold, Montserrat" font-size="11px" font-weight="700" transform="translate(783 360)">
-            <tspan x="-17.446" y="11">active</tspan>
+        <text id="active-text" fill="#fff" font-family="Montserrat-Bold, Montserrat" font-size="11px" font-weight="700" transform="translate(783 360)">
+            <tspan x="4" y="12">active</tspan>
         </text>
     </g>
 </svg>
