@@ -128,6 +128,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
     <Table
       columns={columns}
       data={displayValidators}
+      pagination={true}
     />
   );
 };

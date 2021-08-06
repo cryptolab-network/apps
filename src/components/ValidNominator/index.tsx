@@ -81,7 +81,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
     } else {
       return (<div></div>);
     }
-  }, []);
+  }, [activeAmount]);
 
   const shortenName = shortenStashId(name);
   return (

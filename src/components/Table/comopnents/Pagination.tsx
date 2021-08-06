@@ -48,6 +48,7 @@ const PaginationLayout = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
 `;
 
 const PaginationInfo = styled.div`
