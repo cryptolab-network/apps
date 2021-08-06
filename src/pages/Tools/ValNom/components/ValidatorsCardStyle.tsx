@@ -22,6 +22,8 @@ import { Grid } from '@material-ui/core';
 import { DataContext } from '../../components/Data';
 import { balanceUnit } from '../../../../utils/string';
 import { NetworkConfig } from '../../../../utils/constants/Network';
+import { toast } from 'react-toastify';
+import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
 
 const ValNomHeader = () => {
   return (
@@ -54,6 +56,7 @@ const ValidatorGrid = ({ filters, validators }) => {
     },
     [chain]
   );
+
   const sortValidators = (validators: IValidator[], filters: IValidatorFilter): IValidator[] => {
     // if filters.stashId is not empty
     if (filters.stashId.length > 0) {
@@ -193,19 +196,39 @@ const ValNomContent = () => {
         break;
     }
   };
+  const notifyError = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
   const [options, setFilterOptions] = useState<iOption[]>([]);
+  const [isLoading, toggleLoading] = useState<boolean>(false);
   useEffect(() => {
     setFilterOptions(filterOptionDropdownList);
     async function getValidators() {
       try {
+        toggleLoading(true);
         let validators = await apiGetAllValidator({ params: chain });
         setValidators(validators);
+        if (validators.length === 0) {
+          notifyError('Empty response. We are collecting data, please retry later.');
+        }
       } catch (err) {
         console.error(err);
+        notifyError(err);
+      } finally {
+        toggleLoading(false);
       }
     }
     getValidators();
-  }, [chain]);
+  }, [chain, notifyError]);
+
   const filtersDOM = useMemo(() => {
     return (
       <FilterOptionLayout>
@@ -231,6 +254,12 @@ const ValNomContent = () => {
   const handleOptionToggle = useCallback((visible) => {
     toggleFilters(visible);
   }, []);
+  if (isLoading) {
+    return (
+      <CustomScaleLoader
+      />
+    );
+  }
   return (
     <ValNomContentLayout>
       <OptionBar>

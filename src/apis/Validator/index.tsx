@@ -113,7 +113,7 @@ export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[
       return res.data;
     })
     .catch((err) => {
-      return err;
+      throw err;
     });
 export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
   singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {

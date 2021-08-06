@@ -68,6 +68,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
             </OneKVNominated>);
           }
         },
+        sortType: 'basic',
       },
       {
         Header: 'Nomination Order',
@@ -100,6 +101,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         Cell: ({ value }) => {
           return (<span>{(value * 100).toFixed(2)}%</span>);
         },
+        sortType: 'basic',
       },
     ]
   }, [_formatBalance, onClickDashboard]);
