@@ -26,6 +26,8 @@ import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
+import Contact from './pages/Contact';
+import OurValidators from './pages/OurValidators';
 
 // header
 const Header: React.FC = () => {
@@ -102,11 +104,11 @@ const Footer: React.FC = () => {
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Contact</LinkA>
+            <LinkA href={`${staking_url}/contact`}>Contact</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Our Validators</LinkA>
+            <LinkA href={`${staking_url}/ourValidators`}>Our Validators</LinkA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -197,6 +199,8 @@ const AppLayout = () => {
               <Route path="/validator/:id/:chain" component={ValidatorStatus} />
               <Route path="/onekv" component={OneKV} />
               <Route path="/rewards" component={StakingRewardsReport} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/ourValidators" component={OurValidators} />
             </Switch>
           </RouteContent>
           <Footer />
@@ -223,6 +227,8 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/ourValidators" component={OurValidators} />
             </Switch>
           </RouteContent>
           <Footer />

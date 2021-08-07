@@ -1,12 +1,14 @@
 import styled from 'styled-components';
 
-const CardHeader = ({ Header, children = {} }) => {
+const CardHeader = ({ Header, children = {}, alignItems = 'center' }) => {
   return (
     <CardHeaderLayout>
       <HeaderLayout>
         <Header />
       </HeaderLayout>
-      <MainContentLayout>{children}</MainContentLayout>
+      <MainContentLayout
+        alignItems={alignItems}
+      >{children}</MainContentLayout>
     </CardHeaderLayout>
   );
 };
@@ -28,9 +30,12 @@ const HeaderLayout = styled.div`
   box-sizing: border-box;
 `;
 
-const MainContentLayout = styled.div`
+interface MainContentLayoutProps {
+  alignItems: string;
+}
+const MainContentLayout = styled.div<MainContentLayoutProps>`
   padding: 29px 29px 15px 29px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: ${(props) => (props.alignItems)};
 `;
