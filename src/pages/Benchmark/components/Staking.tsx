@@ -132,10 +132,10 @@ export interface IEraInfo {
 
 export interface IAdvancedSetting {
   // minSelfStake: number | null; // input amount
-  maxCommission?: string | null; // input amount
+  // maxCommission?: string | null; // input amount
   identity?: boolean; // switch
   maxUnclaimedEras?: string | null; // input amount
-  previousSlashes?: boolean; // switch
+  noPreviousSlashes?: boolean; // switch
   isSubIdentity?: boolean; // switch
   historicalApy?: string | null; // input %
   minInclusion?: string | null; // input %
@@ -154,6 +154,7 @@ export interface IStakingInfo {
 export interface ITableData {
   select: boolean;
   account: string;
+  display: string;
   selfStake: number;
   eraInclusion: {
     rate: string;
@@ -171,6 +172,7 @@ export interface ITableData {
   isSubIdentity: boolean;
   identity: {
     parent: string | null | undefined;
+    isVerified: boolean;
   };
 }
 
@@ -189,10 +191,10 @@ interface IApiParams {
 
 const StrategyConfig = {
   LOW_RISK: {
-    maxCommission: '', // input amount
+    // maxCommission: '', // input amount
     identity: true, // switch
     maxUnclaimedEras: '16', // input amount
-    previousSlashes: false, // switch
+    noPreviousSlashes: false, // switch
     isSubIdentity: false, // switch
     historicalApy: '', // input %
     minInclusion: '', // input %
@@ -202,10 +204,10 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   HIGH_APY: {
-    maxCommission: '', // input amount
+    // maxCommission: '', // input amount
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
-    previousSlashes: true, // switch
+    noPreviousSlashes: true, // switch
     isSubIdentity: false, // switch
     historicalApy: '', // input %
     minInclusion: '', // input %
@@ -215,10 +217,10 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   DECENTRAL: {
-    maxCommission: '', // input amount
+    // maxCommission: '', // input amount
     identity: true, // switch
     maxUnclaimedEras: '', // input amount
-    previousSlashes: false, // switch
+    noPreviousSlashes: false, // switch
     isSubIdentity: false, // switch
     historicalApy: '', // input %
     minInclusion: '', // input %
@@ -228,10 +230,10 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   ONE_KV: {
-    maxCommission: '', // input amount
+    // maxCommission: '', // input amount
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
-    previousSlashes: false, // switch
+    noPreviousSlashes: false, // switch
     isSubIdentity: false, // switch
     historicalApy: '', // input %
     minInclusion: '', // input %
@@ -241,10 +243,10 @@ const StrategyConfig = {
     oneKv: true, // switch
   },
   CUSTOM: {
-    maxCommission: '', // input amount
+    // maxCommission: '', // input amount
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
-    previousSlashes: false, // switch
+    noPreviousSlashes: false, // switch
     isSubIdentity: false, // switch
     historicalApy: '', // input %
     minInclusion: '', // input %
@@ -477,13 +479,13 @@ const Staking = () => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
       queryStakingInfo(selectedAccount.address, polkadotApi).then(setChainInfo).catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setChainInfo]);
+  }, [selectedAccount, networkStatus, setChainInfo, polkadotApi]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
       queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
     }
-  }, [networkStatus, networkName]);
+  }, [networkStatus, networkName, polkadotApi]);
 
   const columns = useMemo(() => {
     return [
@@ -496,7 +498,7 @@ const Staking = () => {
             <span
               style={{ cursor: 'pointer' }}
               onClick={() => {
-                let tempTableData = finalFilteredTableData;
+                let tempTableData = { ...finalFilteredTableData };
                 if (tempTableData.tableData[row.index].select) {
                   // unselect
                   tempTableData.tableData[row.index].select = false;
@@ -528,7 +530,7 @@ const Staking = () => {
       {
         Header: 'Account',
         accessor: 'account',
-        Cell: ({ value }) => <Account address={value} display={value} />,
+        Cell: ({ value, row }) => <Account address={value} display={row.original.display} />,
         sortType: 'basic',
       },
       { Header: 'Self Stake', accessor: 'selfStake', collapse: true, sortType: 'basic' },
@@ -745,46 +747,46 @@ const Staking = () => {
     }
 
     switch (name) {
-      case 'maxCommission':
-        setApiParams((prev) => ({
-          ...prev,
-          commission_max: Number(e.target.value) / 100,
-        }));
-        setAdvancedSetting((prev) => ({ ...prev, maxCommission: e.target.value }));
-        break;
+      // case 'maxCommission':
+      //   setApiParams((prev) => ({
+      //     ...prev,
+      //     commission_max: Number(e.target.value) / 100,
+      //   }));
+      //   setAdvancedSetting((prev) => ({ ...prev, maxCommission: e.target.value }));
+      //   break;
       case 'identity':
-        setApiParams((prev) => ({
-          ...prev,
-          has_verified_identity: e,
-        }));
+        // setApiParams((prev) => ({
+        //   ...prev,
+        //   has_verified_identity: e,
+        // }));
         setAdvancedSetting((prev) => ({ ...prev, identity: e }));
         break;
       case 'maxUnclaimedEras':
         setAdvancedSetting((prev) => ({ ...prev, maxUnclaimedEras: e.target.value }));
         break;
-      case 'previousSlashes':
-        setAdvancedSetting((prev) => ({ ...prev, previousSlashes: e }));
+      case 'noPreviousSlashes':
+        setAdvancedSetting((prev) => ({ ...prev, noPreviousSlashes: e }));
         break;
       case 'isSubIdentity':
         setAdvancedSetting((prev) => ({ ...prev, isSubIdentity: e }));
         break;
       case 'historicalApy':
-        setApiParams((prev) => ({
-          ...prev,
-          apy_min: Number(e.target.value) / 100,
-        }));
+        // setApiParams((prev) => ({
+        //   ...prev,
+        //   apy_min: Number(e.target.value) / 100,
+        // }));
         setAdvancedSetting((prev) => ({ ...prev, historicalApy: e.target.value }));
         break;
       case 'minInclusion':
         setAdvancedSetting((prev) => ({ ...prev, minInclusion: e.target.value }));
         break;
-      case 'telemetry':
-        setApiParams((prev) => ({
-          ...prev,
-          has_telemetry: e,
-        }));
-        setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
-        break;
+      // case 'telemetry':
+      //   setApiParams((prev) => ({
+      //     ...prev,
+      //     has_telemetry: e,
+      //   }));
+      //   setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
+      //   break;
       case 'highApy':
         setAdvancedSetting((prev) => ({ ...prev, highApy: e }));
         break;
@@ -884,9 +886,11 @@ const Staking = () => {
       const filteredResult = advancedConditionFilter(
         {
           maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
-          previousSlashes: advancedSetting.previousSlashes,
-          isSubIdentity: advancedSetting.isSubIdentity,
+          historicalApy: advancedSetting.historicalApy,
           minInclusion: advancedSetting.minInclusion,
+          identity: advancedSetting.identity,
+          noPreviousSlashes: advancedSetting.noPreviousSlashes,
+          isSubIdentity: advancedSetting.isSubIdentity,
           highApy: advancedSetting.highApy,
           decentralized: advancedSetting.decentralized,
         },
@@ -900,7 +904,7 @@ const Staking = () => {
     }
   }, [
     advancedSetting.maxUnclaimedEras,
-    advancedSetting.previousSlashes,
+    advancedSetting.noPreviousSlashes,
     advancedSetting.isSubIdentity,
     advancedSetting.minInclusion,
     advancedSetting.highApy,
@@ -909,6 +913,8 @@ const Staking = () => {
     advancedOption.advanced,
     advancedOption.supportus,
     networkName,
+    advancedSetting.historicalApy,
+    advancedSetting.identity,
   ]);
 
   /**
@@ -934,13 +940,13 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
               <AdvancedSettingWrap>
-                <TitleInput
+                {/* <TitleInput
                   title="Max. Commission"
                   placeholder="input maximum amount"
                   inputLength={170}
                   value={advancedSetting.maxCommission}
                   onChange={handleAdvancedFilter('maxCommission')}
-                />
+                /> */}
                 <TitleInput
                   title="Max. Unclaimed Eras"
                   placeholder="input maximum amount"
@@ -968,9 +974,9 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('identity')}
                 />
                 <TitleSwitch
-                  title="Prev. Slashes"
-                  checked={advancedSetting.previousSlashes}
-                  onChange={handleAdvancedFilter('previousSlashes')}
+                  title="No Prev. Slashes"
+                  checked={advancedSetting.noPreviousSlashes}
+                  onChange={handleAdvancedFilter('noPreviousSlashes')}
                 />
                 <TitleSwitch
                   title="Is Sub-Identity"
@@ -1005,17 +1011,34 @@ const Staking = () => {
     );
   }, [
     advancedOption.advanced,
-    advancedSetting.maxCommission,
     advancedSetting.maxUnclaimedEras,
     advancedSetting.historicalApy,
     advancedSetting.minInclusion,
     advancedSetting.identity,
-    advancedSetting.previousSlashes,
+    advancedSetting.noPreviousSlashes,
     advancedSetting.isSubIdentity,
     advancedSetting.highApy,
     advancedSetting.decentralized,
     advancedSetting.oneKv,
   ]);
+
+  const filterResultInfo = useMemo(() => {
+    let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
+      (data) => data.select === true
+    ).length;
+    let filterValidatorsCount = finalFilteredTableData.tableData.length;
+    let totalValidatorsCount = 'TODO';
+
+    return (
+      <div>
+        <FilterInfo style={{ color: '#20aca8' }}>selected: {selectedValidatorsCount}</FilterInfo>
+        <span>|</span>
+        <FilterInfo>filtered: {filterValidatorsCount}</FilterInfo>
+        <span>|</span>
+        <FilterInfo>total: {totalValidatorsCount}</FilterInfo>
+      </div>
+    );
+  }, [finalFilteredTableData]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -1027,7 +1050,7 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
+              <ContentBlockTitle color="white">Filter results{filterResultInfo}</ContentBlockTitle>
               {!apiLoading ? (
                 <Table
                   type={tableType.stake}
@@ -1043,7 +1066,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData]);
+  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData, filterResultInfo]);
 
   return (
     <>
@@ -1472,4 +1495,8 @@ const AdvancedBlockWrap = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 110px);
   }
+`;
+
+const FilterInfo = styled.span`
+  margin: 0 16px 0 16px;
 `;

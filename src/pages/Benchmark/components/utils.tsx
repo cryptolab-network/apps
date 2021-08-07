@@ -29,7 +29,8 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
     }
     return {
       select: false,
-      account: validator.identity.display,
+      account: validator.id,
+      display: validator.identity.display,
       selfStake: validator.info.selfStake,
       eraInclusion: {
         rate: ((activeCount / total) * 100).toFixed(2),
@@ -46,9 +47,10 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
       ],
       commission: validator.info.commission,
       hasSlash: validator.slashes.length > 0 ? true : false,
-      isSubIdentity: validator.identity.sub ? true : false,
+      isSubIdentity: validator.identity.parent ? true : false,
       identity: {
         parent: validator.identity.parent,
+        isVerified: validator.identity.isVerified ? true : false,
       },
     };
   });
@@ -98,7 +100,6 @@ export const supportCryptoLabSelect = (
   selectableCount: number,
   networkName: string
 ): ISelectResult => {
-  console.log('selectable count at the begin: ', selectableCount);
   const cryptoLabNode: string[] =
     networkName.toLowerCase() === NetworkNameLowerCase.KSM
       ? Object.values(CryptolabKSMValidators)
@@ -388,31 +389,64 @@ export const advancedConditionFilter = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  console.log('in advancedConditionFilter');
   let tempTableData = resetSelected(originTableData.tableData);
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // if support us
+  if (isSupportUs) {
+    // select our validators, decrease the selectable number
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   tempTableData = originTableData.tableData.filter((data) => {
-    // max commission, already done in api query
-    // identity, already done in api query
-    // max unclaimed eras
-    if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
-      return false;
+    if (!data.select) {
+      // only data hasn't been selected need to be filtered
+
+      // max unclaimed eras
+      if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
+        return false;
+      }
+
+      // historycal apy
+      if (filtered.historicalApy && Math.floor(data.avgAPY * 100) < Number(filtered.historicalApy)) {
+        return false;
+      }
+
+      // min inclusion
+      if (
+        filtered.minInclusion &&
+        Math.floor(Number(data.eraInclusion.rate)) < Number(filtered.minInclusion)
+      ) {
+        return false;
+      }
+
+      // identity
+      if (filtered.identity && (!data.identity || !data.identity.isVerified)) {
+        return false;
+      }
+
+      // No prev.slashes
+      if (filtered.noPreviousSlashes && data.hasSlash) {
+        return false;
+      }
+      // is sub identity
+      if (filtered.isSubIdentity && !data.isSubIdentity) {
+        return false;
+      }
+
+      // high apy, sorting part (check below)
+      // decentralized, selected part
+      // oneKv, already done in api query
+      // has telemetry (ongoing)
     }
-    // prev.slashes
-    if (!filtered.previousSlashes && data.hasSlash) {
-      return false;
-    }
-    // is sub identity
-    if (!filtered.isSubIdentity && data.isSubIdentity) {
-      return false;
-    }
-    // historycal apy, already done in api query
-    // min inclusion
-    if (filtered.minInclusion && Number(data.eraInclusion.rate) < Number(filtered.minInclusion)) {
-      return false;
-    }
-    // has telemetry, already done in api query
-    // high apy, sorting part (check below)
-    // decentralized, selected part
-    // oneKv, already done in api query
+
     return true;
   });
 
@@ -427,20 +461,6 @@ export const advancedConditionFilter = (
   /**
    * Selected part
    */
-  // get maximum candidate number base on current network
-  let tempSelectableCount = getCandidateNumber(networkName);
-
-  // if support us
-  if (isSupportUs) {
-    // select our validators, decrease the selectable number
-    const { tableData, selectableCount } = supportCryptoLabSelect(
-      tempTableData,
-      tempSelectableCount,
-      networkName
-    );
-    tempTableData = tableData;
-    tempSelectableCount = selectableCount;
-  }
 
   if (filtered.highApy) {
     // select the high apy validators, decrease the selectable number
