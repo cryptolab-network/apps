@@ -186,6 +186,9 @@ const Api: React.FC = (props) => {
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
       console.log(`api connected to ${endpoint}`);
+      api.isReady.then(() => {
+        setApiState(ApiState.READY);
+      }).catch(console.error);
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);
