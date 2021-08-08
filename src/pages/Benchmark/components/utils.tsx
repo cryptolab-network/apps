@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 const ROUND = 10;
 
-const formatToTableData = (data: IValidator[]): ITableData[] => {
+export const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
     let activeCount = 0;
     let total = 0;
@@ -208,7 +208,8 @@ export const decentralizedFilter = (tableData: ITableData[]): ITableData[] => {
     if (
       data.identity.parent === null ||
       data.identity.parent === undefined ||
-      data.identity.parent.length === 0
+      data.identity.parent.length === 0 ||
+      data.select === true // support us has been already selected
     ) {
       filteredTableData.push(data);
     } else {
@@ -245,24 +246,32 @@ export const resetSelected = (tableData: ITableData[]): ITableData[] => {
   });
 };
 
-/**
- * for strategy selection filter
- */
-export const lowRiskStrategy = (
-  data: IValidator[],
-  isSupportUs: boolean,
-  networkName: string
-): IStakingInfo => {
-  // low risk data filtered
-  let filteredResult = data.filter(
-    (validator) => validator.info.unclaimedEras.length < 16 && validator.slashes.length === 0
-  );
+// format origin data from api, to IStakingInfo format
+export const formatToStakingInfo = (data: IValidator[], networkName: string): IStakingInfo => {
   // format the data to fit the frontend table
-  let tempTableData = formatToTableData(filteredResult);
+  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
+
+  // get the calculation apy of the selected validators
+  return apyCalculation(tempTableData, tempSelectableCount);
+};
+
+/**
+ * for strategy selection filter
+ */
+export const lowRiskStrategy = (
+  data: IStakingInfo,
+  isSupportUs: boolean,
+  networkName: string
+): IStakingInfo => {
+  let tempTableData = data.tableData;
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // unselected all
+  tempTableData = resetSelected(tempTableData);
 
   // if support us
   if (isSupportUs) {
@@ -275,6 +284,11 @@ export const lowRiskStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+  // low risk data filtered
+  tempTableData = tempTableData.filter(
+    (validator) =>
+      validator.unclaimedEras < 16 && validator.hasSlash === false && validator.identity.isVerified === true
+  );
   // random select the rest available count
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
 
@@ -282,14 +296,13 @@ export const lowRiskStrategy = (
   return apyCalculation(resultData);
 };
 export const highApyStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
   // if support us
@@ -303,6 +316,7 @@ export const highApyStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
@@ -311,18 +325,16 @@ export const highApyStrategy = (
   return apyCalculation(tempTableData);
 };
 export const decentralStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-  // filtered the data, make sure the candidates are all decentralized
-  tempTableData = decentralizedFilter(tempTableData);
+
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -333,6 +345,9 @@ export const decentralStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
+  // filtered the data, make sure the candidates are all decentralized,
+  tempTableData = decentralizedFilter(tempTableData);
 
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);

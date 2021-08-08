@@ -40,6 +40,8 @@ import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
 import { NetworkCodeName } from '../../../utils/constants/Network';
 import {
+  formatToTableData,
+  formatToStakingInfo,
   lowRiskStrategy,
   highApyStrategy,
   decentralStrategy,
@@ -354,13 +356,9 @@ const Staking = () => {
   const [advancedSetting, setAdvancedSetting] = useState<IAdvancedSetting>(StrategyConfig.LOW_RISK);
   const [apiParams, setApiParams] = useState<IApiParams>({
     network: keys.defaultNetwork,
-    page: 0,
-    size: 60,
   });
   const [apiLoading, setApiLoading] = useState(true);
-  // const [apiFilteredTableData, setApiFilteredTableData] = useState<ITableData[]>([]);
-  // const [finalFilteredTableData, setFinalFilteredTableData] = useState<ITableData[]>([]);
-  const [apiFilteredTableData, setApiFilteredTableData] = useState<IStakingInfo>({
+  const [apiOriginTableData, setApiOriginTableData] = useState<IStakingInfo>({
     tableData: [],
     calculatedApy: 0,
     selectableCount: 0,
@@ -454,24 +452,26 @@ const Staking = () => {
     });
   }, []);
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
     if (advancedOption.advanced) {
       setInputData((prev) => ({ ...prev, strategy: ADVANCED_DEFAULT_STRATEGY }));
       setAdvancedSetting(StrategyConfig.CUSTOM);
-      setApiParams((prev) => ({
-        network: prev.network,
-      }));
+      // setApiParams((prev) => ({
+      //   network: prev.network,
+      // }));
     } else {
       // while using basic mode, we use strategy with default filter setting as strategy
       // and default is 'low risk' strategy
       setInputData((prev) => ({ ...prev, strategy: BASIC_DEFAULT_STRATEGY }));
       setAdvancedSetting(StrategyConfig.LOW_RISK);
-      setApiParams((prev) => ({
-        network: prev.network,
-        has_verified_identity: true,
-        has_telemetry: true,
-      }));
+      // setApiParams((prev) => ({
+      //   network: prev.network,
+      //   has_verified_identity: true,
+      //   has_telemetry: true,
+      // }));
     }
   }, [advancedOption.advanced]);
 
@@ -678,31 +678,31 @@ const Staking = () => {
     switch (e.value) {
       case Strategy.LOW_RISK:
         setAdvancedSetting(StrategyConfig.LOW_RISK);
-        setApiParams((prev) => ({
-          network: prev.network,
-          has_verified_identity: true,
-          has_telemetry: true,
-        }));
+        // setApiParams((prev) => ({
+        //   network: prev.network,
+        //   has_verified_identity: true,
+        //   has_telemetry: true,
+        // }));
         break;
       case Strategy.HIGH_APY:
         setAdvancedSetting(StrategyConfig.HIGH_APY);
-        setApiParams((prev) => ({
-          network: prev.network,
-        }));
+        // setApiParams((prev) => ({
+        //   network: prev.network,
+        // }));
         break;
       case Strategy.DECENTRAL:
         setAdvancedSetting(StrategyConfig.DECENTRAL);
-        setApiParams((prev) => ({
-          network: prev.network,
-          has_verified_identity: true,
-        }));
+        // setApiParams((prev) => ({
+        //   network: prev.network,
+        //   has_verified_identity: true,
+        // }));
         break;
       case Strategy.ONE_KV:
         setAdvancedSetting(StrategyConfig.ONE_KV);
-        setApiParams((prev) => ({
-          network: prev.network,
-          has_joined_1kv: true,
-        }));
+        // setApiParams((prev) => ({
+        //   network: prev.network,
+        //   has_joined_1kv: true,
+        // }));
         break;
     }
 
@@ -806,23 +806,28 @@ const Staking = () => {
   };
 
   const handleValidatorStrategy = useCallback(
-    (data: IValidator[]): IStakingInfo => {
+    (data: IStakingInfo, isSupportUs: boolean, networkName: string): IStakingInfo => {
+      console.log('strategy: ', inputData.strategy.value);
+      console.log('data: ', data);
+      console.log('support is: ', isSupportUs);
+      console.log('network name: ', networkName);
+
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskStrategy(data, advancedOption.supportus, networkName);
+          return lowRiskStrategy(data, isSupportUs, networkName);
         case Strategy.HIGH_APY:
-          return highApyStrategy(data, advancedOption.supportus, networkName);
+          return highApyStrategy(data, isSupportUs, networkName);
         case Strategy.DECENTRAL:
-          return decentralStrategy(data, advancedOption.supportus, networkName);
-        case Strategy.ONE_KV:
-          return oneKvStrategy(data, advancedOption.supportus, networkName);
-        case Strategy.CUSTOM:
-          return customStrategy(data, advancedOption.supportus, networkName);
+          return decentralStrategy(data, isSupportUs, networkName);
+        // case Strategy.ONE_KV:
+        //   return oneKvStrategy(data, isSupportUs, networkName);
+        // case Strategy.CUSTOM:
+        //   return customStrategy(data, isSupportUs, networkName);
         default:
           return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value, advancedOption.supportus, networkName]
+    [inputData.strategy.value]
   );
 
   /**
@@ -861,7 +866,7 @@ const Staking = () => {
             cancelToken: validatorAxiosSource.token,
           });
           console.log('========== API RETURN ==========', tempId);
-          setApiFilteredTableData(handleValidatorStrategy(result));
+          setApiOriginTableData(formatToStakingInfo(result, networkName));
         } catch (error) {
           console.log('error: ', error);
         }
@@ -875,7 +880,7 @@ const Staking = () => {
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }
     };
-  }, [networkStatus, apiParams, handleValidatorStrategy]);
+  }, [networkStatus, apiParams, networkName]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
@@ -894,11 +899,18 @@ const Staking = () => {
           highApy: advancedSetting.highApy,
           decentralized: advancedSetting.decentralized,
         },
-        apiFilteredTableData,
+        apiOriginTableData,
         advancedOption.supportus,
         networkName
       );
-      console.log('filterResult: ', filteredResult);
+      setFinalFilteredTableData(filteredResult);
+      setApiLoading(false);
+    } else {
+      const filteredResult = handleValidatorStrategy(
+        apiOriginTableData,
+        advancedOption.supportus,
+        networkName
+      );
       setFinalFilteredTableData(filteredResult);
       setApiLoading(false);
     }
@@ -909,24 +921,26 @@ const Staking = () => {
     advancedSetting.minInclusion,
     advancedSetting.highApy,
     advancedSetting.decentralized,
-    apiFilteredTableData,
+    apiOriginTableData,
     advancedOption.advanced,
     advancedOption.supportus,
     networkName,
     advancedSetting.historicalApy,
     advancedSetting.identity,
+    handleValidatorStrategy,
   ]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
    */
-  useEffect(() => {
-    if (!advancedOption.advanced) {
-      // is in basic mode, no further filtered needed, we handle it in each strategy filter already
-      setFinalFilteredTableData(apiFilteredTableData);
-      setApiLoading(false);
-    }
-  }, [apiFilteredTableData, advancedOption.advanced]);
+  // useEffect(() => {
+  //   if (!advancedOption.advanced) {
+  //     console.log('??????????');
+  //     // is in basic mode, no further filtered needed, we handle it in each strategy filter already
+  //     setFinalFilteredTableData(apiOriginTableData);
+  //     setApiLoading(false);
+  //   }
+  // }, [apiOriginTableData, advancedOption.advanced]);
 
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -1066,7 +1080,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData, filterResultInfo]);
+  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData.tableData, filterResultInfo]);
 
   return (
     <>
