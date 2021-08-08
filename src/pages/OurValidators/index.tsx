@@ -53,7 +53,8 @@ const ContactContent = () => {
           />
         </Item>
         <Description>
-          Nominate to support us.
+          Toggle <span style={{color: '#23beb9'}}>Support Us</span>&nbsp;
+          on <span style={{color: '#23beb9'}}>Portfolio Benchmark</span>&nbsp;to support us.
         </Description>
       </ContentLayout>
     </CardHeader>
@@ -156,7 +157,7 @@ const Description = styled.div`
   font-style: normal;
   line-height: 1.22;
   color: white;
-  margin: 0 0 18.5px 0;
+  margin: 18.5px 0 18.5px 0;
 `;
 
 const Subtitle = styled.div`

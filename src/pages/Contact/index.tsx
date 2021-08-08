@@ -66,7 +66,7 @@ const MainLayout = styled.div`
 `;
 
 const HeaderLayout = styled.div`
-  width: 60vw;
+  width: 40vw;
   display: flex;
   justify-content: space-between;
   align-items: center;
