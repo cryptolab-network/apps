@@ -112,8 +112,6 @@ export const supportCryptoLabSelect = (
     }
   }
 
-  console.log('after support us, selectableCount:', selectableCount);
-
   return { tableData, selectableCount };
 };
 
@@ -357,16 +355,16 @@ export const decentralStrategy = (
   return apyCalculation(tempTableData);
 };
 export const oneKvStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
+
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -404,7 +402,6 @@ export const advancedConditionFilter = (
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
-  console.log('in advancedConditionFilter');
   let tempTableData = resetSelected(originTableData.tableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
