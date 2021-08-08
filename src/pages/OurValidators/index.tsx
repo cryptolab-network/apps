@@ -1,29 +1,12 @@
 import styled from 'styled-components';
-import CardHeader from '../../components/Card/CardHeader';
 import { ReactComponent as PeopleIcon } from '../../assets/images/people.svg';
 import Account from '../../components/Account';
 import { CryptolabDOTValidators, CryptolabKSMValidators } from '../../utils/constants/Validator';
 
-const ContactHeader = () => {
+const OurValidatorsContent = () => {
   return (
-    <HeaderLayout>
-      <HeaderLeft>
-        <PeopleIcon />
-        <HeaderTitle>
-          <Title>Our Validators</Title>
-          <Subtitle>
-            Official CryptoLab Validators
-          </Subtitle>
-        </HeaderTitle>
-      </HeaderLeft>
-    </HeaderLayout>
-  );
-};
-
-const ContactContent = () => {
-  return (
-    <CardHeader Header={() => <ContactHeader />} alignItems="flex-start">
-      <ContentLayout>
+    <ContentLayout>
+      <ItemLayout>
         <ItemTitle> Polkadot
         </ItemTitle>
         <Item>
@@ -38,6 +21,9 @@ const ContactContent = () => {
             display={'CryptoLab.Network'}
           />
         </Item>
+        </ItemLayout>
+        <VerticalSplitter />
+        <ItemLayout>
         <ItemTitle> Kusama
         </ItemTitle>
         <Item>
@@ -52,21 +38,25 @@ const ContactContent = () => {
             display={'CRYPTOLAB.NETWORK/TANIS'}
           />
         </Item>
-        <Description>
-          Toggle <span style={{color: '#23beb9'}}>Support Us</span>&nbsp;
-          on <span style={{color: '#23beb9'}}>Portfolio Benchmark</span>&nbsp;to support us.
-        </Description>
+        </ItemLayout>
       </ContentLayout>
-    </CardHeader>
   );
 };
 
 const OurValidators = () => {
   return (
     <OurValidatorsLayout>
-      <MainLayout>
-        <ContactContent />
-      </MainLayout>
+      <div style={{margin: '40px 0 0 0'}} />
+      <PeopleIcon />
+      <div style={{margin: '9px 0 0 0'}} />
+      <Title>
+        Our Validators
+      </Title>
+      <div style={{margin: '81px 0 0 0'}} />
+      <OurValidatorsContent />
+      <Description>
+        Toggle <span style={{color: '#23beb9'}}>Support Us</span> on <span style={{color: '#23beb9'}}>Portfolio Benchmark</span>.
+      </Description>
     </OurValidatorsLayout>
   );
 };
@@ -81,48 +71,18 @@ const OurValidatorsLayout = styled.div`
   align-items: center;
 `;
 
-const MainLayout = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-`;
-
-const HeaderLayout = styled.div`
-  width: 40vw;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  @media (max-width: 720px) {
-    width: calc(100vw - 160px);
-  }
-`;
-
-const HeaderLeft = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin: 0 0 0 13.8px;
-`;
-
-const HeaderTitle = styled.div`
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-left: 18px;
-`;
-
 const Title = styled.div`
+  width: 144px;
+  height: 30px;
   font-family: Montserrat;
-  font-size: 18px;
+  font-size: 25px;
   font-weight: bold;
   font-stretch: normal;
   font-style: normal;
-  line-height: 1.22;
-  color: #white;
-  margin: 0 0 18.5px 0;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-align: center;
+  color: white;
 `;
 
 const ItemTitle = styled.div`
@@ -147,24 +107,38 @@ const Item = styled.div`
 `;
 
 const ContentLayout = styled.div`
-  height: 65vh;
+  height: 200px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ItemLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+`;
+
+const VerticalSplitter = styled.div`
+  height: 120px;
+  width: 0px;
+  border: solid 1px;
+  border-radius: 2px;
+  margin: 0 40px 0 40px;
+  color: #aaaaaa;
 `;
 
 const Description = styled.div`
   font-family: Montserrat;
-  font-size: 14px;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.22;
-  color: white;
-  margin: 18.5px 0 18.5px 0;
-`;
-
-const Subtitle = styled.div`
-  font-family: Montserrat;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   font-stretch: normal;
   font-style: normal;
-  line-height: 1.55;
+  line-height: 1.23;
+  letter-spacing: normal;
+  text-align: left;
+  color: white;
 `;
