@@ -850,9 +850,10 @@ const Staking = () => {
    * user changing the advanced setting mannually, we set the new api query parameter
    */
   useEffect(() => {
+    let filteredResult: IStakingInfo;
     if (advancedOption.advanced) {
       // is in advanced mode, need advanced filtered
-      const filteredResult = advancedConditionFilter(
+      filteredResult = advancedConditionFilter(
         {
           maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
           historicalApy: advancedSetting.historicalApy,
@@ -867,15 +868,10 @@ const Staking = () => {
         advancedOption.supportus,
         networkName
       );
-      setFinalFilteredTableData(filteredResult);
     } else {
-      const filteredResult = handleValidatorStrategy(
-        apiOriginTableData,
-        advancedOption.supportus,
-        networkName
-      );
-      setFinalFilteredTableData(filteredResult);
+      filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
     }
+    setFinalFilteredTableData(filteredResult);
   }, [
     advancedSetting.maxUnclaimedEras,
     advancedSetting.noPreviousSlashes,
