@@ -15,21 +15,21 @@ const calcProgress = (type, eraInfo) => {
   const currentTime = Date.now();
   if (type === 'era') {
     const eraTime = eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
-    progress = Math.floor((currentTime - eraInfo.activeEraStart) / eraTime * 100);
+    progress = Math.floor(((currentTime - eraInfo.activeEraStart) / eraTime) * 100);
   } else {
     const epochTime = eraInfo.sessionLength * SLOT_TIME;
-    progress = Math.floor(((currentTime - eraInfo.activeEraStart) % epochTime) / epochTime * 100);
+    progress = Math.floor((((currentTime - eraInfo.activeEraStart) % epochTime) / epochTime) * 100);
   }
   if (progress >= 100) {
     return 100;
   }
   return progress;
-}
+};
 
 const calcLeftHour = (type, eraInfo) => {
   let leftHour = 0;
   const currentTime = Date.now();
-  const endTime = eraInfo.activeEraStart + (eraInfo.sessionPerEra * eraInfo.sessionLength) * SLOT_TIME;
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
   const leftTime = endTime - currentTime;
 
   if (leftTime < 0) {
@@ -42,12 +42,12 @@ const calcLeftHour = (type, eraInfo) => {
     leftHour = Math.floor(leftTime / HOUR);
   }
   return leftHour;
-}
+};
 
 const calcLeftMinute = (type, eraInfo) => {
   let leftMinute = 0;
   const currentTime = Date.now();
-  const endTime = eraInfo.activeEraStart + (eraInfo.sessionPerEra * eraInfo.sessionLength) * SLOT_TIME;
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
   const leftTime = endTime - currentTime;
 
   if (leftTime < 0) {
@@ -55,19 +55,18 @@ const calcLeftMinute = (type, eraInfo) => {
   }
 
   if (type === 'era') {
-    const eraTime = eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
-    leftMinute = Math.floor(leftTime % HOUR / MINUTE);
+    leftMinute = Math.floor((leftTime % HOUR) / MINUTE);
   } else {
     const epochTime = eraInfo.sessionLength * 6 * 1000;
-    leftMinute = Math.floor((leftTime % epochTime % (eraInfo.sessionLength * SLOT_TIME)) / MINUTE);
+    leftMinute = Math.floor(((leftTime % epochTime) % (eraInfo.sessionLength * SLOT_TIME)) / MINUTE);
   }
   return leftMinute;
-}
+};
 
 const calcLeftSecond = (type, eraInfo) => {
   let leftSecond = 0;
   const currentTime = Date.now();
-  const endTime = eraInfo.activeEraStart + (eraInfo.sessionPerEra * eraInfo.sessionLength) * SLOT_TIME;
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
   const leftTime = endTime - currentTime;
 
   if (leftTime < 0) {
@@ -76,14 +75,14 @@ const calcLeftSecond = (type, eraInfo) => {
 
   if (type === 'epoch') {
     const epochTime = eraInfo.sessionLength * SLOT_TIME;
-    leftSecond = Math.floor(((leftTime % epochTime) % (MINUTE)) / SECOND);
+    leftSecond = Math.floor(((leftTime % epochTime) % MINUTE) / SECOND);
   }
   return leftSecond;
-}
+};
 interface Props {
   type: string;
   eraInfo: IEraInfo | null;
-  network: string
+  network: string;
 }
 
 const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
@@ -116,32 +115,32 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
     switch (network) {
       case 'Kusama':
       case 'Westend':
-        mainValue = (type === 'era') ? 6 : 1;
-        mainUnit = (type === 'era') ? ' hrs' : ' hr';
+        mainValue = type === 'era' ? 6 : 1;
+        mainUnit = type === 'era' ? ' hrs' : ' hr';
         if (leftHour > 0) {
-          subValue = (type === 'era') ? `${leftHour} hrs ${leftMinute} mins`: `${leftMinute} mins ${leftSecond} s`;
+          subValue =
+            type === 'era' ? `${leftHour} hrs ${leftMinute} mins` : `${leftMinute} mins ${leftSecond} s`;
         } else {
           subValue = `${leftMinute} mins ${leftSecond} s`;
         }
-      break;
+        break;
       case 'Polkadot':
-        mainValue = (type === 'era') ? 1 : 4;
-        mainUnit = (type === 'era') ? ' day' : ' hrs';
+        mainValue = type === 'era' ? 1 : 4;
+        mainUnit = type === 'era' ? ' day' : ' hrs';
         if (leftHour > 0) {
-          subValue = (type === 'era') ? `${leftHour} hrs ${leftMinute} mins`: `${leftMinute} mins ${leftMinute} s`;
+          subValue =
+            type === 'era' ? `${leftHour} hrs ${leftMinute} mins` : `${leftMinute} mins ${leftMinute} s`;
         } else {
           subValue = `${leftMinute} mins ${leftSecond} s`;
         }
-      break;
+        break;
       default:
-
     }
     return {
       mainValue,
       mainUnit,
-      subValue
-    }
-
+      subValue,
+    };
   }, [network, type, leftHour, leftMinute, leftSecond]);
 
   const ContentDOM = useMemo(() => {
@@ -183,9 +182,7 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
           <MainUnit>{displayValues.mainUnit}</MainUnit>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <SubValue>
-            {displayValues.subValue}
-          </SubValue>
+          <SubValue>{displayValues.subValue}</SubValue>
         </div>
       </WordLayout>
       <CircleLayout>

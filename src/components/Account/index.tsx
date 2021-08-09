@@ -9,16 +9,27 @@ interface IAccount {
   amount?: string;
 }
 
-const Account: React.FC<IAccount> = ({ address, display = address, nominatedCount = 0, amount = 0, showNominatedInfo = false }) => {
+const Account: React.FC<IAccount> = ({
+  address,
+  display = address,
+  nominatedCount = 0,
+  amount = 0,
+  showNominatedInfo = false,
+}) => {
   const AmountTag = () => {
     if (showNominatedInfo) {
       return (
-        <Amount>{nominatedCount}<span style={{color: 'white', margin:'0 4px 0 4px'}}>/</span>{amount}</Amount>
+        <Amount>
+          {nominatedCount}
+          <span style={{ color: 'white', margin: '0 4px 0 4px' }}>/</span>
+          {amount}
+        </Amount>
       );
     } else {
-      return (<div></div>);
+      return <div></div>;
     }
-  }
+  };
+
   return (
     <div>
       <AccountLayout>

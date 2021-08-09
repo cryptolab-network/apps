@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 const ROUND = 10;
 
-const formatToTableData = (data: IValidator[]): ITableData[] => {
+export const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
     let activeCount = 0;
     let total = 0;
@@ -29,7 +29,8 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
     }
     return {
       select: false,
-      account: validator.identity.display,
+      account: validator.id,
+      display: validator.identity.display,
       selfStake: validator.info.selfStake,
       eraInclusion: {
         rate: ((activeCount / total) * 100).toFixed(2),
@@ -46,9 +47,10 @@ const formatToTableData = (data: IValidator[]): ITableData[] => {
       ],
       commission: validator.info.commission,
       hasSlash: validator.slashes.length > 0 ? true : false,
-      isSubIdentity: validator.identity.sub ? true : false,
+      isSubIdentity: validator.identity.parent ? true : false,
       identity: {
         parent: validator.identity.parent,
+        isVerified: validator.identity.isVerified ? true : false,
       },
     };
   });
@@ -98,7 +100,6 @@ export const supportCryptoLabSelect = (
   selectableCount: number,
   networkName: string
 ): ISelectResult => {
-  console.log('selectable count at the begin: ', selectableCount);
   const cryptoLabNode: string[] =
     networkName.toLowerCase() === NetworkNameLowerCase.KSM
       ? Object.values(CryptolabKSMValidators)
@@ -110,8 +111,6 @@ export const supportCryptoLabSelect = (
       selectableCount--;
     }
   }
-
-  console.log('after support us, selectableCount:', selectableCount);
 
   return { tableData, selectableCount };
 };
@@ -207,7 +206,8 @@ export const decentralizedFilter = (tableData: ITableData[]): ITableData[] => {
     if (
       data.identity.parent === null ||
       data.identity.parent === undefined ||
-      data.identity.parent.length === 0
+      data.identity.parent.length === 0 ||
+      data.select === true // support us has been already selected
     ) {
       filteredTableData.push(data);
     } else {
@@ -244,24 +244,32 @@ export const resetSelected = (tableData: ITableData[]): ITableData[] => {
   });
 };
 
-/**
- * for strategy selection filter
- */
-export const lowRiskStrategy = (
-  data: IValidator[],
-  isSupportUs: boolean,
-  networkName: string
-): IStakingInfo => {
-  // low risk data filtered
-  let filteredResult = data.filter(
-    (validator) => validator.info.unclaimedEras.length < 16 && validator.slashes.length === 0
-  );
+// format origin data from api, to IStakingInfo format
+export const formatToStakingInfo = (data: IValidator[], networkName: string): IStakingInfo => {
   // format the data to fit the frontend table
-  let tempTableData = formatToTableData(filteredResult);
+  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
+
+  // get the calculation apy of the selected validators
+  return apyCalculation(tempTableData, tempSelectableCount);
+};
+
+/**
+ * for strategy selection filter
+ */
+export const lowRiskStrategy = (
+  data: IStakingInfo,
+  isSupportUs: boolean,
+  networkName: string
+): IStakingInfo => {
+  let tempTableData = data.tableData;
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // unselected all
+  tempTableData = resetSelected(tempTableData);
 
   // if support us
   if (isSupportUs) {
@@ -274,6 +282,11 @@ export const lowRiskStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+  // low risk data filtered
+  tempTableData = tempTableData.filter(
+    (validator) =>
+      validator.unclaimedEras < 16 && validator.hasSlash === false && validator.identity.isVerified === true
+  );
   // random select the rest available count
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
 
@@ -281,14 +294,13 @@ export const lowRiskStrategy = (
   return apyCalculation(resultData);
 };
 export const highApyStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
   // if support us
@@ -302,6 +314,7 @@ export const highApyStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
@@ -310,18 +323,16 @@ export const highApyStrategy = (
   return apyCalculation(tempTableData);
 };
 export const decentralStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-  // filtered the data, make sure the candidates are all decentralized
-  tempTableData = decentralizedFilter(tempTableData);
+
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -332,6 +343,9 @@ export const decentralStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
+  // filtered the data, make sure the candidates are all decentralized,
+  tempTableData = decentralizedFilter(tempTableData);
 
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
@@ -341,16 +355,16 @@ export const decentralStrategy = (
   return apyCalculation(tempTableData);
 };
 export const oneKvStrategy = (
-  data: IValidator[],
+  data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
 ): IStakingInfo => {
+  let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
-  // format the data to fit the frontend table
-  let tempTableData = formatToTableData(data);
   // unselected all
   tempTableData = resetSelected(tempTableData);
+
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -389,30 +403,62 @@ export const advancedConditionFilter = (
   networkName: string
 ): IStakingInfo => {
   let tempTableData = resetSelected(originTableData.tableData);
+  // get maximum candidate number base on current network
+  let tempSelectableCount = getCandidateNumber(networkName);
+  // if support us
+  if (isSupportUs) {
+    // select our validators, decrease the selectable number
+    const { tableData, selectableCount } = supportCryptoLabSelect(
+      tempTableData,
+      tempSelectableCount,
+      networkName
+    );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   tempTableData = originTableData.tableData.filter((data) => {
-    // max commission, already done in api query
-    // identity, already done in api query
-    // max unclaimed eras
-    if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
-      return false;
+    if (!data.select) {
+      // only data hasn't been selected need to be filtered
+
+      // max unclaimed eras
+      if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {
+        return false;
+      }
+
+      // historycal apy
+      if (filtered.historicalApy && Math.floor(data.avgAPY * 100) < Number(filtered.historicalApy)) {
+        return false;
+      }
+
+      // min inclusion
+      if (
+        filtered.minInclusion &&
+        Math.floor(Number(data.eraInclusion.rate)) < Number(filtered.minInclusion)
+      ) {
+        return false;
+      }
+
+      // identity
+      if (filtered.identity && (!data.identity || !data.identity.isVerified)) {
+        return false;
+      }
+
+      // No prev.slashes
+      if (filtered.noPreviousSlashes && data.hasSlash) {
+        return false;
+      }
+      // is sub identity
+      if (filtered.isSubIdentity && !data.isSubIdentity) {
+        return false;
+      }
+
+      // high apy, sorting part (check below)
+      // decentralized, selected part
+      // oneKv, already done in api query
+      // has telemetry (ongoing)
     }
-    // prev.slashes
-    if (!filtered.previousSlashes && data.hasSlash) {
-      return false;
-    }
-    // is sub identity
-    if (!filtered.isSubIdentity && data.isSubIdentity) {
-      return false;
-    }
-    // historycal apy, already done in api query
-    // min inclusion
-    if (filtered.minInclusion && Number(data.eraInclusion.rate) < Number(filtered.minInclusion)) {
-      return false;
-    }
-    // has telemetry, already done in api query
-    // high apy, sorting part (check below)
-    // decentralized, selected part
-    // oneKv, already done in api query
+
     return true;
   });
 
@@ -427,20 +473,6 @@ export const advancedConditionFilter = (
   /**
    * Selected part
    */
-  // get maximum candidate number base on current network
-  let tempSelectableCount = getCandidateNumber(networkName);
-
-  // if support us
-  if (isSupportUs) {
-    // select our validators, decrease the selectable number
-    const { tableData, selectableCount } = supportCryptoLabSelect(
-      tempTableData,
-      tempSelectableCount,
-      networkName
-    );
-    tempTableData = tableData;
-    tempSelectableCount = selectableCount;
-  }
 
   if (filtered.highApy) {
     // select the high apy validators, decrease the selectable number
