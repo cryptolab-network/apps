@@ -17,7 +17,9 @@ const ContactContent = () => {
       <ItemLayout>
         <ItemTitle> Github </ItemTitle>
         <Item>
-          https://github.com/cryptolab-network
+          <LinkA href="https://github.com/cryptolab-network" target="_blank" rel="noopener noreferrer">
+            https://github.com/cryptolab-network
+          </LinkA>
         </Item>
       </ItemLayout>
     </ContentLayout>
@@ -107,4 +109,9 @@ const VerticalSplitter = styled.div`
   border-radius: 2px;
   margin: 0 40px 0 0;
   color: #aaaaaa;
+`;
+
+const LinkA = styled.a`
+  color: #23beb9;
+  text-decoration: none;
 `;
