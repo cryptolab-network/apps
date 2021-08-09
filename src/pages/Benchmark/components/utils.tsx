@@ -401,7 +401,7 @@ export const advancedConditionFilter = (
   originTableData: IStakingInfo,
   isSupportUs: boolean,
   networkName: string
-): IStakingInfo => {
+): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);

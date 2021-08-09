@@ -46,6 +46,7 @@ import { toast } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
+import { useDebounce } from 'use-debounce';
 
 enum Strategy {
   LOW_RISK,
@@ -359,6 +360,8 @@ const Staking = () => {
   });
   const [chainInfo, setChainInfo] = useState<IChainInfo>();
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
+
+  const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
   const strategyRef = useRef(StrategyType.Common);
 
@@ -855,14 +858,14 @@ const Staking = () => {
       // is in advanced mode, need advanced filtered
       filteredResult = advancedConditionFilter(
         {
-          maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
-          historicalApy: advancedSetting.historicalApy,
-          minInclusion: advancedSetting.minInclusion,
-          identity: advancedSetting.identity,
-          noPreviousSlashes: advancedSetting.noPreviousSlashes,
-          isSubIdentity: advancedSetting.isSubIdentity,
-          highApy: advancedSetting.highApy,
-          decentralized: advancedSetting.decentralized,
+          maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
+          historicalApy: advancedSettingDebounceVal.historicalApy,
+          minInclusion: advancedSettingDebounceVal.minInclusion,
+          identity: advancedSettingDebounceVal.identity,
+          noPreviousSlashes: advancedSettingDebounceVal.noPreviousSlashes,
+          isSubIdentity: advancedSettingDebounceVal.isSubIdentity,
+          highApy: advancedSettingDebounceVal.highApy,
+          decentralized: advancedSettingDebounceVal.decentralized,
         },
         apiOriginTableData,
         advancedOption.supportus,
@@ -873,18 +876,18 @@ const Staking = () => {
     }
     setFinalFilteredTableData(filteredResult);
   }, [
-    advancedSetting.maxUnclaimedEras,
-    advancedSetting.noPreviousSlashes,
-    advancedSetting.isSubIdentity,
-    advancedSetting.minInclusion,
-    advancedSetting.highApy,
-    advancedSetting.decentralized,
+    advancedSettingDebounceVal.maxUnclaimedEras,
+    advancedSettingDebounceVal.noPreviousSlashes,
+    advancedSettingDebounceVal.isSubIdentity,
+    advancedSettingDebounceVal.minInclusion,
+    advancedSettingDebounceVal.highApy,
+    advancedSettingDebounceVal.decentralized,
     apiOriginTableData,
     advancedOption.advanced,
     advancedOption.supportus,
     networkName,
-    advancedSetting.historicalApy,
-    advancedSetting.identity,
+    advancedSettingDebounceVal.historicalApy,
+    advancedSettingDebounceVal.identity,
     handleValidatorStrategy,
   ]);
 
