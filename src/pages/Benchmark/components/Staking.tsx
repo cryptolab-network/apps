@@ -519,7 +519,15 @@ const Staking = () => {
         Cell: ({ value, row }) => <Account address={value} display={row.original.display} />,
         sortType: 'basic',
       },
-      { Header: 'Self Stake', accessor: 'selfStake', collapse: true, sortType: 'basic' },
+      {
+        Header: 'Self Stake',
+        accessor: 'selfStake',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <span>{_formatBalance(value)}</span>;
+        },
+        sortType: 'basic',
+      },
       {
         Header: 'Era Inclusion',
         accessor: 'eraInclusion',
@@ -607,7 +615,7 @@ const Staking = () => {
         sortType: 'basic',
       },
     ];
-  }, [finalFilteredTableData, notifyWarn]);
+  }, [finalFilteredTableData, notifyWarn, _formatBalance]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
