@@ -38,7 +38,7 @@ import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 // import { NetworkStatus } from '../../../utils/status/Network';
 import { ApiState } from '../../../components/Api';
-import { NetworkCodeName } from '../../../utils/constants/Network';
+import { NetworkCodeName, NetworkConfig } from '../../../utils/constants/Network';
 import {
   lowRiskStrategy,
   highApyStrategy,
@@ -54,6 +54,7 @@ import { toast } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
+import { selectAccount } from '../../../redux/walletSlice';
 
 enum Strategy {
   LOW_RISK,
@@ -107,7 +108,7 @@ interface IStrategy {
   value: Strategy;
 }
 
-interface IChainInfo {
+interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
   nominators: string[];
@@ -300,15 +301,29 @@ const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
   }
 }
 
+const queryNominatorLimits = async (api: ApiPromise) => {
+  const [maxNominatorsCount, minNominatorBond, counterForNominators] = await Promise.all([
+    api.query.staking.maxNominatorsCount(),
+    api.query.staking.minNominatorBond(),
+    api.query.staking.counterForNominators()
+  ]);
+
+  return {
+    maxNominatorsCount,
+    minNominatorBond,
+    counterForNominators
+  }
+}
+
 interface IOptions {
   label: string,
-  value: Strategy | RewardDestinationType,
+  value: Strategy,
   isDisabled?: boolean
 }
 interface IInputData {
   stakeAmount: number,
   strategy: IOptions,
-  rewardDestination: IOptions | null
+  rewardDestination: RewardDestinationType;//IOptions | null
 }
 
 const Staking = () => {
@@ -318,7 +333,7 @@ const Staking = () => {
   const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
     strategy: BASIC_DEFAULT_STRATEGY,
-    rewardDestination: null,
+    rewardDestination: RewardDestinationType.NULL,
   });
 
   const [advancedOption, setAdvancedOption] = useState({
@@ -345,7 +360,7 @@ const Staking = () => {
     calculatedApy: 0,
     selectableCount: 0,
   });
-  const [chainInfo, setChainInfo] = useState<IChainInfo>();
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>();
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
 
   const _formatBalance = useCallback(
@@ -456,10 +471,10 @@ const Staking = () => {
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
       queryStakingInfo(selectedAccount.address, polkadotApi)
-      .then(setChainInfo)
+      .then(setAccountChainInfo)
       .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setChainInfo]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -616,15 +631,15 @@ const Staking = () => {
   );
 
   const renderRewardDestinationNode = useMemo(() => {
-    switch(inputData.rewardDestination?.value) {
+    switch(inputData.rewardDestination) {
       case RewardDestinationType.STAKED:
         return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
       case RewardDestinationType.STASH:
         return (<Node title={selectedAccount.name} address={selectedAccount.address} />);
       case RewardDestinationType.CONTROLLER:
         // todo: Jack
-        if (chainInfo?.controller) {
-          return (<Node title={'Controller'} address={chainInfo?.controller} />);
+        if (accountChainInfo?.controller) {
+          return (<Node title={'Controller'} address={accountChainInfo?.controller} />);
         } else {
           return (<Node title={'controller account'} address='enter an address' />);
         }
@@ -634,7 +649,7 @@ const Staking = () => {
       default:
         return (<></>);
     }
-  }, [inputData, chainInfo, selectedAccount]);
+  }, [inputData, accountChainInfo, selectedAccount]);
 
   /**
    * for Header, option toggle
@@ -804,12 +819,121 @@ const Staking = () => {
   /**
    * handle nominate transaction
    */
-  //  const handleNominate = useCallback(
-  //   () => {
-  //     console.log('Nominate');
-  //   },
-  //   [inputData]
-  //  );
+   const handleNominate = useCallback(
+    async () => {
+      console.log('Nominate');
+
+      if (!accountChainInfo) {
+        console.log('no account chain info');
+        return;
+      }
+
+
+      const limits = await queryNominatorLimits(polkadotApi);
+      const maxNominatorsCount = (limits.maxNominatorsCount.isEmpty) ? 0 : parseInt(limits.maxNominatorsCount.toString());
+      const minNominatorBond = parseInt(limits.minNominatorBond.toString());
+      const counterForNominators = parseInt(limits.counterForNominators.toString());
+
+      if (counterForNominators >= maxNominatorsCount) {
+        console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
+        return;
+      }
+
+      if (accountChainInfo?.role === AccountRole.VALIDATOR || accountChainInfo?.role === AccountRole.CONTROLLER) {
+        console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
+        return;
+      }
+
+      if (inputData.stakeAmount < minNominatorBond) {
+        console.log(`not allow to nominate, the input stake amount is less than minNominatorBond ${minNominatorBond}`);
+      }
+
+      const selectedValidators = apiFilteredTableData.tableData.filter((v) => v.select);
+      console.log(selectedValidators);
+      console.log(selectedValidators.length);
+      if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
+        console.log(`not allow to nominate, selected validators is over than ${NetworkConfig[networkName].maxNominateCount}`);
+        return;
+      }
+
+      // api.tx.staking.bond(controller, value, payee)
+      // payee: ''Staked', 'Stash', 'Controller', 'Account'
+      // api.tx.staking.bondExtra(max_additional)
+      // api.tx.staking.setPayee(payee)
+      // api.tx.nominate(target) 
+
+      // estimate tx fee
+      // api.tx.xxx.paymentInfo(sender);
+
+      // send
+      // api.tx.xxx.signAndSend(sender);
+
+      // batch
+      // api.tx.utility.batch(txs).sendAndSign()
+
+      // set up reward destination
+      let payee;
+      switch(inputData.rewardDestination){
+        case RewardDestinationType.STAKED:
+          payee = 'Staked';
+          break;
+        case RewardDestinationType.STASH:
+          payee = 'Stash';
+          break;
+        case RewardDestinationType.CONTROLLER:
+          // todo, change to input controller address
+          payee = selectedAccount.address;
+          break;
+        case RewardDestinationType.ACCOUNT:
+          payee = 'any account here';
+          break;
+        default:
+          payee = 'null';
+      }
+      payee = {Staked: true}
+
+      const mocked_validators = [
+        'GCNeCFUCEjcJ8XQxJe1QuExpS61MavucrnEAVpcngWBYsP2',
+        'CjU6xRgu5f9utpaCbYHBWZGxZPrpgUPSSXqSQQG5mkH9LKM',
+        'DBBFZxZqGPb2LSQSA4WHugerXGwm2ivywqdPxVnsJA9oyV3',
+        'EMrTktHLYSHAqpVH3f2KMMoLkZPMWjeQAZLpZTJ6KgNcXVr'
+      ];
+
+      if (accountChainInfo?.role === AccountRole.OTHER) {
+        const txs = [
+          // todo: replace controller address
+          polkadotApi.tx.staking.bond(selectedAccount.address, inputData.stakeAmount, payee),
+          polkadotApi.tx.staking.nominate(mocked_validators)
+        ]
+
+        const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+
+        console.log(`
+          class=${txFee.class.toString()},
+          weight=${txFee.weight.toString()},
+          partialFee=${txFee.partialFee.toHuman()}
+        `);
+
+      } else {
+        // Account role is Nominator
+
+        const extraBondAmount = BigInt(inputData.stakeAmount) - BigInt(accountChainInfo.bonded);
+
+        const txs = [
+          polkadotApi.tx.staking.bondExtra(extraBondAmount),
+          polkadotApi.tx.staking.nominate(mocked_validators)
+        ]
+
+        const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+        console.log(`
+          class=${txFee.class.toString()},
+          weight=${txFee.weight.toString()},
+          partialFee=${txFee.partialFee.toHuman()}
+        `);
+      }
+    },
+    [inputData, polkadotApi, accountChainInfo, apiFilteredTableData, networkName]
+   );
 
   // while network changing, set api parameter for network
   useEffect(() => {
@@ -1047,11 +1171,11 @@ const Staking = () => {
             </ContentBlockRight>
           </ContentBlock>
           <BalanceContextBlock>
-            <DetailedBalance color='white'>Role: {chainInfo?.role}</DetailedBalance>
-            <DetailedBalance color='white'>bonded: {_formatBalance(chainInfo?.bonded)}</DetailedBalance>
+            <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance>
+            <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
             <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
             <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
-            <DetailedBalance color='white'>redeemable: {_formatBalance(chainInfo?.redeemable)}</DetailedBalance>
+            <DetailedBalance color='white'>redeemable: {_formatBalance(accountChainInfo?.redeemable)}</DetailedBalance>
           </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
@@ -1116,9 +1240,7 @@ const Staking = () => {
             {!apiLoading ? (
               <Button
                 title="Nominate"
-                onClick={() => {
-                  console.log('Nominate');
-                }}
+                onClick={handleNominate}
                 style={{ width: 220 }}
               />
             ) : (
