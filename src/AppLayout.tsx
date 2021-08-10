@@ -28,6 +28,7 @@ import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
 import Contact from './pages/Contact';
 import OurValidators from './pages/OurValidators';
+import About from './pages/About';
 
 // header
 const Header: React.FC = () => {
@@ -100,7 +101,7 @@ const Footer: React.FC = () => {
           <ThDiv>General</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">About</LinkA>
+            <LinkA href={`${staking_url}/about`}>About</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
@@ -201,6 +202,7 @@ const AppLayout = () => {
               <Route path="/rewards" component={StakingRewardsReport} />
               <Route path="/contact" component={Contact} />
               <Route path="/ourValidators" component={OurValidators} />
+              <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
           <Footer />
@@ -229,6 +231,7 @@ const AppLayout = () => {
               <Route path="/management" component={Management} />
               <Route path="/contact" component={Contact} />
               <Route path="/ourValidators" component={OurValidators} />
+              <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
           <Footer />
