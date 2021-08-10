@@ -5,7 +5,9 @@ const AboutContent = () => {
   return (
     <ContentLayout>
       <Description>
-        We are CryptoLab. We operate Polkadot and Kusama validators.
+        We are CryptoLab. We operate Polkadot and Kusama validators.<br/>
+        <div style={{'margin': '10px 0 0 0'}}/>
+        We make the CryptoLan Network because we found the community needs useful tools to help us to have better information about staking.
       </Description>
       <div style={{'margin': '34px 0 0 0'}}/>
       <Description>
