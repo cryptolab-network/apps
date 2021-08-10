@@ -46,8 +46,8 @@ import { toast } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
-import { selectAccount } from '../../../redux/walletSlice';
 import { useDebounce } from 'use-debounce';
+import { web3FromAddress } from '@polkadot/extension-dapp';
 
 enum Strategy {
   LOW_RISK,
@@ -83,16 +83,18 @@ const rewardDestinationOptions = [
     label: 'Controller account',
     value: RewardDestinationType.CONTROLLER,
   },
-  {
-    label: 'Specified payment account',
-    value: RewardDestinationType.ACCOUNT,
-  },
+  // {
+  //   label: 'Specified payment account',
+  //   value: RewardDestinationType.ACCOUNT,
+  // },
 ];
 
 enum AccountRole {
   VALIDATOR,
-  CONTROLLER,
+  CONTROLLER_OF_VALIDATOR,
+  CONTROLLER_OF_NOMINATOR,
   NOMINATOR,
+  NOMINATOR_AND_CONTROLLER,
   NONE,
 }
 
@@ -256,43 +258,6 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     api.query.staking.ledger(address),
   ]);
 
-  let result = {
-    role: AccountRole.NONE,
-    controller: info.controllerId?.toHuman(),
-    nominators: info.nominators.map((n) => n.toHuman()),
-    rewardDestination: RewardDestinationType.NULL,
-    rewardDestinationAddress: null,
-    bonded: 0,
-    redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable: false
-  }
-
-
-  const role =
-    info.nextSessionIds.length !== 0
-      ? AccountRole.VALIDATOR
-      : !ledger.isNone
-      ? AccountRole.CONTROLLER
-      : info.nominators.length !== 0
-      ? AccountRole.NOMINATOR
-      : AccountRole.NONE;
-  
-  let isNominatable = false;
-  let bonded = info.stakingLedger.total.unwrap().toHex();
-  if (role === AccountRole.NONE) {
-    isNominatable = true;
-  }
-
-  if (role === AccountRole.NOMINATOR && info.controllerId?.toHuman() === address) {
-    isNominatable = true;
-  }
-
-  if (role === AccountRole.CONTROLLER && !ledger.isNone) {
-    isNominatable = true;
-    bonded = ledger.unwrap().total.unwrap().toHex();
-    console.log(ledger.unwrap().stash.toHuman());
-  }
-
   const rewardDestination = info.rewardDestination.isStaked
     ? RewardDestinationType.STAKED
     : info.rewardDestination.isStash
@@ -302,6 +267,53 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     : RewardDestinationType.ACCOUNT;
   const rewardDestinationAddress =
     rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
+
+    // VALIDATOR,
+    // CONTROLLER_OF_VALIDATOR,
+    // CONTROLLER_OF_NOMINATOR,
+    // NOMINATOR,
+    // NOMINATOR_AND_CONTROLLER,
+    // NONE,
+
+  let role;
+  let isNominatable = false;
+  let bonded;
+  if (info.nextSessionIds.length !== 0) {
+    role = AccountRole.VALIDATOR;
+    bonded = info.stakingLedger.total.unwrap().toHex();
+    console.log(`role = VALIDATOR`);
+  } else if (!ledger.isNone) {
+    const stash = ledger.unwrap().stash.toHuman();
+    const staking = await api.derive.staking.account(stash);
+    if (staking.nextSessionIds.length !== 0) {
+      role = AccountRole.CONTROLLER_OF_VALIDATOR;
+      bonded = staking.stakingLedger.total.unwrap().toHex();
+      console.log(`role = CONTROLLER_OF_VALIDATOR`);
+    } else {
+      role = AccountRole.CONTROLLER_OF_NOMINATOR;
+      bonded = staking.stakingLedger.total.unwrap().toHex();
+      console.log(`role = CONTROLLER_OF_NOMINATOR`);
+      isNominatable = true;
+    }
+  } else if (!info.stakingLedger.total.unwrap().isZero()) {
+    if (info.controllerId?.toHuman === address) {
+      role = AccountRole.NOMINATOR_AND_CONTROLLER;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      console.log(`role = NOMINATOR_AND_CONTROLLER`);
+      isNominatable = true;
+    } else {
+      role = AccountRole.NOMINATOR;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      console.log(`role = NOMINATOR`);
+    }
+  } else {
+    role = AccountRole.NONE;
+    bonded = info.stakingLedger.total.unwrap().toHex();
+    console.log(`role = NONE`);
+    isNominatable = true;
+  }
+
+
   return {
     role,
     controller: info.controllerId?.toHuman(),
@@ -310,8 +322,8 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     rewardDestinationAddress,
     bonded,
     redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable
-  };
+    isNominatable: false
+  }
 };
 
 const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
@@ -360,7 +372,8 @@ interface IOptions {
 interface IInputData {
   stakeAmount: number,
   strategy: IOptions,
-  rewardDestination: RewardDestinationType;//IOptions | null
+  rewardDestination: RewardDestinationType,//IOptions | null
+  paymentAccount?: string,
 }
 
 enum StrategyType {
@@ -405,6 +418,7 @@ const Staking = () => {
   });
   const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>();
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
+  const [minNominatorBond, setMinNominatorBond] = useState<string>('');
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -519,6 +533,12 @@ const Staking = () => {
       queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
     }
   }, [networkStatus, networkName, polkadotApi]);
+
+  useEffect(() => {
+    queryNominatorLimits(polkadotApi).then((data) => {
+      setMinNominatorBond(data.minNominatorBond.toHex());
+    }).catch(console.error);
+  }, [networkName, polkadotApi, setMinNominatorBond]);
 
   const columns = useMemo(() => {
     return [
@@ -767,13 +787,25 @@ const Staking = () => {
         if (!isNaN(e.target.value)) {
           tmpValue = e.target.value;
           // TODO: deal with input number format and range
+          // input unit is KSM
+          const input = BigInt(tmpValue * Math.pow(10, NetworkConfig[networkName].decimals));
+          const transferrable = BigInt(selectedAccount.balances.availableBalance);
+          const bonded = (accountChainInfo) ? BigInt(accountChainInfo.bonded) : BigInt(0);
+          const minBonded = BigInt(minNominatorBond);
+          if (input > (transferrable + bonded) || input < minBonded) {
+            console.log(`input value should be <= transferrable and >= minBonded`);
+          }
         } else {
           // not a number
           return;
         }
         break;
       case 'rewardDestination':
-        tmpValue = e;
+        
+        tmpValue = e.value;
+        console.log(e);
+        console.log(inputData.rewardDestination);
+        console.log(`reward destination = ${tmpValue}`);
         break;
       default:
         // stakeAmount
@@ -855,109 +887,135 @@ const Staking = () => {
         return;
       }
 
-
       const limits = await queryNominatorLimits(polkadotApi);
       const maxNominatorsCount = (limits.maxNominatorsCount.isEmpty) ? 0 : parseInt(limits.maxNominatorsCount.toString());
       const minNominatorBond = parseInt(limits.minNominatorBond.toString());
       const counterForNominators = parseInt(limits.counterForNominators.toString());
+      const stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
+      const bonded = BigInt(accountChainInfo.bonded);
+      const transferrable = BigInt(selectedAccount.balances.availableBalance);
 
+      // checks
       if (counterForNominators >= maxNominatorsCount) {
         console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
         return;
       }
 
-      if (accountChainInfo?.role === AccountRole.VALIDATOR || accountChainInfo?.role === AccountRole.CONTROLLER) {
+      if (accountChainInfo?.role === AccountRole.VALIDATOR || accountChainInfo?.role === AccountRole.CONTROLLER_OF_VALIDATOR || accountChainInfo?.role === AccountRole.NOMINATOR) {
         console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
         return;
       }
 
-      if (inputData.stakeAmount < minNominatorBond) {
-        console.log(`not allow to nominate, the input stake amount is less than minNominatorBond ${minNominatorBond}`);
+      if (stakeAmount < minNominatorBond) {
+        console.log(`not allow to nominate, the input stake amount should be great than minNominatorBond ${minNominatorBond}`);
+        return;
+      }
+
+      if (stakeAmount > (bonded + transferrable)) {
+        console.log(`not allow to nominate, the input stake amount should be less than transferrable ${bonded + transferrable}`);
+        return;
       }
 
       const selectedValidators = finalFilteredTableData.tableData.filter((v) => v.select);
       console.log(selectedValidators);
       console.log(selectedValidators.length);
       if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
-        console.log(`not allow to nominate, selected validators is over than ${NetworkConfig[networkName].maxNominateCount}`);
+        console.log(`not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`);
         return;
       }
 
-      // api.tx.staking.bond(controller, value, payee)
-      // payee: ''Staked', 'Stash', 'Controller', 'Account'
-      // api.tx.staking.bondExtra(max_additional)
-      // api.tx.staking.setPayee(payee)
-      // api.tx.nominate(target) 
-
-      // estimate tx fee
-      // api.tx.xxx.paymentInfo(sender);
-
-      // send
-      // api.tx.xxx.signAndSend(sender);
-
-      // batch
-      // api.tx.utility.batch(txs).sendAndSign()
-
-      // set up reward destination
+      // reward destination
       let payee;
       switch(inputData.rewardDestination){
         case RewardDestinationType.STAKED:
           payee = 'Staked';
           break;
         case RewardDestinationType.STASH:
-          payee = 'Stash';
+          payee = 'Stash'
           break;
         case RewardDestinationType.CONTROLLER:
           // todo, change to input controller address
-          payee = selectedAccount.address;
+          payee = 'Controller'
           break;
         case RewardDestinationType.ACCOUNT:
-          payee = 'any account here';
+          payee = accountChainInfo.rewardDestinationAddress;
           break;
         default:
-          payee = 'null';
+          payee = null;
       }
-      payee = {Staked: true}
 
-      const mocked_validators = [
-        'GCNeCFUCEjcJ8XQxJe1QuExpS61MavucrnEAVpcngWBYsP2',
-        'CjU6xRgu5f9utpaCbYHBWZGxZPrpgUPSSXqSQQG5mkH9LKM',
-        'DBBFZxZqGPb2LSQSA4WHugerXGwm2ivywqdPxVnsJA9oyV3',
-        'EMrTktHLYSHAqpVH3f2KMMoLkZPMWjeQAZLpZTJ6KgNcXVr'
-      ];
+      let txs;
+      let txFee;
+      switch(accountChainInfo.role) {
+        case AccountRole.NONE: {
+          txs = [
+            polkadotApi.tx.staking.bond(selectedAccount.address, stakeAmount, payee),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+          ]
+  
+          txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+  
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+        case AccountRole.NOMINATOR_AND_CONTROLLER: {
+          const extraBondAmount = stakeAmount - bonded;
+          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+            txs = [
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          }
 
-      if (accountChainInfo?.role === AccountRole.NONE) {
-        const txs = [
-          // todo: replace controller address
-          polkadotApi.tx.staking.bond(selectedAccount.address, inputData.stakeAmount, payee),
-          polkadotApi.tx.staking.nominate(mocked_validators)
-        ]
-
-        const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-
-        console.log(`
-          class=${txFee.class.toString()},
-          weight=${txFee.weight.toString()},
-          partialFee=${txFee.partialFee.toHuman()}
-        `);
-
-      } else {
-        // Account role is Nominator
-
-        const extraBondAmount = BigInt(inputData.stakeAmount) - BigInt(accountChainInfo.bonded);
-
-        const txs = [
-          polkadotApi.tx.staking.bondExtra(extraBondAmount),
-          polkadotApi.tx.staking.nominate(mocked_validators)
-        ]
-
-        const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-        console.log(`
-          class=${txFee.class.toString()},
-          weight=${txFee.weight.toString()},
-          partialFee=${txFee.partialFee.toHuman()}
-        `);
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+        case AccountRole.CONTROLLER_OF_NOMINATOR: {
+          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+            txs = [
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          }
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
       }
+
+      // finds an injector for an address 
+      const injector = await web3FromAddress(selectedAccount.address);
+
+      // ready to sign and send tx
+      polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, ({status, events, dispatchInfo}) => {
+        console.log(status);
+        console.log(events);
+        console.log(dispatchInfo);
+      })
+
     },
     [inputData, polkadotApi, accountChainInfo, finalFilteredTableData, networkName]
    );
