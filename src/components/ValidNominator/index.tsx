@@ -38,7 +38,6 @@ const ValidNominator: React.FC<IValidNominator> = ({
   favorite,
   onClick,
 }) => {
-
   const Favorite = ({ address, _favorite }) => {
     const [favorite, setFavoriteIcon] = useState(_favorite);
     const setFavorite = useCallback(() => {
@@ -48,26 +47,31 @@ const ValidNominator: React.FC<IValidNominator> = ({
       lsUnsetFavorite(address);
     }, [address]);
     if (favorite) {
-      return (<FavoriteIcon 
-        onClick={() => {
-          unsetFavorite();
-          setFavoriteIcon(false);
-        }} />);
+      return (
+        <FavoriteIcon
+          onClick={() => {
+            unsetFavorite();
+            setFavoriteIcon(false);
+          }}
+        />
+      );
     } else {
-      return (<FavoriteUnselectedIcon 
-        onClick={() => {
-          setFavorite();
-          setFavoriteIcon(true);
-        }
-        } />);
+      return (
+        <FavoriteUnselectedIcon
+          onClick={() => {
+            setFavorite();
+            setFavoriteIcon(true);
+          }}
+        />
+      );
     }
-  }
+  };
 
   const Status = () => {
     if (unclaimedPayouts >= 20) {
-      return (<UnclaimedPayoutsIcon />);
+      return <UnclaimedPayoutsIcon />;
     } else {
-      return (<div></div>);
+      return <div></div>;
     }
   };
 
@@ -79,9 +83,9 @@ const ValidNominator: React.FC<IValidNominator> = ({
         </ActiveBannerLayout>
       );
     } else {
-      return (<div></div>);
+      return <div></div>;
     }
-  }, []);
+  }, [activeAmount]);
 
   const shortenName = shortenStashId(name);
   return (
@@ -103,15 +107,25 @@ const ValidNominator: React.FC<IValidNominator> = ({
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
         {activeBanner}
-        <FavoriteLayout onClick={(e) => {e.stopPropagation();}}>
-          <Favorite 
-          address={address}
-          _favorite={favorite}/>
+        <FavoriteLayout
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Favorite address={address} _favorite={favorite} />
         </FavoriteLayout>
-        <StatusLayout onClick={(e) => {e.stopPropagation();}}>
+        <StatusLayout
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Status />
         </StatusLayout>
-        <div onClick={(e) => {e.stopPropagation();}}>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Identicon value={address} size={35} theme={'polkadot'} />
         </div>
         <Name>{shortenName}</Name>
@@ -178,7 +192,7 @@ const Name = styled.div`
   text-align: center;
   color: white;
   word-wrap: break-word;
-  width: 90%
+  width: 90%;
 `;
 const ValuePart = styled.div`
   font-family: Montserrat;

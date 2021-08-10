@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
-import { apiGetSingleValidator, apiGetValidatorSlashes, apiGetValidatorUnclaimedEras, IEraInfo, INominator, IValidatorHistory, IValidatorSlash } from '../../../apis/Validator';
+import {
+  apiGetSingleValidator,
+  apiGetValidatorSlashes,
+  apiGetValidatorUnclaimedEras,
+  IEraInfo,
+  INominator,
+  IValidatorHistory,
+  IValidatorSlash,
+} from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
@@ -13,17 +21,14 @@ import { toast } from 'react-toastify';
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
   info.forEach((eraInfo, i) => {
-    if(eraInfo.era > lastEraInfo.era) {
+    if (eraInfo.era > lastEraInfo.era) {
       lastEraInfo = eraInfo;
     }
   });
   return lastEraInfo;
 };
 
-const ValidatorStatusHeader = ({
-  chain,
-  validator
-}) => {
+const ValidatorStatusHeader = ({ chain, validator }) => {
   const history = useHistory();
   let active = 0;
   let total = 0;
@@ -32,38 +37,39 @@ const ValidatorStatusHeader = ({
   if (validator.info.length > 0) {
     const lastEraInfo = findLastEra(validator.info);
     total = lastEraInfo.nominators.reduce((acc, n) => {
-      return acc += n.balance.lockedBalance;
+      return (acc += n.balance.lockedBalance);
     }, 0);
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
-  const _formatBalance = useCallback((value: any) => {
-    return balanceUnit(chain, value);
-  }, [chain]);
+  const _formatBalance = useCallback(
+    (value: any) => {
+      return balanceUnit(chain, value);
+    },
+    [chain]
+  );
   return (
     <HeaderLayout>
       <HeaderLeft>
         <PrevArrowLayout>
-          <PrevArrow onClick={() => {
-            history.goBack();
-          }}/>
+          <PrevArrow
+            onClick={() => {
+              history.goBack();
+            }}
+          />
         </PrevArrowLayout>
         <HeaderTitle>
           <Title>
-            <Account address={validator.id} display={validator.identity.display}/>
+            <Account address={validator.id} display={validator.identity.display} />
           </Title>
           <Subtitle>{validator.id}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
         <Exposure>
-          <ExposureActive>
-            {_formatBalance(active)}
-          </ExposureActive>
-          <span style={{color: 'white', margin:'0 4px 0 4px'}}>/</span>
-          <ExposureTotal>
-            {_formatBalance(total)}
-          </ExposureTotal>
+          <ExposureActive>{_formatBalance(active)}</ExposureActive>
+          <span style={{ color: 'white', margin: '0 4px 0 4px' }}>/</span>
+          <ExposureTotal>{_formatBalance(total)}</ExposureTotal>
         </Exposure>
         <Value>
           <ValueTitle>APY:</ValueTitle>
@@ -91,33 +97,36 @@ const ValidatorStatus = (props) => {
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
-      commissionChange: 0
+      commissionChange: 0,
     },
     identity: {
-      display: ''
+      display: '',
     },
     info: [],
-    averageApy: 0
+    averageApy: 0,
   });
   const chain = props.match.params.chain;
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
-  }, [chain]);
+  const _formatBalance = useCallback(
+    (value: any) => {
+      if (chain === 'KSM') {
+        return formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM',
+        });
+      } else if (chain === 'DOT') {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT',
+        });
+      } else {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit',
+        });
+      }
+    },
+    [chain]
+  );
   const notifyError = useCallback((msg: string) => {
     toast.error(`${msg}`, {
       position: 'top-right',
@@ -134,30 +143,40 @@ const ValidatorStatus = (props) => {
     async function getValidator() {
       // load stash data from backend
       try {
-        let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
-        let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
-        let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({ params: `${props.match.params.id}/slashes/${props.match.params.chain}` });
+        let validator: IValidatorHistory = await apiGetSingleValidator({
+          params: `${props.match.params.id}/${props.match.params.chain}`,
+        });
+        let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({
+          params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}`,
+        });
+        let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({
+          params: `${props.match.params.id}/slashes/${props.match.params.chain}`,
+        });
         // TODO: error handling not yet
         setValidator(validator);
         if (validator.info.length > 0) {
           const lastEraInfo = findLastEra(validator.info);
           const _nominators = lastEraInfo.nominators;
           setSelfStake(_formatBalance(lastEraInfo.selfStake));
-          let active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
+          let active = _nominators.filter(({ address: id1 }) =>
+            lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1)
+          );
           active = active.sort((a, b) => {
             if (a.balance.lockedBalance > b.balance.lockedBalance) {
               return -1;
-            } else if(a.balance.lockedBalance < b.balance.lockedBalance) {
+            } else if (a.balance.lockedBalance < b.balance.lockedBalance) {
               return 1;
             }
             return 0;
           });
           setActiveNominators(active);
-          let inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
+          let inactive = _nominators.filter(
+            ({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1)
+          );
           inactive = inactive.sort((a, b) => {
             if (a.balance.lockedBalance > b.balance.lockedBalance) {
               return -1;
-            } else if(a.balance.lockedBalance < b.balance.lockedBalance) {
+            } else if (a.balance.lockedBalance < b.balance.lockedBalance) {
               return 1;
             }
             return 0;
@@ -194,52 +213,31 @@ const ValidatorStatus = (props) => {
       }
     }
     getValidator();
-  }, [props.match.params.id, props.match.params.chain, _formatBalance]);
+  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>
         <CardHeader
-          Header={() => (
-            <ValidatorStatusHeader
-              validator={validator}
-              chain={props.match.params.chain}
-            />
-          )}
+          Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
         >
           <ValidatorInfoLayout>
-            <InfoTitle>
-              Self Stake:
-            </InfoTitle>
-            <InfoItem>
-              {selfStake}
-            </InfoItem>
+            <InfoTitle>Self Stake:</InfoTitle>
+            <InfoItem>{selfStake}</InfoItem>
             <InfoDivider />
-            <InfoTitle>
-              Unclaimed Eras:
-            </InfoTitle>
-            <InfoItem>
-              {unclaimedEras}
-            </InfoItem>
+            <InfoTitle>Unclaimed Eras:</InfoTitle>
+            <InfoItem>{unclaimedEras}</InfoItem>
             <InfoDivider />
-            <InfoTitle>
-              Slashes:
-            </InfoTitle>
-            <InfoItem>
-              {slashes.length === 0 ? 'None' : slashes.length}
-            </InfoItem>
+            <InfoTitle>Slashes:</InfoTitle>
+            <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
           </ValidatorInfoLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
-              <NominatorGrid
-              chain={props.match.params.chain}
-              nominators={activeNominators}/>
+            <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
+            <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
           </ContentColumnLayout>
           <Space />
           <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Inactive Nominators</ContentBlockTitle>
-              <NominatorGrid
-              chain={props.match.params.chain}
-              nominators={nominators}/>
+            <ContentBlockTitle color="white">Inactive Nominators</ContentBlockTitle>
+            <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
           </ContentColumnLayout>
         </CardHeader>
       </MainLayout>

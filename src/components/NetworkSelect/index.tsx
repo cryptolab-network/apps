@@ -9,22 +9,21 @@ import './index.css';
 import styled from 'styled-components';
 import { ApiContext } from '../Api';
 import { NetworkConfig } from '../../utils/constants/Network';
-import keys from '../../config/keys';
 
 const getLogoDiv = (network) => {
-  switch(network){
+  switch (network) {
     case 'Kusama':
-      return <KSMLogo style={{ width: 36, height: 36 }} />
+      return <KSMLogo style={{ width: 36, height: 36 }} />;
     case 'Polkadot':
-      return <DOTLogo style={{ width: 36, height: 36 }} />
+      return <DOTLogo style={{ width: 36, height: 36 }} />;
     case 'Westend':
-      return <WNDLogo style={{ width: 36, height: 36 }} />
+      return <WNDLogo style={{ width: 36, height: 36 }} />;
   }
-}
+};
 
 const NetworkSelect: React.FC = () => {
   // context
-  const {network, changeNetwork} = useContext(ApiContext);
+  const { network, changeNetwork } = useContext(ApiContext);
   // state
   const [isOpen, setOpen] = useState(false);
   //ref
@@ -69,7 +68,7 @@ const NetworkSelect: React.FC = () => {
         {getLogoDiv(network)}
         <NetworkTitle>{network}</NetworkTitle>
       </>
-    )
+    );
   }, [network]);
 
   const DisplayDropDownItem = useMemo(() => {
@@ -79,16 +78,17 @@ const NetworkSelect: React.FC = () => {
       if (index === array.length - 1) classname = 'li last';
 
       return (
-        <li key= {key}
+        <li
+          key={key}
           className={classname}
           onClick={() => {
             changeNetwork(NetworkConfig[key].name);
           }}
-        > 
+        >
           {getLogoDiv(NetworkConfig[key].name)}
           <NetworkTitleLight>{NetworkConfig[key].name}</NetworkTitleLight>
         </li>
-      )
+      );
     });
     return list;
   }, [changeNetwork]);
