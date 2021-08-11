@@ -47,6 +47,7 @@ import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
 import { useDebounce } from 'use-debounce';
+import Warning from '../../../components/Hint/Warn';
 
 enum Strategy {
   LOW_RISK,
@@ -180,6 +181,11 @@ interface IApiParams {
   commission_max?: number;
   has_verified_identity?: boolean;
   has_joined_1kv?: boolean;
+}
+
+interface INomitableInfo {
+  nominatable: boolean;
+  warning: any;
 }
 
 const StrategyConfig = {
@@ -477,6 +483,39 @@ const Staking = () => {
       queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
     }
   }, [networkStatus, networkName, polkadotApi]);
+
+  const nominatableInfo = useMemo((): INomitableInfo => {
+    if (networkStatus !== ApiState.READY) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning
+            msg={`Your have disconnected to ${networkName} network, please wait a moment or refresh the page.`}
+          />
+        ),
+      };
+    }
+
+    if (apiLoading) {
+      return {
+        nominatable: false,
+        warning: <Warning msg="Validator list is fetching. As such staking operations are not permitted." />,
+      };
+    }
+    if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="You haven't selected any validators yet. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
+    return {
+      nominatable: true,
+      warning: null,
+    };
+  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus]);
 
   const columns = useMemo(() => {
     return [
@@ -922,6 +961,7 @@ const Staking = () => {
               <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
               <AdvancedSettingWrap>
                 <TitleInput
+                  disabled={apiLoading}
                   title="Min. Self Stake"
                   placeholder="input minimum amount"
                   inputLength={170}
@@ -929,6 +969,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('minSelfStake')}
                 />
                 <TitleInput
+                  disabled={apiLoading}
                   title="Max. Unclaimed Eras"
                   placeholder="input maximum amount"
                   inputLength={170}
@@ -936,6 +977,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('maxUnclaimedEras')}
                 />
                 <TitleInput
+                  disabled={apiLoading}
                   title="Historical APY"
                   placeholder="0 - 100"
                   unit="%"
@@ -943,6 +985,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('historicalApy')}
                 />
                 <TitleInput
+                  disabled={apiLoading}
                   title="Min. Eras Inclusion Rate"
                   placeholder="0 - 100"
                   unit="%"
@@ -955,26 +998,31 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('identity')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="No Prev. Slashes"
                   checked={advancedSetting.noPreviousSlashes}
                   onChange={handleAdvancedFilter('noPreviousSlashes')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Is Sub-Identity"
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Highest Avg.APY"
                   checked={advancedSetting.highApy}
                   onChange={handleAdvancedFilter('highApy')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Decentralized"
                   checked={advancedSetting.decentralized}
                   onChange={handleAdvancedFilter('decentralized')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="1kv programme"
                   checked={advancedSetting.oneKv}
                   onChange={handleAdvancedFilter('oneKv')}
@@ -987,6 +1035,7 @@ const Staking = () => {
     );
   }, [
     advancedOption.advanced,
+    apiLoading,
     advancedSetting.minSelfStake,
     advancedSetting.maxUnclaimedEras,
     advancedSetting.historicalApy,
@@ -1141,19 +1190,16 @@ const Staking = () => {
         {advancedFilterResult}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
-            {!apiLoading ? (
-              <Button
-                title="Nominate"
-                onClick={() => {
-                  console.log('Nominate');
-                }}
-                style={{ width: 220 }}
-              />
-            ) : (
-              <ScaleLoader />
-            )}
+            <Button
+              disabled={!nominatableInfo.nominatable}
+              title="Nominate"
+              onClick={() => {
+                console.log('Nominate');
+              }}
+              style={{ width: 220 }}
+            />
           </div>
-          {/* <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." /> */}
+          {nominatableInfo.warning}
         </FooterLayout>
       </CardHeader>
       <DashboardLayout>{eraInfoDisplayDom}</DashboardLayout>

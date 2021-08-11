@@ -3,9 +3,9 @@ import styled from 'styled-components';
 
 const TitleSwitch = ({ title, ...props }) => {
   return (
-    <SwitchLayout>
+    <SwitchLayout {...props}>
       <Title>{title}</Title>
-      <Switch onChange={props.onChange} checked={props.checked} offColor="#17222e" />
+      <Switch onChange={props.onChange} checked={props.checked} offColor="#17222e" {...props} />
       {props.unit ? <Unit>{props.unit}</Unit> : <Unit></Unit>}
     </SwitchLayout>
   );

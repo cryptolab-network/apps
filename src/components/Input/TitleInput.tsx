@@ -9,6 +9,7 @@ const InputPercentage = ({ title, ...props }) => {
         value={props.value}
         placeholder={props.placeholder}
         inputLength={props.inputLength}
+        {...props}
       />
       {props.unit ? <Unit>{props.unit}</Unit> : <Unit></Unit>}
     </InputLayout>
@@ -17,12 +18,17 @@ const InputPercentage = ({ title, ...props }) => {
 
 export default InputPercentage;
 
-const InputLayout = styled.div`
+interface InputLayoutProps {
+  disabled?: boolean;
+}
+const InputLayout = styled.div<InputLayoutProps>`
   display: flex;
   justify-content: flex-start;
   align-items: center;
   margin-top: 8px;
   margin-bottom: 8px;
+  opacity: ${(props) => (props.disabled ? '0.5' : '1')};
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'default')};
 `;
 
 const Title = styled.div`
@@ -41,6 +47,7 @@ const Title = styled.div`
 
 interface InputStyleProps {
   inputLength: number;
+  disabled?: boolean;
 }
 const InputStyle = styled.input<InputStyleProps>`
   width: ${(props) => (props.inputLength ? props.inputLength : 45)}px;
@@ -65,6 +72,7 @@ const InputStyle = styled.input<InputStyleProps>`
     margin: 0 0 0 0;
     font-weight: 500;
   }
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'default')};
 `;
 
 const Unit = styled.div`
