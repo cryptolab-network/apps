@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -27,7 +27,7 @@ import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues } from '../../../utils/helper';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { ApiContext } from '../../../components/Api';
+import { api, ApiContext } from '../../../components/Api';
 
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -48,6 +48,7 @@ import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
 import { useDebounce } from 'use-debounce';
 import { web3FromAddress } from '@polkadot/extension-dapp';
+import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 
 enum Strategy {
   LOW_RISK,
@@ -268,47 +269,47 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   const rewardDestinationAddress =
     rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
 
-    // VALIDATOR,
-    // CONTROLLER_OF_VALIDATOR,
-    // CONTROLLER_OF_NOMINATOR,
-    // NOMINATOR,
-    // NOMINATOR_AND_CONTROLLER,
-    // NONE,
-
   let role;
   let isNominatable = false;
   let bonded;
+  let nominators;
   if (info.nextSessionIds.length !== 0) {
     role = AccountRole.VALIDATOR;
     bonded = info.stakingLedger.total.unwrap().toHex();
+    nominators = info.nominators.map((n) => n.toHuman())
     console.log(`role = VALIDATOR`);
+  } else if (!info.stakingLedger.total.unwrap().isZero()) {
+    if (info.controllerId?.toHuman() === address) {
+      role = AccountRole.NOMINATOR_AND_CONTROLLER;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      nominators = info.nominators.map((n) => n.toHuman())
+      console.log(`role = NOMINATOR_AND_CONTROLLER`);
+      isNominatable = true;
+    } else {
+      role = AccountRole.NOMINATOR;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      nominators = info.nominators.map((n) => n.toHuman());
+      console.log(`role = NOMINATOR`);
+    }
   } else if (!ledger.isNone) {
     const stash = ledger.unwrap().stash.toHuman();
     const staking = await api.derive.staking.account(stash);
     if (staking.nextSessionIds.length !== 0) {
       role = AccountRole.CONTROLLER_OF_VALIDATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
+      nominators = staking.nominators.map((n) => n.toHuman())
       console.log(`role = CONTROLLER_OF_VALIDATOR`);
     } else {
       role = AccountRole.CONTROLLER_OF_NOMINATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
+      nominators = staking.nominators.map((n) => n.toHuman())
       console.log(`role = CONTROLLER_OF_NOMINATOR`);
       isNominatable = true;
-    }
-  } else if (!info.stakingLedger.total.unwrap().isZero()) {
-    if (info.controllerId?.toHuman === address) {
-      role = AccountRole.NOMINATOR_AND_CONTROLLER;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      console.log(`role = NOMINATOR_AND_CONTROLLER`);
-      isNominatable = true;
-    } else {
-      role = AccountRole.NOMINATOR;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      console.log(`role = NOMINATOR`);
     }
   } else {
     role = AccountRole.NONE;
     bonded = info.stakingLedger.total.unwrap().toHex();
+    nominators = info.nominators.map((n) => n.toHuman());
     console.log(`role = NONE`);
     isNominatable = true;
   }
@@ -317,7 +318,7 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   return {
     role,
     controller: info.controllerId?.toHuman(),
-    nominators: info.nominators.map((n) => n.toHuman()),
+    nominators,
     rewardDestination,
     rewardDestinationAddress,
     bonded,
@@ -388,6 +389,7 @@ const Staking = () => {
     api: polkadotApi,
     apiState: networkStatus,
     selectedAccount,
+    refreshAccountData
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -505,6 +507,91 @@ const Staking = () => {
     });
   }, []);
 
+  const notifyInfo = useCallback((msg: string) => {
+    toast.info(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    })
+  }, []);
+
+  const notifySuccess = useCallback((msg: string) => {
+    toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      }
+    })
+  }, []);
+
+  const notifyFailed = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      }
+    })
+  }, []);
+
+  const notifyProcessing = useCallback((msg: string) => {
+    const id = toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 30000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    })
+  }, []);
+
+  const txStatusCallback = useCallback(({events = [], status}: { events?: EventRecord[], status: ExtrinsicStatus}) => {
+    if (status.isInvalid) {
+      console.log('Transaction invalid');
+      notifyWarn('Transaction invalid');
+    } else if (status.isReady) {
+      console.log('Transaction is ready');
+      notifyInfo('Transaction is ready');
+    } else if (status.isBroadcast) {
+      console.log('Transaction has been broadcasted');
+      notifyInfo('Transaction has been broadcasted');
+    } else if (status.isInBlock) {
+      console.log('Transaction is included in block');
+      notifyInfo('Transaction is included in block');
+    } else if (status.isFinalized) {
+      console.log('Transaction is included in block');
+      notifyInfo(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+      events.forEach(({event}) => {
+        if (event.method === 'ExtrinsicSuccess') {
+          console.log('Transaction succeeded');
+          notifySuccess('Transaction succeeded');
+        } else if (event.method === 'ExtrinsicFailed') {
+          console.log('Transaction failed');
+          notifyFailed('Transaction failed');
+        }
+      })
+      // update account data
+      queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+      refreshAccountData(selectedAccount);
+    }
+  }, [notifyInfo, notifyWarn, selectedAccount, polkadotApi]);
+
   useEffect(() => {}, []);
 
   useEffect(() => {
@@ -523,10 +610,13 @@ const Staking = () => {
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
       queryStakingInfo(selectedAccount.address, polkadotApi)
-      .then(setAccountChainInfo)
+      .then((info) => {
+        setAccountChainInfo(info);
+        setInputData((prev) => ({...prev, rewardDestination: info.rewardDestination}));
+      })
       .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -535,9 +625,11 @@ const Staking = () => {
   }, [networkStatus, networkName, polkadotApi]);
 
   useEffect(() => {
-    queryNominatorLimits(polkadotApi).then((data) => {
-      setMinNominatorBond(data.minNominatorBond.toHex());
-    }).catch(console.error);
+    if (networkStatus === ApiState.READY) {
+      queryNominatorLimits(polkadotApi).then((data) => {
+        setMinNominatorBond(data.minNominatorBond.toHex());
+      }).catch(console.error);
+    }
   }, [networkName, polkadotApi, setMinNominatorBond]);
 
   const columns = useMemo(() => {
@@ -907,7 +999,7 @@ const Staking = () => {
       }
 
       if (stakeAmount < minNominatorBond) {
-        console.log(`not allow to nominate, the input stake amount should be great than minNominatorBond ${minNominatorBond}`);
+        console.log(`not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`);
         return;
       }
 
@@ -919,6 +1011,12 @@ const Staking = () => {
       const selectedValidators = finalFilteredTableData.tableData.filter((v) => v.select);
       console.log(selectedValidators);
       console.log(selectedValidators.length);
+
+      if (selectedValidators.length === 0) {
+        console.log(`not allow to nominate, selected validators should greater than zero.`);
+        return;
+      }
+
       if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
         console.log(`not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`);
         return;
@@ -1008,13 +1106,13 @@ const Staking = () => {
 
       // finds an injector for an address 
       const injector = await web3FromAddress(selectedAccount.address);
-
+      
       // ready to sign and send tx
-      polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, ({status, events, dispatchInfo}) => {
-        console.log(status);
-        console.log(events);
-        console.log(dispatchInfo);
-      })
+      notifyProcessing('Trasaction is processing ');
+      polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, txStatusCallback).catch((err) => {
+        console.log(err);
+        toast.dismiss();
+      });
 
     },
     [inputData, polkadotApi, accountChainInfo, finalFilteredTableData, networkName]
@@ -1257,7 +1355,8 @@ const Staking = () => {
             </ContentBlockRight>
           </ContentBlock>
           <BalanceContextBlock>
-            <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance>
+            {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
+            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators.length}</DetailedBalance>
             <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
             <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
             <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
