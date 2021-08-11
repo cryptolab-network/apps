@@ -1,4 +1,4 @@
-import { NetworkNameLowerCase, NetworkCodeName } from './Network';
+import { NetworkNameLowerCase, NetworkCodeName, NetworkConfig } from './Network';
 
 /*
     while 'support us' switch is on, validators below would be add into the candidate list
@@ -23,15 +23,23 @@ export enum CryptolabDOTValidators {
 export enum CandidateNumber {
   KSM = 24,
   DOT = 16,
+  WND = 16
 }
 
 export const getCandidateNumber = (networkName: string) => {
-  const inputNetworkName = networkName.toLowerCase();
-  if (inputNetworkName === NetworkNameLowerCase.KSM || inputNetworkName === NetworkCodeName.KSM) {
-    return CandidateNumber.KSM;
-  } else if (inputNetworkName === NetworkNameLowerCase.DOT || inputNetworkName === NetworkCodeName.DOT) {
-    return CandidateNumber.DOT;
+  if (NetworkConfig[networkName] !== undefined) {
+    return NetworkConfig[networkName].maxNominateCount;
   } else {
     return 0;
   }
+  // const inputNetworkName = networkName.toLowerCase();
+  // if (inputNetworkName === NetworkNameLowerCase.KSM || inputNetworkName === NetworkCodeName.KSM) {
+  //   return CandidateNumber.KSM;
+  // } else if (inputNetworkName === NetworkNameLowerCase.DOT || inputNetworkName === NetworkCodeName.DOT) {
+  //   return CandidateNumber.DOT;
+  // } else if (inputNetworkName === NetworkNameLowerCase.WND || inputNetworkName === NetworkCodeName.WND) {
+  //   return CandidateNumber.WND;
+  // } else {
+  //   return 0;
+  // }
 };
