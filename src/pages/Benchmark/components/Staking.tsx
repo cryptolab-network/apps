@@ -40,7 +40,7 @@ import {
   apyCalculation,
 } from './utils';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
@@ -48,6 +48,7 @@ import { useDebounce } from 'use-debounce';
 import { web3FromAddress } from '@polkadot/extension-dapp';
 import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import Warning from '../../../components/Hint/Warn';
+import '../index.css';
 
 enum Strategy {
   LOW_RISK,
@@ -516,8 +517,8 @@ const Staking = () => {
     });
   }, []);
 
-  const notifyInfo = useCallback((msg: string) => {
-    toast.info(`${msg}`, {
+  const notifyInfo = useCallback((msg: string | React.ReactElement) => {
+    const options: ToastOptions = {
       position: 'top-right',
       autoClose: 5000,
       hideProgressBar: false,
@@ -525,7 +526,13 @@ const Staking = () => {
       pauseOnHover: true,
       draggable: false,
       progress: undefined,
-    })
+    }
+
+    if ( typeof msg === 'string') {
+      toast.info(`${msg}`, options);
+    } else {
+      toast.info(msg, options);
+    }
   }, []);
 
   const notifySuccess = useCallback((msg: string) => {
@@ -569,7 +576,7 @@ const Staking = () => {
       progress: undefined,
     })
   }, []);
-
+  
   const txStatusCallback = useCallback(({events = [], status}: { events?: EventRecord[], status: ExtrinsicStatus}) => {
     if (status.isInvalid) {
       console.log('Transaction invalid');
@@ -579,13 +586,14 @@ const Staking = () => {
       notifyInfo('Transaction is ready');
     } else if (status.isBroadcast) {
       console.log('Transaction has been broadcasted');
-      notifyInfo('Transaction has been broadcasted');
+      notifyInfo(<div>Transaction has been broadcasted</div>);
     } else if (status.isInBlock) {
       console.log('Transaction is included in block');
       notifyInfo('Transaction is included in block');
     } else if (status.isFinalized) {
-      console.log('Transaction is included in block');
-      notifyInfo(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+      const blockHash = status.asFinalized.toHex();
+      console.log(`Transaction is included in block ${blockHash}`);
+      notifyInfo(<div>Transaction has been included in <br />blockHash {blockHash.substring(0, 9)}...{blockHash.substring(blockHash.length - 8, blockHash.length)}</div>);
       events.forEach(({event}) => {
         if (event.method === 'ExtrinsicSuccess') {
           console.log('Transaction succeeded');
@@ -1165,6 +1173,7 @@ const Staking = () => {
       polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, txStatusCallback).catch((err) => {
         console.log(err);
         toast.dismiss();
+        notifyWarn('Transaction is cancelled');
       });
 
     },
