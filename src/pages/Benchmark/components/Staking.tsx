@@ -98,7 +98,6 @@ enum AccountRole {
   NOMINATOR_AND_CONTROLLER,
   NONE,
 }
-
 interface IStrategy {
   label: string;
   value: Strategy;
@@ -113,6 +112,7 @@ interface IAccountChainInfo {
   bonded: string;
   redeemable: string;
   isNominatable: boolean;
+  isReady: boolean;
 }
 
 // session and epoch are same.
@@ -333,7 +333,8 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     rewardDestinationAddress,
     bonded,
     redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable: false
+    isNominatable: false,
+    isReady: true,
   }
 };
 
@@ -428,7 +429,7 @@ const Staking = () => {
     calculatedApy: 0,
     selectableCount: 0,
   });
-  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>();
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({isReady: false} as unknown as IAccountChainInfo);
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
 
@@ -604,6 +605,7 @@ const Staking = () => {
         }
       })
       // update account data
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
       queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
       refreshAccountData(selectedAccount);
     }
@@ -626,6 +628,7 @@ const Staking = () => {
 
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
       queryStakingInfo(selectedAccount.address, polkadotApi)
       .then((info) => {
         setAccountChainInfo(info);
@@ -667,6 +670,7 @@ const Staking = () => {
         warning: <Warning msg="Validator list is fetching. As such staking operations are not permitted." />,
       };
     }
+
     if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
       return {
         nominatable: false,
@@ -676,11 +680,20 @@ const Staking = () => {
       };
     }
 
+    if (!accountChainInfo.isReady) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="On-chain data is fetching. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
     return {
       nominatable: true,
       warning: null,
     };
-  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus]);
+  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady]);
 
   const columns = useMemo(() => {
     return [
@@ -1440,7 +1453,7 @@ const Staking = () => {
           </ContentBlock>
           <BalanceContextBlock>
             {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
-            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators.length}</DetailedBalance>
+            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators?.length}</DetailedBalance>
             <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
             <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
             <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
