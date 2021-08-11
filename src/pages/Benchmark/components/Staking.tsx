@@ -40,7 +40,7 @@ import {
   apyCalculation,
 } from './utils';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
@@ -48,6 +48,7 @@ import { useDebounce } from 'use-debounce';
 import { web3FromAddress } from '@polkadot/extension-dapp';
 import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import Warning from '../../../components/Hint/Warn';
+import '../index.css';
 
 enum Strategy {
   LOW_RISK,
@@ -97,7 +98,6 @@ enum AccountRole {
   NOMINATOR_AND_CONTROLLER,
   NONE,
 }
-
 interface IStrategy {
   label: string;
   value: Strategy;
@@ -112,6 +112,7 @@ interface IAccountChainInfo {
   bonded: string;
   redeemable: string;
   isNominatable: boolean;
+  isReady: boolean;
 }
 
 // session and epoch are same.
@@ -332,7 +333,8 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     rewardDestinationAddress,
     bonded,
     redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable: false
+    isNominatable: false,
+    isReady: true,
   }
 };
 
@@ -382,7 +384,7 @@ interface IOptions {
 interface IInputData {
   stakeAmount: number,
   strategy: IOptions,
-  rewardDestination: RewardDestinationType,//IOptions | null
+  rewardDestination: IOptions | null
   paymentAccount?: string,
 }
 
@@ -404,7 +406,7 @@ const Staking = () => {
   const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
     strategy: BASIC_DEFAULT_STRATEGY,
-    rewardDestination: RewardDestinationType.NULL,
+    rewardDestination: null,
   });
 
   const [advancedOption, setAdvancedOption] = useState({
@@ -427,7 +429,7 @@ const Staking = () => {
     calculatedApy: 0,
     selectableCount: 0,
   });
-  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>();
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({isReady: false} as unknown as IAccountChainInfo);
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
 
@@ -516,8 +518,8 @@ const Staking = () => {
     });
   }, []);
 
-  const notifyInfo = useCallback((msg: string) => {
-    toast.info(`${msg}`, {
+  const notifyInfo = useCallback((msg: string | React.ReactElement) => {
+    const options: ToastOptions = {
       position: 'top-right',
       autoClose: 5000,
       hideProgressBar: false,
@@ -525,7 +527,13 @@ const Staking = () => {
       pauseOnHover: true,
       draggable: false,
       progress: undefined,
-    })
+    }
+
+    if ( typeof msg === 'string') {
+      toast.info(`${msg}`, options);
+    } else {
+      toast.info(msg, options);
+    }
   }, []);
 
   const notifySuccess = useCallback((msg: string) => {
@@ -569,7 +577,7 @@ const Staking = () => {
       progress: undefined,
     })
   }, []);
-
+  
   const txStatusCallback = useCallback(({events = [], status}: { events?: EventRecord[], status: ExtrinsicStatus}) => {
     if (status.isInvalid) {
       console.log('Transaction invalid');
@@ -579,13 +587,14 @@ const Staking = () => {
       notifyInfo('Transaction is ready');
     } else if (status.isBroadcast) {
       console.log('Transaction has been broadcasted');
-      notifyInfo('Transaction has been broadcasted');
+      notifyInfo(<div>Transaction has been broadcasted</div>);
     } else if (status.isInBlock) {
       console.log('Transaction is included in block');
       notifyInfo('Transaction is included in block');
     } else if (status.isFinalized) {
-      console.log('Transaction is included in block');
-      notifyInfo(`Transaction has been included in blockHash ${status.asFinalized.toHex()}`);
+      const blockHash = status.asFinalized.toHex();
+      console.log(`Transaction is included in block ${blockHash}`);
+      notifyInfo(<div>Transaction has been included in <br />blockHash {blockHash.substring(0, 9)}...{blockHash.substring(blockHash.length - 8, blockHash.length)}</div>);
       events.forEach(({event}) => {
         if (event.method === 'ExtrinsicSuccess') {
           console.log('Transaction succeeded');
@@ -596,6 +605,7 @@ const Staking = () => {
         }
       })
       // update account data
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
       queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
       refreshAccountData(selectedAccount);
     }
@@ -618,10 +628,11 @@ const Staking = () => {
 
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
       queryStakingInfo(selectedAccount.address, polkadotApi)
       .then((info) => {
         setAccountChainInfo(info);
-        setInputData((prev) => ({...prev, rewardDestination: info.rewardDestination}));
+        setInputData((prev) => ({...prev, rewardDestination: rewardDestinationOptions[info.rewardDestination]}));
       })
       .catch(console.error);
     }
@@ -659,6 +670,7 @@ const Staking = () => {
         warning: <Warning msg="Validator list is fetching. As such staking operations are not permitted." />,
       };
     }
+
     if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
       return {
         nominatable: false,
@@ -668,11 +680,20 @@ const Staking = () => {
       };
     }
 
+    if (!accountChainInfo.isReady) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="On-chain data is fetching. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
     return {
       nominatable: true,
       warning: null,
     };
-  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus]);
+  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady]);
 
   const columns = useMemo(() => {
     return [
@@ -841,7 +862,7 @@ const Staking = () => {
   );
 
   const renderRewardDestinationNode = useMemo(() => {
-    switch (inputData.rewardDestination) {
+    switch (inputData.rewardDestination?.value) {
       case RewardDestinationType.STAKED:
         return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.STASH:
@@ -943,11 +964,7 @@ const Staking = () => {
         }
         break;
       case 'rewardDestination':
-        
-        tmpValue = e.value;
-        console.log(e);
-        console.log(inputData.rewardDestination);
-        console.log(`reward destination = ${tmpValue}`);
+        tmpValue = e;
         break;
       default:
         // stakeAmount
@@ -1075,9 +1092,15 @@ const Staking = () => {
         return;
       }
 
+      if (inputData.rewardDestination === null) {
+        console.log(`not allow to nominate, reward destination is null`);
+        return;
+      }
+
       // reward destination
+      console.log(inputData.rewardDestination.value);
       let payee;
-      switch(inputData.rewardDestination){
+      switch(inputData.rewardDestination.value){
         case RewardDestinationType.STAKED:
           payee = 'Staked';
           break;
@@ -1115,7 +1138,7 @@ const Staking = () => {
         break;
         case AccountRole.NOMINATOR_AND_CONTROLLER: {
           const extraBondAmount = stakeAmount - bonded;
-          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
             txs = [
               polkadotApi.tx.staking.bondExtra(extraBondAmount),
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
@@ -1137,7 +1160,7 @@ const Staking = () => {
         }
         break;
         case AccountRole.CONTROLLER_OF_NOMINATOR: {
-          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
             txs = [
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
             ]
@@ -1165,6 +1188,7 @@ const Staking = () => {
       polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, txStatusCallback).catch((err) => {
         console.log(err);
         toast.dismiss();
+        notifyWarn('Transaction is cancelled');
       });
 
     },
@@ -1429,7 +1453,7 @@ const Staking = () => {
           </ContentBlock>
           <BalanceContextBlock>
             {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
-            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators.length}</DetailedBalance>
+            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators?.length}</DetailedBalance>
             <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
             <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
             <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
