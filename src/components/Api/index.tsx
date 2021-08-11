@@ -37,6 +37,7 @@ export interface ApiProps {
   selectedAccount: IAccount;
   selectAccount: Function;
   isLoading: boolean;
+  refreshAccountData: Function;
 }
 
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
@@ -115,6 +116,28 @@ const Api: React.FC = (props) => {
     [setSelectedAccount]
   );
 
+  const refreshAccountData = useCallback(
+    (account: IAccount) => {
+      if (apiState === ApiState.READY) {
+        queryBalances(accounts, api)
+        .then((accountsWithBalances) => {
+          setAccounts(accountsWithBalances);
+          if (accountsWithBalances.length > 0) {
+            const target = accountsWithBalances.find((a) => a.address === account.address) ;
+            if (target) {
+              setSelectedAccount(target);
+            } else {
+              setSelectedAccount(accountsWithBalances[0]);
+            }
+          }
+          setIsLoading(false);
+        })
+        .catch(console.error);
+      }
+    },
+    [accounts, network, apiState]
+  )
+
   const value = useMemo<ApiProps>(
     () => ({
       network,
@@ -128,6 +151,7 @@ const Api: React.FC = (props) => {
       selectedAccount,
       selectAccount,
       isLoading,
+      refreshAccountData,
     }),
     [
       network,
@@ -140,6 +164,7 @@ const Api: React.FC = (props) => {
       selectedAccount,
       selectAccount,
       isLoading,
+      refreshAccountData
     ]
   );
 
@@ -186,6 +211,9 @@ const Api: React.FC = (props) => {
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
       console.log(`api connected to ${endpoint}`);
+      api.isReady.then(() => {
+        setApiState(ApiState.READY);
+      }).catch(console.error);
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);
