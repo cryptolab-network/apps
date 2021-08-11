@@ -383,7 +383,7 @@ interface IOptions {
 interface IInputData {
   stakeAmount: number,
   strategy: IOptions,
-  rewardDestination: RewardDestinationType,//IOptions | null
+  rewardDestination: IOptions | null
   paymentAccount?: string,
 }
 
@@ -405,7 +405,7 @@ const Staking = () => {
   const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
     strategy: BASIC_DEFAULT_STRATEGY,
-    rewardDestination: RewardDestinationType.NULL,
+    rewardDestination: null,
   });
 
   const [advancedOption, setAdvancedOption] = useState({
@@ -629,7 +629,7 @@ const Staking = () => {
       queryStakingInfo(selectedAccount.address, polkadotApi)
       .then((info) => {
         setAccountChainInfo(info);
-        setInputData((prev) => ({...prev, rewardDestination: info.rewardDestination}));
+        setInputData((prev) => ({...prev, rewardDestination: rewardDestinationOptions[info.rewardDestination]}));
       })
       .catch(console.error);
     }
@@ -849,7 +849,7 @@ const Staking = () => {
   );
 
   const renderRewardDestinationNode = useMemo(() => {
-    switch (inputData.rewardDestination) {
+    switch (inputData.rewardDestination?.value) {
       case RewardDestinationType.STAKED:
         return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.STASH:
@@ -951,11 +951,7 @@ const Staking = () => {
         }
         break;
       case 'rewardDestination':
-        
-        tmpValue = e.value;
-        console.log(e);
-        console.log(inputData.rewardDestination);
-        console.log(`reward destination = ${tmpValue}`);
+        tmpValue = e;
         break;
       default:
         // stakeAmount
@@ -1083,9 +1079,15 @@ const Staking = () => {
         return;
       }
 
+      if (inputData.rewardDestination === null) {
+        console.log(`not allow to nominate, reward destination is null`);
+        return;
+      }
+
       // reward destination
+      console.log(inputData.rewardDestination.value);
       let payee;
-      switch(inputData.rewardDestination){
+      switch(inputData.rewardDestination.value){
         case RewardDestinationType.STAKED:
           payee = 'Staked';
           break;
@@ -1123,7 +1125,7 @@ const Staking = () => {
         break;
         case AccountRole.NOMINATOR_AND_CONTROLLER: {
           const extraBondAmount = stakeAmount - bonded;
-          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
             txs = [
               polkadotApi.tx.staking.bondExtra(extraBondAmount),
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
@@ -1145,7 +1147,7 @@ const Staking = () => {
         }
         break;
         case AccountRole.CONTROLLER_OF_NOMINATOR: {
-          if (inputData.rewardDestination === accountChainInfo.rewardDestination) {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
             txs = [
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
             ]
