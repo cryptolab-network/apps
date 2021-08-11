@@ -5,8 +5,11 @@ import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from '../../../utils/constants/Validator';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
 import _ from 'lodash';
+import { balanceUnit } from '../../../utils/string';
 
 const ROUND = 10;
+const KSM_MIN_SELF_STAKE = 50;
+const DOT_MIN_SELF_STAKE = 1000;
 
 export const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
@@ -283,10 +286,27 @@ export const lowRiskStrategy = (
     tempSelectableCount = selectableCount;
   }
   // low risk data filtered
-  tempTableData = tempTableData.filter(
-    (validator) =>
-      validator.unclaimedEras < 16 && validator.hasSlash === false && validator.identity.isVerified === true
-  );
+  tempTableData = tempTableData.filter((validator) => {
+    let minSelfStakeFlag = false;
+    if (
+      (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
+        Number(balanceUnit(networkName, validator.selfStake).split(' ')[0]) < KSM_MIN_SELF_STAKE) ||
+      (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
+        Number(balanceUnit(networkName, validator.selfStake).split(' ')[0]) < DOT_MIN_SELF_STAKE)
+    ) {
+      minSelfStakeFlag = true;
+    }
+
+    if (
+      minSelfStakeFlag &&
+      validator.unclaimedEras < 16 &&
+      validator.hasSlash === false &&
+      validator.identity.isVerified === true
+    ) {
+      return true;
+    }
+    return false;
+  });
   // random select the rest available count
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
 
@@ -420,6 +440,14 @@ export const advancedConditionFilter = (
   tempTableData = originTableData.tableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
+
+      // min self stake
+      if (
+        filtered.minSelfStake &&
+        Number(balanceUnit(networkName, data.selfStake, true).split(' ')[0]) < Number(filtered.minSelfStake)
+      ) {
+        return false;
+      }
 
       // max unclaimed eras
       if (filtered.maxUnclaimedEras && data.unclaimedEras > Number(filtered.maxUnclaimedEras)) {

@@ -124,7 +124,7 @@ export interface IEraInfo {
 }
 
 export interface IAdvancedSetting {
-  // minSelfStake: number | null; // input amount
+  minSelfStake: string | null; // input amount
   // maxCommission?: string | null; // input amount
   identity?: boolean; // switch
   maxUnclaimedEras?: string | null; // input amount
@@ -184,6 +184,7 @@ interface IApiParams {
 
 const StrategyConfig = {
   LOW_RISK: {
+    minSelfStake: '',
     identity: true, // switch
     maxUnclaimedEras: '16', // input amount
     noPreviousSlashes: false, // switch
@@ -196,6 +197,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   HIGH_APY: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: true, // switch
@@ -208,6 +210,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   DECENTRAL: {
+    minSelfStake: '',
     identity: true, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -220,6 +223,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   ONE_KV: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -232,6 +236,7 @@ const StrategyConfig = {
     oneKv: true, // switch
   },
   CUSTOM: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -750,6 +755,9 @@ const Staking = () => {
   const handleAdvancedFilter = (name) => (e) => {
     // TODO: input validator, limit
     switch (name) {
+      case 'minSelfStake':
+        setAdvancedSetting((prev) => ({ ...prev, minSelfStake: e.target.value }));
+        break;
       case 'identity':
         setAdvancedSetting((prev) => ({ ...prev, identity: e }));
         break;
@@ -866,6 +874,7 @@ const Staking = () => {
       // is in advanced mode, need advanced filtered
       filteredResult = advancedConditionFilter(
         {
+          minSelfStake: advancedSettingDebounceVal.minSelfStake,
           maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
           historicalApy: advancedSettingDebounceVal.historicalApy,
           minInclusion: advancedSettingDebounceVal.minInclusion,
@@ -897,6 +906,7 @@ const Staking = () => {
     advancedSettingDebounceVal.historicalApy,
     advancedSettingDebounceVal.identity,
     handleValidatorStrategy,
+    advancedSettingDebounceVal.minSelfStake,
   ]);
 
   const advancedSettingDOM = useMemo(() => {
@@ -911,6 +921,13 @@ const Staking = () => {
             <ContentColumnLayout width="100%" justifyContent="flex-start">
               <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
               <AdvancedSettingWrap>
+                <TitleInput
+                  title="Min. Self Stake"
+                  placeholder="input minimum amount"
+                  inputLength={170}
+                  value={advancedSetting.minSelfStake}
+                  onChange={handleAdvancedFilter('minSelfStake')}
+                />
                 <TitleInput
                   title="Max. Unclaimed Eras"
                   placeholder="input maximum amount"
@@ -970,6 +987,7 @@ const Staking = () => {
     );
   }, [
     advancedOption.advanced,
+    advancedSetting.minSelfStake,
     advancedSetting.maxUnclaimedEras,
     advancedSetting.historicalApy,
     advancedSetting.minInclusion,
