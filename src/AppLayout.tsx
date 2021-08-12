@@ -376,8 +376,10 @@ const TableDiv = styled.div`
   flex-flow: row;
   justify-content: space-between;
   height: 14em;
-  margin: 80px 0 0 0;
+  margin: auto;
+  margin-top: 80px;
   padding: 20px 15% 20px 15%;
+  width: 1000px;
 `;
 
 const ColumnDiv = styled.div`
