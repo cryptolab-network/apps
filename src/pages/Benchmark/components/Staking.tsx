@@ -333,7 +333,7 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     rewardDestinationAddress,
     bonded,
     redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable: false,
+    isNominatable,
     isReady: true,
   }
 };
@@ -689,11 +689,41 @@ const Staking = () => {
       };
     }
 
+    if (!accountChainInfo.isNominatable) {
+      let msg = "This account cannot operate staking related extrinsics. As such staking operations are not permitted.";
+      switch (accountChainInfo.role) {
+        case AccountRole.VALIDATOR:
+          msg = "This account's role is Validator. As such staking operations are not permitted.";
+          break;
+        case AccountRole.CONTROLLER_OF_VALIDATOR:
+          msg = "This account's role is Controller of Validator. As such staking operations are not permitted.";
+          break;
+        case AccountRole.NOMINATOR:
+          msg = "This account's role is Nominator which has a Controller account. As such staking operations are not permitted.";
+          break;
+      }
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg={msg} />
+        ),
+      };
+    }
+
+    if (accountChainInfo.role === AccountRole.VALIDATOR) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="This account's role is Validator. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
     return {
       nominatable: true,
       warning: null,
     };
-  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady]);
+  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady, accountChainInfo.role]);
 
   const columns = useMemo(() => {
     return [
