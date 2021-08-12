@@ -201,9 +201,10 @@ const Api: React.FC = (props) => {
         })
         .catch(console.error);
     }
-  }, [isWeb3AccessDenied, hasWeb3Injected, apiState, network]);
+  }, [apiState, network]);
 
   useEffect(() => {
+    setApiState(ApiState.DISCONNECTED);
     const endpoint = NetworkConfig[network]?.wss;
     const provider = new WsProvider(endpoint, 1000);
     api = new ApiPromise({ provider });
@@ -229,9 +230,7 @@ const Api: React.FC = (props) => {
 
       web3Enable('CryptoLab')
         .then((injected) => {
-          if (isWeb3Injected !== hasWeb3Injected) {
-            setHasWeb3Injected(isWeb3Injected);
-          }
+          setHasWeb3Injected(isWeb3Injected);
           if (injected.length === 0) {
             setIsWeb3AccessDenied(true);
           } else {
@@ -242,7 +241,7 @@ const Api: React.FC = (props) => {
     });
 
     setIsApiInitialized(true);
-  }, [hasWeb3Injected, network]);
+  }, [setHasWeb3Injected, network]);
 
   if (!isApiInitialized) {
     return null;

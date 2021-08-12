@@ -55,6 +55,7 @@ export const formatToTableData = (data: IValidator[]): ITableData[] => {
         parent: validator.identity.parent,
         isVerified: validator.identity.isVerified ? true : false,
       },
+      blockNomination: validator.blockNomination
     };
   });
 };
@@ -178,6 +179,21 @@ export const highApySelect = (tableData: ITableData[], selectableCount: number):
   return { tableData, selectableCount };
 };
 
+export const prevValidatorsSelect = (tableData: ITableData[], selectableCount: number, prevValidators: string[]): ISelectResult => {
+  let selectableData = tableData.filter((data) => !data.select);
+  for (let idx = 0; idx < selectableData.length && selectableCount > 0; idx++) {
+    const isPrevValidator = prevValidators.filter((v) => v === selectableData[idx].account);
+    if (isPrevValidator.length === 0) {
+      continue;
+    }
+    let selectedIdx = tableData.findIndex((data) => data.account === selectableData[idx].account);
+    tableData[selectedIdx].select = true;
+    selectableData.splice(idx, 1);
+    selectableCount--;
+  }
+  return { tableData, selectableCount };
+}
+
 export const apyCalculation = (tableData: ITableData[], selectableCount?: number): IStakingInfo => {
   //
   tableData = sortSelectedTableData(tableData);
@@ -247,6 +263,10 @@ export const resetSelected = (tableData: ITableData[]): ITableData[] => {
   });
 };
 
+export const filterBlockNomination = (tableData: ITableData[]): ITableData[] => {
+  return tableData.filter(data => !data.blockNomination);
+}
+
 // format origin data from api, to IStakingInfo format
 export const formatToStakingInfo = (data: IValidator[], networkName: string): IStakingInfo => {
   // format the data to fit the frontend table
@@ -266,14 +286,16 @@ export const formatToStakingInfo = (data: IValidator[], networkName: string): IS
 export const lowRiskStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
-  networkName: string
+  networkName: string,
+  prevValidators: string[]
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // if support us
   if (isSupportUs) {
     // select our validators, decrease the selectable number
@@ -301,12 +323,19 @@ export const lowRiskStrategy = (
       minSelfStakeFlag &&
       validator.unclaimedEras < 16 &&
       validator.hasSlash === false &&
-      validator.identity.isVerified === true
+      validator.identity.isVerified === true &&
+      validator.blockNomination === false
     ) {
       return true;
     }
     return false;
   });
+
+  // select previous selected validators first
+  const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
+  tempTableData = prevValidatorsSelectResult.tableData;
+  tempSelectableCount = prevValidatorsSelectResult.selectableCount;
+
   // random select the rest available count
   let { tableData: resultData } = randomSelect(tempTableData, tempSelectableCount);
 
@@ -316,13 +345,16 @@ export const lowRiskStrategy = (
 export const highApyStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
-  networkName: string
+  networkName: string,
+  prevValidators: string[]
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // if support us
   if (isSupportUs) {
     // select our validators, decrease the selectable number
@@ -335,6 +367,11 @@ export const highApyStrategy = (
     tempSelectableCount = selectableCount;
   }
 
+  // select previous selected validators first
+  const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
+  tempTableData = prevValidatorsSelectResult.tableData;
+  tempSelectableCount = prevValidatorsSelectResult.selectableCount;
+
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
@@ -345,14 +382,16 @@ export const highApyStrategy = (
 export const decentralStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
-  networkName: string
+  networkName: string,
+  prevValidators: string[]
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -367,6 +406,11 @@ export const decentralStrategy = (
   // filtered the data, make sure the candidates are all decentralized,
   tempTableData = decentralizedFilter(tempTableData);
 
+  // select previous selected validators first
+  const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
+  tempTableData = prevValidatorsSelectResult.tableData;
+  tempSelectableCount = prevValidatorsSelectResult.selectableCount;
+
   // select the high apy validators, decrease the selectable number
   const highApySelectResult = highApySelect(tempTableData, tempSelectableCount);
   tempTableData = highApySelectResult.tableData;
@@ -377,14 +421,16 @@ export const decentralStrategy = (
 export const oneKvStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
-  networkName: string
+  networkName: string,
+  prevValidators: string[]
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -395,6 +441,12 @@ export const oneKvStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
+  // select previous selected validators first
+  const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
+  tempTableData = prevValidatorsSelectResult.tableData;
+  tempSelectableCount = prevValidatorsSelectResult.selectableCount;
+  
   // random select the rest available count
   const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
   tempTableData = randomSelectResult.tableData;
@@ -420,9 +472,12 @@ export const advancedConditionFilter = (
   filtered: IAdvancedSetting,
   originTableData: IStakingInfo,
   isSupportUs: boolean,
-  networkName: string
+  networkName: string,
+  prevValidators: string[]
 ): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // if support us
@@ -437,7 +492,7 @@ export const advancedConditionFilter = (
     tempSelectableCount = selectableCount;
   }
 
-  tempTableData = originTableData.tableData.filter((data) => {
+  tempTableData = tempTableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
 
@@ -501,6 +556,11 @@ export const advancedConditionFilter = (
   /**
    * Selected part
    */
+
+  // select previous selected validators first
+  const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
+  tempTableData = prevValidatorsSelectResult.tableData;
+  tempSelectableCount = prevValidatorsSelectResult.selectableCount;
 
   if (filtered.highApy) {
     // select the high apy validators, decrease the selectable number
