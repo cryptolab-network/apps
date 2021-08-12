@@ -48,28 +48,64 @@ const ValidNominator: React.FC<IValidNominator> = ({
     }, [address]);
     if (favorite) {
       return (
-        <FavoriteIcon
-          onClick={() => {
-            unsetFavorite();
-            setFavoriteIcon(false);
-          }}
-        />
+        <div>
+          <ReactTooltip
+            id="unfavorite"
+            place="bottom"
+            effect="solid"
+            backgroundColor="#18232f"
+            textColor="#21aca8"
+          />
+          <EnhanceValue data-for="unfavorite" data-tip="toggle to un-favorite this validator">
+            <FavoriteIcon
+              onClick={() => {
+                unsetFavorite();
+                setFavoriteIcon(false);
+              }}
+            />
+          </EnhanceValue>
+        </div>
       );
     } else {
       return (
-        <FavoriteUnselectedIcon
-          onClick={() => {
-            setFavorite();
-            setFavoriteIcon(true);
-          }}
-        />
+        <div>
+          <ReactTooltip
+            id="favorite"
+            place="bottom"
+            effect="solid"
+            backgroundColor="#18232f"
+            textColor="#21aca8"
+          />
+          <EnhanceValue data-for="favorite" data-tip="toggle to favorite this validator">
+            <FavoriteUnselectedIcon
+              onClick={() => {
+                setFavorite();
+                setFavoriteIcon(true);
+              }}
+            />
+          </EnhanceValue>
+        </div>
       );
     }
   };
 
   const Status = () => {
     if (unclaimedPayouts >= 20) {
-      return <UnclaimedPayoutsIcon />;
+      return (
+        <div>
+          <ReactTooltip
+            id="unclaimed-payouts"
+            place="bottom"
+            effect="solid"
+            backgroundColor="#18232f"
+            textColor="#21aca8"
+          />
+          <EnhanceValue data-for="favorite" data-tip="too many unclaimed payouts">
+            <UnclaimedPayoutsIcon />
+          </EnhanceValue>
+          
+        </div>
+      );
     } else {
       return <div></div>;
     }
