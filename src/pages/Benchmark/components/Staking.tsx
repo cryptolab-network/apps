@@ -106,7 +106,7 @@ interface IStrategy {
 interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
-  nominators: string[];
+  validators: string[];
   rewardDestination: RewardDestinationType;
   rewardDestinationAddress: string | null;
   bonded: string;
@@ -283,23 +283,23 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   let role;
   let isNominatable = false;
   let bonded;
-  let nominators;
+  let validators;
   if (info.nextSessionIds.length !== 0) {
     role = AccountRole.VALIDATOR;
     bonded = info.stakingLedger.total.unwrap().toHex();
-    nominators = info.nominators.map((n) => n.toHuman())
+    validators = info.nominators.map((n) => n.toHuman())
     console.log(`role = VALIDATOR`);
   } else if (!info.stakingLedger.total.unwrap().isZero()) {
     if (info.controllerId?.toHuman() === address) {
       role = AccountRole.NOMINATOR_AND_CONTROLLER;
       bonded = info.stakingLedger.total.unwrap().toHex();
-      nominators = info.nominators.map((n) => n.toHuman())
+      validators = info.nominators.map((n) => n.toHuman())
       console.log(`role = NOMINATOR_AND_CONTROLLER`);
       isNominatable = true;
     } else {
       role = AccountRole.NOMINATOR;
       bonded = info.stakingLedger.total.unwrap().toHex();
-      nominators = info.nominators.map((n) => n.toHuman());
+      validators = info.nominators.map((n) => n.toHuman());
       console.log(`role = NOMINATOR`);
     }
   } else if (!ledger.isNone) {
@@ -308,19 +308,19 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     if (staking.nextSessionIds.length !== 0) {
       role = AccountRole.CONTROLLER_OF_VALIDATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
-      nominators = staking.nominators.map((n) => n.toHuman())
+      validators = staking.nominators.map((n) => n.toHuman())
       console.log(`role = CONTROLLER_OF_VALIDATOR`);
     } else {
       role = AccountRole.CONTROLLER_OF_NOMINATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
-      nominators = staking.nominators.map((n) => n.toHuman())
+      validators = staking.nominators.map((n) => n.toHuman())
       console.log(`role = CONTROLLER_OF_NOMINATOR`);
       isNominatable = true;
     }
   } else {
     role = AccountRole.NONE;
     bonded = info.stakingLedger.total.unwrap().toHex();
-    nominators = info.nominators.map((n) => n.toHuman());
+    validators = info.nominators.map((n) => n.toHuman());
     console.log(`role = NONE`);
     isNominatable = true;
   }
@@ -329,7 +329,7 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   return {
     role,
     controller: info.controllerId?.toHuman(),
-    nominators,
+    validators,
     rewardDestination,
     rewardDestinationAddress,
     bonded,
@@ -1063,18 +1063,18 @@ const Staking = () => {
     (data: IStakingInfo, isSupportUs: boolean, networkName: string): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskStrategy(data, isSupportUs, networkName);
+          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
         case Strategy.HIGH_APY:
-          return highApyStrategy(data, isSupportUs, networkName);
+          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
         case Strategy.DECENTRAL:
-          return decentralStrategy(data, isSupportUs, networkName);
+          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
         case Strategy.ONE_KV:
-          return oneKvStrategy(data, isSupportUs, networkName);
+          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
         default:
           return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value]
+    [inputData.strategy.value, accountChainInfo.validators]
   );
 
   /**
@@ -1299,7 +1299,8 @@ const Staking = () => {
         },
         apiOriginTableData,
         advancedOption.supportus,
-        networkName
+        networkName,
+        accountChainInfo.validators
       );
     } else {
       filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
@@ -1320,6 +1321,7 @@ const Staking = () => {
     advancedSettingDebounceVal.identity,
     handleValidatorStrategy,
     advancedSettingDebounceVal.minSelfStake,
+    accountChainInfo.validators
   ]);
 
   const advancedSettingDOM = useMemo(() => {
@@ -1493,7 +1495,7 @@ const Staking = () => {
           </ContentBlock>
           <BalanceContextBlock>
             {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
-            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators?.length}</DetailedBalance>
+            <DetailedBalance color='white'>Nominees: {accountChainInfo?.validators?.length}</DetailedBalance>
             <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
             <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
             <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
