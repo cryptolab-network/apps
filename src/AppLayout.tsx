@@ -223,7 +223,7 @@ const Footer: React.FC = () => {
       <CopyRightDiv>
         <CopyRightTitleDiv>
           @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a href="https://www.iubenda.com/terms-and-conditions/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe " title="Terms and Conditions ">Terms and Conditions</a> &nbsp;| &nbsp;
+          <a href="https://www.iubenda.com/terms-and-conditions/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe " title="Terms and Conditions ">T&C</a> &nbsp;| &nbsp;
           <Helmet>
           <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>
