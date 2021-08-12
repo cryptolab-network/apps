@@ -1,5 +1,5 @@
 import { CancelToken } from 'axios';
-import { nominatedValidatorsAxios, singleValidatorAxios, validatorAxios } from '../../instance/Axios';
+import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
   commissionChange: number;
@@ -106,6 +106,11 @@ export interface IValidatorRequest {
   query?: IValidatorQuery;
   cancelToken?: CancelToken;
 }
+
+export interface ISubscribeNewsletter {
+  email: string;
+}
+
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
   validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
@@ -142,3 +147,14 @@ export const apiGetValidatorSlashes = (
 singleValidatorAxios.get(`${data.params}`).then((res) => {
   return res.data;
 });
+
+
+export const apiSubscribeNewsletter = (
+  data: ISubscribeNewsletter
+): Promise<number> => {
+  return subscribeNewsletterAxios.post('', data).then((res) => {
+    return 0;
+  }).catch((err) => {
+    return err.response.data.code;
+  });
+};

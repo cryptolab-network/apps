@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
@@ -12,6 +12,7 @@ import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg'
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
@@ -30,6 +31,7 @@ import Contact from './pages/Contact';
 import OurValidators from './pages/OurValidators';
 import About from './pages/About';
 import { Helmet } from 'react-helmet';
+import { apiSubscribeNewsletter } from './apis/Validator';
 
 // header
 const Header: React.FC = () => {
@@ -95,6 +97,60 @@ const ToolsHeader: React.FC = () => {
 
 const Footer: React.FC = () => {
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
+  const [email, setEmail] = useState<string>('');
+  
+  const onSubscribeNewsletter = () => {
+    apiSubscribeNewsletter({
+      email: email,
+    }).then((result) => {
+      let message = '';
+      console.log(result);
+      if (result === 0) {
+        message = `Thank you for subscribing our newsletter`;
+        toast.info(`${message}`, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: undefined,
+        });
+      } else if (result === -2000) {
+        message = `You have already subsribed our newsletter`;
+        toast.error(`${message}`, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: undefined,
+        });
+      } else if (result === -1002) {
+        message = `Invalid email format`;
+        toast.error(`${message}`, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: undefined,
+        });
+      }
+    }).catch((err) => {
+      toast.error(`Failed to subscribe our newsletter`, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
+    });
+  };
   return (
     <>
       <TableDiv>
@@ -159,8 +215,8 @@ const Footer: React.FC = () => {
           </TdDiv>
           <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
-            <Input placeholder="Enter your email address"></Input>
-            <SubmitButton>Subscribe</SubmitButton>
+            <Input placeholder="Enter your email address" value={email} onChange={(e) => {setEmail(e.target.value)}}></Input>
+            <SubmitButton onClick={onSubscribeNewsletter}>Subscribe</SubmitButton>
           </TdDiv>
         </ColumnDiv>
       </TableDiv>
