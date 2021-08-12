@@ -672,6 +672,15 @@ const Staking = () => {
       };
     }
 
+    if (finalFilteredTableData.tableData.length <= 0) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="The filtered validator count is 0. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
     if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
       return {
         nominatable: false,
