@@ -1418,7 +1418,7 @@ const Staking = () => {
       (data) => data.select === true
     ).length;
     let filterValidatorsCount = finalFilteredTableData.tableData.length;
-    let totalValidatorsCount = 'TODO';
+    let totalValidatorsCount = apiOriginTableData.tableData.length;
 
     return (
       <div>
