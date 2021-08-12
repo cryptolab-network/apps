@@ -379,7 +379,14 @@ const TableDiv = styled.div`
   margin: auto;
   margin-top: 80px;
   padding: 20px 15% 20px 15%;
-  width: 1000px;
+  width: auto;
+  @media (min-width: 1000px) {
+    width: 70%;
+  }
+  @media (max-width: 1000px) {
+    width: 90%;
+    padding: 0px;
+  }
 `;
 
 const ColumnDiv = styled.div`
