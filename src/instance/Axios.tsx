@@ -37,3 +37,7 @@ export const nominatedValidatorsAxios = Axios.create({
   baseURL: `${prefix}/nominated/`
 });
 
+export const subscribeNewsletterAxios =  Axios.create({
+  baseURL: `${prefix}/newsletter/`
+});
+

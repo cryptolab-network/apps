@@ -115,7 +115,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
         </table>
         <br />
       </div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
         {pagination ? (
           <Pagination
             canPreviousPage={canPreviousPage}
