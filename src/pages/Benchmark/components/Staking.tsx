@@ -1,10 +1,9 @@
-import { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
 import Node from '../../../components/Node';
-// import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
 import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
@@ -27,11 +26,10 @@ import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues } from '../../../utils/helper';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { ApiContext } from '../../../components/Api';
-
+import { api, ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
-import { NetworkCodeName } from '../../../utils/constants/Network';
+import { NetworkCodeName, NetworkConfig } from '../../../utils/constants/Network';
 import {
   formatToStakingInfo,
   lowRiskStrategy,
@@ -42,10 +40,15 @@ import {
   apyCalculation,
 } from './utils';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import keys from '../../../config/keys';
+import { useDebounce } from 'use-debounce';
+import { web3FromAddress } from '@polkadot/extension-dapp';
+import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
+import Warning from '../../../components/Hint/Warn';
+import '../index.css';
 
 enum Strategy {
   LOW_RISK,
@@ -81,25 +84,26 @@ const rewardDestinationOptions = [
     label: 'Controller account',
     value: RewardDestinationType.CONTROLLER,
   },
-  {
-    label: 'Specified payment account',
-    value: RewardDestinationType.ACCOUNT,
-  },
+  // {
+  //   label: 'Specified payment account',
+  //   value: RewardDestinationType.ACCOUNT,
+  // },
 ];
 
 enum AccountRole {
   VALIDATOR,
-  CONTROLLER,
+  CONTROLLER_OF_VALIDATOR,
+  CONTROLLER_OF_NOMINATOR,
   NOMINATOR,
-  OTHER,
+  NOMINATOR_AND_CONTROLLER,
+  NONE,
 }
-
 interface IStrategy {
   label: string;
   value: Strategy;
 }
 
-interface IChainInfo {
+interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
   nominators: string[];
@@ -107,6 +111,8 @@ interface IChainInfo {
   rewardDestinationAddress: string | null;
   bonded: string;
   redeemable: string;
+  isNominatable: boolean;
+  isReady: boolean;
 }
 
 // session and epoch are same.
@@ -123,7 +129,7 @@ export interface IEraInfo {
 }
 
 export interface IAdvancedSetting {
-  // minSelfStake: number | null; // input amount
+  minSelfStake: string | null; // input amount
   // maxCommission?: string | null; // input amount
   identity?: boolean; // switch
   maxUnclaimedEras?: string | null; // input amount
@@ -181,8 +187,14 @@ interface IApiParams {
   has_joined_1kv?: boolean;
 }
 
+interface INomitableInfo {
+  nominatable: boolean;
+  warning: any;
+}
+
 const StrategyConfig = {
   LOW_RISK: {
+    minSelfStake: '',
     identity: true, // switch
     maxUnclaimedEras: '16', // input amount
     noPreviousSlashes: false, // switch
@@ -195,6 +207,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   HIGH_APY: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: true, // switch
@@ -207,6 +220,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   DECENTRAL: {
+    minSelfStake: '',
     identity: true, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -219,6 +233,7 @@ const StrategyConfig = {
     oneKv: false, // switch
   },
   ONE_KV: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -231,6 +246,7 @@ const StrategyConfig = {
     oneKv: true, // switch
   },
   CUSTOM: {
+    minSelfStake: '',
     identity: false, // switch
     maxUnclaimedEras: '', // input amount
     noPreviousSlashes: false, // switch
@@ -248,19 +264,10 @@ const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
 const queryStakingInfo = async (address, api: ApiPromise) => {
-  const [info, isController] = await Promise.all([
+  const [info, ledger] = await Promise.all([
     api.derive.staking.account(address),
     api.query.staking.ledger(address),
   ]);
-
-  const role =
-    info.nextSessionIds.length !== 0
-      ? AccountRole.VALIDATOR
-      : !isController.isNone
-      ? AccountRole.CONTROLLER
-      : info.nominators.length !== 0
-      ? AccountRole.NOMINATOR
-      : AccountRole.OTHER;
 
   const rewardDestination = info.rewardDestination.isStaked
     ? RewardDestinationType.STAKED
@@ -271,15 +278,64 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     : RewardDestinationType.ACCOUNT;
   const rewardDestinationAddress =
     rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
+
+  let role;
+  let isNominatable = false;
+  let bonded;
+  let nominators;
+  if (info.nextSessionIds.length !== 0) {
+    role = AccountRole.VALIDATOR;
+    bonded = info.stakingLedger.total.unwrap().toHex();
+    nominators = info.nominators.map((n) => n.toHuman())
+    console.log(`role = VALIDATOR`);
+  } else if (!info.stakingLedger.total.unwrap().isZero()) {
+    if (info.controllerId?.toHuman() === address) {
+      role = AccountRole.NOMINATOR_AND_CONTROLLER;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      nominators = info.nominators.map((n) => n.toHuman())
+      console.log(`role = NOMINATOR_AND_CONTROLLER`);
+      isNominatable = true;
+    } else {
+      role = AccountRole.NOMINATOR;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      nominators = info.nominators.map((n) => n.toHuman());
+      console.log(`role = NOMINATOR`);
+    }
+  } else if (!ledger.isNone) {
+    const stash = ledger.unwrap().stash.toHuman();
+    const staking = await api.derive.staking.account(stash);
+    if (staking.nextSessionIds.length !== 0) {
+      role = AccountRole.CONTROLLER_OF_VALIDATOR;
+      bonded = staking.stakingLedger.total.unwrap().toHex();
+      nominators = staking.nominators.map((n) => n.toHuman())
+      console.log(`role = CONTROLLER_OF_VALIDATOR`);
+    } else {
+      role = AccountRole.CONTROLLER_OF_NOMINATOR;
+      bonded = staking.stakingLedger.total.unwrap().toHex();
+      nominators = staking.nominators.map((n) => n.toHuman())
+      console.log(`role = CONTROLLER_OF_NOMINATOR`);
+      isNominatable = true;
+    }
+  } else {
+    role = AccountRole.NONE;
+    bonded = info.stakingLedger.total.unwrap().toHex();
+    nominators = info.nominators.map((n) => n.toHuman());
+    console.log(`role = NONE`);
+    isNominatable = true;
+  }
+
+
   return {
     role,
     controller: info.controllerId?.toHuman(),
-    nominators: info.nominators.map((n) => n.toHuman()),
+    nominators,
     rewardDestination,
     rewardDestinationAddress,
-    bonded: info.stakingLedger.total.unwrap().toHex(),
+    bonded,
     redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-  };
+    isNominatable: false,
+    isReady: true,
+  }
 };
 
 const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
@@ -306,15 +362,30 @@ const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
   };
 };
 
+const queryNominatorLimits = async (api: ApiPromise) => {
+  const [maxNominatorsCount, minNominatorBond, counterForNominators] = await Promise.all([
+    api.query.staking.maxNominatorsCount(),
+    api.query.staking.minNominatorBond(),
+    api.query.staking.counterForNominators()
+  ]);
+
+  return {
+    maxNominatorsCount,
+    minNominatorBond,
+    counterForNominators
+  }
+}
+
 interface IOptions {
-  label: string;
-  value: Strategy | RewardDestinationType;
-  isDisabled?: boolean;
+  label: string,
+  value: Strategy | RewardDestinationType,
+  isDisabled?: boolean
 }
 interface IInputData {
-  stakeAmount: number;
-  strategy: IOptions;
-  rewardDestination: IOptions | null;
+  stakeAmount: number,
+  strategy: IOptions,
+  rewardDestination: IOptions | null
+  paymentAccount?: string,
 }
 
 enum StrategyType {
@@ -329,6 +400,7 @@ const Staking = () => {
     api: polkadotApi,
     apiState: networkStatus,
     selectedAccount,
+    refreshAccountData
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -357,8 +429,11 @@ const Staking = () => {
     calculatedApy: 0,
     selectableCount: 0,
   });
-  const [chainInfo, setChainInfo] = useState<IChainInfo>();
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({isReady: false} as unknown as IAccountChainInfo);
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
+  const [minNominatorBond, setMinNominatorBond] = useState<string>('');
+
+  const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
   const strategyRef = useRef(StrategyType.Common);
 
@@ -443,6 +518,99 @@ const Staking = () => {
     });
   }, []);
 
+  const notifyInfo = useCallback((msg: string | React.ReactElement) => {
+    const options: ToastOptions = {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    }
+
+    if ( typeof msg === 'string') {
+      toast.info(`${msg}`, options);
+    } else {
+      toast.info(msg, options);
+    }
+  }, []);
+
+  const notifySuccess = useCallback((msg: string) => {
+    toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      }
+    })
+  }, []);
+
+  const notifyFailed = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      }
+    })
+  }, []);
+
+  const notifyProcessing = useCallback((msg: string) => {
+    const id = toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 30000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    })
+  }, []);
+  
+  const txStatusCallback = useCallback(({events = [], status}: { events?: EventRecord[], status: ExtrinsicStatus}) => {
+    if (status.isInvalid) {
+      console.log('Transaction invalid');
+      notifyWarn('Transaction invalid');
+    } else if (status.isReady) {
+      console.log('Transaction is ready');
+      notifyInfo('Transaction is ready');
+    } else if (status.isBroadcast) {
+      console.log('Transaction has been broadcasted');
+      notifyInfo(<div>Transaction has been broadcasted</div>);
+    } else if (status.isInBlock) {
+      console.log('Transaction is included in block');
+      notifyInfo('Transaction is included in block');
+    } else if (status.isFinalized) {
+      const blockHash = status.asFinalized.toHex();
+      console.log(`Transaction is included in block ${blockHash}`);
+      notifyInfo(<div>Transaction has been included in <br />blockHash {blockHash.substring(0, 9)}...{blockHash.substring(blockHash.length - 8, blockHash.length)}</div>);
+      events.forEach(({event}) => {
+        if (event.method === 'ExtrinsicSuccess') {
+          console.log('Transaction succeeded');
+          notifySuccess('Transaction succeeded');
+        } else if (event.method === 'ExtrinsicFailed') {
+          console.log('Transaction failed');
+          notifyFailed('Transaction failed');
+        }
+      })
+      // update account data
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
+      queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+      refreshAccountData(selectedAccount);
+    }
+  }, [notifyInfo, notifyWarn, selectedAccount, polkadotApi]);
+
   useEffect(() => {}, []);
 
   useEffect(() => {
@@ -460,15 +628,72 @@ const Staking = () => {
 
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
-      queryStakingInfo(selectedAccount.address, polkadotApi).then(setChainInfo).catch(console.error);
+      setAccountChainInfo((prev) => ({...prev, isReady: false}));
+      queryStakingInfo(selectedAccount.address, polkadotApi)
+      .then((info) => {
+        setAccountChainInfo(info);
+        setInputData((prev) => ({...prev, rewardDestination: rewardDestinationOptions[info.rewardDestination]}));
+      })
+      .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setChainInfo, polkadotApi]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
       queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
     }
   }, [networkStatus, networkName, polkadotApi]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY) {
+      queryNominatorLimits(polkadotApi).then((data) => {
+        setMinNominatorBond(data.minNominatorBond.toHex());
+      }).catch(console.error);
+    }
+  }, [networkName, polkadotApi, setMinNominatorBond]);
+
+  const nominatableInfo = useMemo((): INomitableInfo => {
+    if (networkStatus !== ApiState.READY) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning
+            msg={`Your have disconnected to ${networkName} network, please wait a moment or refresh the page.`}
+          />
+        ),
+      };
+    }
+
+    if (apiLoading) {
+      return {
+        nominatable: false,
+        warning: <Warning msg="Validator list is fetching. As such staking operations are not permitted." />,
+      };
+    }
+
+    if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="You haven't selected any validators yet. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
+    if (!accountChainInfo.isReady) {
+      return {
+        nominatable: false,
+        warning: (
+          <Warning msg="On-chain data is fetching. As such staking operations are not permitted." />
+        ),
+      };
+    }
+
+    return {
+      nominatable: true,
+      warning: null,
+    };
+  }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady]);
 
   const columns = useMemo(() => {
     return [
@@ -516,7 +741,15 @@ const Staking = () => {
         Cell: ({ value, row }) => <Account address={value} display={row.original.display} />,
         sortType: 'basic',
       },
-      { Header: 'Self Stake', accessor: 'selfStake', collapse: true, sortType: 'basic' },
+      {
+        Header: 'Self Stake',
+        accessor: 'selfStake',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <span>{_formatBalance(value)}</span>;
+        },
+        sortType: 'basic',
+      },
       {
         Header: 'Era Inclusion',
         accessor: 'eraInclusion',
@@ -604,7 +837,7 @@ const Staking = () => {
         sortType: 'basic',
       },
     ];
-  }, [finalFilteredTableData, notifyWarn]);
+  }, [finalFilteredTableData, notifyWarn, _formatBalance]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -636,8 +869,8 @@ const Staking = () => {
         return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.CONTROLLER:
         // todo: Jack
-        if (chainInfo?.controller) {
-          return <Node title={'Controller'} address={chainInfo?.controller} />;
+        if (accountChainInfo?.controller) {
+          return <Node title={'Controller'} address={accountChainInfo?.controller} />;
         } else {
           return <Node title={'controller account'} address="enter an address" />;
         }
@@ -647,7 +880,7 @@ const Staking = () => {
       default:
         return <></>;
     }
-  }, [inputData, chainInfo, selectedAccount]);
+  }, [inputData, accountChainInfo, selectedAccount]);
 
   /**
    * for Header, option toggle
@@ -717,6 +950,14 @@ const Staking = () => {
         if (!isNaN(e.target.value)) {
           tmpValue = e.target.value;
           // TODO: deal with input number format and range
+          // input unit is KSM
+          const input = BigInt(tmpValue * Math.pow(10, NetworkConfig[networkName].decimals));
+          const transferrable = BigInt(selectedAccount.balances.availableBalance);
+          const bonded = (accountChainInfo) ? BigInt(accountChainInfo.bonded) : BigInt(0);
+          const minBonded = BigInt(minNominatorBond);
+          if (input > (transferrable + bonded) || input < minBonded) {
+            console.log(`input value should be <= transferrable and >= minBonded`);
+          }
         } else {
           // not a number
           return;
@@ -739,6 +980,9 @@ const Staking = () => {
   const handleAdvancedFilter = (name) => (e) => {
     // TODO: input validator, limit
     switch (name) {
+      case 'minSelfStake':
+        setAdvancedSetting((prev) => ({ ...prev, minSelfStake: e.target.value }));
+        break;
       case 'identity':
         setAdvancedSetting((prev) => ({ ...prev, identity: e }));
         break;
@@ -796,12 +1040,160 @@ const Staking = () => {
   /**
    * handle nominate transaction
    */
-  //  const handleNominate = useCallback(
-  //   () => {
-  //     console.log('Nominate');
-  //   },
-  //   [inputData]
-  //  );
+   const handleNominate = useCallback(
+    async () => {
+      console.log('Nominate');
+
+      if (!accountChainInfo) {
+        console.log('no account chain info');
+        return;
+      }
+
+      const limits = await queryNominatorLimits(polkadotApi);
+      const maxNominatorsCount = (limits.maxNominatorsCount.isEmpty) ? 0 : parseInt(limits.maxNominatorsCount.toString());
+      const minNominatorBond = parseInt(limits.minNominatorBond.toString());
+      const counterForNominators = parseInt(limits.counterForNominators.toString());
+      const stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
+      const bonded = BigInt(accountChainInfo.bonded);
+      const transferrable = BigInt(selectedAccount.balances.availableBalance);
+
+      // checks
+      if (counterForNominators >= maxNominatorsCount) {
+        console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
+        return;
+      }
+
+      if (accountChainInfo?.role === AccountRole.VALIDATOR || accountChainInfo?.role === AccountRole.CONTROLLER_OF_VALIDATOR || accountChainInfo?.role === AccountRole.NOMINATOR) {
+        console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
+        return;
+      }
+
+      if (stakeAmount < minNominatorBond) {
+        console.log(`not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`);
+        return;
+      }
+
+      if (stakeAmount > (bonded + transferrable)) {
+        console.log(`not allow to nominate, the input stake amount should be less than transferrable ${bonded + transferrable}`);
+        return;
+      }
+
+      const selectedValidators = finalFilteredTableData.tableData.filter((v) => v.select);
+      console.log(selectedValidators);
+      console.log(selectedValidators.length);
+
+      if (selectedValidators.length === 0) {
+        console.log(`not allow to nominate, selected validators should greater than zero.`);
+        return;
+      }
+
+      if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
+        console.log(`not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`);
+        return;
+      }
+
+      if (inputData.rewardDestination === null) {
+        console.log(`not allow to nominate, reward destination is null`);
+        return;
+      }
+
+      // reward destination
+      console.log(inputData.rewardDestination.value);
+      let payee;
+      switch(inputData.rewardDestination.value){
+        case RewardDestinationType.STAKED:
+          payee = 'Staked';
+          break;
+        case RewardDestinationType.STASH:
+          payee = 'Stash'
+          break;
+        case RewardDestinationType.CONTROLLER:
+          // todo, change to input controller address
+          payee = 'Controller'
+          break;
+        case RewardDestinationType.ACCOUNT:
+          payee = accountChainInfo.rewardDestinationAddress;
+          break;
+        default:
+          payee = null;
+      }
+
+      let txs;
+      let txFee;
+      switch(accountChainInfo.role) {
+        case AccountRole.NONE: {
+          txs = [
+            polkadotApi.tx.staking.bond(selectedAccount.address, stakeAmount, payee),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+          ]
+  
+          txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+  
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+        case AccountRole.NOMINATOR_AND_CONTROLLER: {
+          const extraBondAmount = stakeAmount - bonded;
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+            txs = [
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          }
+
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+        case AccountRole.CONTROLLER_OF_NOMINATOR: {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+            txs = [
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))
+            ]
+          }
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+      }
+
+      // finds an injector for an address 
+      const injector = await web3FromAddress(selectedAccount.address);
+      
+      // ready to sign and send tx
+      notifyProcessing('Trasaction is processing ');
+      polkadotApi.tx.utility.batch(txs).signAndSend(selectedAccount.address, { signer: injector.signer}, txStatusCallback).catch((err) => {
+        console.log(err);
+        toast.dismiss();
+        notifyWarn('Transaction is cancelled');
+      });
+
+    },
+    [inputData, polkadotApi, accountChainInfo, finalFilteredTableData, networkName]
+   );
 
   // while network changing, set api parameter for network
   useEffect(() => {
@@ -850,46 +1242,44 @@ const Staking = () => {
    * user changing the advanced setting mannually, we set the new api query parameter
    */
   useEffect(() => {
+    let filteredResult: IStakingInfo;
     if (advancedOption.advanced) {
       // is in advanced mode, need advanced filtered
-      const filteredResult = advancedConditionFilter(
+      filteredResult = advancedConditionFilter(
         {
-          maxUnclaimedEras: advancedSetting.maxUnclaimedEras,
-          historicalApy: advancedSetting.historicalApy,
-          minInclusion: advancedSetting.minInclusion,
-          identity: advancedSetting.identity,
-          noPreviousSlashes: advancedSetting.noPreviousSlashes,
-          isSubIdentity: advancedSetting.isSubIdentity,
-          highApy: advancedSetting.highApy,
-          decentralized: advancedSetting.decentralized,
+          minSelfStake: advancedSettingDebounceVal.minSelfStake,
+          maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
+          historicalApy: advancedSettingDebounceVal.historicalApy,
+          minInclusion: advancedSettingDebounceVal.minInclusion,
+          identity: advancedSettingDebounceVal.identity,
+          noPreviousSlashes: advancedSettingDebounceVal.noPreviousSlashes,
+          isSubIdentity: advancedSettingDebounceVal.isSubIdentity,
+          highApy: advancedSettingDebounceVal.highApy,
+          decentralized: advancedSettingDebounceVal.decentralized,
         },
         apiOriginTableData,
         advancedOption.supportus,
         networkName
       );
-      setFinalFilteredTableData(filteredResult);
     } else {
-      const filteredResult = handleValidatorStrategy(
-        apiOriginTableData,
-        advancedOption.supportus,
-        networkName
-      );
-      setFinalFilteredTableData(filteredResult);
+      filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
     }
+    setFinalFilteredTableData(filteredResult);
   }, [
-    advancedSetting.maxUnclaimedEras,
-    advancedSetting.noPreviousSlashes,
-    advancedSetting.isSubIdentity,
-    advancedSetting.minInclusion,
-    advancedSetting.highApy,
-    advancedSetting.decentralized,
+    advancedSettingDebounceVal.maxUnclaimedEras,
+    advancedSettingDebounceVal.noPreviousSlashes,
+    advancedSettingDebounceVal.isSubIdentity,
+    advancedSettingDebounceVal.minInclusion,
+    advancedSettingDebounceVal.highApy,
+    advancedSettingDebounceVal.decentralized,
     apiOriginTableData,
     advancedOption.advanced,
     advancedOption.supportus,
     networkName,
-    advancedSetting.historicalApy,
-    advancedSetting.identity,
+    advancedSettingDebounceVal.historicalApy,
+    advancedSettingDebounceVal.identity,
     handleValidatorStrategy,
+    advancedSettingDebounceVal.minSelfStake,
   ]);
 
   const advancedSettingDOM = useMemo(() => {
@@ -905,6 +1295,15 @@ const Staking = () => {
               <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
               <AdvancedSettingWrap>
                 <TitleInput
+                  disabled={apiLoading}
+                  title="Min. Self Stake"
+                  placeholder="input minimum amount"
+                  inputLength={170}
+                  value={advancedSetting.minSelfStake}
+                  onChange={handleAdvancedFilter('minSelfStake')}
+                />
+                <TitleInput
+                  disabled={apiLoading}
                   title="Max. Unclaimed Eras"
                   placeholder="input maximum amount"
                   inputLength={170}
@@ -912,6 +1311,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('maxUnclaimedEras')}
                 />
                 <TitleInput
+                  disabled={apiLoading}
                   title="Historical APY"
                   placeholder="0 - 100"
                   unit="%"
@@ -919,6 +1319,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('historicalApy')}
                 />
                 <TitleInput
+                  disabled={apiLoading}
                   title="Min. Eras Inclusion Rate"
                   placeholder="0 - 100"
                   unit="%"
@@ -931,26 +1332,31 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('identity')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="No Prev. Slashes"
                   checked={advancedSetting.noPreviousSlashes}
                   onChange={handleAdvancedFilter('noPreviousSlashes')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Is Sub-Identity"
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Highest Avg.APY"
                   checked={advancedSetting.highApy}
                   onChange={handleAdvancedFilter('highApy')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Decentralized"
                   checked={advancedSetting.decentralized}
                   onChange={handleAdvancedFilter('decentralized')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="1kv programme"
                   checked={advancedSetting.oneKv}
                   onChange={handleAdvancedFilter('oneKv')}
@@ -963,6 +1369,8 @@ const Staking = () => {
     );
   }, [
     advancedOption.advanced,
+    apiLoading,
+    advancedSetting.minSelfStake,
     advancedSetting.maxUnclaimedEras,
     advancedSetting.historicalApy,
     advancedSetting.minInclusion,
@@ -1044,17 +1452,12 @@ const Staking = () => {
             </ContentBlockRight>
           </ContentBlock>
           <BalanceContextBlock>
-            <DetailedBalance color="white">Role: {chainInfo?.role}</DetailedBalance>
-            <DetailedBalance color="white">bonded: {_formatBalance(chainInfo?.bonded)}</DetailedBalance>
-            <DetailedBalance color="white">
-              transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}
-            </DetailedBalance>
-            <DetailedBalance color="white">
-              reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}
-            </DetailedBalance>
-            <DetailedBalance color="white">
-              redeemable: {_formatBalance(chainInfo?.redeemable)}
-            </DetailedBalance>
+            {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
+            <DetailedBalance color='white'>Nominees: {accountChainInfo?.nominators?.length}</DetailedBalance>
+            <DetailedBalance color='white'>bonded: {_formatBalance(accountChainInfo?.bonded)}</DetailedBalance>
+            <DetailedBalance color='white'>transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}</DetailedBalance>
+            <DetailedBalance color='white'>reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}</DetailedBalance>
+            <DetailedBalance color='white'>redeemable: {_formatBalance(accountChainInfo?.redeemable)}</DetailedBalance>
           </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
@@ -1116,19 +1519,14 @@ const Staking = () => {
         {advancedFilterResult}
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
-            {!apiLoading ? (
-              <Button
-                title="Nominate"
-                onClick={() => {
-                  console.log('Nominate');
-                }}
-                style={{ width: 220 }}
-              />
-            ) : (
-              <ScaleLoader />
-            )}
+            <Button
+              disabled={!nominatableInfo.nominatable}
+              title="Nominate"
+              onClick={handleNominate}
+              style={{ width: 220 }}
+            />
           </div>
-          {/* <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." /> */}
+          {nominatableInfo.warning}
         </FooterLayout>
       </CardHeader>
       <DashboardLayout>{eraInfoDisplayDom}</DashboardLayout>

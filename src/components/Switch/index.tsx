@@ -14,6 +14,7 @@ const CustomSwitch = ({ ...props }) => {
       handleDiameter={14}
       checked={props.checked}
       onChange={props.onChange}
+      disabled={props.disabled ? props.disabled : false}
     />
   );
 };

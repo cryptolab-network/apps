@@ -29,6 +29,7 @@ import Network from './pages/Tools/components/Network';
 import Contact from './pages/Contact';
 import OurValidators from './pages/OurValidators';
 import About from './pages/About';
+import { Helmet } from 'react-helmet';
 
 // header
 const Header: React.FC = () => {
@@ -167,7 +168,11 @@ const Footer: React.FC = () => {
         <CopyRightTitleDiv>
           @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
           <TextLinkA href="#">Disclaimer</TextLinkA> &nbsp;| &nbsp;
-          <TextLinkA href="#">Privacy</TextLinkA>
+          <a href="https://www.iubenda.com/privacy-policy/37411829" className="iubenda-black iubenda-noiframe iubenda-embed iubenda-noiframe " title="Privacy Policy ">Privacy Policy</a>
+          <Helmet>
+          <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+          </Helmet>
+          {/* <TextLinkA href="#">Privacy</TextLinkA> */}
         </CopyRightTitleDiv>
       </CopyRightDiv>
     </>
