@@ -172,6 +172,7 @@ export interface ITableData {
     parent: string | null | undefined;
     isVerified: boolean;
   };
+  blockNomination: boolean;
 }
 
 interface IApiParams {

@@ -69,6 +69,7 @@ export interface IValidator {
   averageApy: number;
   slashes: ISlash[];
   favorite: boolean;
+  blockNomination: boolean;
 }
 
 export interface IValidatorHistory {

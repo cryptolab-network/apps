@@ -55,6 +55,7 @@ export const formatToTableData = (data: IValidator[]): ITableData[] => {
         parent: validator.identity.parent,
         isVerified: validator.identity.isVerified ? true : false,
       },
+      blockNomination: validator.blockNomination
     };
   });
 };
@@ -247,6 +248,10 @@ export const resetSelected = (tableData: ITableData[]): ITableData[] => {
   });
 };
 
+export const filterBlockNomination = (tableData: ITableData[]): ITableData[] => {
+  return tableData.filter(data => !data.blockNomination);
+}
+
 // format origin data from api, to IStakingInfo format
 export const formatToStakingInfo = (data: IValidator[], networkName: string): IStakingInfo => {
   // format the data to fit the frontend table
@@ -273,7 +278,8 @@ export const lowRiskStrategy = (
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // if support us
   if (isSupportUs) {
     // select our validators, decrease the selectable number
@@ -301,7 +307,8 @@ export const lowRiskStrategy = (
       minSelfStakeFlag &&
       validator.unclaimedEras < 16 &&
       validator.hasSlash === false &&
-      validator.identity.isVerified === true
+      validator.identity.isVerified === true &&
+      validator.blockNomination === false
     ) {
       return true;
     }
@@ -323,6 +330,8 @@ export const highApyStrategy = (
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // if support us
   if (isSupportUs) {
     // select our validators, decrease the selectable number
@@ -352,7 +361,8 @@ export const decentralStrategy = (
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -384,7 +394,8 @@ export const oneKvStrategy = (
   let tempSelectableCount = getCandidateNumber(networkName);
   // unselected all
   tempTableData = resetSelected(tempTableData);
-
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   if (isSupportUs) {
     // select our validators, decrease the selectable number
     const { tableData, selectableCount } = supportCryptoLabSelect(
@@ -423,6 +434,8 @@ export const advancedConditionFilter = (
   networkName: string
 ): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
+  // filter the validators which block new nomination
+  tempTableData = filterBlockNomination(tempTableData);
   // get maximum candidate number base on current network
   let tempSelectableCount = getCandidateNumber(networkName);
   // if support us
@@ -437,7 +450,7 @@ export const advancedConditionFilter = (
     tempSelectableCount = selectableCount;
   }
 
-  tempTableData = originTableData.tableData.filter((data) => {
+  tempTableData = tempTableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
 
