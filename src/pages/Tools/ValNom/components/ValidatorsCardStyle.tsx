@@ -24,6 +24,7 @@ import { balanceUnit } from '../../../../utils/string';
 import { NetworkConfig } from '../../../../utils/constants/Network';
 import { toast } from 'react-toastify';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
+import Pagination from '../../../../components/Pagination';
 
 const ValNomHeader = () => {
   return (
@@ -133,13 +134,16 @@ const ValidatorGrid = ({ filters, validators }) => {
     return validators;
   };
   const [displayValidators, setDisplayValidators] = useState<IValidator[]>([]);
+  const [page, setPage] = useState<number>(0);
+  const [pageCount, setPageCount] = useState<number>(0);
   useEffect(() => {
     try {
-      setDisplayValidators(sortValidators(validators, filters).slice(0, 24));
+      setDisplayValidators(sortValidators(validators, filters).slice(page * 24, page * 24 + 24));
+      setPageCount(Math.ceil(validators.length / 24));
     } catch (err) {
       console.error(err);
     }
-  }, [filters, validators]);
+  }, [filters, page, validators]);
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
@@ -166,9 +170,31 @@ const ValidatorGrid = ({ filters, validators }) => {
   }, [_formatBalance, chain, history, displayValidators]);
   if (validatorComponents.length > 0) {
     return (
-      <Grid container spacing={3} style={{ justifyContent: 'space-between' }}>
-        {validatorComponents}
-      </Grid>
+      <GridLayout>
+        <Grid container spacing={3} style={{ justifyContent: 'flex-start' }}>
+          {validatorComponents}
+        </Grid>
+        <div style={{margin: '20px 0 0 0'}}></div>
+        <Pagination
+          canNextPage={page < pageCount ? true: false}
+          canPreviousPage={page > 0 ? true: false}
+          pageOptions={{}}
+          pageCount={pageCount}
+          gotoPage={(p) => {
+            setPage(p);
+          }}
+          nextPage={() => {
+            if (page < pageCount - 1) {
+              setPage(page + 1);
+            }
+          }}
+          previousPage={() => {
+            if (page > 0) {
+              setPage(page - 1);
+            }
+          }}
+        ></Pagination>
+      </GridLayout>
     );
   } else {
     return <div></div>;
@@ -376,4 +402,11 @@ const AdvancedOption = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.23;
+`;
+
+const GridLayout = styled.div`
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

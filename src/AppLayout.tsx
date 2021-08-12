@@ -26,6 +26,9 @@ import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
+import Contact from './pages/Contact';
+import OurValidators from './pages/OurValidators';
+import About from './pages/About';
 import { Helmet } from 'react-helmet';
 
 // header
@@ -99,15 +102,15 @@ const Footer: React.FC = () => {
           <ThDiv>General</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">About</LinkA>
+            <LinkA href={`${staking_url}/about`}>About</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Contact</LinkA>
+            <LinkA href={`${staking_url}/contact`}>Contact</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Our Validators</LinkA>
+            <LinkA href={`${staking_url}/ourValidators`}>Our Validators</LinkA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -202,6 +205,9 @@ const AppLayout = () => {
               <Route path="/validator/:id/:chain" component={ValidatorStatus} />
               <Route path="/onekv" component={OneKV} />
               <Route path="/rewards" component={StakingRewardsReport} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/ourValidators" component={OurValidators} />
+              <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
           <Footer />
@@ -228,6 +234,9 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/ourValidators" component={OurValidators} />
+              <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
           <Footer />
