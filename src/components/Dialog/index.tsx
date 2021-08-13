@@ -1,0 +1,96 @@
+import { useMemo } from 'react';
+import Modal from 'react-modal';
+import styled from 'styled-components';
+
+interface IDialogWithImage {
+  image?: any;
+  title?: string;
+  isOpen: boolean;
+  handleDialogClose: Function;
+}
+
+const Dialog: React.FC<IDialogWithImage> = ({ image, title, isOpen, handleDialogClose, children }) => {
+  const customStyles = {
+    overlay: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.74)',
+      zIndex: 1100,
+    },
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      minWidth: 652,
+      minHeight: 493,
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      OverflowX: 'scroll',
+      OverflowY: 'scroll',
+      border: 'solid 1px #23beb9',
+      borderRadius: 8,
+      backgroundColor: '#18232f',
+      opacity: 0.89,
+    },
+  };
+
+  const imageDOM = useMemo(() => {
+    return image ? <ImageContainer>{image}</ImageContainer> : null;
+  }, [image]);
+
+  const titleDOM = useMemo(() => {
+    return title ? <TitleContainer>{title}</TitleContainer> : null;
+  }, [title]);
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={handleDialogClose}
+      style={customStyles}
+      contentLabel="Example Modal"
+    >
+      <DialogMainLayout>
+        {imageDOM}
+        {titleDOM}
+        {children}
+      </DialogMainLayout>
+    </Modal>
+  );
+};
+
+export default Dialog;
+
+const DialogMainLayout = styled.div`
+  padding: 68px 16px 53px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ContentContainer = styled.div``;
+
+const ImageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const TitleContainer = styled.div`
+  margin-top: 22.7px;
+  margin-bottom: 45px;
+  font-family: Montserrat;
+  font-size: 25px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-align: center;
+  color: white;
+`;

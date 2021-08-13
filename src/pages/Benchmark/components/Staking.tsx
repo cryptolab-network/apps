@@ -1274,8 +1274,7 @@ const Staking = () => {
     inputData.stakeAmount,
     inputData.rewardDestination,
     networkName,
-    selectedAccount.balances.availableBalance,
-    selectedAccount.address,
+    selectedAccount,
     finalFilteredTableData.tableData,
     notifyProcessing,
     txStatusCallback,
@@ -1416,6 +1415,7 @@ const Staking = () => {
                   onChange={handleAdvancedFilter('minInclusion')}
                 />
                 <TitleSwitch
+                  disabled={apiLoading}
                   title="Identity"
                   checked={advancedSetting.identity}
                   onChange={handleAdvancedFilter('identity')}

@@ -9,6 +9,7 @@ import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
+import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -28,10 +29,14 @@ import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
 import Contact from './pages/Contact';
-import OurValidators from './pages/OurValidators';
+// import OurValidators from './pages/OurValidators';
 import About from './pages/About';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
+import Dialog from './components/Dialog';
+import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
+import Identicon from '@polkadot/react-identicon';
+import { IconTheme, IdentityProps } from '@polkadot/react-identicon/types';
 
 // header
 const Header: React.FC = () => {
@@ -95,19 +100,64 @@ const ToolsHeader: React.FC = () => {
   );
 };
 
-const Footer: React.FC = () => {
+interface IFooter {
+  handleDialogOpen: React.MouseEventHandler<HTMLDivElement>;
+}
+
+interface IValidator {
+  name: string;
+  address: string;
+  theme: IconTheme;
+}
+
+const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
-  
+
   const onSubscribeNewsletter = () => {
     apiSubscribeNewsletter({
       email: email,
-    }).then((result) => {
-      let message = '';
-      console.log(result);
-      if (result === 0) {
-        message = `Thank you for subscribing our newsletter`;
-        toast.info(`${message}`, {
+    })
+      .then((result) => {
+        let message = '';
+        console.log(result);
+        if (result === 0) {
+          message = `Thank you for subscribing our newsletter`;
+          toast.info(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        } else if (result === -2000) {
+          message = `You have already subsribed our newsletter`;
+          toast.error(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        } else if (result === -1002) {
+          message = `Invalid email format`;
+          toast.error(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        }
+      })
+      .catch((err) => {
+        toast.error(`Failed to subscribe our newsletter`, {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
@@ -116,41 +166,9 @@ const Footer: React.FC = () => {
           draggable: false,
           progress: undefined,
         });
-      } else if (result === -2000) {
-        message = `You have already subsribed our newsletter`;
-        toast.error(`${message}`, {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          progress: undefined,
-        });
-      } else if (result === -1002) {
-        message = `Invalid email format`;
-        toast.error(`${message}`, {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: false,
-          progress: undefined,
-        });
-      }
-    }).catch((err) => {
-      toast.error(`Failed to subscribe our newsletter`, {
-        position: 'top-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        progress: undefined,
       });
-    });
   };
+
   return (
     <>
       <TableDiv>
@@ -166,7 +184,7 @@ const Footer: React.FC = () => {
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/ourValidators`}>Our Validators</LinkA>
+            <DialogA onClick={handleDialogOpen}>Our Validators</DialogA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -215,7 +233,13 @@ const Footer: React.FC = () => {
           </TdDiv>
           <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
           <TdDiv justify_content="center">
-            <Input placeholder="Enter your email address" value={email} onChange={(e) => {setEmail(e.target.value)}}></Input>
+            <Input
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            ></Input>
             <SubmitButton onClick={onSubscribeNewsletter}>Subscribe</SubmitButton>
           </TdDiv>
         </ColumnDiv>
@@ -223,11 +247,26 @@ const Footer: React.FC = () => {
       <CopyRightDiv>
         <CopyRightTitleDiv>
           @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a href="https://www.iubenda.com/terms-and-conditions/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe " title="Terms and Conditions ">Terms and Conditions</a> &nbsp;| &nbsp;
+          <a
+            href="https://www.iubenda.com/terms-and-conditions/37411829"
+            style={{ textDecoration: 'none', color: 'white' }}
+            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+            title="Terms and Conditions "
+          >
+            Terms and Conditions
+          </a>{' '}
+          &nbsp;| &nbsp;
           <Helmet>
-          <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>
-          <a href="https://www.iubenda.com/privacy-policy/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe " title="Privacy Policy ">Privacy Policy</a>
+          <a
+            href="https://www.iubenda.com/privacy-policy/37411829"
+            style={{ textDecoration: 'none', color: 'white' }}
+            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+            title="Privacy Policy "
+          >
+            Privacy Policy
+          </a>
           <Helmet>
             <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>
@@ -240,6 +279,85 @@ const Footer: React.FC = () => {
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
   const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
+
+  const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
+
+  const handleDialogClose = () => {
+    setVisibleOurValidatorsDialog(false);
+  };
+
+  const handleDialogOpen = () => {
+    console.log('modal open');
+    setVisibleOurValidatorsDialog(true);
+  };
+
+  const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
+    return (
+      <Validator>
+        <Identicon value={address} size={35} theme={theme} />
+        <span style={{ marginLeft: 8 }}>{name}</span>
+      </Validator>
+    );
+  };
+
+  const ourValidatorsDOM = useMemo(() => {
+    let polkadotValidator: any = [];
+    let kusamaValidator: any = [];
+
+    Object.keys(CryptolabDOTValidators).forEach((item) => {
+      polkadotValidator.push(
+        <ValidatorNode name={item} address={CryptolabDOTValidators[item]} theme="polkadot" />
+      );
+    });
+
+    Object.keys(CryptolabKSMValidators).forEach((item) => {
+      kusamaValidator.push(
+        <ValidatorNode name={item} address={CryptolabKSMValidators[item]} theme="polkadot" />
+      );
+    });
+
+    return (
+      <>
+        <ValidatorMainContainer>
+          <ValidatorListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <div style={{ marginBottom: 12 }}>Polkadot</div>
+            {polkadotValidator}
+          </ValidatorListContainer>
+          <ValidatorListContainer>
+            <div style={{ marginBottom: 12 }}>Kusama</div>
+            {kusamaValidator}
+          </ValidatorListContainer>
+        </ValidatorMainContainer>
+        <div
+          style={{
+            width: '100%',
+            display: 'inline-box',
+            boxSizing: 'border-box',
+            justifyContent: 'flex-start',
+            marginTop: 18,
+            color: 'white',
+            fontSize: 13,
+            fontFamily: 'Montserrat',
+            fontWeight: 500,
+            paddingLeft: 50,
+          }}
+        >
+          Toggle
+          <span style={{ color: '#23beb9', fontSize: 13, fontFamily: 'Montserrat', fontWeight: 500 }}>
+            {' '}
+            Support Us{' '}
+          </span>
+          on
+          <span style={{ color: '#23beb9', fontSize: 13, fontFamily: 'Montserrat', fontWeight: 500 }}>
+            {' '}
+            Portfolio Benchmark{' '}
+          </span>
+          to support us.
+        </div>
+      </>
+    );
+  }, []);
+
   const mainRender = useMemo(() => {
     if (isToolsSite) {
       return (
@@ -264,11 +382,11 @@ const AppLayout = () => {
               <Route path="/onekv" component={OneKV} />
               <Route path="/rewards" component={StakingRewardsReport} />
               <Route path="/contact" component={Contact} />
-              <Route path="/ourValidators" component={OurValidators} />
+              {/* <Route path="/ourValidators" component={OurValidators} /> */}
               <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
-          <Footer />
+          <Footer handleDialogOpen={handleDialogOpen} />
         </>
       );
     } else {
@@ -276,6 +394,14 @@ const AppLayout = () => {
         <>
           <Header />
           <RouteContent>
+            <Dialog
+              image={<PeopleIcon />}
+              title={'Our Validators'}
+              isOpen={visibleOurValidatorsDialog}
+              handleDialogClose={handleDialogClose}
+            >
+              {ourValidatorsDOM}
+            </Dialog>
             <ToastContainer
               position="top-center"
               autoClose={5000}
@@ -292,16 +418,13 @@ const AppLayout = () => {
               <Route path="/guide" component={Guide} />
               <Route path="/benchmark" component={Benchmark} />
               <Route path="/management" component={Management} />
-              <Route path="/contact" component={Contact} />
-              <Route path="/ourValidators" component={OurValidators} />
-              <Route path="/about" component={About} />
             </Switch>
           </RouteContent>
-          <Footer />
+          <Footer handleDialogOpen={handleDialogOpen} />
         </>
       );
     }
-  }, [isToolsSite]);
+  }, [isToolsSite, visibleOurValidatorsDialog, ourValidatorsDOM]);
 
   return (
     <>
@@ -437,6 +560,14 @@ const LinkA = styled.a`
   }
 `;
 
+const DialogA = styled.span`
+  color: white;
+  text-decoration: none;
+  :hover {
+    color: #23beb9;
+  }
+`;
+
 const Input = styled.input`
   width: 100%;
   height: 70%;
@@ -495,4 +626,36 @@ const TextLinkA = styled.a`
 `;
 const SocialMediaWrapper = styled.div`
   margin-right: 15px;
+`;
+
+const ValidatorMainContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-family: Montserrat;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: left;
+  color: white;
+`;
+
+const ValidatorListContainer = styled.span`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 6px 50px 6px 50px;
+`;
+
+const Validator = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 6px 0px 6px 0px;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+
+  text-align: left;
+  color: #23beb9;
 `;
