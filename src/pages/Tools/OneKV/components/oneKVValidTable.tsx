@@ -9,7 +9,10 @@ import { IOneKVValidator } from "../../../../apis/OneKV/validator";
 import Table from "../../../../components/Table";
 import { balanceUnit } from "../../../../utils/string";
 
+import { useTranslation } from 'react-i18next';
+
 const ValidatorTable = ({filter, chain, validators}) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const onClickDashboard = useCallback((id: string) => {
     history.push(`/validator/${id}/${chain}`);
@@ -20,7 +23,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Dashboard',
+        Header: t('tools.oneKv.table.header.dashboard'),
         accessor: 'dashboard',
         maxWidth: 48,
         disableSortBy: true,
@@ -30,19 +33,19 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Name',
+        Header: t('tools.oneKv.table.header.name'),
         accessor: 'name',
         maxWidth: 180,
         Cell: ({ value }) => <span>{value}</span>,
       },
       {
-        Header: 'Commission',
+        Header: t('tools.oneKv.table.header.commission'),
         accessor: 'stakingInfo.validatorPrefs.commission',
         maxWidth: 48,
         Cell: ({ value }) => <span>{value / 10000000}%</span>,
       },
       {
-        Header: 'Active',
+        Header: t('tools.oneKv.table.header.active'),
         accessor: 'activeNominators',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -54,7 +57,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: '1KV nominated',
+        Header: t('tools.oneKv.table.header.oneKvNominated'),
         accessor: 'elected',
         maxWidth: 100,
         Cell: ({ value, row }) => {
@@ -71,7 +74,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         sortType: 'basic',
       },
       {
-        Header: 'Nomination Order',
+        Header: t('tools.oneKv.table.header.nominationOrder'),
         accessor: 'nominationOrder',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -79,7 +82,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Self Stake',
+        Header: t('tools.oneKv.table.header.selfStake'),
         accessor: 'selfStake',
         maxWidth: 150,
         Cell: ({ value }) => {
@@ -87,7 +90,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         }
       },
       {
-        Header: 'Rank',
+        Header: t('tools.oneKv.table.header.rank'),
         accessor: 'rank',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -95,7 +98,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Inclusion',
+        Header: t('tools.oneKv.table.header.inclusion'),
         accessor: 'inclusion',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -104,7 +107,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         sortType: 'basic',
       },
     ]
-  }, [_formatBalance, onClickDashboard]);
+  }, [_formatBalance, onClickDashboard, t]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
   useEffect(() => {
     setDisplayValidators(validators);

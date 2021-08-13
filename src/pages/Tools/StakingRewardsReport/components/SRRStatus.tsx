@@ -25,6 +25,8 @@ import { balanceUnit, validateAddress } from "../../../../utils/string";
 import { DataContext } from "../../components/Data";
 import { toast } from "react-toastify";
 
+import { useTranslation } from 'react-i18next';
+
 interface ISRRFilters {
   stashId: string;
   startDate: string;
@@ -80,6 +82,7 @@ enum State {
 }
 
 const SRRContent = ({ filters }) => {
+  const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
   const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
   const [validators, setValidators] = useState<IValidator[]>([]);
@@ -119,7 +122,7 @@ const SRRContent = ({ filters }) => {
         }
       }).catch((err) => {
         setState(State.ERROR);
-        notifyWarn('No rewards are found. Please make sure that this address is a stash.');
+        notifyWarn(t('tools.stakingRewards.noRewards'));
       });
       if (s === undefined || s === null) {
         return;
@@ -138,7 +141,7 @@ const SRRContent = ({ filters }) => {
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, filters.stashId, notifyWarn]);
+  }, [chain, filters.stashId, notifyWarn, t]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -177,7 +180,7 @@ const SRRContent = ({ filters }) => {
       <EmptyStashIconLayout>
         <EmptyStashIcon />
         <EmptyStashDescription>
-          Enter a Stash ID to see its rewards.
+          {t('tools.stakingRewards.description')}
         </EmptyStashDescription>
       </EmptyStashIconLayout>
     );
@@ -229,7 +232,7 @@ const SRRContent = ({ filters }) => {
       <EmptyStashIconLayout>
         <EmptyStashIcon />
         <EmptyStashDescription>
-          Enter a Stash ID to see its rewards.
+          {t('tools.stakingRewards.enter')}
         </EmptyStashDescription>
       </EmptyStashIconLayout>
     );
@@ -238,6 +241,7 @@ const SRRContent = ({ filters }) => {
 };
 
 const SRRLayout = () => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<ISRRFilters>({
     stashId: '',
     startDate: '2020-01-01',
@@ -261,7 +265,7 @@ const SRRLayout = () => {
           <IconInput
             Icon={Search}
             iconSize="16px"
-            placeholder="Polkadot/Kusama StashId"
+            placeholder={t('tools.stakingRewards.optionBar.title')}
             inputLength={512}
             value={filters.stashId}
             onChange={handleFilterChange('stashId')}

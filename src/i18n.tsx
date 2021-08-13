@@ -82,7 +82,33 @@ i18n
             },
             oneKv: {
               title: '1KV Monitor',
-              detail: 'Information that allow 1kv node operators to predict when they will be nominated.'
+              detail: 'Information that allow 1kv node operators to predict when they will be nominated.',
+              seeInvalid: 'See Invalid',
+              seeValid: 'See Valid',
+              subtitle: 'Nomination order and data of all One Thousand Validators',
+              era: 'Era',
+              validValidators: 'Valid Validators',
+              activeValidators: 'Active Validators',
+              electedValidators: '1KV Elected Validators',
+              lastUpdateTime: 'Last Update Time',
+              table: {
+                header: {
+                  era: 'Era',
+                  dashboard: 'Dashboard',
+                  name: 'Name',
+                  commission: 'Commission',
+                  active: 'Active',
+                  oneKvNominated: 'OneKv Nominated',
+                  nominationOrder: 'Nomination Order',
+                  selfStake: 'Self Stake',
+                  rank: 'Rank',
+                  inclusion: 'Inclusion',
+                  reasons: 'reasons',
+                }
+              },
+              optionBar: {
+                stashId: 'Polkadot/Kusama Stash ID or Name'
+              }
             },
             validators: {
               apy: 'APY',
@@ -96,7 +122,27 @@ i18n
             },
             stakingRewards: {
               title: 'Staking Rewards',
-              detail: 'Exportable reports of your staking rewards.'
+              detail: 'Exportable reports of your staking rewards.',
+              subtitle: 'Query and export your staking rewards',
+              noRewards: 'No rewards are found. Please make sure that this address is a stash.',
+              description: 'Enter your stash ID to query your staking rewards',
+              enter: 'Enter your stash ID',
+              optionBar: {
+                title: "Polkadot/Kusama Stash ID",
+              },
+              table: {
+                header: {
+                  payoutDate: 'Payout Date',
+                  amount: 'Amount',
+                  price: 'Price',
+                  total: 'Total'
+                }
+              },
+              stashInformation: 'Stash Information',
+              stashId: 'Stash ID',
+              totalRewards: 'Total Rewards',
+              from: 'From',
+              to: 'to',
             },
           }
         }
@@ -176,11 +222,57 @@ i18n
             },
             oneKv: {
               title: '1KV 提名人資訊',
-              detail: '幫助運行1KV節點的人能夠評估何時將會被提名'
+              detail: '幫助運行1KV節點的人能夠評估何時將會被提名',
+              seeInvalid: '查看不符合規則的節點',
+              seeValid: '查看符合規則的節點',
+              subtitle: '提名順序以及1KV節點的詳細資訊',
+              era: 'Era',
+              validValidators: '符合規則的驗證人',
+              activeValidators: '驗證中的驗證人',
+              electedValidators: '1KV提名的驗證人',
+              lastUpdateTime: '最近的資料更新時間',
+              table: {
+                header: {
+                  era: 'Era',
+                  dashboard: '儀錶板',
+                  name: '名稱',
+                  commission: '傭金',
+                  active: '驗證中',
+                  oneKvNominated: '1KV提名中',
+                  nominationOrder: '下次提名順序',
+                  selfStake: '本身的質押數',
+                  rank: '排名',
+                  inclusion: '提名率',
+                  reasons: '原因',
+                }
+              },
+              optionBar: {
+                stashId: 'Polkadot/Kusama 帳號ID或名稱'
+              }
             },
             stakingRewards: {
               title: '質押獎勵查詢',
-              detail: '幫助提名人查詢您的質押獎勵, 也能夠將您的質押紀律匯出'
+              detail: '幫助提名人查詢您的質押獎勵, 也能夠將您的質押紀律匯出',
+              subtitle: '查詢與匯出您的質押獎勵',
+              noRewards: '此帳戶沒有獎勵紀錄',
+              description: '輸入您的帳戶 ID以查詢獎勵',
+              enter: '輸入您的帳戶 ID',
+              optionBar: {
+                title: "Polkadot/Kusama 帳戶 ID",
+              },
+              table: {
+                header: {
+                  payoutDate: '獎勵分配日期',
+                  amount: '總顆數',
+                  price: '當日價格',
+                  total: '總價'
+                }
+              },
+              stashInformation: '帳戶資訊',
+              stashId: '帳戶 ID',
+              totalRewards: '總獎勵',
+              from: '從',
+              to: '至',
             },
           }
         }

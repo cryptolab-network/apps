@@ -16,28 +16,31 @@ import Button from '../../../../components/Button';
 import { useCallback } from 'react';
 import InvalidValidatorTable from './oneKVInvalidTable';
 
+import { useTranslation } from 'react-i18next';
+
 const OneKVHeader = ({onSeeValidClicked, seeValid}) => {
+  const { t } = useTranslation();
   const onClickSeeInvalid = useCallback(() => {
     onSeeValidClicked(seeValid);
   }, [onSeeValidClicked, seeValid]);
   const ValidityButton = useCallback(() => {
     if(seeValid) {
       return (<Button 
-        title={'See Invalid'}
+        title={t('tools.oneKv.seeInvalid')}
         onClick={onClickSeeInvalid} />);
     } else {
       return (<Button 
-        title={'See Valid'}
+        title={t('tools.oneKv.seeValid')}
         onClick={onClickSeeInvalid} />);
     }
-  }, [onClickSeeInvalid, seeValid]);
+  }, [onClickSeeInvalid, seeValid, t]);
   return (
     <HeaderLayout>
       <HeaderLeft>
         <MonitorIcon />
         <HeaderTitle>
-          <Title>One Thousand Validator Monitor</Title>
-          <Subtitle>Nomination order and data of all One Thousand Validators</Subtitle>
+          <Title>{t('tools.oneKv.title')}</Title>
+          <Subtitle>{t('tools.oneKv.subtitle')}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
@@ -51,6 +54,7 @@ const ValNomContent = ({ valid, chain, validators, activeEra, validValidators, a
   const [filters, setFilters] = useState({
     stashId: '',
   });
+  const { t } = useTranslation();
   const handleFilterChange = (name) => (e) => {
     // TODO: input validator, limit
     switch (name) {
@@ -87,7 +91,7 @@ const ValNomContent = ({ valid, chain, validators, activeEra, validValidators, a
             <IconInput
               Icon={Search}
               iconSize="16px"
-              placeholder="Polkadot/Kusama Stash ID or Name"
+              placeholder={t('tools.oneKv.optionBar.stashId')}
               inputLength={256}
               value={filters.stashId}
               onChange={handleFilterChange('stashId')}
@@ -95,19 +99,19 @@ const ValNomContent = ({ valid, chain, validators, activeEra, validValidators, a
           </HeaderLeft>
           <HeaderRight>
             <HeaderItem>
-              Era: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeEra}</span>
+              {t('tools.oneKv.era')}: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeEra}</span>
             </HeaderItem>
             <HeaderItem>
-              Valid Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{validValidators}</span>
+              {t('tools.oneKv.validValidators')}: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{validValidators}</span>
             </HeaderItem>
             <HeaderItem>
-              Active Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeValidators}</span>
+              {t('tools.oneKv.activeValidators')}: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{activeValidators}</span>
             </HeaderItem>
             <HeaderItem>
-              1KV Elected Validators: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{electedValidators}</span>
+              {t('tools.oneKv.electedValidators')}: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{electedValidators}</span>
             </HeaderItem>
             <HeaderItem>
-              Last Updated Time: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{lastUpdatedTime}</span>
+              {t('tools.oneKv.lastUpdateTime')}: <span style={{color: '#23b3b9', margin:'0 4px 0 4px'}}>{lastUpdatedTime}</span>
             </HeaderItem>
           </HeaderRight>
         </HeaderLayout>
