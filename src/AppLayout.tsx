@@ -33,7 +33,7 @@ import About from './pages/About';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
 
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 // header
 const Header: React.FC = () => {
@@ -227,11 +227,11 @@ const Footer: React.FC = () => {
       <CopyRightDiv>
         <CopyRightTitleDiv>
           @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a href="https://www.iubenda.com/terms-and-conditions/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe " title="Terms and Conditions ">Terms and Conditions</a> &nbsp;| &nbsp;
+          <a href="https://www.iubenda.com/terms-and-conditions/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe " title={t('app.footer.title.disclaimer')}>{t('app.footer.title.disclaimer')}</a> &nbsp;| &nbsp;
           <Helmet>
           <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>
-          <a href="https://www.iubenda.com/privacy-policy/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe " title="Privacy Policy ">Privacy Policy</a>
+          <a href="https://www.iubenda.com/privacy-policy/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe " title={t('app.footer.title.privacyPolicy')}>{t('app.footer.title.privacyPolicy')}</a>
           <Helmet>
             <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>

@@ -48,7 +48,8 @@ i18n
                 medium: 'Medium',
                 subscribeDescription: 'Subscribe to receive CryptoLab updates!',
                 subscribe: 'Subscribe',
-                disclaimer: 'Disclaimer',
+                disclaimer: 'Terms and Conditions',
+                privacyPolicy: 'Privacy Policy',
                 enterEmail: 'Enter your email address',
                 general: 'General',
               }
@@ -63,10 +64,35 @@ i18n
             valnom: {
               title: 'Validator / Nominator Status',
               detail: 'Useful criterias for both validators and nominators to monitor and evaluate your staking information.',
+              subtitle: 'See filtered validator status or enter a nominator stash ID to see its nominated validators',
+              unfavorite: 'Toggle to un-favorite this validator',
+              favorite: 'Toggle to favorite this validator',
+              filters: {
+                sorting: 'Sorting'
+              },
+              tips: {
+                tooManyUnclaimedPayouts: 'Too many unclaimed payouts',
+                activeAmounts: 'Active amounts',
+                totalAmounts: 'Total amounts',
+                apy: 'Annual Percentage Yields',
+                averageApy: 'Average APY',
+                nominatorCount:'Nominator Count',
+                commission: 'Commission',
+              },
             },
             oneKv: {
               title: '1KV Monitor',
               detail: 'Information that allow 1kv node operators to predict when they will be nominated.'
+            },
+            validators: {
+              apy: 'APY',
+              nominatorCount: 'Nominator Count',
+              commission: 'Commission',
+              selfStake: 'Self Stake',
+              unclaimedEras: 'Unclaimed Eras',
+              slashes: 'Slashes',
+              activeNominators: 'Active Nominators',
+              inactiveNominators: 'Inactive Nominators',
             },
             stakingRewards: {
               title: 'Staking Rewards',
@@ -107,7 +133,8 @@ i18n
                 subscribeDescription: '訂閱電子報來獲得CryptoLab的最新消息',
                 subscribe: '訂閱',
                 enterEmail: '輸入您的Email地址',
-                disclaimer: '免責聲明',
+                disclaimer: '使用條款',
+                privacyPolicy: '隱私權政策',
                 general: '一般',
               }
             }
@@ -121,6 +148,31 @@ i18n
             valnom: {
               title: '驗證人/提名人狀態',
               detail: '提供驗證人以及提名人實用的工具以便評估您的質押狀態',
+              subtitle: '可依條件過濾驗證人資訊 也可以搜尋提名人的ID來查詢您提名的節點運行的狀況',
+              unfavorite: '點擊此圖示取消關注此驗證人',
+              favorite: '點擊此圖示以關注此驗證人',
+              filters: {
+                sorting: '排序'
+              },
+              tips: {
+                tooManyUnclaimedPayouts: '過多未分配的獎勵',
+                activeAmounts: '此Era提名您的質押總數',
+                totalAmounts: '所有提名您的質押總數',
+                apy: '年化報酬率',
+                averageApy: '平均年化報酬率',
+                nominatorCount: '提名人總數',
+                commission: '傭金',
+              },
+            },
+            validators: {
+              apy: '年化報酬率',
+              nominatorCount: '提名人總數',
+              commission: '傭金',
+              selfStake: '本身的質押數',
+              unclaimedEras: '未分配獎勵的Era數',
+              slashes: '懲罰次數',
+              activeNominators: '此Era將Stake分配給您的提名人',
+              inactiveNominators: '此Era未將Stake分配給您的提名人',
             },
             oneKv: {
               title: '1KV 提名人資訊',
