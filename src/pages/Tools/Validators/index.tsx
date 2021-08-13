@@ -18,6 +18,8 @@ import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit } from '../../../utils/string';
 import { toast } from 'react-toastify';
 
+import { useTranslation } from 'react-i18next';
+
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
   info.forEach((eraInfo, i) => {
@@ -30,6 +32,7 @@ const findLastEra = (info: IEraInfo[]): IEraInfo => {
 
 const ValidatorStatusHeader = ({ chain, validator }) => {
   const history = useHistory();
+  const { t } = useTranslation();
   let active = 0;
   let total = 0;
   let nominatorCount = 0;
@@ -72,15 +75,15 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
           <ExposureTotal>{_formatBalance(total)}</ExposureTotal>
         </Exposure>
         <Value>
-          <ValueTitle>APY:</ValueTitle>
+          <ValueTitle>{t('tools.validators.apy')}:</ValueTitle>
           {(validator.averageApy * 100).toFixed(2)} %
         </Value>
         <Value>
-          <ValueTitle>Nominator Count:</ValueTitle>
+          <ValueTitle>{t('tools.validators.nominatorCount')}:</ValueTitle>
           {nominatorCount}
         </Value>
         <Value>
-          <ValueTitle>Commission:</ValueTitle>
+          <ValueTitle>{t('tools.validators.commission')}:</ValueTitle>
           {commission} %
         </Value>
       </HeaderRight>
@@ -89,6 +92,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
 };
 
 const ValidatorStatus = (props) => {
+  const { t } = useTranslation();
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
   const [selfStake, setSelfStake] = useState<string>('0');
@@ -221,22 +225,22 @@ const ValidatorStatus = (props) => {
           Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
         >
           <ValidatorInfoLayout>
-            <InfoTitle>Self Stake:</InfoTitle>
+            <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
             <InfoItem>{selfStake}</InfoItem>
             <InfoDivider />
-            <InfoTitle>Unclaimed Eras:</InfoTitle>
+            <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
             <InfoItem>{unclaimedEras}</InfoItem>
             <InfoDivider />
-            <InfoTitle>Slashes:</InfoTitle>
+            <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
             <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
           </ValidatorInfoLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
+            <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
             <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
           </ContentColumnLayout>
           <Space />
           <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">Inactive Nominators</ContentBlockTitle>
+            <ContentBlockTitle color="white">{t('tools.validators.inactiveNominators')}</ContentBlockTitle>
             <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
           </ContentColumnLayout>
         </CardHeader>

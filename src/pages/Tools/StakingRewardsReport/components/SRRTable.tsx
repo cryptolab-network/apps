@@ -3,11 +3,14 @@ import { useMemo } from "react";
 import styled from "styled-components";
 import Table from "../../../../components/Table";
 
+import { useTranslation } from 'react-i18next';
+
 const SRRTable = ( {stashData, currency} ) => {
+  const { t } = useTranslation();
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Payout Date',
+        Header: t('tools.stakingRewards.table.header.payoutDate'),
         accessor: 'timestamp',
         width: 180,
         minWidth: 180,
@@ -15,7 +18,7 @@ const SRRTable = ( {stashData, currency} ) => {
         Cell: ({ value }) => <span>{moment(value).format('YYYY-MM-DD')}</span>,
       },
       {
-        Header: 'Amount',
+        Header: t('tools.stakingRewards.table.header.amount'),
         accessor: 'amount',
         maxWidth: 100,
         minWidth: 100,
@@ -23,21 +26,21 @@ const SRRTable = ( {stashData, currency} ) => {
         Cell: ({ value }) => <span>{value.toFixed(4)}</span>,
       },
       {
-        Header: `Price (${currency})`,
+        Header: `${t('tools.stakingRewards.table.header.price')} (${currency})`,
         accessor: 'price',
         maxWidth: 100,
         width: 100,
         Cell: ({ value }) => <span>{value.toFixed(2)}</span>,
       },
       {
-        Header: `Total (${currency})`,
+        Header: `${t('tools.stakingRewards.table.header.total')} (${currency})`,
         accessor: 'total',
         maxWidth: 100,
         width: 100,
         Cell: ({ value }) => <span>{value.toFixed(2)}</span>,
       },
     ];
-  }, [currency]);
+  }, [currency, t]);
   return (
     <SRRTableLayout>
       <Table

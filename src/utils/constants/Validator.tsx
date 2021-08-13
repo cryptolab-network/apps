@@ -26,7 +26,7 @@ export enum CandidateNumber {
   WND = 16,
 }
 
-export const getCandidateNumber = (networkName: string) => {
+export const getCandidateNumber = (networkName: string): number => {
   if (NetworkConfig[networkName] !== undefined) {
     return NetworkConfig[networkName].maxNominateCount;
   } else {

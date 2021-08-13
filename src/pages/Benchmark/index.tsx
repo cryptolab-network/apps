@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import SwitchTab from '../../components/SwitchTab';
 import Staking from './components/Staking';
+import Charts from './components/Charts';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 
 const Benchmark = () => {
@@ -24,7 +25,7 @@ const Benchmark = () => {
         <div style={{ width: '100%' }}>
           <Switch>
             <Route exact path={`${path}`} component={Staking} />
-            <Route exact path={`${path}/charts`} component={() => <div>charts</div>} />
+            <Route exact path={`${path}/charts`} component={Charts} />
           </Switch>
         </div>
       </MainLayout>
