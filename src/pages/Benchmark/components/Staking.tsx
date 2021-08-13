@@ -38,17 +38,20 @@ import {
   oneKvStrategy,
   advancedConditionFilter,
   apyCalculation,
+  resetSelected
 } from './utils';
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
+import { getCandidateNumber } from '../../../utils/constants/Validator';
 import keys from '../../../config/keys';
 import { useDebounce } from 'use-debounce';
 import { web3FromAddress } from '@polkadot/extension-dapp';
 import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import Warning from '../../../components/Hint/Warn';
 import '../index.css';
+import ReactTooltip from 'react-tooltip';
 
 enum Strategy {
   LOW_RISK,
@@ -735,10 +738,80 @@ const Staking = () => {
     };
   }, [apiLoading, finalFilteredTableData.tableData, networkName, networkStatus, accountChainInfo.isReady, accountChainInfo.role]);
 
+  const applyAdvancedFilter = useCallback(() => {
+    let filteredResult: IStakingInfo;
+    if (advancedOption.advanced) {
+      // is in advanced mode, need advanced filtered
+      filteredResult = advancedConditionFilter(
+        {
+          minSelfStake: advancedSettingDebounceVal.minSelfStake,
+          maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
+          historicalApy: advancedSettingDebounceVal.historicalApy,
+          minInclusion: advancedSettingDebounceVal.minInclusion,
+          identity: advancedSettingDebounceVal.identity,
+          noPreviousSlashes: advancedSettingDebounceVal.noPreviousSlashes,
+          isSubIdentity: advancedSettingDebounceVal.isSubIdentity,
+          highApy: advancedSettingDebounceVal.highApy,
+          decentralized: advancedSettingDebounceVal.decentralized,
+        },
+        apiOriginTableData,
+        advancedOption.supportus,
+        networkName,
+        accountChainInfo.validators
+      );
+      setFinalFilteredTableData(filteredResult);
+    }
+  }, [
+    advancedSettingDebounceVal.maxUnclaimedEras,
+    advancedSettingDebounceVal.noPreviousSlashes,
+    advancedSettingDebounceVal.isSubIdentity,
+    advancedSettingDebounceVal.minInclusion,
+    advancedSettingDebounceVal.highApy,
+    advancedSettingDebounceVal.decentralized,
+    apiOriginTableData,
+    advancedOption.advanced,
+    advancedOption.supportus,
+    networkName,
+    advancedSettingDebounceVal.historicalApy,
+    advancedSettingDebounceVal.identity,
+    advancedSettingDebounceVal.minSelfStake,
+    accountChainInfo.validators
+  ]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName])
+
   const columns = useMemo(() => {
+    console.log(`call `);
     return [
       {
-        Header: 'Select',
+        Header: <span onClick={() => {
+          const candidateNumber = getCandidateNumber(networkName);
+          console.log('number: ', candidateNumber);
+          console.log('selectable: ', finalFilteredTableData.selectableCount);
+          if (finalFilteredTableData.selectableCount !== undefined && finalFilteredTableData.selectableCount < candidateNumber) {
+            console.log(`gogog`);
+            let tempTableData = {...finalFilteredTableData};
+            tempTableData.tableData = resetSelected(tempTableData.tableData);
+            tempTableData.selectableCount = getCandidateNumber(networkName);
+            tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+            setFinalFilteredTableData(tempTableData);
+          } else {
+            applyAdvancedFilter();
+          }
+        }}>
+          {(finalFilteredTableData.selectableCount !== getCandidateNumber(networkName)) ? 
+            (<>
+              <ReactTooltip id="HandTrueTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
+              <HandTrue data-for="HandTrueTip" data-tip="Unselect all"/>
+            </>) : 
+            (<>
+              <ReactTooltip id="HandFalseTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
+              <HandFalse data-for="HandFalseTip" data-tip="Auto select" />
+            </>)
+          }
+        </span>,
         accessor: 'select',
         maxWidth: 150,
         Cell: ({ value, row, rows }) => {
@@ -877,7 +950,7 @@ const Staking = () => {
         sortType: 'basic',
       },
     ];
-  }, [finalFilteredTableData, notifyWarn, _formatBalance]);
+  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
