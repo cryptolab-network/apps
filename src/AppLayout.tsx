@@ -33,10 +33,12 @@ import About from './pages/About';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
 
+import { useTranslation } from 'react-i18next';
+
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-
+  const { t } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -46,13 +48,13 @@ const Header: React.FC = () => {
       </HeaderLeftDiv>
       <HeaderMidDiv>
         <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
-          Staking Guide
+          {t('app.title.stakingGuide')}
         </NavLink>
         <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
-          Portfolio Benchmark
+          {t('app.title.portfolioBenchmark')}
         </NavLink>
         <NavLink to="/management" className="header-item" activeClassName="header-item-active">
-          Portfolio Management
+          {t('app.title.portfolioManagement')}
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
@@ -60,7 +62,7 @@ const Header: React.FC = () => {
           <NetworkWallet />
         ) : (
           <NavLink to="/benchmark">
-            <Button title="Use Benchmark" />
+            <Button title={t('app.title.useBenchmark')} />
           </NavLink>
         )}
       </HeaderRightDiv>
@@ -70,6 +72,7 @@ const Header: React.FC = () => {
 
 // tools header
 const ToolsHeader: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -79,13 +82,13 @@ const ToolsHeader: React.FC = () => {
       </HeaderLeftDiv>
       <HeaderMidDiv>
         <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-          Validator / Nominator status
+          {t('tools.title.valnom')}
         </NavLink>
         <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-          1KV Monitor
+          {t('tools.title.oneKvMonitor')}
         </NavLink>
         <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-          Staking Rewards
+          {t('tools.title.stakingRewards')}
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
@@ -96,6 +99,7 @@ const ToolsHeader: React.FC = () => {
 };
 
 const Footer: React.FC = () => {
+  const { t } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
   
@@ -106,7 +110,7 @@ const Footer: React.FC = () => {
       let message = '';
       console.log(result);
       if (result === 0) {
-        message = `Thank you for subscribing our newsletter`;
+        message = t('app.newsletter.subscribe.successful');
         toast.info(`${message}`, {
           position: 'top-right',
           autoClose: 5000,
@@ -117,7 +121,7 @@ const Footer: React.FC = () => {
           progress: undefined,
         });
       } else if (result === -2000) {
-        message = `You have already subsribed our newsletter`;
+        message = t('app.newsletter.subscribe.duplicated');
         toast.error(`${message}`, {
           position: 'top-right',
           autoClose: 5000,
@@ -128,7 +132,7 @@ const Footer: React.FC = () => {
           progress: undefined,
         });
       } else if (result === -1002) {
-        message = `Invalid email format`;
+        message = t('app.newsletter.subscribe.incorrectFormat');
         toast.error(`${message}`, {
           position: 'top-right',
           autoClose: 5000,
@@ -140,7 +144,7 @@ const Footer: React.FC = () => {
         });
       }
     }).catch((err) => {
-      toast.error(`Failed to subscribe our newsletter`, {
+      toast.error(t('app.newsletter.subscribe.failed'), {
         position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -155,44 +159,44 @@ const Footer: React.FC = () => {
     <>
       <TableDiv>
         <ColumnDiv>
-          <ThDiv>General</ThDiv>
+          <ThDiv>{t('app.footer.title.general')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/about`}>About</LinkA>
+            <LinkA href={`${staking_url}/about`}>{t('app.footer.title.about')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/contact`}>Contact</LinkA>
+            <LinkA href={`${staking_url}/contact`}>{t('app.footer.title.contact')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/ourValidators`}>Our Validators</LinkA>
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <ThDiv>Technology</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={staking_url}>Staking Service</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={tools_url}>Tools for Validators</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">Telegram Bots</LinkA>
+            <LinkA href={`${staking_url}/ourValidators`}>{t('app.footer.title.ourValidators')}</LinkA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
-          <ThDiv>Community</ThDiv>
+          <ThDiv>{t('app.footer.title.technology')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Blog</LinkA>
+            <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Medium</LinkA>
+            <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
+          </TdDiv>
+          <TdDiv>
+            <DotDiv />
+            <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
+          </TdDiv>
+        </ColumnDiv>
+        <ColumnDiv>
+          <ThDiv>{t('app.footer.title.community')}</ThDiv>
+          <TdDiv>
+            <DotDiv />
+            <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
+          </TdDiv>
+          <TdDiv>
+            <DotDiv />
+            <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -213,10 +217,10 @@ const Footer: React.FC = () => {
               </SocialMediaWrapper>
             </a>
           </TdDiv>
-          <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
+          <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
           <TdDiv justify_content="center">
-            <Input placeholder="Enter your email address" value={email} onChange={(e) => {setEmail(e.target.value)}}></Input>
-            <SubmitButton onClick={onSubscribeNewsletter}>Subscribe</SubmitButton>
+            <Input placeholder={t('app.footer.title.enterEmail')} value={email} onChange={(e) => {setEmail(e.target.value)}}></Input>
+            <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
           </TdDiv>
         </ColumnDiv>
       </TableDiv>
@@ -227,7 +231,7 @@ const Footer: React.FC = () => {
           <Helmet>
           <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>
-          <a href="https://www.iubenda.com/privacy-policy/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe " title="Privacy Policy ">Privacy Policy</a>
+          <a href="https://www.iubenda.com/privacy-policy/37411829" style={{textDecoration: 'none', color: 'white'}} className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe " title={t('app.footer.title.privacyPolicy')}>{t('app.footer.title.privacyPolicy')}</a>
           <Helmet>
             <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
           </Helmet>

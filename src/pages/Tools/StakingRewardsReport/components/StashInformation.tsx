@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Account from "../../../../components/Account";
 
+import { useTranslation } from 'react-i18next';
+
 const StashInformation = ({ stashId, stashData, currency }) => {
+  const { t } = useTranslation();
   const [totalRewards, setTotalRewards] = useState(0);
   const [totalInFiat, setTotalInFiat] = useState(0);
   const [firstRewardDate, setFirstRewardDate] = useState('N/A');
@@ -29,11 +32,11 @@ const StashInformation = ({ stashId, stashData, currency }) => {
   }, [stashData, stashData.eraRewards]);
   return (
     <div>
-      <Title>Stash Information</Title>
+      <Title>{t('tools.stakingRewards.stashInformation')}</Title>
       <HorizontalBar />
       <InformationItem>
         <InformationTitle>
-          Stash ID
+          {t('tools.stakingRewards.stashId')}
         </InformationTitle>
         <Account
           address={stashId}
@@ -43,14 +46,14 @@ const StashInformation = ({ stashId, stashData, currency }) => {
       <HorizontalBar />
       <InformationItem>
         <InformationTitle>
-          Total Rewards
+          {t('tools.stakingRewards.totalRewards')}
         </InformationTitle>
         <InformationContent>
           <div style={{margin: '0 16px 0 0'}}>
             <span style={{color: '#23beb9'}}>{totalRewards.toFixed(4)} KSM</span>&nbsp; / &nbsp;{totalInFiat.toFixed(2)} {currency}
           </div>
           <div>
-            (From &nbsp;<span style={{color: '#23beb9'}}>{firstRewardDate}</span>&nbsp; to &nbsp;<span style={{color: '#23beb9'}}>{lastRewardDate}</span>)
+            ({t('tools.stakingRewards.from')} &nbsp;<span style={{color: '#23beb9'}}>{firstRewardDate}</span>&nbsp; {t('tools.stakingRewards.to')} &nbsp;<span style={{color: '#23beb9'}}>{lastRewardDate}</span>)
           </div>
           </InformationContent>
       </InformationItem>

@@ -11,6 +11,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { lsSetFavorite, lsUnsetFavorite } from '../../utils/localStorage';
 import { IStatusChange } from '../../apis/Validator';
 
+import { useTranslation } from 'react-i18next';
+
 export interface IValidNominator {
   address: string;
   name: string;
@@ -38,6 +40,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
   favorite,
   onClick,
 }) => {
+  const { t } = useTranslation();
   const Favorite = ({ address, _favorite }) => {
     const [favorite, setFavoriteIcon] = useState(_favorite);
     const setFavorite = useCallback(() => {
@@ -56,7 +59,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
             backgroundColor="#18232f"
             textColor="#21aca8"
           />
-          <EnhanceValue data-for="unfavorite" data-tip="toggle to un-favorite this validator">
+          <EnhanceValue data-for="unfavorite" data-tip={t('tools.valnom.unfavorite')}>
             <FavoriteIcon
               onClick={() => {
                 unsetFavorite();
@@ -76,7 +79,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
             backgroundColor="#18232f"
             textColor="#21aca8"
           />
-          <EnhanceValue data-for="favorite" data-tip="toggle to favorite this validator">
+          <EnhanceValue data-for="favorite" data-tip={t('tools.valnom.unfavorite')}>
             <FavoriteUnselectedIcon
               onClick={() => {
                 setFavorite();
@@ -100,7 +103,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
             backgroundColor="#18232f"
             textColor="#21aca8"
           />
-          <EnhanceValue data-for="favorite" data-tip="too many unclaimed payouts">
+          <EnhanceValue data-for="favorite" data-tip={t('tools.valnom.tips.tooManyUnclaimedPayouts')}>
             <UnclaimedPayoutsIcon />
           </EnhanceValue>
           
@@ -166,25 +169,25 @@ const ValidNominator: React.FC<IValidNominator> = ({
         </div>
         <Name>{shortenName}</Name>
         <ValuePart>
-          <EnhanceValue data-for="activeAmount" data-tip="active amount">
+          <EnhanceValue data-for="activeAmount" data-tip={t('tools.valnom.tips.activeAmounts')}>
             {activeAmount}
           </EnhanceValue>{' '}
           /{' '}
-          <span data-for="totalAmount" data-tip="total amount">
+          <span data-for="totalAmount" data-tip={t('tools.valnom.tips.totalAmounts')}>
             {totalAmount}
           </span>
-          <div data-for="apy" data-tip="Annual Percentage Yield">
-            Average APY：
+          <div data-for="apy" data-tip={t('tools.valnom.tips.apy')}>
+          {t('tools.valnom.tips.averageApy')}
             <EnhanceValue>{apy}%</EnhanceValue>
           </div>
         </ValuePart>
       </MainInfo>
       <SubInfo>
         <ValuePart>
-          Nominator Count：<EnhanceValue>{count}</EnhanceValue>
+        {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
         <ValuePart>
-          Commission：<EnhanceValue>{commission}%</EnhanceValue>
+        {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
     </ValidNominatorLayout>

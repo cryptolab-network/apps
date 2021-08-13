@@ -26,15 +26,18 @@ import { toast } from 'react-toastify';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
 import Pagination from '../../../../components/Pagination';
 
+import { useTranslation } from 'react-i18next';
+
 const ValNomHeader = () => {
+  const { t } = useTranslation();
   return (
     <HeaderLayout>
       <HeaderLeft>
         <PeopleIcon />
         <HeaderTitle>
-          <Title>Validator / Nominator Status</Title>
+          <Title>{t('tools.valnom.title')}</Title>
           <Subtitle>
-            See filtered validator status or enter a nominator stash ID to see its nominated validators
+            {t('tools.valnom.subtitle')}
           </Subtitle>
         </HeaderTitle>
       </HeaderLeft>
@@ -48,6 +51,7 @@ interface iOption {
 }
 
 const ValidatorGrid = ({ filters, validators }) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const { network: networkName } = useContext(DataContext);
   const chain = NetworkConfig[networkName].token;
@@ -202,6 +206,7 @@ const ValidatorGrid = ({ filters, validators }) => {
 };
 
 const ValNomContent = () => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState({
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
@@ -259,7 +264,7 @@ const ValNomContent = () => {
     return (
       <FilterOptionLayout>
         <AdvancedOption>
-          <span style={{ color: '#fff' }}>Sorting</span>
+          <span style={{ color: '#fff' }}>{t('tools.valnom.filters.sorting')}</span>
           <div style={{ marginLeft: 16, width: '120px' }}>
             <DropdownCommon
               style={{ flex: 1, width: '90%' }}
@@ -272,7 +277,7 @@ const ValNomContent = () => {
         </AdvancedOption>
       </FilterOptionLayout>
     );
-  }, [filters.strategy, options]);
+  }, [filters.strategy, options, t]);
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
     toggleFilters(true);
@@ -294,7 +299,7 @@ const ValNomContent = () => {
             <IconInput
               Icon={Search}
               iconSize="16px"
-              placeholder="Polkadot/Kusama StashId"
+              placeholder="Polkadot/Kusama Stash ID"
               inputLength={256}
               value={filters.stashId}
               onChange={handleFilterChange('stashId')}

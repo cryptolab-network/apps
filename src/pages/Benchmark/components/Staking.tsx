@@ -26,7 +26,7 @@ import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues } from '../../../utils/helper';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { api, ApiContext } from '../../../components/Api';
+import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
 import { NetworkCodeName, NetworkConfig } from '../../../utils/constants/Network';

@@ -1,15 +1,18 @@
 import styled from 'styled-components';
 import { ReactComponent as MedalIcon } from '../../../../assets/images/medal.svg';
 
+import { useTranslation } from 'react-i18next';
+
 const SRRHeader = () => {
+  const { t } = useTranslation();
   return (
     <HeaderLayout>
       <HeaderLeft>
         <MedalIcon />
         <HeaderTitle>
-          <Title>Staking Rewards</Title>
+          <Title>{t('tools.stakingRewards.title')}</Title>
           <Subtitle>
-            See staking rewards of your stash
+            {t('tools.stakingRewards.subtitle')}
           </Subtitle>
         </HeaderTitle>
       </HeaderLeft>
