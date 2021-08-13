@@ -50,12 +50,22 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getSortByToggleProps()}>
-                    {column.render('Header')}
-                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                  </th>
-                ))}
+                {headerGroup.headers.map((column) => {
+                  if ((typeof column.Header) === 'string') {
+                    return (
+                      <th {...column.getSortByToggleProps()}>
+                        {column.render('Header')}
+                        <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      </th>
+                    )
+                  } else {
+                    return (
+                      <th>
+                        {column.render('Header')}
+                      </th>
+                    )
+                  }
+                })}
               </tr>
             ))}
           </thead>
