@@ -453,7 +453,7 @@ const HeaderDiv = styled.div`
 const RouteContent = styled.div`
   display: flex;
   // height: 100%;
-  // min-height: calc(100vh - 93px);
+  min-height: calc(100vh - 344px - 64px - 96px);
   overflow-y: visible;
 `;
 
@@ -493,7 +493,7 @@ const TableDiv = styled.div`
   display: flex;
   flex-flow: row;
   justify-content: space-between;
-  height: 14em;
+  height: 224px;
   margin: 80px 0 0 0;
   padding: 20px 15% 20px 15%;
 `;

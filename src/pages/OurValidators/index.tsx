@@ -3,59 +3,48 @@ import { ReactComponent as PeopleIcon } from '../../assets/images/people.svg';
 import Account from '../../components/Account';
 import { CryptolabDOTValidators, CryptolabKSMValidators } from '../../utils/constants/Validator';
 
+// TODO: this component might be deprecated
 const OurValidatorsContent = () => {
   return (
     <ContentLayout>
       <ItemLayout>
-        <ItemTitle> Polkadot
-        </ItemTitle>
+        <ItemTitle> Polkadot</ItemTitle>
         <Item>
-          <Account 
-            address={CryptolabDOTValidators.CRYPTOLAB_01}
-            display={'CryptoLab 01'}
-          />
+          <Account address={CryptolabDOTValidators.CRYPTOLAB_01} display={'CryptoLab 01'} />
         </Item>
         <Item>
-          <Account 
-            address={CryptolabDOTValidators.CRYPTOLAB_NETWORK}
-            display={'CryptoLab.Network'}
-          />
+          <Account address={CryptolabDOTValidators.CRYPTOLAB_NETWORK} display={'CryptoLab.Network'} />
         </Item>
-        </ItemLayout>
-        <VerticalSplitter />
-        <ItemLayout>
-        <ItemTitle> Kusama
-        </ItemTitle>
+      </ItemLayout>
+      <VerticalSplitter />
+      <ItemLayout>
+        <ItemTitle> Kusama</ItemTitle>
         <Item>
-          <Account 
-            address={CryptolabKSMValidators.CRYPTOLAB_NETWORK}
-            display={'CRYPTOLAB.NETWORK'}
-          />
+          <Account address={CryptolabKSMValidators.CRYPTOLAB_NETWORK} display={'CRYPTOLAB.NETWORK'} />
         </Item>
         <Item>
-          <Account 
+          <Account
             address={CryptolabKSMValidators.CRYPTOLAB_NETWORK_TANIS}
             display={'CRYPTOLAB.NETWORK/TANIS'}
           />
         </Item>
-        </ItemLayout>
-      </ContentLayout>
+      </ItemLayout>
+    </ContentLayout>
   );
 };
 
 const OurValidators = () => {
   return (
     <OurValidatorsLayout>
-      <div style={{margin: '40px 0 0 0'}} />
+      <div style={{ margin: '40px 0 0 0' }} />
       <PeopleIcon />
-      <div style={{margin: '9px 0 0 0'}} />
-      <Title>
-        Our Validators
-      </Title>
-      <div style={{margin: '81px 0 0 0'}} />
+      <div style={{ margin: '9px 0 0 0' }} />
+      <Title>Our Validators</Title>
+      <div style={{ margin: '81px 0 0 0' }} />
       <OurValidatorsContent />
       <Description>
-        Toggle <span style={{color: '#23beb9'}}>Support Us</span> on <span style={{color: '#23beb9'}}>Portfolio Benchmark</span>.
+        Toggle <span style={{ color: '#23beb9' }}>Support Us</span> on{' '}
+        <span style={{ color: '#23beb9' }}>Portfolio Benchmark</span>.
       </Description>
     </OurValidatorsLayout>
   );
