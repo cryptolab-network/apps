@@ -36,7 +36,7 @@ import { apiSubscribeNewsletter } from './apis/Validator';
 import Dialog from './components/Dialog';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
 import Identicon from '@polkadot/react-identicon';
-import { IconTheme, IdentityProps } from '@polkadot/react-identicon/types';
+import { IconTheme } from '@polkadot/react-identicon/types';
 
 // header
 const Header: React.FC = () => {
@@ -358,73 +358,68 @@ const AppLayout = () => {
     );
   }, []);
 
-  const mainRender = useMemo(() => {
+  const headerDOM = useMemo(() => {
+    if (isToolsSite) {
+      return <ToolsHeader />;
+    }
+    return <Header />;
+  }, [isToolsSite]);
+
+  const switchtDOM = useMemo(() => {
     if (isToolsSite) {
       return (
-        <>
-          <ToolsHeader />
-          <RouteContent>
-            <ToastContainer
-              position="top-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-            <Switch>
-              <Route exact path="/" component={ToolsPortal} />
-              <Route path="/valnom" component={ValNom} />
-              <Route path="/validator/:id/:chain" component={ValidatorStatus} />
-              <Route path="/onekv" component={OneKV} />
-              <Route path="/rewards" component={StakingRewardsReport} />
-              <Route path="/contact" component={Contact} />
-              {/* <Route path="/ourValidators" component={OurValidators} /> */}
-              <Route path="/about" component={About} />
-            </Switch>
-          </RouteContent>
-          <Footer handleDialogOpen={handleDialogOpen} />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Header />
-          <RouteContent>
-            <Dialog
-              image={<PeopleIcon />}
-              title={'Our Validators'}
-              isOpen={visibleOurValidatorsDialog}
-              handleDialogClose={handleDialogClose}
-            >
-              {ourValidatorsDOM}
-            </Dialog>
-            <ToastContainer
-              position="top-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-            <Switch>
-              <Route exact path="/" component={Portal} />
-              <Route path="/guide" component={Guide} />
-              <Route path="/benchmark" component={Benchmark} />
-              <Route path="/management" component={Management} />
-            </Switch>
-          </RouteContent>
-          <Footer handleDialogOpen={handleDialogOpen} />
-        </>
+        <Switch>
+          <Route exact path="/" component={ToolsPortal} />
+          <Route path="/valnom" component={ValNom} />
+          <Route path="/validator/:id/:chain" component={ValidatorStatus} />
+          <Route path="/onekv" component={OneKV} />
+          <Route path="/rewards" component={StakingRewardsReport} />
+          <Route path="/contact" component={Contact} />
+          {/* <Route path="/ourValidators" component={OurValidators} /> */}
+          <Route path="/about" component={About} />
+        </Switch>
       );
     }
-  }, [isToolsSite, visibleOurValidatorsDialog, ourValidatorsDOM]);
+    return (
+      <Switch>
+        <Route exact path="/" component={Portal} />
+        <Route path="/guide" component={Guide} />
+        <Route path="/benchmark" component={Benchmark} />
+        <Route path="/management" component={Management} />
+      </Switch>
+    );
+  }, [isToolsSite]);
+
+  const mainRender = useMemo(() => {
+    return (
+      <>
+        {headerDOM}
+        <RouteContent>
+          <Dialog
+            image={<PeopleIcon />}
+            title={'Our Validators'}
+            isOpen={visibleOurValidatorsDialog}
+            handleDialogClose={handleDialogClose}
+          >
+            {ourValidatorsDOM}
+          </Dialog>
+          <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+          {switchtDOM}
+        </RouteContent>
+        <Footer handleDialogOpen={handleDialogOpen} />
+      </>
+    );
+  }, [headerDOM, ourValidatorsDOM, switchtDOM, visibleOurValidatorsDialog]);
 
   return (
     <>
@@ -620,10 +615,7 @@ const CopyRightTitleDiv = styled.div`
   color: white;
   text-align: center;
 `;
-const TextLinkA = styled.a`
-  text-decoration: none;
-  color: white;
-`;
+
 const SocialMediaWrapper = styled.div`
   margin-right: 15px;
 `;
