@@ -120,23 +120,23 @@ const Api: React.FC = (props) => {
     (account: IAccount) => {
       if (apiState === ApiState.READY) {
         queryBalances(accounts, api)
-        .then((accountsWithBalances) => {
-          setAccounts(accountsWithBalances);
-          if (accountsWithBalances.length > 0) {
-            const target = accountsWithBalances.find((a) => a.address === account.address) ;
-            if (target) {
-              setSelectedAccount(target);
-            } else {
-              setSelectedAccount(accountsWithBalances[0]);
+          .then((accountsWithBalances) => {
+            setAccounts(accountsWithBalances);
+            if (accountsWithBalances.length > 0) {
+              const target = accountsWithBalances.find((a) => a.address === account.address);
+              if (target) {
+                setSelectedAccount(target);
+              } else {
+                setSelectedAccount(accountsWithBalances[0]);
+              }
             }
-          }
-          setIsLoading(false);
-        })
-        .catch(console.error);
+            setIsLoading(false);
+          })
+          .catch(console.error);
       }
     },
-    [accounts, network, apiState]
-  )
+    [accounts, apiState]
+  );
 
   const value = useMemo<ApiProps>(
     () => ({
@@ -164,7 +164,7 @@ const Api: React.FC = (props) => {
       selectedAccount,
       selectAccount,
       isLoading,
-      refreshAccountData
+      refreshAccountData,
     ]
   );
 
@@ -212,9 +212,11 @@ const Api: React.FC = (props) => {
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
       console.log(`api connected to ${endpoint}`);
-      api.isReady.then(() => {
-        setApiState(ApiState.READY);
-      }).catch(console.error);
+      api.isReady
+        .then(() => {
+          setApiState(ApiState.READY);
+        })
+        .catch(console.error);
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);

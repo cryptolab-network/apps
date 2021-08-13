@@ -1,4 +1,4 @@
-import { NetworkNameLowerCase, NetworkCodeName, NetworkConfig } from './Network';
+import { NetworkConfig } from './Network';
 
 /*
     while 'support us' switch is on, validators below would be add into the candidate list
@@ -23,7 +23,7 @@ export enum CryptolabDOTValidators {
 export enum CandidateNumber {
   KSM = 24,
   DOT = 16,
-  WND = 16
+  WND = 16,
 }
 
 export const getCandidateNumber = (networkName: string) => {

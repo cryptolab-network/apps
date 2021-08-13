@@ -55,7 +55,7 @@ export const formatToTableData = (data: IValidator[]): ITableData[] => {
         parent: validator.identity.parent,
         isVerified: validator.identity.isVerified ? true : false,
       },
-      blockNomination: validator.blockNomination
+      blockNomination: validator.blockNomination,
     };
   });
 };
@@ -179,7 +179,11 @@ export const highApySelect = (tableData: ITableData[], selectableCount: number):
   return { tableData, selectableCount };
 };
 
-export const prevValidatorsSelect = (tableData: ITableData[], selectableCount: number, prevValidators: string[]): ISelectResult => {
+export const prevValidatorsSelect = (
+  tableData: ITableData[],
+  selectableCount: number,
+  prevValidators: string[]
+): ISelectResult => {
   let selectableData = tableData.filter((data) => !data.select);
   for (let idx = 0; idx < selectableData.length && selectableCount > 0; idx++) {
     const isPrevValidator = prevValidators.filter((v) => v === selectableData[idx].account);
@@ -192,7 +196,7 @@ export const prevValidatorsSelect = (tableData: ITableData[], selectableCount: n
     selectableCount--;
   }
   return { tableData, selectableCount };
-}
+};
 
 export const apyCalculation = (tableData: ITableData[], selectableCount?: number): IStakingInfo => {
   //
@@ -264,8 +268,8 @@ export const resetSelected = (tableData: ITableData[]): ITableData[] => {
 };
 
 export const filterBlockNomination = (tableData: ITableData[]): ITableData[] => {
-  return tableData.filter(data => !data.blockNomination);
-}
+  return tableData.filter((data) => !data.blockNomination);
+};
 
 // format origin data from api, to IStakingInfo format
 export const formatToStakingInfo = (data: IValidator[], networkName: string): IStakingInfo => {
@@ -446,7 +450,7 @@ export const oneKvStrategy = (
   const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
   tempTableData = prevValidatorsSelectResult.tableData;
   tempSelectableCount = prevValidatorsSelectResult.selectableCount;
-  
+
   // random select the rest available count
   const randomSelectResult = randomSelect(tempTableData, tempSelectableCount);
   tempTableData = randomSelectResult.tableData;
