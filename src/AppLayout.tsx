@@ -10,6 +10,8 @@ import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg'
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
+import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
+import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -28,9 +30,6 @@ import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
-import Contact from './pages/Contact';
-// import OurValidators from './pages/OurValidators';
-import About from './pages/About';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
 import Dialog from './components/Dialog';
@@ -104,7 +103,7 @@ const ToolsHeader: React.FC = () => {
 };
 
 interface IFooter {
-  handleDialogOpen: React.MouseEventHandler<HTMLDivElement>;
+  handleDialogOpen: Function;
 }
 
 interface IValidator {
@@ -179,15 +178,33 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
           <ThDiv>{t('app.footer.title.general')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/about`}>{t('app.footer.title.about')}</LinkA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('aboutus');
+              }}
+            >
+              {t('app.footer.title.about')}
+            </DialogA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={`${staking_url}/contact`}>{t('app.footer.title.contact')}</LinkA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('contactus');
+              }}
+            >
+              {t('app.footer.title.contact')}
+            </DialogA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <DialogA onClick={handleDialogOpen}>{t('app.footer.title.ourValidators')}</DialogA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('validators');
+              }}
+            >
+              {t('app.footer.title.ourValidators')}
+            </DialogA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -281,17 +298,41 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
+  const { t } = useTranslation();
   const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
 
   const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
+  const [visibleContactUsDialog, setVisibleContactUsDialog] = useState(false);
+  const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
 
-  const handleDialogClose = () => {
-    setVisibleOurValidatorsDialog(false);
+  const handleDialogClose = (name) => {
+    console.log('close name: ', name);
+    switch (name) {
+      case 'validators':
+        setVisibleOurValidatorsDialog(false);
+        break;
+      case 'contactus':
+        setVisibleContactUsDialog(false);
+        break;
+      case 'aboutus':
+        setVisibleAboutUsDialog(false);
+        break;
+    }
   };
 
-  const handleDialogOpen = () => {
-    console.log('modal open');
-    setVisibleOurValidatorsDialog(true);
+  const handleDialogOpen = (name) => {
+    console.log('open name: ', name);
+    switch (name) {
+      case 'validators':
+        setVisibleOurValidatorsDialog(true);
+        break;
+      case 'contactus':
+        setVisibleContactUsDialog(true);
+        break;
+      case 'aboutus':
+        setVisibleAboutUsDialog(true);
+        break;
+    }
   };
 
   const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
@@ -321,16 +362,16 @@ const AppLayout = () => {
 
     return (
       <>
-        <ValidatorMainContainer>
-          <ValidatorListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+        <DialogMainContainer>
+          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
             <div style={{ marginBottom: 12 }}>Polkadot</div>
             {polkadotValidator}
-          </ValidatorListContainer>
-          <ValidatorListContainer>
+          </DialogListContainer>
+          <DialogListContainer>
             <div style={{ marginBottom: 12 }}>Kusama</div>
             {kusamaValidator}
-          </ValidatorListContainer>
-        </ValidatorMainContainer>
+          </DialogListContainer>
+        </DialogMainContainer>
         <div
           style={{
             width: '100%',
@@ -361,6 +402,56 @@ const AppLayout = () => {
     );
   }, []);
 
+  const contactUsDOM = useMemo(() => {
+    return (
+      <>
+        <DialogMainContainer>
+          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <div style={{ marginBottom: 12 }}>Riot</div>
+            <ul style={{ paddingLeft: 20 }}>
+              <LiStyle>tanis_37:matrix.org</LiStyle>
+              <LiStyle>yaohsin:matrix.org</LiStyle>
+            </ul>
+          </DialogListContainer>
+          <DialogListContainer>
+            <div style={{ marginBottom: 12 }}>Github</div>
+            <ul style={{ paddingLeft: 20 }}>
+              <LiStyle>Https://github.com/crytolab-network</LiStyle>
+            </ul>
+          </DialogListContainer>
+        </DialogMainContainer>
+      </>
+    );
+  }, []);
+
+  const aboutUsDOM = useMemo(() => {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          boxSizing: 'border-box',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+        }}
+      >
+        <AboutUsFontStyle>We are CryptoLab, we run Polkadot and Kusama validators.</AboutUsFontStyle>
+        <div style={{ marginTop: 34, textAlign: 'left' }}>
+          <AboutUsFontStyle>Our missions are,</AboutUsFontStyle>
+          <ul style={{ paddingLeft: 20 }}>
+            <AboutUsGoalFontStyle>
+              provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.
+            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>
+              provide data collection and analysis services for Polkadot and Kusama node operators.
+            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>provide stable validating service.</AboutUsGoalFontStyle>
+          </ul>
+        </div>
+      </div>
+    );
+  }, []);
+
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
       return <ToolsHeader />;
@@ -377,9 +468,9 @@ const AppLayout = () => {
           <Route path="/validator/:id/:chain" component={ValidatorStatus} />
           <Route path="/onekv" component={OneKV} />
           <Route path="/rewards" component={StakingRewardsReport} />
-          <Route path="/contact" component={Contact} />
+          {/* <Route path="/contact" component={Contact} /> */}
           {/* <Route path="/ourValidators" component={OurValidators} /> */}
-          <Route path="/about" component={About} />
+          {/* <Route path="/about" component={About} /> */}
         </Switch>
       );
     }
@@ -400,11 +491,33 @@ const AppLayout = () => {
         <RouteContent>
           <Dialog
             image={<PeopleIcon />}
-            title={'Our Validators'}
+            title={t('app.footer.title.ourValidators')}
             isOpen={visibleOurValidatorsDialog}
-            handleDialogClose={handleDialogClose}
+            handleDialogClose={() => {
+              handleDialogClose('validators');
+            }}
           >
             {ourValidatorsDOM}
+          </Dialog>
+          <Dialog
+            image={<ContactIcon />}
+            title={t('app.footer.title.contact')}
+            isOpen={visibleContactUsDialog}
+            handleDialogClose={() => {
+              handleDialogClose('contactus');
+            }}
+          >
+            {contactUsDOM}
+          </Dialog>
+          <Dialog
+            image={<AboutIcon />}
+            title={t('app.footer.title.about')}
+            isOpen={visibleAboutUsDialog}
+            handleDialogClose={() => {
+              handleDialogClose('aboutus');
+            }}
+          >
+            {aboutUsDOM}
           </Dialog>
           <ToastContainer
             position="top-center"
@@ -419,10 +532,24 @@ const AppLayout = () => {
           />
           {switchtDOM}
         </RouteContent>
-        <Footer handleDialogOpen={handleDialogOpen} />
+        <Footer
+          handleDialogOpen={(name) => {
+            handleDialogOpen(name);
+          }}
+        />
       </>
     );
-  }, [headerDOM, ourValidatorsDOM, switchtDOM, visibleOurValidatorsDialog]);
+  }, [
+    aboutUsDOM,
+    contactUsDOM,
+    headerDOM,
+    ourValidatorsDOM,
+    switchtDOM,
+    t,
+    visibleAboutUsDialog,
+    visibleContactUsDialog,
+    visibleOurValidatorsDialog,
+  ]);
 
   return (
     <>
@@ -632,7 +759,7 @@ const SocialMediaWrapper = styled.div`
   margin-right: 15px;
 `;
 
-const ValidatorMainContainer = styled.div`
+const DialogMainContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -643,7 +770,7 @@ const ValidatorMainContainer = styled.div`
   color: white;
 `;
 
-const ValidatorListContainer = styled.span`
+const DialogListContainer = styled.span`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -662,4 +789,32 @@ const Validator = styled.div`
 
   text-align: left;
   color: #23beb9;
+`;
+
+const LiStyle = styled.li`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #23beb9;
+  margin-top: 3px;
+  margin-bottom: 3px;
+`;
+
+const AboutUsFontStyle = styled.div`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: white;
+`;
+
+const AboutUsGoalFontStyle = styled.li`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #1faaa6;
+  margin-top: 6px;
+  margin-bottom: 6px;
 `;

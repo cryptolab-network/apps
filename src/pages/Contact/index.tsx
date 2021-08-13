@@ -1,17 +1,13 @@
 import styled from 'styled-components';
 import { ReactComponent as ContactIcon } from '../../assets/images/contact-logo.svg';
-
+// TODO: deprecated
 const ContactContent = () => {
   return (
     <ContentLayout>
       <ItemLayout>
         <ItemTitle> Riot </ItemTitle>
-        <Item>
-          tanis_37:matrix.org
-        </Item>
-        <Item>
-          yaohsin:matrix.org
-        </Item>
+        <Item>tanis_37:matrix.org</Item>
+        <Item>yaohsin:matrix.org</Item>
       </ItemLayout>
       <VerticalSplitter />
       <ItemLayout>
@@ -29,13 +25,11 @@ const ContactContent = () => {
 const Contact = () => {
   return (
     <ContactLayout>
-      <div style={{margin: '40px 0 0 0'}} />
+      <div style={{ margin: '40px 0 0 0' }} />
       <ContactIcon />
-      <div style={{margin: '9px 0 0 0'}} />
-      <Title>
-        Contact
-      </Title>
-      <div style={{margin: '81px 0 0 0'}} />
+      <div style={{ margin: '9px 0 0 0' }} />
+      <Title>Contact</Title>
+      <div style={{ margin: '81px 0 0 0' }} />
       <ContactContent />
     </ContactLayout>
   );

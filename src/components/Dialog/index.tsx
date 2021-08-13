@@ -27,11 +27,10 @@ const Dialog: React.FC<IDialogWithImage> = ({ image, title, isOpen, handleDialog
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      minWidth: 652,
-      minHeight: 493,
+      minWidth: 'calc(100vw - 652)>0' ? '652' : '90vw',
+      minHeight: 'calc(100vh - 493)>0' ? '493' : '70vh',
       maxWidth: '90vw',
       maxHeight: '90vh',
-      OverflowX: 'scroll',
       OverflowY: 'scroll',
       border: 'solid 1px #23beb9',
       borderRadius: 8,
@@ -72,8 +71,6 @@ const DialogMainLayout = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-
-const ContentContainer = styled.div``;
 
 const ImageContainer = styled.div`
   display: flex;
