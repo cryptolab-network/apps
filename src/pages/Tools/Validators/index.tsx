@@ -13,12 +13,99 @@ import {
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
+import Chart from '../../../components/Chart';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit } from '../../../utils/string';
 import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
+
+// object key order is matter, first is the x axis key (ex. name),
+// than data1 (ex. uv), data2 (ex. pv), data3 (ex. amt),
+// you can change the order when using the 'config' props to control
+const mockData = [
+  {
+    name: 'Page A', // x axis key
+    uv: 4000, // y1 axis key (first data source, left default)
+    pv: 2400, // y2 axis key (second data source, right default)
+    amt: 2400, // y3 axis key (third data source, right default)
+  },
+  {
+    name: 'Page B',
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: 'Page C',
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: 'Page D',
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: 'Page E',
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: 'Page F',
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: 'Page G',
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+];
+
+const mockData1 = [
+  {
+    year: '2011 A', // x axis key
+    validate: 4000, // y1 axis key (first data source, left default)
+    nominate: 2400, // y2 axis key (second data source, right default)
+  },
+  {
+    year: '2011 B',
+    validate: 3000,
+    nominate: 1398,
+  },
+  {
+    year: '2011 C',
+    validate: 3101,
+    nominate: 9800,
+  },
+  {
+    year: '2011 D',
+    validate: 2780,
+    nominate: 3908,
+  },
+  {
+    year: '2011 E',
+    validate: 1890,
+    nominate: 4800,
+  },
+  {
+    year: '2011 F',
+    validate: 2390,
+    nominate: 3800,
+  },
+  {
+    year: '2011 G',
+    validate: 3490,
+    nominate: 4300,
+  },
+];
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -234,6 +321,24 @@ const ValidatorStatus = (props) => {
             <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
             <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
           </ValidatorInfoLayout>
+          <ChartsLayout>
+            <ChartContainer>
+              <Chart showTools data={mockData} leftLabel="Nominator Count" rightLabel="Commission ( % )" />
+            </ChartContainer>
+            <ChartContainer>
+              <Chart
+                data={mockData1}
+                leftLabel="APY"
+                config={{
+                  xKey: 'year',
+                  firstDataKey: 'validate',
+                  secondDataKey: 'nominate',
+                  firstDataYAxis: 'left',
+                  secondDataYAxis: 'left',
+                }}
+              />
+            </ChartContainer>
+          </ChartsLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">
             <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
             <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
@@ -372,6 +477,33 @@ type ContentColumnLayoutProps = {
   justifyContent?: string;
   width?: string;
 };
+
+const ChartsLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  // padding: 13px 18.7px 15.7px 16px;
+`;
+
+const ChartContainer = styled.div`
+  box-sizing: border-box;
+  flex: 1;
+  height: 500px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #2f3842;
+  padding: 13px 16px 13px 16px;
+  margin: 5px 4px 5px 4px;
+  border-radius: 6px;
+  color: white;
+  font-family: Montserrat;
+  font-size: 11px;
+  font-weight: 500;
+`;
+
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
   display: flex;
   flex-direction: column;
