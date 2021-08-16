@@ -53,6 +53,22 @@ i18n
                 enterEmail: 'Enter your email address',
                 general: 'General',
               }
+            },
+            portal: {
+              slogan: 'Built to maximize staking yield',
+              sloganDetail: 'CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more accessible, for technical and non-technical users alike.',
+              stakingGuide: {
+                title: 'Staking Guide',
+                detail: 'Learn how to use our services',
+              },
+              portfolioBenchmark: {
+                title: 'Portfolio Benchmark',
+                detail: 'Make assessment on validators, and select from them to stake.',
+              },
+              portfolioManagement: {
+                title: 'Portfolio Management',
+                detail: 'Manage after you stake. See rewards and validator status.',
+              },
             }
           },
           tools: {
@@ -183,6 +199,22 @@ i18n
                 privacyPolicy: '隱私權政策',
                 general: '一般',
               }
+            },
+            portal: {
+              slogan: '最大化您的質押收益',
+              sloganDetail: 'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
+              stakingGuide: {
+                title: '質押說明',
+                detail: '使用我們的服務的教學',
+              },
+              portfolioBenchmark: {
+                title: '質押評估',
+                detail: '依據不同的條件選擇適合的驗證節點 並完成質押',
+              },
+              portfolioManagement: {
+                title: '質押管理',
+                detail: '進行質押後的管理 查看驗證節點資訊以及您的質押收益',
+              },
             }
           },
           tools: {
