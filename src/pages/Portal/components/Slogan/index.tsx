@@ -1,16 +1,16 @@
 import styled from 'styled-components';
 import { ReactComponent as CryptoLabLogo } from '../../../../assets/images/main-vertical-color-logo.svg';
 import './index.css';
+import { useTranslation } from 'react-i18next';
 
 const Slogan = () => {
+  const { t } = useTranslation();
   return (
     <SloganLayout>
       <CryptoLabLogo id="slogan" />
-      <SloganTitle>Built to maximize staking yield</SloganTitle>
+      <SloganTitle>{t('app.portal.slogan')}</SloganTitle>
       <SloganDetail>
-        CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama
-        and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more
-        accessible, for technical and non-technical users alike.
+        {t('app.portal.sloganDetail')}
       </SloganDetail>
     </SloganLayout>
   );
