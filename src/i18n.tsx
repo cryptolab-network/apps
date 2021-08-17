@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { shortenStashId } from './utils/string';
 
 i18n
   // detect user language
@@ -135,6 +136,10 @@ i18n
               slashes: 'Slashes',
               activeNominators: 'Active Nominators',
               inactiveNominators: 'Inactive Nominators',
+              errors: {
+                incorrectValidator1: `The validator data of Stash`,
+                incorrectValidator2: `does not exist. Please make sure that you entered a correct validator ID`,
+              }
             },
             stakingRewards: {
               title: 'Staking Rewards',
@@ -251,6 +256,10 @@ i18n
               slashes: '懲罰次數',
               activeNominators: '此Era將Stake分配給您的提名人',
               inactiveNominators: '此Era未將Stake分配給您的提名人',
+              errors: {
+                incorrectValidator1: `不存在的驗證者`,
+                incorrectValidator2: `請確認您輸入正確的ID`,
+              }
             },
             oneKv: {
               title: '1KV 提名人資訊',

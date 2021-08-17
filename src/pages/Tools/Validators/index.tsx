@@ -16,7 +16,7 @@ import CardHeader from '../../../components/Card/CardHeader';
 import Chart from '../../../components/Chart';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
-import { balanceUnit } from '../../../utils/string';
+import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
@@ -208,7 +208,9 @@ const ValidatorStatus = (props) => {
           _setSlashes(slashes);
         }
       } catch (err) {
-        notifyError(err);
+        notifyError(t('tools.validators.errors.incorrectValidator1') +
+          `${shortenStashId(props.match.params.id)} ` +
+          t('tools.validators.errors.incorrectValidator2'));
       }
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
