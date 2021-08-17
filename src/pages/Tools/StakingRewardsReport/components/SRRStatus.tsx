@@ -26,6 +26,7 @@ import { DataContext } from "../../components/Data";
 import { toast } from "react-toastify";
 
 import { useTranslation } from 'react-i18next';
+import SRRChart from "./SRRChart";
 
 interface ISRRFilters {
   stashId: string;
@@ -194,28 +195,36 @@ const SRRContent = ({ filters }) => {
             currency={filters.currency}
           />
         </StashInformationLayout>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
-            <Toolbar>
-              <Tooltip content={DownloadOptionsLayout} visible={showDownload} tooltipToggle={handleDownloadToggle}>
-                <IconButton onClick={onShowDownload}
-                  Icon={() => <DownloadIcon />}
+        <ContentLayout>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
+              <div>
+                <Toolbar>
+                  <Tooltip content={DownloadOptionsLayout} visible={showDownload} tooltipToggle={handleDownloadToggle}>
+                    <IconButton onClick={onShowDownload}
+                      Icon={() => <DownloadIcon />}
+                    />
+                  </Tooltip>
+                  <div style={{margin: '0 0 0 16px'}}></div>
+                  <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
+                    <IconButton onClick={onShowFilters}
+                      Icon={() => <FiltersIcon />}
+                    />
+                  </Tooltip>
+                  <div style={{margin: '0 16px 0 0'}}></div>
+                </Toolbar>
+                <SRRTable
+                  currency={'USD'}
+                  stashData={stashData.eraRewards}
                 />
-              </Tooltip>
-              <div style={{margin: '0 0 0 16px'}}></div>
-              <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
-                <IconButton onClick={onShowFilters}
-                  Icon={() => <FiltersIcon />}
-                />
-              </Tooltip>
-              <div style={{margin: '0 16px 0 0'}}></div>
-            </Toolbar>
-            <SRRTable
-              currency={'USD'}
-              stashData={stashData.eraRewards}
-            />
+              </div>
+              <SRRChart 
+                stashData={stashData}
+                chain={chain}
+              />
+            </Grid>
           </Grid>
-        </Grid>
+        </ContentLayout>
         <ValidatorComponents 
           chain={chain}
           validators={validators}
@@ -359,3 +368,8 @@ const Toolbar = styled.div`
   justify-content: flex-end;
 `;
 
+const ContentLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+`;
