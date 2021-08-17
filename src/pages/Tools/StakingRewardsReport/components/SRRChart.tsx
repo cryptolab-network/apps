@@ -1,6 +1,5 @@
 import moment from "moment";
 import { useEffect, useState } from "react";
-import { IEraRewards } from "../../../../apis/StashRewards";
 import Chart from "../../../../components/Chart";
 
 // export interface IStashRewards {
