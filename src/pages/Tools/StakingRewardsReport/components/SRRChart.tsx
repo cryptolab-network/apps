@@ -32,6 +32,7 @@ const mergeEraRewards = (eraRewards) => {
 const SRRChart = ({ stashData, chain }) => {
   const [chartData, setChartData]  = useState<IChartData[]>([]);
   useEffect(() => {
+    stashData.eraRewards.reverse();
     const dayRewards: any[] = mergeEraRewards(stashData.eraRewards);
     let rewardDistribution: number[] = [];
     const units: string[] = [];

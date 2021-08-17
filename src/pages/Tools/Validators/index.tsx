@@ -21,92 +21,6 @@ import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
 
-// object key order is matter, first is the x axis key (ex. name),
-// than data1 (ex. uv), data2 (ex. pv), data3 (ex. amt),
-// you can change the order when using the 'config' props to control
-const mockData = [
-  {
-    name: 'Page A', // x axis key
-    uv: 4000, // y1 axis key (first data source, left default)
-    pv: 2400, // y2 axis key (second data source, right default)
-    amt: 2400, // y3 axis key (third data source, right default)
-  },
-  {
-    name: 'Page B',
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: 'Page C',
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: 'Page D',
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: 'Page E',
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: 'Page F',
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: 'Page G',
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-];
-
-const mockData1 = [
-  {
-    year: '2011 A', // x axis key
-    validate: 4000, // y1 axis key (first data source, left default)
-    nominate: 2400, // y2 axis key (second data source, right default)
-  },
-  {
-    year: '2011 B',
-    validate: 3000,
-    nominate: 1398,
-  },
-  {
-    year: '2011 C',
-    validate: 3101,
-    nominate: 9800,
-  },
-  {
-    year: '2011 D',
-    validate: 2780,
-    nominate: 3908,
-  },
-  {
-    year: '2011 E',
-    validate: 1890,
-    nominate: 4800,
-  },
-  {
-    year: '2011 F',
-    validate: 2390,
-    nominate: 3800,
-  },
-  {
-    year: '2011 G',
-    validate: 3490,
-    nominate: 4300,
-  },
-];
-
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
   info.forEach((eraInfo, i) => {
@@ -196,6 +110,8 @@ const ValidatorStatus = (props) => {
     info: [],
     averageApy: 0,
   });
+  const [chartData1, setChartData1] = useState<any[]>([]);
+  const [chartData2, setChartData2] = useState<any[]>([]);
   const chain = props.match.params.chain;
   const _formatBalance = useCallback(
     (value: any) => {
@@ -246,6 +162,21 @@ const ValidatorStatus = (props) => {
         // TODO: error handling not yet
         setValidator(validator);
         if (validator.info.length > 0) {
+          const chartData1 = validator.info.map((era) => {
+            return {
+              nominators: era.nominatorCount,
+              commission: era.commission,
+              era: era.era,
+            };
+          });
+          const chartData2 = validator.info.map((era) => {
+            return {
+              apy: era.apy.toFixed(4),
+              era: era.era,
+            };
+          });
+          setChartData1(chartData1);
+          setChartData2(chartData2);
           const lastEraInfo = findLastEra(validator.info);
           const _nominators = lastEraInfo.nominators;
           setSelfStake(_formatBalance(lastEraInfo.selfStake));
@@ -323,18 +254,24 @@ const ValidatorStatus = (props) => {
           </ValidatorInfoLayout>
           <ChartsLayout>
             <ChartContainer>
-              <Chart showTools data={mockData} leftLabel="Nominator Count" rightLabel="Commission ( % )" />
+              <Chart showTools data={chartData1} leftLabel="Nominator Count" rightLabel="Commission ( % )"
+                config={{
+                  xKey: 'era',
+                  firstDataKey: 'nominators',
+                  secondDataKey: 'commission',
+                  firstDataYAxis: 'left',
+                  secondDataYAxis: 'right',
+                }}
+              />
             </ChartContainer>
             <ChartContainer>
               <Chart
-                data={mockData1}
+                data={chartData2}
                 leftLabel="APY"
                 config={{
-                  xKey: 'year',
-                  firstDataKey: 'validate',
-                  secondDataKey: 'nominate',
+                  xKey: 'era',
+                  firstDataKey: 'apy',
                   firstDataYAxis: 'left',
-                  secondDataYAxis: 'left',
                 }}
               />
             </ChartContainer>
