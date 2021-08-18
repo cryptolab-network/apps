@@ -237,7 +237,7 @@ const ValidatorStatus = (props) => {
       }
     }
     getValidator();
-  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError]);
+  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError, t]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>
