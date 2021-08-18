@@ -23,17 +23,19 @@ import FilterOptions from './FilterOptions';
 import DownloadOptions from './DownloadOptions';
 import { balanceUnit, validateAddress } from '../../../../utils/string';
 import { DataContext } from '../../components/Data';
+import Dialog from '../../../../components/Dialog';
 import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
 import SRRChart from './SRRChart';
+import Button from '../../../../components/Button';
 
 interface ISRRFilters {
   stashId: string;
   startDate: string;
   endDate: string;
   currency: string;
-  startBalance: number
+  startBalance: number;
 }
 
 const ValidatorComponents = ({ chain, validators }) => {
@@ -87,7 +89,15 @@ enum State {
   ERROR,
 }
 
-const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyChange, onStartBalanceChange }) => {
+const SRRContent = ({
+  filters,
+  onStartDateChange,
+  onEndDateChange,
+  onCurrencyChange,
+  onStartBalanceChange,
+  onCancel,
+  onConfirm,
+}) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
@@ -97,6 +107,7 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
     stash: '',
     eraRewards: [],
   });
+  const [filterDialogVisible, setFilterDialogVisible] = useState(false);
   const notifyWarn = useCallback((msg: string) => {
     toast.warn(`${msg}`, {
       position: 'top-right',
@@ -125,7 +136,7 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
           startDate: '2020-01-01',
           endDate: moment().format('YYYY-MM-DD'),
           currency: filters.currency || 'USD',
-          startBalance: filters.startBalance || 0.1
+          startBalance: filters.startBalance || 0.1,
         },
       }).catch((err) => {
         setState(State.ERROR);
@@ -155,6 +166,7 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
     toggleFilters(true);
   }, []);
   const handleOptionToggle = useCallback((visible) => {
+    console.log('visible: ', visible);
     toggleFilters(visible);
   }, []);
 
@@ -165,6 +177,30 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
   const handleDownloadToggle = useCallback((visible) => {
     toggleDownload(visible);
   }, []);
+
+  const handleDialogOpen = useCallback((name) => {
+    switch (name) {
+      case 'filters':
+        setFilterDialogVisible(true);
+        break;
+    }
+  }, []);
+
+  const handleDialogClose = useCallback((name) => {
+    switch (name) {
+      case 'filters':
+        setFilterDialogVisible(false);
+        break;
+    }
+  }, []);
+
+  const handleFilterCancel = () => {
+    setFilterDialogVisible(false);
+  };
+
+  const handleFilterConfirm = () => {
+    setFilterDialogVisible(false);
+  };
 
   const FilterOptionsLayout = useMemo(() => {
     return (
@@ -177,12 +213,25 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
         onEndDateChange={onEndDateChange}
         onCurrencyChange={onCurrencyChange}
         onStartBalanceChange={onStartBalanceChange}
+        onCancel={handleFilterCancel}
+        onConfirm={handleFilterConfirm}
       />
     );
-  }, [filters.currency, filters.endDate, filters.startBalance, filters.startDate, onCurrencyChange, onEndDateChange, onStartBalanceChange, onStartDateChange]);
+  }, [
+    filters.currency,
+    filters.endDate,
+    filters.startBalance,
+    filters.startDate,
+    onCurrencyChange,
+    onEndDateChange,
+    onStartBalanceChange,
+    onStartDateChange,
+  ]);
+
   const DownloadOptionsLayout = useMemo(() => {
     return <DownloadOptions stashId={filters.stashId} />;
   }, [filters.stashId]);
+
   if (state === State.EMPTY) {
     return (
       <EmptyStashIconLayout>
@@ -193,36 +242,49 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
   } else if (state === State.LOADED || state === State.LOADING_VALIDATORS) {
     return (
       <StashRewardsLayout>
+        <Dialog
+          isOpen={filterDialogVisible}
+          handleDialogClose={() => {
+            handleDialogClose('filters');
+          }}
+          padding="16px"
+        >
+          {FilterOptionsLayout}
+        </Dialog>
         <StashInformationLayout>
           <StashInformation stashId={filters.stashId} stashData={stashData} currency={filters.currency} />
         </StashInformationLayout>
+
         <ContentLayout>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
-              <div>
-                <Toolbar>
-                  <Tooltip
-                    content={DownloadOptionsLayout}
-                    visible={showDownload}
-                    tooltipToggle={handleDownloadToggle}
-                  >
-                    <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
-                  </Tooltip>
-                  <div style={{ margin: '0 0 0 16px' }}></div>
-                  <Tooltip
-                    content={FilterOptionsLayout}
-                    visible={showFilters}
-                    tooltipToggle={handleOptionToggle}
-                  >
-                    <IconButton onClick={onShowFilters} Icon={() => <FiltersIcon />} />
-                  </Tooltip>
-                  <div style={{ margin: '0 16px 0 0' }}></div>
-                </Toolbar>
-                <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
+          <div style={{ flex: 1 }}>
+            <Toolbar>
+              <Tooltip
+                content={DownloadOptionsLayout}
+                visible={showDownload}
+                tooltipToggle={handleDownloadToggle}
+              >
+                <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
+              </Tooltip>
+              <div style={{ margin: '0 0 0 16px' }}></div>
+              <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
+                <IconButton onClick={onShowFilters} Icon={() => <FiltersIcon />} />
+              </Tooltip>
+
+              <div
+                onClick={() => {
+                  handleDialogOpen('filters');
+                }}
+              >
+                <FiltersIcon />
               </div>
-              <SRRChart stashData={stashData} chain={chain} />
-            </Grid>
-          </Grid>
+
+              <div style={{ margin: '0 16px 0 0' }}></div>
+            </Toolbar>
+            <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
+          </div>
+          <div style={{ flex: 1, width: '100%', height: 500 }}>
+            <SRRChart stashData={stashData} chain={chain} />
+          </div>
         </ContentLayout>
         <ValidatorComponents chain={chain} validators={validators} />
       </StashRewardsLayout>
@@ -269,6 +331,15 @@ const SRRLayout = () => {
         break;
     }
   };
+
+  const onCancel = () => {
+    console.log('cancel click');
+  };
+
+  const onConfirm = () => {
+    console.log('confirm click');
+  };
+
   return (
     <SRRContentLayout>
       <OptionBar>
@@ -291,6 +362,8 @@ const SRRLayout = () => {
         onEndDateChange={handleFilterChange('endDate')}
         onCurrencyChange={handleFilterChange('currency')}
         onStartBalanceChange={handleFilterChange('startBalance')}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
       />
     </SRRContentLayout>
   );
@@ -375,8 +448,19 @@ const Toolbar = styled.div`
   justify-content: flex-end;
 `;
 
-const ContentLayout = styled.div`
+{
+  /* const ContentLayout = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+`; */
+}
+
+const ContentLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  // padding: 13px 18.7px 15.7px 16px;
 `;
