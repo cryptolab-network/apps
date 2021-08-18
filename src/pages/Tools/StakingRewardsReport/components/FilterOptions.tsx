@@ -11,6 +11,7 @@ import { useState } from 'react';
 
 import './FilterOptions.css';
 import DropdownCommon from '../../../../components/Dropdown/Common';
+import Input from '../../../../components/Input';
 
 type overridesNameToClassKey = {
   [P in keyof MuiPickersOverrides]: keyof MuiPickersOverrides[P];
@@ -29,10 +30,12 @@ export const filterOptionDropdownList = filterOptions.map((o, idx) => {
   };
 });
 
-const FilterOptions = ({ startDate, endDate, currency, onStartDateChange, onEndDateChange, onCurrencyChange }) => {
+const FilterOptions = ({ startDate, endDate, currency, startBalance,
+  onStartDateChange, onEndDateChange, onCurrencyChange, onStartBalanceChange }) => {
   const [sDate, setSDate] = useState(startDate);
   const [eDate, setEDate] = useState(endDate);
   const [_currency, setCurrency] = useState(currency);
+  const [_startBalance, setStartBalance] = useState(startBalance);
   const handleStartDateChange = useCallback((date) => {
     setSDate(moment(date).format('YYYY-MM-DD'));
     onStartDateChange(moment(date).format('YYYY-MM-DD'));
@@ -45,6 +48,10 @@ const FilterOptions = ({ startDate, endDate, currency, onStartDateChange, onEndD
     setCurrency(e.label);
     onCurrencyChange(e.label);
   }, [onCurrencyChange]);
+  const handleStartBalanceChange = useCallback((e) => {
+    setStartBalance(e.label);
+    onStartBalanceChange(e.label);
+  }, [onStartBalanceChange]);
   const materialTheme = createTheme({
     overrides: {
       MuiPickersDay: {
@@ -118,10 +125,20 @@ const FilterOptions = ({ startDate, endDate, currency, onStartDateChange, onEndD
               />
             </div>
           </FilterItem>
+          <FilterItem>
+            <div style={{ color: 'white' }}>
+              Start Balance
+              <Input
+                style={{ width: '80%' }}
+                onChange={handleStartBalanceChange}
+                value={_startBalance}
+              />
+            </div>
+          </FilterItem>
         </AdvancedOption>
       </FilterOptionLayout>
     );
-  }, [_currency, eDate, handleCurrencyChange, handleEndDateChange, handleStartDateChange, materialTheme, sDate]);
+  }, [_currency, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, sDate]);
 
   return <div>{filtersDOM}</div>;
 };

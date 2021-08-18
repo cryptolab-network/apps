@@ -33,6 +33,7 @@ interface ISRRFilters {
   startDate: string;
   endDate: string;
   currency: string;
+  startBalance: number
 }
 
 const ValidatorComponents = ({ chain, validators }) => {
@@ -86,7 +87,7 @@ enum State {
   ERROR,
 }
 
-const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyChange }) => {
+const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyChange, onStartBalanceChange }) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
@@ -124,6 +125,7 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
           startDate: '2020-01-01',
           endDate: moment().format('YYYY-MM-DD'),
           currency: filters.currency || 'USD',
+          startBalance: filters.startBalance || 0.1
         },
       }).catch((err) => {
         setState(State.ERROR);
@@ -146,7 +148,7 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, filters.currency, filters.stashId, notifyWarn, t]);
+  }, [chain, filters.currency, filters.startBalance, filters.stashId, notifyWarn, t]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -170,12 +172,14 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
         startDate={filters.startDate}
         endDate={filters.endDate}
         currency={filters.currency}
+        startBalance={filters.startBalance}
         onStartDateChange={onStartDateChange}
         onEndDateChange={onEndDateChange}
         onCurrencyChange={onCurrencyChange}
+        onStartBalanceChange={onStartBalanceChange}
       />
     );
-  }, [filters.currency, filters.endDate, filters.startDate, onCurrencyChange, onEndDateChange, onStartDateChange]);
+  }, [filters.currency, filters.endDate, filters.startBalance, filters.startDate, onCurrencyChange, onEndDateChange, onStartBalanceChange, onStartDateChange]);
   const DownloadOptionsLayout = useMemo(() => {
     return <DownloadOptions stashId={filters.stashId} />;
   }, [filters.stashId]);
@@ -242,6 +246,7 @@ const SRRLayout = () => {
     startDate: '2020-01-01',
     endDate: moment().format('YYYY-MM-DD'),
     currency: 'USD',
+    startBalance: 0.1,
   });
   const handleFilterChange = (name) => (e) => {
     switch (name) {
@@ -256,6 +261,9 @@ const SRRLayout = () => {
         break;
       case 'currency':
         setFilters((prev) => ({ ...prev, currency: e }));
+        break;
+      case 'startBalance':
+        setFilters((prev) => ({ ...prev, startBalance: e }));
         break;
       default:
         break;
@@ -282,6 +290,7 @@ const SRRLayout = () => {
         onStartDateChange={handleFilterChange('startDate')}
         onEndDateChange={handleFilterChange('endDate')}
         onCurrencyChange={handleFilterChange('currency')}
+        onStartBalanceChange={handleFilterChange('startBalance')}
       />
     </SRRContentLayout>
   );
