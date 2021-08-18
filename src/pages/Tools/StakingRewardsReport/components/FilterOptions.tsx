@@ -34,6 +34,9 @@ const FilterOptions = ({ startDate, endDate, currency }) => {
         daySelected: {
           backgroundColor: '#21aca8',
           color: 'white',
+          '&:hover': {
+            backgroundColor: '#2ee6e0',
+          },
         },
         dayDisabled: {
           color: 'gray',
