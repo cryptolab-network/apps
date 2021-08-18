@@ -1,32 +1,32 @@
-import styled from "styled-components";
-import CardHeader from "../../../../components/Card/CardHeader";
-import IconInput from "../../../../components/Input/IconInput";
+import styled from 'styled-components';
+import CardHeader from '../../../../components/Card/CardHeader';
+import IconInput from '../../../../components/Input/IconInput';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import { ReactComponent as EmptyStashIcon } from '../../../../assets/images/empty-staking-rewards.svg';
 import { ReactComponent as DownloadIcon } from '../../../../assets/images/download.svg';
 import { ReactComponent as FiltersIcon } from '../../../../assets/images/filter.svg';
-import SRRHeader from "./SRRHeader";
-import { useCallback, useMemo, useState, useContext } from "react";
-import StashInformation from "./StashInformation";
-import { useEffect } from "react";
-import { apiGetStashRewards, IStashRewards } from "../../../../apis/StashRewards";
-import moment from "moment";
+import SRRHeader from './SRRHeader';
+import { useCallback, useMemo, useState, useContext } from 'react';
+import StashInformation from './StashInformation';
+import { useEffect } from 'react';
+import { apiGetStashRewards, IStashRewards } from '../../../../apis/StashRewards';
+import moment from 'moment';
 import { Grid } from '@material-ui/core';
-import SRRTable from "./SRRTable";
-import IconButton from "../../../../components/Button/IconButton";
-import { apiGetNominatedValidators, IValidator } from "../../../../apis/Validator";
-import { useHistory } from "react-router-dom";
-import ValidNominator from "../../../../components/ValidNominator";
-import CustomScaleLoader from "../../../../components/Spinner/ScaleLoader";
-import Tooltip from "../../../../components/Tooltip";
-import FilterOptions from "./FilterOptions";
-import DownloadOptions from "./DownloadOptions";
-import { balanceUnit, validateAddress } from "../../../../utils/string";
-import { DataContext } from "../../components/Data";
-import { toast } from "react-toastify";
+import SRRTable from './SRRTable';
+import IconButton from '../../../../components/Button/IconButton';
+import { apiGetNominatedValidators, IValidator } from '../../../../apis/Validator';
+import { useHistory } from 'react-router-dom';
+import ValidNominator from '../../../../components/ValidNominator';
+import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
+import Tooltip from '../../../../components/Tooltip';
+import FilterOptions from './FilterOptions';
+import DownloadOptions from './DownloadOptions';
+import { balanceUnit, validateAddress } from '../../../../utils/string';
+import { DataContext } from '../../components/Data';
+import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
-import SRRChart from "./SRRChart";
+import SRRChart from './SRRChart';
 
 interface ISRRFilters {
   stashId: string;
@@ -35,11 +35,14 @@ interface ISRRFilters {
   currency: string;
 }
 
-const ValidatorComponents = ({chain, validators}) => {
+const ValidatorComponents = ({ chain, validators }) => {
   const history = useHistory();
-  const _formatBalance = useCallback((value: any) => {
-    return balanceUnit(chain, value);
-  }, [chain]);
+  const _formatBalance = useCallback(
+    (value: any) => {
+      return balanceUnit(chain, value);
+    },
+    [chain]
+  );
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
@@ -48,24 +51,25 @@ const ValidatorComponents = ({chain, validators}) => {
       return (
         <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
           <ValidNominator
-          address={v.id}
-          name={v.identity.display}
-          activeAmount={_formatBalance(v.info.exposure.total)}
-          totalAmount={_formatBalance(v.info.total)}
-          apy={(v.averageApy * 100).toFixed(2)}
-          commission={v.info.commission}
-          count={v.info.nominatorCount}
-          statusChange={v.statusChange}
-          unclaimedPayouts={v.info.unclaimedEras.length}
-          favorite={v.favorite}
-          onClick={() => openValidatorStatus(v.id)}
+            address={v.id}
+            name={v.identity.display}
+            activeAmount={_formatBalance(v.info.exposure.total)}
+            totalAmount={_formatBalance(v.info.total)}
+            apy={(v.averageApy * 100).toFixed(2)}
+            commission={v.info.commission}
+            count={v.info.nominatorCount}
+            statusChange={v.statusChange}
+            unclaimedPayouts={v.info.unclaimedEras.length}
+            favorite={v.favorite}
+            onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </Grid>);
-      });
+        </Grid>
+      );
+    });
   }, [_formatBalance, chain, history, validators]);
   if (validatorComponents.length > 0) {
     return (
-      <Grid container spacing={3} style={{justifyContent: 'space-between'}}>
+      <Grid container spacing={3} style={{ justifyContent: 'space-between' }}>
         {validatorComponents}
       </Grid>
     );
@@ -79,13 +83,13 @@ enum State {
   LOADING,
   LOADING_VALIDATORS,
   LOADED,
-  ERROR
+  ERROR,
 }
 
 const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
+  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
   const [stashData, setStashData] = useState<IStashRewards>({
@@ -119,8 +123,8 @@ const SRRContent = ({ filters }) => {
         query: {
           startDate: '2020-01-01',
           endDate: moment().format('YYYY-MM-DD'),
-          currency: 'USD'
-        }
+          currency: 'USD',
+        },
       }).catch((err) => {
         setState(State.ERROR);
         notifyWarn(t('tools.stakingRewards.noRewards'));
@@ -132,13 +136,13 @@ const SRRContent = ({ filters }) => {
       try {
         setState(State.LOADING_VALIDATORS);
         const validators = await apiGetNominatedValidators({
-          params: `/stash/${s!.stash}/${chain}`
-        })
+          params: `/stash/${s!.stash}/${chain}`,
+        });
         setValidators(validators);
       } finally {
         setState(State.LOADED);
       }
-    }; 
+    }
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
@@ -162,91 +166,66 @@ const SRRContent = ({ filters }) => {
 
   const FilterOptionsLayout = useMemo(() => {
     return (
-      <FilterOptions
-        startDate={filters.startDate}
-        endDate={filters.endDate}
-        currency={filters.currency}
-      />
+      <FilterOptions startDate={filters.startDate} endDate={filters.endDate} currency={filters.currency} />
     );
   }, [filters.currency, filters.endDate, filters.startDate]);
   const DownloadOptionsLayout = useMemo(() => {
-    return (
-      <DownloadOptions
-        stashId={filters.stashId}
-      />
-    );
+    return <DownloadOptions stashId={filters.stashId} />;
   }, [filters.stashId]);
   if (state === State.EMPTY) {
     return (
       <EmptyStashIconLayout>
         <EmptyStashIcon />
-        <EmptyStashDescription>
-          {t('tools.stakingRewards.description')}
-        </EmptyStashDescription>
+        <EmptyStashDescription>{t('tools.stakingRewards.description')}</EmptyStashDescription>
       </EmptyStashIconLayout>
     );
   } else if (state === State.LOADED || state === State.LOADING_VALIDATORS) {
     return (
       <StashRewardsLayout>
         <StashInformationLayout>
-          <StashInformation
-            stashId={filters.stashId}
-            stashData={stashData}
-            currency={filters.currency}
-          />
+          <StashInformation stashId={filters.stashId} stashData={stashData} currency={filters.currency} />
         </StashInformationLayout>
         <ContentLayout>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
               <div>
                 <Toolbar>
-                  <Tooltip content={DownloadOptionsLayout} visible={showDownload} tooltipToggle={handleDownloadToggle}>
-                    <IconButton onClick={onShowDownload}
-                      Icon={() => <DownloadIcon />}
-                    />
+                  <Tooltip
+                    content={DownloadOptionsLayout}
+                    visible={showDownload}
+                    tooltipToggle={handleDownloadToggle}
+                  >
+                    <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
                   </Tooltip>
-                  <div style={{margin: '0 0 0 16px'}}></div>
-                  <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
-                    <IconButton onClick={onShowFilters}
-                      Icon={() => <FiltersIcon />}
-                    />
+                  <div style={{ margin: '0 0 0 16px' }}></div>
+                  <Tooltip
+                    content={FilterOptionsLayout}
+                    visible={showFilters}
+                    tooltipToggle={handleOptionToggle}
+                  >
+                    <IconButton onClick={onShowFilters} Icon={() => <FiltersIcon />} />
                   </Tooltip>
-                  <div style={{margin: '0 16px 0 0'}}></div>
+                  <div style={{ margin: '0 16px 0 0' }}></div>
                 </Toolbar>
-                <SRRTable
-                  currency={'USD'}
-                  stashData={stashData.eraRewards}
-                />
+                <SRRTable currency={'USD'} stashData={stashData.eraRewards} />
               </div>
-              <SRRChart 
-                stashData={stashData}
-                chain={chain}
-              />
+              <SRRChart stashData={stashData} chain={chain} />
             </Grid>
           </Grid>
         </ContentLayout>
-        <ValidatorComponents 
-          chain={chain}
-          validators={validators}
-        />
+        <ValidatorComponents chain={chain} validators={validators} />
       </StashRewardsLayout>
     );
   } else if (state === State.LOADING) {
-    return (
-      <CustomScaleLoader
-      />
-    )
+    return <CustomScaleLoader />;
   } else {
     return (
       <EmptyStashIconLayout>
         <EmptyStashIcon />
-        <EmptyStashDescription>
-          {t('tools.stakingRewards.enter')}
-        </EmptyStashDescription>
+        <EmptyStashDescription>{t('tools.stakingRewards.enter')}</EmptyStashDescription>
       </EmptyStashIconLayout>
     );
   }
-  
 };
 
 const SRRLayout = () => {
@@ -269,22 +248,20 @@ const SRRLayout = () => {
   return (
     <SRRContentLayout>
       <OptionBar>
-      <HeaderLayout>
-        <HeaderLeft>
-          <IconInput
-            Icon={Search}
-            iconSize="16px"
-            placeholder={t('tools.stakingRewards.optionBar.title')}
-            inputLength={512}
-            value={filters.stashId}
-            onChange={handleFilterChange('stashId')}
-          />
-        </HeaderLeft>
-      </HeaderLayout>
+        <HeaderLayout>
+          <HeaderLeft>
+            <IconInput
+              Icon={Search}
+              iconSize="16px"
+              placeholder={t('tools.stakingRewards.optionBar.title')}
+              inputLength={512}
+              value={filters.stashId}
+              onChange={handleFilterChange('stashId')}
+            />
+          </HeaderLeft>
+        </HeaderLayout>
       </OptionBar>
-      <SRRContent
-        filters={filters}
-      />
+      <SRRContent filters={filters} />
     </SRRContentLayout>
   );
 };
