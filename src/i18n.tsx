@@ -166,6 +166,14 @@ i18n
               to: 'to',
             },
           }
+        },
+        about: {
+          description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
+          subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
+          mission: 'Our missions are,',
+          mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
+          mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
+          mission3: 'provide stable validating service.',
         }
       },
       'zh-Hant-TW': {
@@ -315,9 +323,17 @@ i18n
               from: '從',
               to: '至',
             },
+          },
+          about: {
+            description: '我們是 CryptoLab. Polkadot 和 Kusama 驗證節點的運營者.',
+            subDescription: '我們提供CryptoLab是因為我們發現社群需要簡單易用的質押服務',
+            mission: '以下是我們的使命',
+            mission1: '為提名人提供簡單易用的質押服務',
+            mission2: '為節點管理者及提名人提供監控驗證人狀態的服務',
+            mission3: '為網路提供穩定的驗證節點',
           }
-        }
-      }
+        },
+      },
     }
   });
 i18n.changeLanguage('zh-Hant-TW');

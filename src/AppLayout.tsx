@@ -435,17 +435,19 @@ const AppLayout = () => {
           alignItems: 'flex-start',
         }}
       >
-        <AboutUsFontStyle>We are CryptoLab, we run Polkadot and Kusama validators.</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.subDescription')}</AboutUsFontStyle>
         <div style={{ marginTop: 34, textAlign: 'left' }}>
-          <AboutUsFontStyle>Our missions are,</AboutUsFontStyle>
+          <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
             <AboutUsGoalFontStyle>
-              provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.
+              {t('about.mission1')}
             </AboutUsGoalFontStyle>
             <AboutUsGoalFontStyle>
-              provide data collection and analysis services for Polkadot and Kusama node operators.
+              {t('about.mission2')}
             </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>provide stable validating service.</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>
+              {t('about.mission3')}
+            </AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>

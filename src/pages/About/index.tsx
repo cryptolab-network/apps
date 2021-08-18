@@ -1,22 +1,24 @@
 import styled from 'styled-components';
 import { ReactComponent as CryptoLabIcon } from '../../assets/images/about-us-logo.svg';
+import { useTranslation } from 'react-i18next';
 // TODO: deprecated
 const AboutContent = () => {
+  const { t } = useTranslation();
   return (
     <ContentLayout>
       <Description>
-        We are CryptoLab. We operate Polkadot and Kusama validators.
+        {t('about.description')}
         <br />
         <div style={{ margin: '10px 0 0 0' }} />
-        We make the CryptoLan Network because we found the community needs useful tools to help us to have
-        better information about staking.
+        {t('about.subDescription')}
+        
       </Description>
       <div style={{ margin: '34px 0 0 0' }} />
       <Description>
-        Our missions are,
-        <List>Provide a simple, easy-to-use staking service</List>
-        <List>Provide monitoring tools to help node operators</List>
-        <List>Provide stable validating services for the network</List>
+      {t('about.mission')}
+        <List>{t('about.mission1')}</List>
+        <List>{t('about.mission2')}</List>
+        <List>{t('about.mission3')}</List>
       </Description>
     </ContentLayout>
   );
