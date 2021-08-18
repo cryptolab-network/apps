@@ -91,6 +91,7 @@ const SRRContent = ({ filters }) => {
   const [stashData, setStashData] = useState<IStashRewards>({
     stash: '',
     eraRewards: [],
+    totalInFiat: 0,
   });
   const notifyWarn = useCallback((msg: string) => {
     toast.warn(`${msg}`, {
@@ -108,6 +109,7 @@ const SRRContent = ({ filters }) => {
     setStashData({
       stash: '',
       eraRewards: [],
+      totalInFiat: 0,
     });
     async function getStashRewards() {
       if (!validateAddress(filters.stashId)) {

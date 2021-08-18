@@ -11,6 +11,7 @@ export interface IEraRewards {
 export interface IStashRewards {
   stash: string;
   eraRewards: IEraRewards[];
+  totalInFiat: number;
 }
 
 export interface ISRQuery {
