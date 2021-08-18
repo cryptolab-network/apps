@@ -10,6 +10,7 @@ import { useCallback } from 'react';
 import { useState } from 'react';
 
 import './FilterOptions.css';
+import DropdownCommon from '../../../../components/Dropdown/Common';
 
 type overridesNameToClassKey = {
   [P in keyof MuiPickersOverrides]: keyof MuiPickersOverrides[P];
@@ -19,12 +20,31 @@ declare module '@material-ui/core/styles/overrides' {
   export interface ComponentNameToClassKey extends overridesNameToClassKey {}
 }
 
-const FilterOptions = ({ startDate, endDate, currency }) => {
-  const [sDate, setSDate] = useState(startDate);
-  const handleDateChange = useCallback((date) => {
-    setSDate(moment(date).format('YYYY-MM-DD'));
-  }, []);
+export const filterOptions = ['USD', 'TWD', 'JPY'];
 
+export const filterOptionDropdownList = filterOptions.map((o, idx) => {
+  return {
+    label: o,
+    value: idx + 1,
+  };
+});
+
+const FilterOptions = ({ startDate, endDate, currency, onStartDateChange, onEndDateChange, onCurrencyChange }) => {
+  const [sDate, setSDate] = useState(startDate);
+  const [eDate, setEDate] = useState(endDate);
+  const [_currency, setCurrency] = useState(currency);
+  const handleStartDateChange = useCallback((date) => {
+    setSDate(moment(date).format('YYYY-MM-DD'));
+    onStartDateChange(moment(date).format('YYYY-MM-DD'));
+  }, [onStartDateChange]);
+  const handleEndDateChange = useCallback((date) => {
+    setEDate(moment(date).format('YYYY-MM-DD'));
+    onEndDateChange(moment(date).format('YYYY-MM-DD'));
+  }, [onEndDateChange]);
+  const handleCurrencyChange = useCallback((e) => {
+    setCurrency(e.label);
+    onCurrencyChange(e.label);
+  }, [onCurrencyChange]);
   const materialTheme = createTheme({
     overrides: {
       MuiPickersDay: {
@@ -59,22 +79,49 @@ const FilterOptions = ({ startDate, endDate, currency }) => {
                 <MuiPickersUtilsProvider utils={MomentUtils}>
                   <DatePicker
                     disableToolbar
-                    variant="inline"
                     format="YYYY-MM-DD"
                     margin="normal"
                     id="date-picker-inline"
                     label="Start Date"
                     value={sDate}
-                    onChange={handleDateChange}
+                    onChange={handleStartDateChange}
                   />
                 </MuiPickersUtilsProvider>
               </ThemeProvider>
             </div>
           </FilterItem>
+          <FilterItem>
+            <div style={{ color: 'white' }}>
+              <ThemeProvider theme={materialTheme}>
+                <MuiPickersUtilsProvider utils={MomentUtils}>
+                  <DatePicker
+                    disableToolbar
+                    format="YYYY-MM-DD"
+                    margin="normal"
+                    id="date-picker-inline"
+                    label="End Date"
+                    value={eDate}
+                    onChange={handleEndDateChange}
+                  />
+                </MuiPickersUtilsProvider>
+              </ThemeProvider>
+            </div>
+          </FilterItem>
+          <FilterItem>
+            <div style={{ color: 'white' }}>
+              <DropdownCommon
+                style={{ flex: 1, width: '200px' }}
+                options={filterOptionDropdownList}
+                value={_currency}
+                onChange={handleCurrencyChange}
+                theme="dark"
+              />
+            </div>
+          </FilterItem>
         </AdvancedOption>
       </FilterOptionLayout>
     );
-  }, [handleDateChange, materialTheme, sDate]);
+  }, [_currency, eDate, handleCurrencyChange, handleEndDateChange, handleStartDateChange, materialTheme, sDate]);
 
   return <div>{filtersDOM}</div>;
 };
@@ -90,7 +137,8 @@ const AdvancedOption = styled.div`
   margin-top: 4px;
   margin-bottom: 4px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   color: #23beb9;
   font-family: Montserrat;

@@ -86,7 +86,7 @@ enum State {
   ERROR,
 }
 
-const SRRContent = ({ filters }) => {
+const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyChange }) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
@@ -123,7 +123,7 @@ const SRRContent = ({ filters }) => {
         query: {
           startDate: '2020-01-01',
           endDate: moment().format('YYYY-MM-DD'),
-          currency: 'USD',
+          currency: filters.currency || 'USD',
         },
       }).catch((err) => {
         setState(State.ERROR);
@@ -146,7 +146,7 @@ const SRRContent = ({ filters }) => {
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, filters.stashId, notifyWarn, t]);
+  }, [chain, filters.currency, filters.stashId, notifyWarn, t]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -166,9 +166,16 @@ const SRRContent = ({ filters }) => {
 
   const FilterOptionsLayout = useMemo(() => {
     return (
-      <FilterOptions startDate={filters.startDate} endDate={filters.endDate} currency={filters.currency} />
+      <FilterOptions
+        startDate={filters.startDate}
+        endDate={filters.endDate}
+        currency={filters.currency}
+        onStartDateChange={onStartDateChange}
+        onEndDateChange={onEndDateChange}
+        onCurrencyChange={onCurrencyChange}
+      />
     );
-  }, [filters.currency, filters.endDate, filters.startDate]);
+  }, [filters.currency, filters.endDate, filters.startDate, onCurrencyChange, onEndDateChange, onStartDateChange]);
   const DownloadOptionsLayout = useMemo(() => {
     return <DownloadOptions stashId={filters.stashId} />;
   }, [filters.stashId]);
@@ -207,7 +214,7 @@ const SRRContent = ({ filters }) => {
                   </Tooltip>
                   <div style={{ margin: '0 16px 0 0' }}></div>
                 </Toolbar>
-                <SRRTable currency={'USD'} stashData={stashData.eraRewards} />
+                <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
               </div>
               <SRRChart stashData={stashData} chain={chain} />
             </Grid>
@@ -241,6 +248,15 @@ const SRRLayout = () => {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
         break;
+      case 'startDate':
+        setFilters((prev) => ({ ...prev, startDate: e }));
+        break;
+      case 'endDate':
+        setFilters((prev) => ({ ...prev, endDate: e }));
+        break;
+      case 'currency':
+        setFilters((prev) => ({ ...prev, currency: e }));
+        break;
       default:
         break;
     }
@@ -261,7 +277,12 @@ const SRRLayout = () => {
           </HeaderLeft>
         </HeaderLayout>
       </OptionBar>
-      <SRRContent filters={filters} />
+      <SRRContent
+        filters={filters}
+        onStartDateChange={handleFilterChange('startDate')}
+        onEndDateChange={handleFilterChange('endDate')}
+        onCurrencyChange={handleFilterChange('currency')}
+      />
     </SRRContentLayout>
   );
 };
