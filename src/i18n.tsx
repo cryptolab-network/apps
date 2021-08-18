@@ -55,19 +55,19 @@ i18n
               }
             },
             portal: {
-              slogan: 'Built to maximize staking yield',
-              sloganDetail: 'CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more accessible, for technical and non-technical users alike.',
+              slogan: 'Built to create stable staking yields',//'Built to maximize staking yield',
+              sloganDetail: 'CryptoLab is making life way easier for crypto holders. We help you earn staking yield without taking custody of your assets. Stake once, CryptoLab will take care of the rest for you.',//'CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more accessible, for technical and non-technical users alike.',
               stakingGuide: {
                 title: 'Staking Guide',
                 detail: 'Learn how to use our services',
               },
               portfolioBenchmark: {
                 title: 'Portfolio Benchmark',
-                detail: 'Make assessment on validators, and select from them to stake.',
+                detail: 'We know validtors. Use our prebuilt staking strategies or even invent yours.',//'Make assessment on validators, and select from them to stake.',
               },
               portfolioManagement: {
                 title: 'Portfolio Management',
-                detail: 'Manage after you stake. See rewards and validator status.',
+                detail: 'Stablibity is key. We will inform you before things changed.',//'Manage after you stake. See rewards and validator status.',
               },
             }
           },
@@ -209,19 +209,19 @@ i18n
               }
             },
             portal: {
-              slogan: '最大化您的質押收益',
-              sloganDetail: 'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
+              slogan: '創造穩定的質押收益',//'最大化您的質押收益',
+              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益，且無須託管您的資產。質押一次， CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
               stakingGuide: {
-                title: '質押說明',
-                detail: '使用我們的服務的教學',
+                title: '質押教學',
+                detail: '手把手說明如何使用我們的服務',
               },
               portfolioBenchmark: {
                 title: '質押評估',
-                detail: '依據不同的條件選擇適合的驗證節點 並完成質押',
+                detail: '我們瞭解驗證節點。使用預先建立的質押機制，或是打造您自己的',
               },
               portfolioManagement: {
                 title: '質押管理',
-                detail: '進行質押後的管理 查看驗證節點資訊以及您的質押收益',
+                detail: '穩定性是關鍵。在情況發生變化之前，我們會通知您',
               },
             }
           },
@@ -327,5 +327,6 @@ i18n
       },
     }
   });
-i18n.changeLanguage('zh-Hant-TW');
+// i18n.changeLanguage('zh-Hant-TW');
+// i18n.changeLanguage('en-US');
 export default i18n;
