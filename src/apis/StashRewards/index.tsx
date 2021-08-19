@@ -18,6 +18,7 @@ export interface ISRQuery {
   startDate: string;
   endDate: string;
   currency: string;
+  startBalance: number;
 }
 
 export interface ISRRequest {

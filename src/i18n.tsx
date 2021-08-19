@@ -164,6 +164,14 @@ i18n
               from: 'From',
               to: 'to',
             },
+          },
+          about: {
+            description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
+            subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
+            mission: 'Our missions are,',
+            mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
+            mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
+            mission3: 'provide stable validating service.',
           }
         },
         about: {
@@ -401,5 +409,5 @@ i18n
       },
     }
   });
-i18n.changeLanguage('zh-Hant-TW');
+i18n.changeLanguage('en');
 export default i18n;

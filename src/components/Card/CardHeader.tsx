@@ -6,9 +6,7 @@ const CardHeader = ({ Header, children = {}, alignItems = 'center' }) => {
       <HeaderLayout>
         <Header />
       </HeaderLayout>
-      <MainContentLayout
-        alignItems={alignItems}
-      >{children}</MainContentLayout>
+      <MainContentLayout alignItems={alignItems}>{children}</MainContentLayout>
     </CardHeaderLayout>
   );
 };
@@ -32,10 +30,11 @@ const HeaderLayout = styled.div`
 
 interface MainContentLayoutProps {
   alignItems: string;
+  padding?: string;
 }
 const MainContentLayout = styled.div<MainContentLayoutProps>`
-  padding: 29px 29px 15px 29px;
+  padding: ${(props) => (props.padding ? props.padding : '29px 29px 15px 29px')};
   display: flex;
   flex-direction: column;
-  align-items: ${(props) => (props.alignItems)};
+  align-items: ${(props) => props.alignItems};
 `;

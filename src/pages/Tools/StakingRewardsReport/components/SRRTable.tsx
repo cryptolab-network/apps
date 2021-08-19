@@ -37,7 +37,21 @@ const SRRTable = ( {stashData, currency} ) => {
         accessor: 'total',
         maxWidth: 100,
         width: 100,
-        Cell: ({ value }) => <span>{value.toFixed(2)}</span>,
+        Cell: ({ value }) => {
+          if (value !== undefined) {
+            if (typeof value !== 'string') {
+              return (<span>{
+                value.toFixed(2)
+              }</span>);
+            } else {
+              return (<span>{
+                value
+              }</span>);
+            }
+          } else {
+            return (<span></span>);
+          }
+        },
       },
     ];
   }, [currency, t]);
