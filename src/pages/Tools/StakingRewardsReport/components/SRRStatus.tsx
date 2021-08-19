@@ -271,8 +271,10 @@ const SRRContent = ({
             </Toolbar>
             <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
           </div>
-          <div style={{ flex: 1, width: '100%', height: 500 }}>
+          <div style={{ flex: 1, width: '100%', height: 500, "marginLeft": '16px' }}>
+          <SRRChartLayout>
             <SRRChart stashData={stashData} chain={chain} />
+          </SRRChartLayout>
           </div>
         </ContentLayout>
         <ValidatorComponents chain={chain} validators={validators} />
@@ -418,4 +420,18 @@ const ContentLayout = styled.div`
   justify-content: center;
   align-items: center;
   // padding: 13px 18.7px 15.7px 16px;
+`;
+
+const SRRChartLayout = styled.div`
+width: 100%;
+height: 500px;
+  font-family: Montserrat;
+  font-size: 9px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.25;
+  letter-spacing: normal;
+  text-align: right;
+  color: #9099a8;
 `;
