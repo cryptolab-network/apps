@@ -188,7 +188,28 @@ i18n
               apy: 'APY',
               unclaimedEras: 'Unclaimed Eras'
             }
-          }
+          },
+          about: {
+            description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
+            subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
+            mission: 'Our missions are,',
+            mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
+            mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
+            mission3: 'provide stable validating service.',
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
         },
       },
       'zh-Hant-TW': {
@@ -362,7 +383,20 @@ i18n
                 unclaimedEras: '尚未分配收益的Era數'
               }
             }
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: '網路',
+                  validators: '驗證人',
+                  waiting: '等待中',
+                  nominators: '提名人',
+                  averageReturns: '平均報酬'
+                }
+              }
+            }
+          },
         },
       },
     }
