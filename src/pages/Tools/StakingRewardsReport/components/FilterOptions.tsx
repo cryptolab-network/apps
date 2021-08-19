@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback, useState } from 'react';
+import Button from '../../../../components/Button';
 import { createTheme } from '@material-ui/core/styles';
 import { MuiPickersOverrides } from '@material-ui/pickers/typings/overrides';
 import { ThemeProvider } from '@material-ui/styles';
@@ -6,8 +7,6 @@ import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import styled from 'styled-components';
 import moment from 'moment';
-import { useCallback } from 'react';
-import { useState } from 'react';
 
 import './FilterOptions.css';
 import DropdownCommon from '../../../../components/Dropdown/Common';
@@ -30,28 +29,50 @@ export const filterOptionDropdownList = filterOptions.map((o, idx) => {
   };
 });
 
-const FilterOptions = ({ startDate, endDate, currency, startBalance,
-  onStartDateChange, onEndDateChange, onCurrencyChange, onStartBalanceChange }) => {
+const FilterOptions = ({
+  startDate,
+  endDate,
+  currency,
+  startBalance,
+  onStartDateChange,
+  onEndDateChange,
+  onCurrencyChange,
+  onStartBalanceChange,
+  onCancel,
+  onConfirm,
+}) => {
   const [sDate, setSDate] = useState(startDate);
   const [eDate, setEDate] = useState(endDate);
   const [_currency, setCurrency] = useState(currency);
   const [_startBalance, setStartBalance] = useState(startBalance);
-  const handleStartDateChange = useCallback((date) => {
-    setSDate(moment(date).format('YYYY-MM-DD'));
-    onStartDateChange(moment(date).format('YYYY-MM-DD'));
-  }, [onStartDateChange]);
-  const handleEndDateChange = useCallback((date) => {
-    setEDate(moment(date).format('YYYY-MM-DD'));
-    onEndDateChange(moment(date).format('YYYY-MM-DD'));
-  }, [onEndDateChange]);
-  const handleCurrencyChange = useCallback((e) => {
-    setCurrency(e.label);
-    onCurrencyChange(e.label);
-  }, [onCurrencyChange]);
-  const handleStartBalanceChange = useCallback((e) => {
-    setStartBalance(e.label);
-    onStartBalanceChange(e.label);
-  }, [onStartBalanceChange]);
+  const handleStartDateChange = useCallback(
+    (date) => {
+      setSDate(moment(date).format('YYYY-MM-DD'));
+      onStartDateChange(moment(date).format('YYYY-MM-DD'));
+    },
+    [onStartDateChange]
+  );
+  const handleEndDateChange = useCallback(
+    (date) => {
+      setEDate(moment(date).format('YYYY-MM-DD'));
+      onEndDateChange(moment(date).format('YYYY-MM-DD'));
+    },
+    [onEndDateChange]
+  );
+  const handleCurrencyChange = useCallback(
+    (e) => {
+      setCurrency(e.label);
+      onCurrencyChange(e.label);
+    },
+    [onCurrencyChange]
+  );
+  const handleStartBalanceChange = useCallback(
+    (e) => {
+      setStartBalance(e.label);
+      onStartBalanceChange(e.label);
+    },
+    [onStartBalanceChange]
+  );
   const materialTheme = createTheme({
     overrides: {
       MuiPickersDay: {
@@ -128,17 +149,28 @@ const FilterOptions = ({ startDate, endDate, currency, startBalance,
           <FilterItem>
             <div style={{ color: 'white' }}>
               Start Balance
-              <Input
-                style={{ width: '80%' }}
-                onChange={handleStartBalanceChange}
-                value={_startBalance}
-              />
+              <Input style={{ width: '80%' }} onChange={handleStartBalanceChange} value={_startBalance} />
             </div>
           </FilterItem>
         </AdvancedOption>
+
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32 }}>
+          <Button title="cancel" onClick={onCancel} />
+          <Button title="confirm" onClick={onConfirm} />
+        </div>
       </FilterOptionLayout>
     );
-  }, [_currency, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, sDate]);
+  }, [
+    _currency,
+    _startBalance,
+    eDate,
+    handleCurrencyChange,
+    handleEndDateChange,
+    handleStartBalanceChange,
+    handleStartDateChange,
+    materialTheme,
+    sDate,
+  ]);
 
   return <div>{filtersDOM}</div>;
 };
