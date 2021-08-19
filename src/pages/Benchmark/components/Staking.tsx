@@ -38,7 +38,7 @@ import {
   oneKvStrategy,
   advancedConditionFilter,
   apyCalculation,
-  resetSelected
+  resetSelected,
 } from './utils';
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
@@ -437,6 +437,7 @@ const Staking = () => {
   } as unknown as IAccountChainInfo);
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
+  const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -625,8 +626,6 @@ const Staking = () => {
     [notifyWarn, notifyInfo, selectedAccount, polkadotApi, refreshAccountData, notifySuccess, notifyFailed]
   );
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
     if (advancedOption.advanced) {
@@ -797,43 +796,56 @@ const Staking = () => {
     advancedSettingDebounceVal.historicalApy,
     advancedSettingDebounceVal.identity,
     advancedSettingDebounceVal.minSelfStake,
-    accountChainInfo.validators
+    accountChainInfo.validators,
   ]);
 
   useEffect(() => {
     ReactTooltip.rebuild();
-  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName])
+  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName]);
 
   const columns = useMemo(() => {
     console.log(`call `);
     return [
       {
-        Header: <span onClick={() => {
-          const candidateNumber = getCandidateNumber(networkName);
-          console.log('number: ', candidateNumber);
-          console.log('selectable: ', finalFilteredTableData.selectableCount);
-          if (finalFilteredTableData.selectableCount !== undefined && finalFilteredTableData.selectableCount < candidateNumber) {
-            console.log(`gogog`);
-            let tempTableData = {...finalFilteredTableData};
-            tempTableData.tableData = resetSelected(tempTableData.tableData);
-            tempTableData.selectableCount = getCandidateNumber(networkName);
-            tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
-            setFinalFilteredTableData(tempTableData);
-          } else {
-            applyAdvancedFilter();
-          }
-        }}>
-          {(finalFilteredTableData.selectableCount !== getCandidateNumber(networkName)) ? 
-            (<>
-              <ReactTooltip id="HandTrueTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
-              <HandTrue data-for="HandTrueTip" data-tip="Unselect all"/>
-            </>) : 
-            (<>
-              <ReactTooltip id="HandFalseTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
-              <HandFalse data-for="HandFalseTip" data-tip="Auto select" />
-            </>)
-          }
-        </span>,
+        Header: (
+          <span
+            onClick={() => {
+              const candidateNumber = getCandidateNumber(networkName);
+              console.log('number: ', candidateNumber);
+              console.log('selectable: ', finalFilteredTableData.selectableCount);
+              if (
+                finalFilteredTableData.selectableCount !== undefined &&
+                finalFilteredTableData.selectableCount < candidateNumber
+              ) {
+                console.log(`gogog`);
+                let tempTableData = { ...finalFilteredTableData };
+                tempTableData.tableData = resetSelected(tempTableData.tableData);
+                tempTableData.selectableCount = getCandidateNumber(networkName);
+                tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                setFinalFilteredTableData(tempTableData);
+              } else {
+                applyAdvancedFilter();
+              }
+            }}
+          >
+            {finalFilteredTableData.selectableCount !== getCandidateNumber(networkName) ? (
+              <>
+                <ReactTooltip id="HandTrueTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
+                <HandTrue data-for="HandTrueTip" data-tip="Unselect all" />
+              </>
+            ) : (
+              <>
+                <ReactTooltip
+                  id="HandFalseTip"
+                  effect="solid"
+                  backgroundColor="#18232f"
+                  textColor="#21aca8"
+                />
+                <HandFalse data-for="HandFalseTip" data-tip="Auto select" />
+              </>
+            )}
+          </span>
+        ),
         accessor: 'select',
         maxWidth: 150,
         Cell: ({ value, row, rows }) => {
@@ -1602,7 +1614,7 @@ const Staking = () => {
         )}
       >
         <ContentBlockWrap advanced={advancedOption.advanced}>
-          <ContentBlock>
+          <ContentBlockBadgeBalance advanced={advancedOption.advanced}>
             <ContentBlockLeft>{networkDisplayDOM}</ContentBlockLeft>
             <ContentBlockRight>
               <Balance>Balance: {walletBalance}</Balance>
@@ -1612,22 +1624,57 @@ const Staking = () => {
                 value={inputData.stakeAmount}
               />
             </ContentBlockRight>
-          </ContentBlock>
-          <BalanceContextBlock>
-            {/* <DetailedBalance color='white'>Role: {accountChainInfo?.role}</DetailedBalance> */}
-            <DetailedBalance color="white">Nominees: {accountChainInfo?.validators?.length}</DetailedBalance>
-            <DetailedBalance color="white">
-              bonded: {_formatBalance(accountChainInfo?.bonded)}
-            </DetailedBalance>
-            <DetailedBalance color="white">
-              transferrable: {_formatBalance(selectedAccount?.balances?.availableBalance)}
-            </DetailedBalance>
-            <DetailedBalance color="white">
-              reserved: {_formatBalance(selectedAccount?.balances?.reservedBalance)}
-            </DetailedBalance>
-            <DetailedBalance color="white">
-              redeemable: {_formatBalance(accountChainInfo?.redeemable)}
-            </DetailedBalance>
+          </ContentBlockBadgeBalance>
+          <BalanceContextBlock advanced={advancedOption.advanced} show={extraBalanceInfoVisible}>
+            <BalanceContextLeft>
+              <BalanceContextRow>
+                <div>
+                  <BalanceContextLabel>Role</BalanceContextLabel>
+                </div>
+                <div>
+                  <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
+                </div>
+              </BalanceContextRow>
+              <BalanceContextRow>
+                <div>
+                  <BalanceContextLabel>Nominees</BalanceContextLabel>
+                </div>
+                <div>
+                  <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
+                </div>
+              </BalanceContextRow>
+              <BalanceContextRow>
+                <div>
+                  <BalanceContextLabel>Bonded</BalanceContextLabel>
+                </div>
+                <div>
+                  <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
+                </div>
+              </BalanceContextRow>
+            </BalanceContextLeft>
+            <BalanceContextRight>
+              <BalanceContextRow>
+                <div>
+                  <BalanceContextLabel>Reserved</BalanceContextLabel>
+                </div>
+                <div>
+                  <BalanceContextValue>
+                    {_formatBalance(selectedAccount?.balances?.reservedBalance)}
+                  </BalanceContextValue>
+                </div>
+              </BalanceContextRow>
+              <BalanceContextRow>
+                <div>
+                  <BalanceContextLabel>Redeemable</BalanceContextLabel>
+                </div>
+                <div>
+                  <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
+                </div>
+              </BalanceContextRow>
+              <BalanceContextRow>
+                <div style={{ height: '19px' }}></div>
+              </BalanceContextRow>
+            </BalanceContextRight>
           </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
@@ -1708,7 +1755,7 @@ export default Staking;
 
 const ContentBlock = styled.div`
   background-color: white;
-  border-radius: 6px 6px 0px 0px;
+  border-radius: 6px 6px 6px 6px;
   padding: 14px 25px 14px 25px;
   display: flex;
   justify-content: space-between;
@@ -1720,22 +1767,90 @@ const ContentBlock = styled.div`
   }
 `;
 
-const BalanceContextBlock = styled.div`
-  background-color: #0b0d13;
-  border-radius: 0px 0px 6px 6px;
+interface IContentBlockBadgeBalance {
+  advanced: Boolean;
+}
+const ContentBlockBadgeBalance = styled.div<IContentBlockBadgeBalance>`
+  background-color: white;
+  border-radius: ${(props) => (props.advanced ? '6px 0px 0px 6px' : '6px 6px 0px 0px')};
+  padding: 14px 25px 14px 25px;
   display: flex;
-  flex-flow: column;
-  flex-grow: 1;
   justify-content: space-between;
   align-items: center;
-  align-content: space-between;
-  flex-wrap: wrap;
-  padding: 25px;
   height: 62px;
-  width: 570px;
+  width: ${(props) => (props.advanced ? '500px' : '570px')};
+  @media (max-width: 1395px) {
+    border-radius: 6px 6px 0px 0px;
+    width: 570px;
+  }
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
+    border-radius: 6px 6px 0px 0px;
   }
+`;
+
+interface IBalanceContextBlock {
+  advanced: boolean;
+  show: boolean;
+}
+const BalanceContextBlock = styled.div<IBalanceContextBlock>`
+  background-color: #0b0d13;
+  border-radius: ${(props) => (props.advanced ? '0px 6px 6px 0px' : '0px 0px 6px 6px')};
+  display: ${(props) => (props.show ? 'flex' : 'none')};
+  justify-content: space-around;
+  align-items: center;
+  padding: 14px 25px 14px 25px;
+  height: 62px;
+  width: ${(props) => (props.advanced ? '640px' : '570px')};
+  @media (max-width: 1395px) {
+    border-radius: 0px 0px 6px 6px;
+    width: 570px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+    border-radius: 0px 0px 6px 6px;
+  }
+`;
+
+const BalanceContextLeft = styled.div`
+  flex: 1;
+  width: 100%;
+`;
+
+const BalanceContextRight = styled.div`
+  flex: 1;
+  width: 100%;
+`;
+
+const BalanceContextRow = styled.div`
+  display: flex;
+  box-sizing: border-box;
+  padding: 0px 10px 0px 16px;
+  justify-content: space-between;
+`;
+
+const BalanceContextLabel = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  color: white;
+`;
+
+const BalanceContextValue = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  color: #23beb9;
+`;
+
+const BalanceContextUnit = styled.div`
+  font-family: Montserrat;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  color: white;
 `;
 
 type BalanceProps = {
