@@ -122,8 +122,8 @@ const SRRContent = ({ filters, onStartDateChange, onEndDateChange, onCurrencyCha
       const s = await apiGetStashRewards({
         params: filters.stashId,
         query: {
-          startDate: '2020-01-01',
-          endDate: moment().format('YYYY-MM-DD'),
+          startDate: filters.startDate || '2020-01-01',
+          endDate: filters.endDate || moment().format('YYYY-MM-DD'),
           currency: filters.currency || 'USD',
           startBalance: filters.startBalance || 0.1
         },
