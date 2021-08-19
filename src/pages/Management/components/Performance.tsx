@@ -53,7 +53,8 @@ const Performance = () => {
                 query: {
                   startDate: '2020-01-01',
                   endDate: moment().format('YYYY-MM-DD'),
-                  currency: 'USD'
+                  currency: 'USD',
+                  startBalance: 0.1
                 }
               }).then((reward) => {
                 rewards.push(reward);
