@@ -14,7 +14,7 @@ import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import SRRTable from './SRRTable';
 import IconButton from '../../../../components/Button/IconButton';
-import { apiGetNominatedValidators, IValidator } from '../../../../apis/Validator';
+import { apiGetNominatedValidators, IStatusChange, IValidator } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import ValidNominator from '../../../../components/ValidNominator';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
@@ -47,10 +47,10 @@ const ValidatorComponents = ({ chain, validators }) => {
     [chain]
   );
   const validatorComponents = useMemo(() => {
-    const openValidatorStatus = (id) => {
+    const openValidatorStatus = (id: any) => {
       history.push(`/validator/${id}/${chain}`);
     };
-    return validators.map((v, idx) => {
+    return validators.map((v: { id: string; identity: { display: string; }; info: { exposure: { total: any; }; total: any; commission: number; nominatorCount: number; unclaimedEras: string | any[]; }; averageApy: number; statusChange: IStatusChange; favorite: boolean; }, idx: any) => {
       return (
         <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
           <ValidNominator
@@ -91,12 +91,6 @@ enum State {
 
 const SRRContent = ({
   filters,
-  onStartDateChange,
-  onEndDateChange,
-  onCurrencyChange,
-  onStartBalanceChange,
-  onCancel,
-  onConfirm,
 }) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
@@ -107,6 +101,7 @@ const SRRContent = ({
     stash: '',
     eraRewards: [],
   });
+  const [_filters, setFilters] = useState<ISRRFilters>(filters);
   const [filterDialogVisible, setFilterDialogVisible] = useState(false);
   const notifyWarn = useCallback((msg: string) => {
     toast.warn(`${msg}`, {
@@ -133,10 +128,10 @@ const SRRContent = ({
       const s = await apiGetStashRewards({
         params: filters.stashId,
         query: {
-          startDate: filters.startDate || '2020-01-01',
-          endDate: filters.endDate || moment().format('YYYY-MM-DD'),
-          currency: filters.currency || 'USD',
-          startBalance: filters.startBalance || 0.1,
+          startDate: _filters.startDate || '2020-01-01',
+          endDate: _filters.endDate || moment().format('YYYY-MM-DD'),
+          currency: _filters.currency || 'USD',
+          startBalance: _filters.startBalance || 0.1,
         },
       }).catch((err) => {
         setState(State.ERROR);
@@ -159,7 +154,7 @@ const SRRContent = ({
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, filters.currency, filters.startBalance, filters.stashId, notifyWarn, t]);
+  }, [chain, _filters.currency, _filters.endDate, _filters.startBalance, _filters.startDate, _filters.stashId, notifyWarn, t, _filters.stashId.length, filters.stashId.length, filters]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -198,39 +193,33 @@ const SRRContent = ({
     setFilterDialogVisible(false);
   };
 
-  const handleFilterConfirm = () => {
+  const handleFilterConfirm = useCallback((sDate: string, eDate: string, currency: string, startBalance: number) => {
+    setFilters({
+      stashId: filters.stashId,
+      startDate: sDate,
+      endDate: eDate,
+      currency: currency,
+      startBalance: startBalance,
+    });
     setFilterDialogVisible(false);
-  };
+  }, [filters.stashId]);
 
   const FilterOptionsLayout = useMemo(() => {
     return (
       <FilterOptions
-        startDate={filters.startDate}
-        endDate={filters.endDate}
-        currency={filters.currency}
-        startBalance={filters.startBalance}
-        onStartDateChange={onStartDateChange}
-        onEndDateChange={onEndDateChange}
-        onCurrencyChange={onCurrencyChange}
-        onStartBalanceChange={onStartBalanceChange}
+        startDate={_filters.startDate}
+        endDate={_filters.endDate}
+        currency={_filters.currency}
+        startBalance={_filters.startBalance}
         onCancel={handleFilterCancel}
         onConfirm={handleFilterConfirm}
       />
     );
-  }, [
-    filters.currency,
-    filters.endDate,
-    filters.startBalance,
-    filters.startDate,
-    onCurrencyChange,
-    onEndDateChange,
-    onStartBalanceChange,
-    onStartDateChange,
-  ]);
+  }, [_filters.currency, _filters.endDate, _filters.startBalance, _filters.startDate, handleFilterConfirm]);
 
   const DownloadOptionsLayout = useMemo(() => {
-    return <DownloadOptions stashId={filters.stashId} />;
-  }, [filters.stashId]);
+    return <DownloadOptions stashId={_filters.stashId} />;
+  }, [_filters.stashId]);
 
   if (state === State.EMPTY) {
     return (
@@ -252,7 +241,7 @@ const SRRContent = ({
           {FilterOptionsLayout}
         </Dialog>
         <StashInformationLayout>
-          <StashInformation stashId={filters.stashId} stashData={stashData} currency={filters.currency} />
+          <StashInformation stashId={filters.stashId} stashData={stashData} currency={_filters.currency} />
         </StashInformationLayout>
 
         <ContentLayout>
@@ -310,34 +299,14 @@ const SRRLayout = () => {
     currency: 'USD',
     startBalance: 0.1,
   });
-  const handleFilterChange = (name) => (e) => {
+  const handleFilterChange = (name: string) => (e: { target: { value: any; }; }) => {
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
         break;
-      case 'startDate':
-        setFilters((prev) => ({ ...prev, startDate: e }));
-        break;
-      case 'endDate':
-        setFilters((prev) => ({ ...prev, endDate: e }));
-        break;
-      case 'currency':
-        setFilters((prev) => ({ ...prev, currency: e }));
-        break;
-      case 'startBalance':
-        setFilters((prev) => ({ ...prev, startBalance: e }));
-        break;
       default:
         break;
     }
-  };
-
-  const onCancel = () => {
-    console.log('cancel click');
-  };
-
-  const onConfirm = () => {
-    console.log('confirm click');
   };
 
   return (
@@ -358,12 +327,6 @@ const SRRLayout = () => {
       </OptionBar>
       <SRRContent
         filters={filters}
-        onStartDateChange={handleFilterChange('startDate')}
-        onEndDateChange={handleFilterChange('endDate')}
-        onCurrencyChange={handleFilterChange('currency')}
-        onStartBalanceChange={handleFilterChange('startBalance')}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
       />
     </SRRContentLayout>
   );
@@ -447,14 +410,6 @@ const Toolbar = styled.div`
   flex-direction: row;
   justify-content: flex-end;
 `;
-
-{
-  /* const ContentLayout = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-`; */
-}
 
 const ContentLayout = styled.div`
   width: 100%;

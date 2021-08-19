@@ -34,10 +34,6 @@ const FilterOptions = ({
   endDate,
   currency,
   startBalance,
-  onStartDateChange,
-  onEndDateChange,
-  onCurrencyChange,
-  onStartBalanceChange,
   onCancel,
   onConfirm,
 }) => {
@@ -48,30 +44,26 @@ const FilterOptions = ({
   const handleStartDateChange = useCallback(
     (date) => {
       setSDate(moment(date).format('YYYY-MM-DD'));
-      onStartDateChange(moment(date).format('YYYY-MM-DD'));
     },
-    [onStartDateChange]
+    []
   );
   const handleEndDateChange = useCallback(
     (date) => {
       setEDate(moment(date).format('YYYY-MM-DD'));
-      onEndDateChange(moment(date).format('YYYY-MM-DD'));
     },
-    [onEndDateChange]
+    []
   );
   const handleCurrencyChange = useCallback(
     (e) => {
       setCurrency(e.label);
-      onCurrencyChange(e.label);
     },
-    [onCurrencyChange]
+    []
   );
   const handleStartBalanceChange = useCallback(
     (e) => {
-      setStartBalance(e.label);
-      onStartBalanceChange(e.label);
+      setStartBalance(e.target.value);
     },
-    [onStartBalanceChange]
+    []
   );
   const materialTheme = createTheme({
     overrides: {
@@ -95,6 +87,9 @@ const FilterOptions = ({
       },
     },
   });
+  const _onConfirm = useCallback(() => {
+    onConfirm(sDate, eDate, _currency, _startBalance);
+  }, [_currency, _startBalance, eDate, onConfirm, sDate]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -156,21 +151,11 @@ const FilterOptions = ({
 
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32 }}>
           <Button title="cancel" onClick={onCancel} />
-          <Button title="confirm" onClick={onConfirm} />
+          <Button title="confirm" onClick={_onConfirm} />
         </div>
       </FilterOptionLayout>
     );
-  }, [
-    _currency,
-    _startBalance,
-    eDate,
-    handleCurrencyChange,
-    handleEndDateChange,
-    handleStartBalanceChange,
-    handleStartDateChange,
-    materialTheme,
-    sDate,
-  ]);
+  }, [_currency, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, onCancel, onConfirm, sDate]);
 
   return <div>{filtersDOM}</div>;
 };
