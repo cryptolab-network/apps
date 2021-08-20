@@ -5,6 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { ApiContext, ApiState } from '../../../components/Api';
 import { calcInflation, chainGetNominatorCounts, chainGetValidatorCounts, chainGetWaitingCount } from '../../../utils/Network';
+import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
+import Chart from '../../../components/Chart';
+import { apiGetAllValidator, IValidator } from '../../../apis/Validator';
+import { NetworkConfig } from '../../../utils/constants/Network';
+import { number } from 'prop-types';
 
 interface INetworkData {
   networkName: string;
@@ -14,7 +19,60 @@ interface INetworkData {
   avgReturns: number;
 }
 
-const NetworkStatusTable = () => {
+const CDCXAxis = {
+  'polkadot': [
+    0,
+    1,
+    2,
+    3,
+    5,
+    10,
+    20,
+    100
+  ],
+  'kusama': [
+    0,
+    1,
+    2,
+    3,
+    5,
+    10,
+    20,
+    100
+  ]
+};
+
+interface ICommission {
+  count: number;
+  commission: number;
+}
+
+const parseValidatorCommissions = (network: string, validators: IValidator[]): ICommission[] => {
+  const commissions: ICommission[] = [];
+  validators.forEach(validator => {
+    let xaxis = CDCXAxis.polkadot;
+    if (network === 'kusama') {
+      xaxis = CDCXAxis.kusama;
+    }
+    console.log(validator.info.commission);
+    for (let i = 1; i < xaxis.length; i++) {
+      if (validator.info.commission < xaxis[i]) {
+        if (commissions[i - 1] === undefined) {
+          commissions[i - 1] = {
+            commission: xaxis[i - 1],
+            count: 0,
+          };
+        }
+        commissions[i - 1].count++;
+        break;
+      }
+    }
+  });
+  console.log(commissions);
+  return commissions;
+};
+
+const CommissionDistributionChart = () => {
   const { t } = useTranslation();
   let {
     network: networkName,
@@ -22,6 +80,50 @@ const NetworkStatusTable = () => {
     apiState: networkStatus,
     selectedAccount,
     refreshAccountData,
+  } = useContext(ApiContext);
+  const [commissions, setCommissions] = useState<ICommission[]>([]);
+  const chain = NetworkConfig[networkName].token;
+  useEffect(() => {
+    const parseValidators = async () => {
+      const validators = await apiGetAllValidator({
+        params: chain,
+        query: {},
+      });
+      const c = parseValidatorCommissions(networkName, validators);
+      setCommissions(c);
+    };
+    parseValidators();
+  }, [chain, networkName]);
+  return (
+    <CommissionDistributionChartLayout>
+      <CDCTitle>
+        Commission Distrubution
+      </CDCTitle>
+      <Chart 
+        data={commissions}
+        leftLabel={`Commission (%)`}
+        config = {{
+          xKey: 'commission',
+          firstDataKey: 'count',
+          secondDataKey: undefined,
+          thirdDataKey: undefined,
+          firstDataYAxis: 'left',
+          secondDataYAxis: undefined,
+          thirdDataYAxis: undefined,
+          leftLabel: `Commission (%)`,
+          rightLabel: undefined,
+        }}
+      />
+    </CommissionDistributionChartLayout>
+  );
+};
+
+const NetworkStatusTable = () => {
+  const { t } = useTranslation();
+  let {
+    network: networkName,
+    api: polkadotApi,
+    apiState: networkStatus,
   } = useContext(ApiContext);
   const columns = useMemo(() => {
     return [
@@ -61,9 +163,11 @@ const NetworkStatusTable = () => {
   const [validatorCount, setValidatorCount] = useState<number>(0);
   const [waitingCount, setWaitingCount] = useState<number>(0);
   const [nominatorCount, setNominatorCount] = useState<number>(0);
-  const [networkData, setNetworkData] = useState<INetworkData[]>([])
+  const [networkData, setNetworkData] = useState<INetworkData[]>([]);
+  const [isLoading, toggleLoading] = useState<boolean>(false);
   useEffect(() => {
     async function getChainData() {
+      toggleLoading(true);
       if (networkStatus === ApiState.READY) {
         let c = await chainGetValidatorCounts(networkName, polkadotApi);
         setValidatorCount(c);
@@ -72,7 +176,6 @@ const NetworkStatusTable = () => {
         c = await chainGetWaitingCount(networkName, polkadotApi);
         setWaitingCount(c);
         const inflation = await calcInflation(networkName, polkadotApi);
-        console.log(inflation);
         setNetworkData([{
           networkName: networkName,
           validatorCount: validatorCount,
@@ -81,10 +184,16 @@ const NetworkStatusTable = () => {
           avgReturns: inflation.stakedReturned,
         }]);
       }
+      toggleLoading(false);
     }
     getChainData();
   }, [networkName, networkStatus, nominatorCount, polkadotApi, validatorCount, waitingCount]);
-
+  if (isLoading) {
+    return (
+      <CustomScaleLoader
+      />
+    );
+  } else {
   return (
     <TableLayout>
       <Table
@@ -93,13 +202,14 @@ const NetworkStatusTable = () => {
       />
     </TableLayout>
   );
+  }
 };
 
 const Charts: React.FC = () => {
   return (
     <ChartsLayout>
       <ChartContent>
-
+        <CommissionDistributionChart />
       </ChartContent>
       <NetworkStatusTable />
     </ChartsLayout>
@@ -123,10 +233,27 @@ const ChartsLayout = styled.div`
 const ChartContent = styled.div`
   display: flex;
   flex-direction: column;
-
+  align-items: center;
 `;
 
 const TableLayout = styled.div`
   width: 90%;
   margin: 20px 5% 0 5%;
+`;
+
+const CommissionDistributionChartLayout = styled.div`
+  width: 50%;
+  height: 400px;
+`;
+
+const CDCTitle = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.27;
+  letter-spacing: normal;
+  text-align: left;
+  color: white;
 `;
