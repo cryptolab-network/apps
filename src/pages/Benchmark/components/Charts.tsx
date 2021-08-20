@@ -44,7 +44,7 @@ const CDCXAxis = {
 
 interface ICommission {
   count: number;
-  commission: number;
+  commission: string;
 }
 
 const parseValidatorCommissions = (network: string, validators: IValidator[]): ICommission[] => {
@@ -54,12 +54,11 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
     if (network === 'kusama') {
       xaxis = CDCXAxis.kusama;
     }
-    console.log(validator.info.commission);
     for (let i = 1; i < xaxis.length; i++) {
       if (validator.info.commission < xaxis[i]) {
         if (commissions[i - 1] === undefined) {
           commissions[i - 1] = {
-            commission: xaxis[i - 1],
+            commission: `${xaxis[i - 1]} %`,
             count: 0,
           };
         }
@@ -68,7 +67,6 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
       }
     }
   });
-  console.log(commissions);
   return commissions;
 };
 
@@ -76,10 +74,6 @@ const CommissionDistributionChart = () => {
   const { t } = useTranslation();
   let {
     network: networkName,
-    api: polkadotApi,
-    apiState: networkStatus,
-    selectedAccount,
-    refreshAccountData,
   } = useContext(ApiContext);
   const [commissions, setCommissions] = useState<ICommission[]>([]);
   const chain = NetworkConfig[networkName].token;
@@ -99,21 +93,23 @@ const CommissionDistributionChart = () => {
       <CDCTitle>
         Commission Distrubution
       </CDCTitle>
-      <Chart 
-        data={commissions}
-        leftLabel={`Commission (%)`}
-        config = {{
-          xKey: 'commission',
-          firstDataKey: 'count',
-          secondDataKey: undefined,
-          thirdDataKey: undefined,
-          firstDataYAxis: 'left',
-          secondDataYAxis: undefined,
-          thirdDataYAxis: undefined,
-          leftLabel: `Commission (%)`,
-          rightLabel: undefined,
-        }}
-      />
+      <ChartLayout>
+        <Chart 
+          data={commissions}
+          leftLabel={`Validator Count`}
+          config = {{
+            xKey: 'commission',
+            firstDataKey: 'count',
+            secondDataKey: undefined,
+            thirdDataKey: undefined,
+            firstDataYAxis: 'left',
+            secondDataYAxis: undefined,
+            thirdDataYAxis: undefined,
+            leftLabel: `Validator Count`,
+            rightLabel: undefined,
+          }}
+        />
+      </ChartLayout>
     </CommissionDistributionChartLayout>
   );
 };
@@ -210,6 +206,7 @@ const Charts: React.FC = () => {
     <ChartsLayout>
       <ChartContent>
         <CommissionDistributionChart />
+        <CommissionDistributionChart />
       </ChartContent>
       <NetworkStatusTable />
     </ChartsLayout>
@@ -226,23 +223,24 @@ const ChartsLayout = styled.div`
   background-color: #18232f;
   margin-top: 25px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
 `;
 
 const ChartContent = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  width: 90%;
 `;
 
 const TableLayout = styled.div`
-  width: 90%;
+  width: 50%;
   margin: 20px 5% 0 5%;
 `;
 
 const CommissionDistributionChartLayout = styled.div`
-  width: 50%;
+  width: 400px;
   height: 400px;
 `;
 
@@ -256,4 +254,8 @@ const CDCTitle = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: white;
+`;
+
+const ChartLayout = styled.div`
+  height: 400px;
 `;
