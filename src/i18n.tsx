@@ -63,11 +63,11 @@ i18n
               },
               portfolioBenchmark: {
                 title: 'Portfolio Benchmark',
-                detail: 'We know validtors. Use our prebuilt staking strategies or even invent yours.',//'Make assessment on validators, and select from them to stake.',
+                detail: 'We know validtors very well. You can use our prebuilt staking strategies or even invent yours.',//'Make assessment on validators, and select from them to stake.',
               },
               portfolioManagement: {
                 title: 'Portfolio Management',
-                detail: 'Stability is key for the Long Haul. We will inform you before things changed.',//'Manage after you stake. See rewards and validator status.',
+                detail: 'Stability is vital for the Long Haul. We will inform you to take action before things changed.',//'Manage after you stake. See rewards and validator status.',
               },
             }
           },
@@ -215,11 +215,11 @@ i18n
               },
               portfolioBenchmark: {
                 title: '質押評估',
-                detail: '我們瞭解驗證節點。使用預先建立的質押機制，或是打造您自己的',
+                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略，或是打造您自己的',
               },
               portfolioManagement: {
                 title: '質押管理',
-                detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會通知您',
+                detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會即時通知您並採取行動',
               },
             }
           },
