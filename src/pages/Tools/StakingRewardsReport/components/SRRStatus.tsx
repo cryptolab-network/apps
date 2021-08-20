@@ -128,8 +128,8 @@ const SRRContent = ({
       const s = await apiGetStashRewards({
         params: filters.stashId,
         query: {
-          startDate: _filters.startDate || '2020-01-01',
-          endDate: _filters.endDate || moment().format('YYYY-MM-DD'),
+          start: _filters.startDate || '2020-01-01',
+          end: _filters.endDate || moment().format('YYYY-MM-DD'),
           currency: _filters.currency || 'USD',
           startBalance: _filters.startBalance || 0.1,
         },
@@ -255,21 +255,18 @@ const SRRContent = ({
                 <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
               </Tooltip>
               <div style={{ margin: '0 0 0 16px' }}></div>
-              <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
-                <IconButton onClick={onShowFilters} Icon={() => <FiltersIcon />} />
-              </Tooltip>
-
               <div
                 onClick={() => {
                   handleDialogOpen('filters');
                 }}
+                style={{cursor: 'pointer'}}
               >
                 <FiltersIcon />
               </div>
 
               <div style={{ margin: '0 16px 0 0' }}></div>
             </Toolbar>
-            <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
+            <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
           </div>
           <div style={{ flex: 1, width: '100%', height: 500, "marginLeft": '16px' }}>
           <SRRChartLayout>
@@ -378,7 +375,6 @@ const EmptyStashIconLayout = styled.div`
 `;
 
 const EmptyStashDescription = styled.div`
-  width: 406px;
   height: 22px;
   font-family: Montserrat;
   font-size: 18px;
@@ -389,7 +385,7 @@ const EmptyStashDescription = styled.div`
   letter-spacing: normal;
   text-align: center;
   color: white;
-  margin: 24.5px 0 0 0;
+  margin: 24.5px 0 24.5px 0;
 `;
 
 const StashRewardsLayout = styled.div`

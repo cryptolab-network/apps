@@ -20,12 +20,58 @@ declare module '@material-ui/core/styles/overrides' {
   export interface ComponentNameToClassKey extends overridesNameToClassKey {}
 }
 
-export const filterOptions = ['USD', 'TWD', 'JPY'];
+export const filterOptions = 
+[ "usd",
+  "aed",
+  "ars",
+  "aud",
+  "bdt",
+  "bhd",
+  "bmd",
+  "brl",
+  "cad",
+  "chf",
+  "clp",
+  "cny",
+  "czk",
+  "dkk",
+  "eur",
+  "gbp",
+  "hkd",
+  "huf",
+  "idr",
+  "ils",
+  "inr",
+  "jpy",
+  "krw",
+  "kwd",
+  "lkr",
+  "mmk",
+  "mxn",
+  "myr",
+  "ngn",
+  "nok",
+  "nzd",
+  "php",
+  "pkr",
+  "pln",
+  "rub",
+  "sar",
+  "sek",
+  "sgd",
+  "thb",
+  "try",
+  "twd",
+  "uah",
+  "vef",
+  "vnd",
+  "zar"
+];
 
 export const filterOptionDropdownList = filterOptions.map((o, idx) => {
   return {
-    label: o,
-    value: idx + 1,
+    label: o.toUpperCase(),
+    value: idx,
   };
 });
 
@@ -41,6 +87,13 @@ const FilterOptions = ({
   const [eDate, setEDate] = useState(endDate);
   const [_currency, setCurrency] = useState(currency);
   const [_startBalance, setStartBalance] = useState(startBalance);
+  const [selectedOption, setSelectedOption] = useState<{
+    label: string,
+    value: number,
+  }>({
+    label: 'USD',
+    value: 0,
+  })
   const handleStartDateChange = useCallback(
     (date) => {
       setSDate(moment(date).format('YYYY-MM-DD'));
@@ -56,6 +109,10 @@ const FilterOptions = ({
   const handleCurrencyChange = useCallback(
     (e) => {
       setCurrency(e.label);
+      setSelectedOption({
+        label: e.label,
+        value: e.value
+      })
     },
     []
   );
@@ -130,21 +187,23 @@ const FilterOptions = ({
               </ThemeProvider>
             </div>
           </FilterItem>
+          <div style={{'marginTop': '16px'}}></div>
           <FilterItem>
             <div style={{ color: 'white' }}>
               <DropdownCommon
                 style={{ flex: 1, width: '200px' }}
                 options={filterOptionDropdownList}
-                value={_currency}
+                value={selectedOption}
                 onChange={handleCurrencyChange}
                 theme="dark"
               />
             </div>
           </FilterItem>
+          <div style={{'marginTop': '16px'}}></div>
           <FilterItem>
-            <div style={{ color: 'white' }}>
+            <div style={{ color: 'white', width: '50%' }}>
               Start Balance
-              <Input style={{ width: '80%' }} onChange={handleStartBalanceChange} value={_startBalance} />
+              <Input style={{ width: '100%' }} onChange={handleStartBalanceChange} value={_startBalance} />
             </div>
           </FilterItem>
         </AdvancedOption>
@@ -155,7 +214,7 @@ const FilterOptions = ({
         </div>
       </FilterOptionLayout>
     );
-  }, [_currency, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, onCancel, onConfirm, sDate]);
+  }, [_onConfirm, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, onCancel, sDate, selectedOption]);
 
   return <div>{filtersDOM}</div>;
 };

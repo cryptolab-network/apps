@@ -172,7 +172,20 @@ i18n
             mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
             mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
             mission3: 'provide stable validating service.',
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
         },
       },
       'zh-Hant-TW': {
@@ -330,7 +343,20 @@ i18n
             mission1: '為提名人提供簡單易用的質押服務',
             mission2: '為節點管理者及提名人提供監控驗證人狀態的服務',
             mission3: '為網路提供穩定的驗證節點',
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: '網路',
+                  validators: '驗證人',
+                  waiting: '等待中',
+                  nominators: '提名人',
+                  averageReturns: '平均報酬'
+                }
+              }
+            }
+          },
         },
       },
     }
