@@ -10,6 +10,7 @@ import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import Table from './Table';
 import Account from '../../../components/Account';
 import Button from '../../../components/Button';
+import TinyButton from '../../../components/Button/tiny';
 import Era from './Table/comopnents/Era';
 import EraInclusion from './Table/comopnents/EraInclusion';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
@@ -39,6 +40,8 @@ import {
   advancedConditionFilter,
   apyCalculation,
   resetSelected,
+  stakeAmountValidate,
+  IStakeAmountValidateType,
 } from './utils';
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
@@ -984,7 +987,7 @@ const Staking = () => {
         sortType: 'basic',
       },
     ];
-  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName]);
+  }, [finalFilteredTableData, networkName, applyAdvancedFilter, notifyWarn, _formatBalance]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -1120,6 +1123,63 @@ const Staking = () => {
     }
     setInputData((prev) => ({ ...prev, [name]: tmpValue }));
   };
+
+  const handleBondedClick = useCallback(() => {
+    stakeAmountValidate(
+      Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
+      IStakeAmountValidateType.BONDED,
+      notifyWarn
+    );
+    setInputData((prev) => ({
+      ...prev,
+      stakeAmount: Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
+    }));
+  }, [_formatBalance, accountChainInfo?.bonded, notifyWarn]);
+
+  const handleMaxClick = useCallback(() => {
+    console.log('bonded: ', Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]));
+    console.log(
+      'transferable:',
+      Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0])
+    );
+
+    let bonded = Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]);
+    let transferable = Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0]);
+    let fee = NetworkConfig[networkName].handlingFee;
+
+    if (stakeAmountValidate(bonded + transferable - fee, IStakeAmountValidateType.STAKEAMOUNT, notifyWarn)) {
+      setInputData((prev) => ({
+        ...prev,
+        stakeAmount: bonded + transferable - fee,
+      }));
+    }
+  }, [_formatBalance, accountChainInfo?.bonded, networkName, notifyWarn, selectedAccount.balances]);
+
+  const showBondedBtn = useMemo(() => {
+    let show = false;
+    if (
+      accountChainInfo.role === AccountRole.CONTROLLER_OF_NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER
+    ) {
+      show = true;
+    }
+
+    return show;
+  }, [accountChainInfo.role]);
+
+  const showMaxBtn = useMemo(() => {
+    let show = false;
+    if (
+      accountChainInfo.role === AccountRole.NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER ||
+      accountChainInfo.role === AccountRole.NONE
+    ) {
+      show = true;
+    }
+
+    return show;
+  }, [accountChainInfo.role]);
 
   /**
    * handle advanced filter changing,
@@ -1365,6 +1425,13 @@ const Staking = () => {
     txStatusCallback,
     notifyWarn,
   ]);
+
+  // while network status change, reset input stake amount
+  useEffect(() => {
+    if (networkStatus) {
+      setInputData((prev) => ({ ...prev, stakeAmount: 0 }));
+    }
+  }, [networkStatus]);
 
   // while network changing, set api parameter for network
   useEffect(() => {
@@ -1617,7 +1684,28 @@ const Staking = () => {
           <ContentBlockBadgeBalance advanced={advancedOption.advanced}>
             <ContentBlockLeft>{networkDisplayDOM}</ContentBlockLeft>
             <ContentBlockRight>
-              <Balance>Balance: {walletBalance}</Balance>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+              >
+                <Balance>Balance: {walletBalance}</Balance>
+                <div
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                >
+                  {showBondedBtn && <TinyButton title="bonded" onClick={handleBondedClick} primary={false} />}
+                </div>
+                <div
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                >
+                  {showMaxBtn && <TinyButton title="max" onClick={handleMaxClick} primary={false} />}
+                </div>
+              </div>
+
               <Input
                 style={{ width: '80%' }}
                 onChange={handleInputChange('stakeAmount')}

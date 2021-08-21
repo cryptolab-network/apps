@@ -580,3 +580,32 @@ export const advancedConditionFilter = (
 
   return apyCalculation(tempTableData, tempSelectableCount);
 };
+
+export enum IStakeAmountValidateType {
+  BONDED = 'bonded',
+  STAKEAMOUNT = 'stakeAmount',
+}
+/**
+ * stake amount value check
+ */
+export const stakeAmountValidate = (
+  value: number,
+  itemName: IStakeAmountValidateType,
+  notifyCallback
+): boolean => {
+  switch (itemName) {
+    case 'bonded':
+      if (Number(value) <= 0) {
+        notifyCallback('bonded value cannot be 0');
+        return false;
+      }
+      break;
+    case 'stakeAmount':
+      if (Number(value) <= 0) {
+        notifyCallback('staking amount cannot be smaller than 0');
+        return false;
+      }
+      break;
+  }
+  return true;
+};
