@@ -814,13 +814,10 @@ const Staking = () => {
           <span
             onClick={() => {
               const candidateNumber = getCandidateNumber(networkName);
-              console.log('number: ', candidateNumber);
-              console.log('selectable: ', finalFilteredTableData.selectableCount);
               if (
                 finalFilteredTableData.selectableCount !== undefined &&
                 finalFilteredTableData.selectableCount < candidateNumber
               ) {
-                console.log(`gogog`);
                 let tempTableData = { ...finalFilteredTableData };
                 tempTableData.tableData = resetSelected(tempTableData.tableData);
                 tempTableData.selectableCount = getCandidateNumber(networkName);

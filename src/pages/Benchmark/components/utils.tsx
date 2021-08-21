@@ -99,6 +99,26 @@ export const sortHighApy = (tableData: ITableData[], orderBy: OrderBy = OrderBy.
   return tableData;
 };
 
+export const sortUnSelectedHighApy = (
+  tableData: ITableData[],
+  orderBy: OrderBy = OrderBy.DESC
+): ITableData[] => {
+  tableData.sort((a, b) => {
+    if (a.select === false && b.select === false) {
+      if (a.avgAPY > b.avgAPY) {
+        return orderBy === OrderBy.DESC ? -1 : 1;
+      } else if (a.avgAPY < b.avgAPY) {
+        return orderBy === OrderBy.DESC ? 1 : -1;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+  });
+  return tableData;
+};
+
 export const supportCryptoLabSelect = (
   tableData: ITableData[],
   selectableCount: number,
@@ -201,6 +221,7 @@ export const prevValidatorsSelect = (
 export const apyCalculation = (tableData: ITableData[], selectableCount?: number): IStakingInfo => {
   //
   tableData = sortSelectedTableData(tableData);
+  tableData = sortUnSelectedHighApy(tableData);
   let tempApyInfo = {
     sum: 0,
     counter: 0,
