@@ -1,12 +1,14 @@
 import styled from 'styled-components';
 
-const CardHeader = ({ Header, children = {}, alignItems = 'center' }) => {
+const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding = '' }) => {
   return (
     <CardHeaderLayout>
       <HeaderLayout>
         <Header />
       </HeaderLayout>
-      <MainContentLayout alignItems={alignItems}>{children}</MainContentLayout>
+      <MainContentLayout alignItems={alignItems} padding={mainPadding}>
+        {children}
+      </MainContentLayout>
     </CardHeaderLayout>
   );
 };
