@@ -25,18 +25,22 @@ export const NominatorGrid = ({
       const x = idx % cols;
       const y = Math.floor(idx / cols);
       if(isNominatedLoaded) {
-        return (
-          <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
-            <AccountLayout>
-              <Account
-                address={n.address}
-                display={n.address}
-                showNominatedInfo={true}
-                amount={_formatBalance(nominatorDetail[n.address].balance.lockedBalance)}
-                nominatedCount={nominatorDetail[n.address].targets.length}
-              ></Account>
-            </AccountLayout>
-          </div>);
+        if (nominatorDetail[n.address] !== undefined) {
+          return (
+            <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
+              <AccountLayout>
+                <Account
+                  address={n.address}
+                  display={n.address}
+                  showNominatedInfo={true}
+                  amount={_formatBalance(nominatorDetail[n.address].balance.lockedBalance)}
+                  nominatedCount={nominatorDetail[n.address].targets.length}
+                ></Account>
+              </AccountLayout>
+            </div>);
+        } else {
+          return (<div></div>);
+        }
       } else {
         return (
           <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>

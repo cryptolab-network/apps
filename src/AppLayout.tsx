@@ -452,7 +452,7 @@ const AppLayout = () => {
         </div>
       </div>
     );
-  }, []);
+  }, [t]);
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {

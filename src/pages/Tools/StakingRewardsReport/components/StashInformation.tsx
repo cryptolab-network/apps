@@ -1,7 +1,7 @@
-import moment from "moment";
-import { useEffect, useState } from "react";
-import styled from "styled-components";
-import Account from "../../../../components/Account";
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import Account from '../../../../components/Account';
 
 import { useTranslation } from 'react-i18next';
 
@@ -35,27 +35,23 @@ const StashInformation = ({ stashId, stashData, currency }) => {
       <Title>{t('tools.stakingRewards.stashInformation')}</Title>
       <HorizontalBar />
       <InformationItem>
-        <InformationTitle>
-          {t('tools.stakingRewards.stashId')}
-        </InformationTitle>
-        <Account
-          address={stashId}
-          display={stashId}
-        />
+        <InformationTitle>{t('tools.stakingRewards.stashId')}</InformationTitle>
+        <Account address={stashId} display={stashId} />
       </InformationItem>
       <HorizontalBar />
       <InformationItem>
-        <InformationTitle>
-          {t('tools.stakingRewards.totalRewards')}
-        </InformationTitle>
+        <InformationTitle>{t('tools.stakingRewards.totalRewards')}</InformationTitle>
         <InformationContent>
-          <div style={{margin: '0 16px 0 0'}}>
-            <span style={{color: '#23beb9'}}>{totalRewards.toFixed(4)} KSM</span>&nbsp; / &nbsp;{totalInFiat.toFixed(2)} {currency}
+          <div style={{ margin: '0 16px 0 0' }}>
+            <span style={{ color: '#23beb9' }}>{totalRewards.toFixed(4)} KSM</span>&nbsp; / &nbsp;
+            {totalInFiat.toFixed(2)} {currency}
           </div>
           <div>
-            ({t('tools.stakingRewards.from')} &nbsp;<span style={{color: '#23beb9'}}>{firstRewardDate}</span>&nbsp; {t('tools.stakingRewards.to')} &nbsp;<span style={{color: '#23beb9'}}>{lastRewardDate}</span>)
+            ({t('tools.stakingRewards.from')} &nbsp;
+            <span style={{ color: '#23beb9' }}>{firstRewardDate}</span>&nbsp; {t('tools.stakingRewards.to')}{' '}
+            &nbsp;<span style={{ color: '#23beb9' }}>{lastRewardDate}</span>)
           </div>
-          </InformationContent>
+        </InformationContent>
       </InformationItem>
     </div>
   );
@@ -66,7 +62,7 @@ export default StashInformation;
 const Title = styled.div`
   width: 123px;
   height: 16px;
-  margin: 0 49px 11.7px 16px;
+  margin: 0 0 11.7px 0;
   font-family: Montserrat;
   font-size: 13px;
   font-weight: bold;
@@ -80,15 +76,14 @@ const Title = styled.div`
 `;
 
 const HorizontalBar = styled.div`
-  width: 96%;
+  width: 100%;
   height: 0;
-  margin: 0 18.7px 0 16px;
   border: solid 1px #404952;
 `;
 
 const InformationItem = styled.div`
   height: 16px;
-  margin: 28.9px 0 28.9px 16px;
+  margin: 28.9px 0 28.9px 0px;
   font-family: Montserrat;
   font-size: 13px;
   font-weight: bold;

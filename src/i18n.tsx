@@ -41,7 +41,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'toolsForValidators',
+                toolsForValidators: 'Tools For Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
@@ -135,6 +135,10 @@ i18n
               slashes: 'Slashes',
               activeNominators: 'Active Nominators',
               inactiveNominators: 'Inactive Nominators',
+              errors: {
+                incorrectValidator1: `The validator data of Stash`,
+                incorrectValidator2: `does not exist. Please make sure that you entered a correct validator ID`,
+              }
             },
             stakingRewards: {
               title: 'Staking Rewards',
@@ -160,16 +164,29 @@ i18n
               from: 'From',
               to: 'to',
             },
-          }
+          },
+          about: {
+            description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
+            subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
+            mission: 'Our missions are,',
+            mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
+            mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
+            mission3: 'provide stable validating service.',
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
         },
-        about: {
-          description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
-          subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
-          mission: 'Our missions are,',
-          mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
-          mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
-          mission3: 'provide stable validating service.',
-        }
       },
       'zh-Hant-TW': {
         translation: {
@@ -259,6 +276,10 @@ i18n
               slashes: '懲罰次數',
               activeNominators: '此Era將Stake分配給您的提名人',
               inactiveNominators: '此Era未將Stake分配給您的提名人',
+              errors: {
+                incorrectValidator1: `不存在的驗證者`,
+                incorrectValidator2: `請確認您輸入正確的ID`,
+              }
             },
             oneKv: {
               title: '1KV 提名人資訊',
@@ -322,10 +343,23 @@ i18n
             mission1: '為提名人提供簡單易用的質押服務',
             mission2: '為節點管理者及提名人提供監控驗證人狀態的服務',
             mission3: '為網路提供穩定的驗證節點',
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: '網路',
+                  validators: '驗證人',
+                  waiting: '等待中',
+                  nominators: '提名人',
+                  averageReturns: '平均報酬'
+                }
+              }
+            }
+          },
         },
       },
     }
   });
-i18n.changeLanguage('zh-Hant-TW');
+i18n.changeLanguage('en');
 export default i18n;
