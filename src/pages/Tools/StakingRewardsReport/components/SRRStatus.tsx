@@ -276,7 +276,7 @@ const SRRContent = ({ filters }) => {
         </StashInformationLayout>
 
         <ContentLayout>
-          <div style={{ flex: 1 }}>
+          <ContentItem>
             <Toolbar>
               <Tooltip
                 content={DownloadOptionsLayout}
@@ -298,12 +298,12 @@ const SRRContent = ({ filters }) => {
               <div style={{ margin: '0 16px 0 0' }}></div>
             </Toolbar>
             <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
-          </div>
-          <div style={{ flex: 1, width: '100%', height: 500, marginLeft: '16px' }}>
+          </ContentItem>
+          <ContentItem>
             <SRRChartLayout>
               <SRRChart stashData={stashData} chain={chain} />
             </SRRChartLayout>
-          </div>
+          </ContentItem>
         </ContentLayout>
         <ValidatorComponents chain={chain} validators={validators} />
       </>
@@ -451,22 +451,33 @@ const Toolbar = styled.div`
 const ContentLayout = styled.div`
   width: 100%;
   display: flex;
+
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  // padding: 13px 18.7px 15.7px 16px;
+  @media (max-width: 1395px) {
+    flex-direction: column;
+    width: calc(100% - 8px);
+    margin-left: 4px;
+  }
+`;
+
+const ContentItem = styled.div`
+  flex: 1;
+  width: 100%;
+  height: 650px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #2f3842;
+  padding: 16px 16px 16px 16px;
+  margin: 4px 4px 4px 4px;
+  @media (max-width: 1395px) {
+    width: 100%;
+    margin: 4px 8px 4px 8px;
+  }
 `;
 
 const SRRChartLayout = styled.div`
   width: 100%;
-  height: 500px;
-  font-family: Montserrat;
-  font-size: 9px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: normal;
-  text-align: right;
-  color: #9099a8;
+  height: 100%;
 `;
