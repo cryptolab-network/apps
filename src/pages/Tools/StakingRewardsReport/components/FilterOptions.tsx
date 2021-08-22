@@ -20,52 +20,52 @@ declare module '@material-ui/core/styles/overrides' {
   export interface ComponentNameToClassKey extends overridesNameToClassKey {}
 }
 
-export const filterOptions = 
-[ "usd",
-  "aed",
-  "ars",
-  "aud",
-  "bdt",
-  "bhd",
-  "bmd",
-  "brl",
-  "cad",
-  "chf",
-  "clp",
-  "cny",
-  "czk",
-  "dkk",
-  "eur",
-  "gbp",
-  "hkd",
-  "huf",
-  "idr",
-  "ils",
-  "inr",
-  "jpy",
-  "krw",
-  "kwd",
-  "lkr",
-  "mmk",
-  "mxn",
-  "myr",
-  "ngn",
-  "nok",
-  "nzd",
-  "php",
-  "pkr",
-  "pln",
-  "rub",
-  "sar",
-  "sek",
-  "sgd",
-  "thb",
-  "try",
-  "twd",
-  "uah",
-  "vef",
-  "vnd",
-  "zar"
+export const filterOptions = [
+  'usd',
+  'aed',
+  'ars',
+  'aud',
+  'bdt',
+  'bhd',
+  'bmd',
+  'brl',
+  'cad',
+  'chf',
+  'clp',
+  'cny',
+  'czk',
+  'dkk',
+  'eur',
+  'gbp',
+  'hkd',
+  'huf',
+  'idr',
+  'ils',
+  'inr',
+  'jpy',
+  'krw',
+  'kwd',
+  'lkr',
+  'mmk',
+  'mxn',
+  'myr',
+  'ngn',
+  'nok',
+  'nzd',
+  'php',
+  'pkr',
+  'pln',
+  'rub',
+  'sar',
+  'sek',
+  'sgd',
+  'thb',
+  'try',
+  'twd',
+  'uah',
+  'vef',
+  'vnd',
+  'zar',
 ];
 
 export const filterOptionDropdownList = filterOptions.map((o, idx) => {
@@ -75,53 +75,34 @@ export const filterOptionDropdownList = filterOptions.map((o, idx) => {
   };
 });
 
-const FilterOptions = ({
-  startDate,
-  endDate,
-  currency,
-  startBalance,
-  onCancel,
-  onConfirm,
-}) => {
+const FilterOptions = ({ startDate, endDate, currency, startBalance, onCancel, onConfirm }) => {
   const [sDate, setSDate] = useState(startDate);
   const [eDate, setEDate] = useState(endDate);
   const [_currency, setCurrency] = useState(currency);
   const [_startBalance, setStartBalance] = useState(startBalance);
   const [selectedOption, setSelectedOption] = useState<{
-    label: string,
-    value: number,
+    label: string;
+    value: number;
   }>({
     label: 'USD',
     value: 0,
-  })
-  const handleStartDateChange = useCallback(
-    (date) => {
-      setSDate(moment(date).format('YYYY-MM-DD'));
-    },
-    []
-  );
-  const handleEndDateChange = useCallback(
-    (date) => {
-      setEDate(moment(date).format('YYYY-MM-DD'));
-    },
-    []
-  );
-  const handleCurrencyChange = useCallback(
-    (e) => {
-      setCurrency(e.label);
-      setSelectedOption({
-        label: e.label,
-        value: e.value
-      })
-    },
-    []
-  );
-  const handleStartBalanceChange = useCallback(
-    (e) => {
-      setStartBalance(e.target.value);
-    },
-    []
-  );
+  });
+  const handleStartDateChange = useCallback((date) => {
+    setSDate(moment(date).format('YYYY-MM-DD'));
+  }, []);
+  const handleEndDateChange = useCallback((date) => {
+    setEDate(moment(date).format('YYYY-MM-DD'));
+  }, []);
+  const handleCurrencyChange = useCallback((e) => {
+    setCurrency(e.label);
+    setSelectedOption({
+      label: e.label,
+      value: e.value,
+    });
+  }, []);
+  const handleStartBalanceChange = useCallback((e) => {
+    setStartBalance(e.target.value);
+  }, []);
   const materialTheme = createTheme({
     overrides: {
       MuiPickersDay: {
@@ -154,7 +135,7 @@ const FilterOptions = ({
         <FiltersTitle>Filters</FiltersTitle>
         <AdvancedOption>
           <FilterItem>
-            <div style={{ color: 'white' }}>
+            <div style={{ color: 'white', width: '100%' }}>
               <ThemeProvider theme={materialTheme}>
                 <MuiPickersUtilsProvider utils={MomentUtils}>
                   <DatePicker
@@ -171,7 +152,7 @@ const FilterOptions = ({
             </div>
           </FilterItem>
           <FilterItem>
-            <div style={{ color: 'white' }}>
+            <div style={{ color: 'white', width: '100%' }}>
               <ThemeProvider theme={materialTheme}>
                 <MuiPickersUtilsProvider utils={MomentUtils}>
                   <DatePicker
@@ -187,11 +168,22 @@ const FilterOptions = ({
               </ThemeProvider>
             </div>
           </FilterItem>
-          <div style={{'marginTop': '16px'}}></div>
+          <div style={{ marginTop: '16px' }}></div>
           <FilterItem>
-            <div style={{ color: 'white' }}>
+            <div style={{ color: 'white', width: '100%' }}>
+              <div
+                style={{
+                  color: '#535a62',
+                  fontSize: '13px',
+                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                  marginBottom: 6,
+                }}
+              >
+                Currency
+              </div>
               <DropdownCommon
-                style={{ flex: 1, width: '200px' }}
+                style={{ flex: 1, width: '100%' }}
+                borderBottom="1px solid rgba(215, 216, 217, 0.42)"
                 options={filterOptionDropdownList}
                 value={selectedOption}
                 onChange={handleCurrencyChange}
@@ -199,11 +191,23 @@ const FilterOptions = ({
               />
             </div>
           </FilterItem>
-          <div style={{'marginTop': '16px'}}></div>
+          <div style={{ marginTop: '16px' }}></div>
           <FilterItem>
-            <div style={{ color: 'white', width: '50%' }}>
-              Start Balance
-              <Input style={{ width: '100%' }} onChange={handleStartBalanceChange} value={_startBalance} />
+            <div style={{ color: 'white', width: '100%' }}>
+              <span
+                style={{
+                  color: '#535a62',
+                  fontSize: '13px',
+                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                }}
+              >
+                Start Balance
+              </span>
+              <Input
+                style={{ width: '100%', borderBottom: '1px solid rgba(215, 216, 217, 0.42)' }}
+                onChange={handleStartBalanceChange}
+                value={_startBalance}
+              />
             </div>
           </FilterItem>
         </AdvancedOption>
@@ -214,7 +218,19 @@ const FilterOptions = ({
         </div>
       </FilterOptionLayout>
     );
-  }, [_onConfirm, _startBalance, eDate, handleCurrencyChange, handleEndDateChange, handleStartBalanceChange, handleStartDateChange, materialTheme, onCancel, sDate, selectedOption]);
+  }, [
+    _onConfirm,
+    _startBalance,
+    eDate,
+    handleCurrencyChange,
+    handleEndDateChange,
+    handleStartBalanceChange,
+    handleStartDateChange,
+    materialTheme,
+    onCancel,
+    sDate,
+    selectedOption,
+  ]);
 
   return <div>{filtersDOM}</div>;
 };
@@ -224,11 +240,13 @@ export default FilterOptions;
 const FilterOptionLayout = styled.div`
   display: flex;
   flex-direction: column;
+  width: 250px;
 `;
 
 const AdvancedOption = styled.div`
   margin-top: 4px;
   margin-bottom: 4px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -264,4 +282,5 @@ const FiltersTitle = styled.div`
 const FilterItem = styled.div`
   display: flex;
   flex-direction: row;
+  width: 100%;
 `;

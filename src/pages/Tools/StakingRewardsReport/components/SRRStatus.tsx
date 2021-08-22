@@ -278,24 +278,24 @@ const SRRContent = ({ filters }) => {
         <ContentLayout>
           <ContentItem>
             <Toolbar>
-              <Tooltip
-                content={DownloadOptionsLayout}
-                visible={showDownload}
-                tooltipToggle={handleDownloadToggle}
-              >
-                <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
-              </Tooltip>
-              <div style={{ margin: '0 0 0 16px' }}></div>
-              <div
-                onClick={() => {
-                  handleDialogOpen('filters');
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <FiltersIcon />
-              </div>
-
-              <div style={{ margin: '0 16px 0 0' }}></div>
+              <ToolbarLeft>Era Rewards</ToolbarLeft>
+              <ToolbarRight>
+                <Tooltip
+                  content={DownloadOptionsLayout}
+                  visible={showDownload}
+                  tooltipToggle={handleDownloadToggle}
+                >
+                  <DownloadIcon />
+                </Tooltip>
+                <div
+                  onClick={() => {
+                    handleDialogOpen('filters');
+                  }}
+                  style={{ cursor: 'pointer', marginLeft: '16px' }}
+                >
+                  <FiltersIcon />
+                </div>
+              </ToolbarRight>
             </Toolbar>
             <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
           </ContentItem>
@@ -445,7 +445,20 @@ const StashInformationLayout = styled.div`
 const Toolbar = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+`;
+
+const ToolbarLeft = styled.div`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: left;
+  color: white;
+`;
+const ToolbarRight = styled.div`
+  display: flex;
   justify-content: flex-end;
+  align-items: center;
 `;
 
 const ContentLayout = styled.div`
