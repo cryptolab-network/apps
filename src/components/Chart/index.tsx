@@ -20,6 +20,7 @@ interface IChart {
   secondYAxis?: boolean;
   leftLabel: string;
   rightLabel?: string;
+  xAxisHeight?: number;
   config?: {
     xKey: string | undefined;
     firstDataKey: string | undefined;
@@ -38,6 +39,7 @@ const Chart: React.FC<IChart> = ({
   secondYAxis = false,
   leftLabel = '',
   rightLabel = '',
+  xAxisHeight = 30,
   config = {
     xKey: undefined,
     firstDataKey: undefined,
@@ -129,6 +131,7 @@ const Chart: React.FC<IChart> = ({
             tickLine={false}
             tickSize={0}
             tickMargin={25}
+            height={xAxisHeight}
           />
           {((chartConfig?.firstDataKey && chartConfig?.firstDataYAxis === 'left') ||
             (chartConfig?.secondDataKey && chartConfig?.secondDataYAxis === 'left') ||

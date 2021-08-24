@@ -50,25 +50,43 @@ const ValidatorComponents = ({ chain, validators }) => {
     const openValidatorStatus = (id: any) => {
       history.push(`/validator/${id}/${chain}`);
     };
-    return validators.map((v: { id: string; identity: { display: string; }; info: { exposure: { total: any; }; total: any; commission: number; nominatorCount: number; unclaimedEras: string | any[]; }; averageApy: number; statusChange: IStatusChange; favorite: boolean; }, idx: any) => {
-      return (
-        <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
-          <ValidNominator
-            address={v.id}
-            name={v.identity.display}
-            activeAmount={_formatBalance(v.info.exposure.total)}
-            totalAmount={_formatBalance(v.info.total)}
-            apy={(v.averageApy * 100).toFixed(2)}
-            commission={v.info.commission}
-            count={v.info.nominatorCount}
-            statusChange={v.statusChange}
-            unclaimedPayouts={v.info.unclaimedEras.length}
-            favorite={v.favorite}
-            onClick={() => openValidatorStatus(v.id)}
-          ></ValidNominator>
-        </Grid>
-      );
-    });
+    return validators.map(
+      (
+        v: {
+          id: string;
+          identity: { display: string };
+          info: {
+            exposure: { total: any };
+            total: any;
+            commission: number;
+            nominatorCount: number;
+            unclaimedEras: string | any[];
+          };
+          averageApy: number;
+          statusChange: IStatusChange;
+          favorite: boolean;
+        },
+        idx: any
+      ) => {
+        return (
+          <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
+            <ValidNominator
+              address={v.id}
+              name={v.identity.display}
+              activeAmount={_formatBalance(v.info.exposure.total)}
+              totalAmount={_formatBalance(v.info.total)}
+              apy={(v.averageApy * 100).toFixed(2)}
+              commission={v.info.commission}
+              count={v.info.nominatorCount}
+              statusChange={v.statusChange}
+              unclaimedPayouts={v.info.unclaimedEras.length}
+              favorite={v.favorite}
+              onClick={() => openValidatorStatus(v.id)}
+            ></ValidNominator>
+          </Grid>
+        );
+      }
+    );
   }, [_formatBalance, chain, history, validators]);
   if (validatorComponents.length > 0) {
     return (
@@ -89,9 +107,7 @@ enum State {
   ERROR,
 }
 
-const SRRContent = ({
-  filters,
-}) => {
+const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
   const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
@@ -130,8 +146,8 @@ const SRRContent = ({
       const s = await apiGetStashRewards({
         params: filters.stashId,
         query: {
-          startDate: _filters.startDate || '2020-01-01',
-          endDate: _filters.endDate || moment().format('YYYY-MM-DD'),
+          start: _filters.startDate || '2020-01-01',
+          end: _filters.endDate || moment().format('YYYY-MM-DD'),
           currency: _filters.currency || 'USD',
           startBalance: _filters.startBalance || 0.1,
         },
@@ -156,7 +172,19 @@ const SRRContent = ({
     if (filters.stashId.length > 0) {
       getStashRewards();
     }
-  }, [chain, _filters.currency, _filters.endDate, _filters.startBalance, _filters.startDate, _filters.stashId, notifyWarn, t, _filters.stashId.length, filters.stashId.length, filters]);
+  }, [
+    chain,
+    _filters.currency,
+    _filters.endDate,
+    _filters.startBalance,
+    _filters.startDate,
+    _filters.stashId,
+    notifyWarn,
+    t,
+    _filters.stashId.length,
+    filters.stashId.length,
+    filters,
+  ]);
 
   const [showFilters, toggleFilters] = useState(false);
   const onShowFilters = useCallback(() => {
@@ -195,16 +223,19 @@ const SRRContent = ({
     setFilterDialogVisible(false);
   };
 
-  const handleFilterConfirm = useCallback((sDate: string, eDate: string, currency: string, startBalance: number) => {
-    setFilters({
-      stashId: filters.stashId,
-      startDate: sDate,
-      endDate: eDate,
-      currency: currency,
-      startBalance: startBalance,
-    });
-    setFilterDialogVisible(false);
-  }, [filters.stashId]);
+  const handleFilterConfirm = useCallback(
+    (sDate: string, eDate: string, currency: string, startBalance: number) => {
+      setFilters({
+        stashId: filters.stashId,
+        startDate: sDate,
+        endDate: eDate,
+        currency: currency,
+        startBalance: startBalance,
+      });
+      setFilterDialogVisible(false);
+    },
+    [filters.stashId]
+  );
 
   const FilterOptionsLayout = useMemo(() => {
     return (
@@ -232,7 +263,7 @@ const SRRContent = ({
     );
   } else if (state === State.LOADED || state === State.LOADING_VALIDATORS) {
     return (
-      <StashRewardsLayout>
+      <>
         <Dialog
           isOpen={filterDialogVisible}
           handleDialogClose={() => {
@@ -247,43 +278,44 @@ const SRRContent = ({
         </StashInformationLayout>
 
         <ContentLayout>
-          <div style={{ flex: 1 }}>
+          <ContentItem>
             <Toolbar>
-              <Tooltip
-                content={DownloadOptionsLayout}
-                visible={showDownload}
-                tooltipToggle={handleDownloadToggle}
-              >
-                <IconButton onClick={onShowDownload} Icon={() => <DownloadIcon />} />
-              </Tooltip>
-              <div style={{ margin: '0 0 0 16px' }}></div>
-              <Tooltip content={FilterOptionsLayout} visible={showFilters} tooltipToggle={handleOptionToggle}>
-                <IconButton onClick={onShowFilters} Icon={() => <FiltersIcon />} />
-              </Tooltip>
-
-              <div
-                onClick={() => {
-                  handleDialogOpen('filters');
-                }}
-              >
-                <FiltersIcon />
-              </div>
-
-              <div style={{ margin: '0 16px 0 0' }}></div>
+              <ToolbarLeft>Era Rewards</ToolbarLeft>
+              <ToolbarRight>
+                <Tooltip
+                  content={DownloadOptionsLayout}
+                  visible={showDownload}
+                  tooltipToggle={handleDownloadToggle}
+                >
+                  <DownloadIcon />
+                </Tooltip>
+                <div
+                  onClick={() => {
+                    handleDialogOpen('filters');
+                  }}
+                  style={{ cursor: 'pointer', marginLeft: '16px' }}
+                >
+                  <FiltersIcon />
+                </div>
+              </ToolbarRight>
             </Toolbar>
-            <SRRTable currency={filters.currency} stashData={stashData.eraRewards} />
-          </div>
-          <div style={{ flex: 1, width: '100%', height: 500, "marginLeft": '16px' }}>
-          <SRRChartLayout>
-            <SRRChart stashData={stashData} chain={chain} />
-          </SRRChartLayout>
-          </div>
+            <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
+          </ContentItem>
+          <ContentItem>
+            <SRRChartLayout>
+              <SRRChart stashData={stashData} chain={chain} />
+            </SRRChartLayout>
+          </ContentItem>
         </ContentLayout>
         <ValidatorComponents chain={chain} validators={validators} />
-      </StashRewardsLayout>
+      </>
     );
   } else if (state === State.LOADING) {
-    return <CustomScaleLoader />;
+    return (
+      <div style={{ margin: '32px 0px 32px 0px' }}>
+        <CustomScaleLoader />
+      </div>
+    );
   } else {
     return (
       <EmptyStashIconLayout>
@@ -303,7 +335,7 @@ const SRRLayout = () => {
     currency: 'USD',
     startBalance: 0.1,
   });
-  const handleFilterChange = (name: string) => (e: { target: { value: any; }; }) => {
+  const handleFilterChange = (name: string) => (e: { target: { value: any } }) => {
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
@@ -329,16 +361,14 @@ const SRRLayout = () => {
           </HeaderLeft>
         </HeaderLayout>
       </OptionBar>
-      <SRRContent
-        filters={filters}
-      />
+      <SRRContent filters={filters} />
     </SRRContentLayout>
   );
 };
 
 const SRRStatus = () => {
   return (
-    <CardHeader Header={() => <SRRHeader />}>
+    <CardHeader Header={() => <SRRHeader />} mainPadding="0 0 0 0">
       <SRRLayout />
     </CardHeader>
   );
@@ -360,16 +390,21 @@ const HeaderLeft = styled.div`
 `;
 
 const OptionBar = styled.div`
-  width: 100%;
+  box-sizing: border-box;
+  width: calc(100% - 8px);
   height: 62px;
-  padding: 12px 0px 0px 0;
+  margin: 4px;
   border-radius: 6px;
   background-color: #2f3842;
-  margin: 0 0 9px 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 const SRRContentLayout = styled.div`
-  width: 80vw;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
 `;
 
 const EmptyStashIconLayout = styled.div`
@@ -377,10 +412,10 @@ const EmptyStashIconLayout = styled.div`
   justify-content: center;
   display: flex;
   flex-direction: column;
+  margin: 32px 0px 32px 0px;
 `;
 
 const EmptyStashDescription = styled.div`
-  width: 406px;
   height: 22px;
   font-family: Montserrat;
   font-size: 18px;
@@ -391,7 +426,7 @@ const EmptyStashDescription = styled.div`
   letter-spacing: normal;
   text-align: center;
   color: white;
-  margin: 24.5px 0 0 0;
+  margin: 24.5px 0 24.5px 0;
 `;
 
 const StashRewardsLayout = styled.div`
@@ -404,36 +439,60 @@ const StashRewardsLayout = styled.div`
 
 const StashInformationLayout = styled.div`
   border-radius: 6px;
-  background-color: rgba(35, 190, 185, 0.1);
-  padding: 16px 0 0 0;
-  margin: 0 0 26px 0;
+  background-color: #2f3842;
+  padding: 16px 16px 16px 16px;
+  margin: 8px 4px 4px 4px;
 `;
 
 const Toolbar = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+`;
+
+const ToolbarLeft = styled.div`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: left;
+  color: white;
+`;
+const ToolbarRight = styled.div`
+  display: flex;
   justify-content: flex-end;
+  align-items: center;
 `;
 
 const ContentLayout = styled.div`
   width: 100%;
   display: flex;
+
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  // padding: 13px 18.7px 15.7px 16px;
+  @media (max-width: 1395px) {
+    flex-direction: column;
+    width: calc(100% - 8px);
+    margin-left: 4px;
+  }
+`;
+
+const ContentItem = styled.div`
+  flex: 1;
+  width: 100%;
+  height: 650px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #2f3842;
+  padding: 16px 16px 16px 16px;
+  margin: 4px 4px 4px 4px;
+  @media (max-width: 1395px) {
+    width: 100%;
+    margin: 4px 8px 4px 8px;
+  }
 `;
 
 const SRRChartLayout = styled.div`
-width: 100%;
-height: 500px;
-  font-family: Montserrat;
-  font-size: 9px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: normal;
-  text-align: right;
-  color: #9099a8;
+  width: 100%;
+  height: 100%;
 `;

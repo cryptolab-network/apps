@@ -24,7 +24,11 @@ const DropdownCommon = ({ options, ...props }) => {
       width: '100%',
       display: 'flex',
       paddingBottom: 11,
-      borderBottom: props.theme && props.theme === 'dark' ? 'solid 1px #525a63' : 'solid 1px #d7d8d9',
+      borderBottom: props.borderBottom
+        ? props.borderBottom
+        : props.theme && props.theme === 'dark'
+        ? 'solid 1px #525a63'
+        : 'solid 1px #d7d8d9',
     }),
     indicatorSeparator: () => ({
       width: 0,

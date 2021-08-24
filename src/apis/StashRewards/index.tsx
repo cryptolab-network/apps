@@ -15,8 +15,8 @@ export interface IStashRewards {
 }
 
 export interface ISRQuery {
-  startDate: string;
-  endDate: string;
+  start: string;
+  end: string;
   currency: string;
   startBalance: number;
 }

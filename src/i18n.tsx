@@ -41,7 +41,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'toolsForValidators',
+                toolsForValidators: 'Tools For Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
@@ -172,7 +172,20 @@ i18n
             mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
             mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
             mission3: 'provide stable validating service.',
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
         },
         about: {
           description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
