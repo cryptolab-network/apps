@@ -9,7 +9,7 @@ import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
 import Chart from '../../../components/Chart';
 import { apiGetAllValidator, IValidator } from '../../../apis/Validator';
 import { NetworkConfig } from '../../../utils/constants/Network';
-import { number } from 'prop-types';
+import { apiGetAllNominators, INominatorInfo } from '../../../apis/Nominator';
 
 interface INetworkData {
   networkName: string;
@@ -18,6 +18,111 @@ interface INetworkData {
   nominatorCount: number;
   avgReturns: number;
 }
+
+interface IStake {
+  count: number;
+  stakeRange: string;
+}
+
+const SDCXAxis = {
+  'polkadot': [
+    10000,
+    100000,
+    500000,
+    1000000,
+    20000000,
+    50000000,
+    100000000,
+  ],
+  'kusama': [
+    1000,
+    5000,
+    10000,
+    20000,
+    30000,
+    50000,
+    100000,
+  ]
+};
+
+const parseNominatorStakes = (network: string, decimals: number, nominators: INominatorInfo[]): IStake[] => {
+  const stake: IStake[] = [];
+  nominators.forEach(nominator => {
+    let xaxis = SDCXAxis.polkadot;
+    if (network === 'kusama') {
+      xaxis = SDCXAxis.kusama;
+    }
+    console.log(nominator);
+    for (let i = 1; i < xaxis.length; i++) {
+      if ((nominator as any).balance.lockedBalance / decimals < xaxis[i]) {
+        if (stake[i - 1] === undefined) {
+          stake[i - 1] = {
+            stakeRange: `${xaxis[i - 1]}`,
+            count: 0,
+          };
+        }
+        stake[i - 1].count++;
+        break;
+      }
+    }
+    for (let i = 0; i < stake.length; i++) {
+      if (stake[i] === undefined) {
+        stake[i] = {
+          stakeRange: `${xaxis[i]}`,
+          count: 0,
+        }
+      }
+    }
+  });
+  return stake;
+};
+
+const StakeDistributionChart = () => {
+  const { t } = useTranslation();
+  let {
+    network: networkName,
+  } = useContext(ApiContext);
+  const [stake, setStake] = useState<IStake[]>([]);
+  const chain = NetworkConfig[networkName].token;
+  useEffect(() => {
+    const parseNominators = async () => {
+      const nominators = await apiGetAllNominators({
+        params: {
+          chain: chain,
+        },
+      });
+      const c = parseNominatorStakes(networkName, NetworkConfig[networkName].decimals, nominators);
+      console.log(c);
+      setStake(c);
+    };
+    parseNominators();
+  }, [chain, networkName]);
+
+  return (
+    <StakeDistributionChartLayout>
+      <SDCTitle>
+        Stake Distrubution
+      </SDCTitle>
+      <ChartLayout>
+        <Chart 
+          data={stake}
+          leftLabel={`Nominator Count`}
+          config = {{
+            xKey: 'stakeRange',
+            firstDataKey: 'count',
+            secondDataKey: undefined,
+            thirdDataKey: undefined,
+            firstDataYAxis: 'left',
+            secondDataYAxis: undefined,
+            thirdDataYAxis: undefined,
+            leftLabel: `Nominator Count`,
+            rightLabel: undefined,
+          }}
+        />
+      </ChartLayout>
+    </StakeDistributionChartLayout>
+  );
+};
 
 const CDCXAxis = {
   'polkadot': [
@@ -206,7 +311,7 @@ const Charts: React.FC = () => {
     <ChartsLayout>
       <ChartContent>
         <CommissionDistributionChart />
-        <CommissionDistributionChart />
+        <StakeDistributionChart />
       </ChartContent>
       <NetworkStatusTable />
     </ChartsLayout>
@@ -258,4 +363,21 @@ const CDCTitle = styled.div`
 
 const ChartLayout = styled.div`
   height: 400px;
+`;
+
+const StakeDistributionChartLayout = styled.div`
+  width: 400px;
+  height: 400px;
+`;
+
+const SDCTitle = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.27;
+  letter-spacing: normal;
+  text-align: left;
+  color: white;
 `;
