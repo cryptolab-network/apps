@@ -1,6 +1,6 @@
-import moment from "moment";
-import { useEffect, useState } from "react";
-import Chart from "../../../../components/Chart";
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import Chart from '../../../../components/Chart';
 
 // export interface IStashRewards {
 //   stash: string;
@@ -16,30 +16,30 @@ import Chart from "../../../../components/Chart";
 // }
 
 interface IChartData {
-  key: string,
-  amount: number
+  key: string;
+  amount: number;
 }
 
 const mergeEraRewards = (eraRewards) => {
-  return eraRewards.map((era)=>{
+  return eraRewards.map((era) => {
     era.date = moment.utc(era.timestamp).format('L');
     era.total = era.total.toFixed(2);
     return era;
-  })
+  });
 };
 
 const SRRChart = ({ stashData, chain }) => {
-  const [chartData, setChartData]  = useState<IChartData[]>([]);
+  const [chartData, setChartData] = useState<IChartData[]>([]);
   useEffect(() => {
     stashData.eraRewards.reverse();
     const dayRewards: any[] = mergeEraRewards(stashData.eraRewards);
     let rewardDistribution: number[] = [];
     const units: string[] = [];
-    dayRewards.forEach((reward: any)=>{
+    dayRewards.forEach((reward: any) => {
       const week = moment(reward.date).week();
       const year = moment(reward.date).year();
       const i = units.findIndex((element) => element === year + ' W' + week);
-      if(i < 0) {
+      if (i < 0) {
         units.push(year + ' W' + week);
         rewardDistribution.push(reward.amount);
       } else {
@@ -47,16 +47,16 @@ const SRRChart = ({ stashData, chain }) => {
       }
     });
     let maxRewards = 0;
-    const cd: IChartData[] = rewardDistribution.map((dist, idx)=>{
-      if(dist > maxRewards) {
+    const cd: IChartData[] = rewardDistribution.map((dist, idx) => {
+      if (dist > maxRewards) {
         maxRewards = dist;
       }
       return {
         key: units[idx],
-        amount: parseFloat(dist.toFixed(3))
+        amount: parseFloat(dist.toFixed(3)),
       };
     });
-    if(maxRewards === 0) {
+    if (maxRewards === 0) {
       maxRewards = 1;
     }
     setChartData(cd);
@@ -65,7 +65,8 @@ const SRRChart = ({ stashData, chain }) => {
     <Chart
       data={chartData}
       leftLabel={`Amount (${chain})`}
-      config = {{
+      xAxisHeight={80}
+      config={{
         xKey: 'key',
         firstDataKey: undefined,
         secondDataKey: undefined,

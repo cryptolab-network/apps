@@ -8,12 +8,10 @@ const SRRHeader = () => {
   return (
     <HeaderLayout>
       <HeaderLeft>
-        <MedalIcon />
+        <MedalIcon width="38.8px" height="38px" />
         <HeaderTitle>
           <Title>{t('tools.stakingRewards.title')}</Title>
-          <Subtitle>
-            {t('tools.stakingRewards.subtitle')}
-          </Subtitle>
+          <Subtitle>{t('tools.stakingRewards.subtitle')}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -23,7 +21,9 @@ const SRRHeader = () => {
 export default SRRHeader;
 
 const HeaderLayout = styled.div`
+  box-sizing: border-box;
   width: 80vw;
+  max-height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
