@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import Table from './Table';
+import Table from './Table/chart';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import { ApiContext, ApiState } from '../../../components/Api';
@@ -10,8 +10,11 @@ import {
   chainGetValidatorCounts,
   chainGetWaitingCount,
 } from '../../../utils/Network';
+import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
+import { ReactComponent as DOTLogo } from '../../../assets/images/dot-logo.svg';
+import { ReactComponent as WNDLogo } from '../../../assets/images/wnd-logo.svg';
 import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
-import Chart from '../../../components/Chart';
+import BarChart from '../../../components/Chart/bar';
 import { apiGetAllValidator, IValidator } from '../../../apis/Validator';
 import { NetworkConfig } from '../../../utils/constants/Network';
 import { apiGetAllNominators, INominatorInfo } from '../../../apis/Nominator';
@@ -89,7 +92,7 @@ const StakeDistributionChart = () => {
     <StakeDistributionChartLayout>
       <SDCTitle>Stake Distrubution</SDCTitle>
       <ChartLayout>
-        <Chart
+        <BarChart
           data={stake}
           leftLabel={`Nominator Count`}
           xAxisHeight={80}
@@ -163,7 +166,7 @@ const CommissionDistributionChart = () => {
     <CommissionDistributionChartLayout>
       <CDCTitle>Commission Distrubution</CDCTitle>
       <ChartLayout>
-        <Chart
+        <BarChart
           data={commissions}
           leftLabel={`Validator Count`}
           xAxisHeight={80}
@@ -184,6 +187,17 @@ const CommissionDistributionChart = () => {
   );
 };
 
+const getLogoDiv = (network) => {
+  switch (network) {
+    case 'Kusama':
+      return <KSMLogo style={{ width: 36, height: 36 }} />;
+    case 'Polkadot':
+      return <DOTLogo style={{ width: 36, height: 36 }} />;
+    case 'Westend':
+      return <WNDLogo style={{ width: 36, height: 36 }} />;
+  }
+};
+
 const NetworkStatusTable = () => {
   const { t } = useTranslation();
   let { network: networkName, api: polkadotApi, apiState: networkStatus } = useContext(ApiContext);
@@ -192,8 +206,13 @@ const NetworkStatusTable = () => {
       {
         Header: t('benchmark.charts.table.header.network'),
         accessor: 'networkName',
-        maxWidth: 180,
-        Cell: ({ value }) => <span>{value}</span>,
+        width: 360,
+        Cell: ({ value }) => (
+          <span style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            {getLogoDiv(value)}
+            <NetworkTitle>{value}</NetworkTitle>
+          </span>
+        ),
       },
       {
         Header: t('benchmark.charts.table.header.validators'),
@@ -328,7 +347,7 @@ const ChartItem = styled.div`
 const TableLayout = styled.div`
   box-sizing: border-box;
   width: 100%;
-  padding: 4px;
+  padding: 4px 16px 4px 16px;
   border-radius: 6px;
   background-color: #2f3842;
 `;
@@ -353,7 +372,7 @@ const CDCTitle = styled.div`
 const ChartLayout = styled.div`
   box-sizing: border-box;
   width: 100%;
-  height: 466px;
+  height: 478px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -378,4 +397,16 @@ const SDCTitle = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: white;
+`;
+
+const NetworkTitle = styled.div`
+  margin-left: 8px;
+  margin-right: 8px;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  color: white;
+  flex-grow: 1;
 `;
