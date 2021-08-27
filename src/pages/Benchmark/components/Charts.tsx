@@ -35,21 +35,25 @@ interface IStake {
 const SDCXAxis = {
   polkadot: [10000, 100000, 500000, 1000000, 20000000, 50000000, 100000000],
   kusama: [1000, 5000, 10000, 20000, 30000, 50000, 100000],
+  polkadotTitle: ['<10k', '100k', '500k', '1M', '2M', '5M', '>10M'],
+  kusamaTitle: ['<1k', '5k', '10k', '20k', '30k', '50k', '>100k'],
 };
 
 const parseNominatorStakes = (network: string, decimals: number, nominators: INominatorInfo[]): IStake[] => {
   const stake: IStake[] = [];
   nominators.forEach((nominator) => {
     let xaxis = SDCXAxis.polkadot;
+    let xaxisTitle = SDCXAxis.polkadotTitle;
     if (network === 'kusama') {
       xaxis = SDCXAxis.kusama;
+      xaxisTitle = SDCXAxis.kusamaTitle;
     }
     // console.log(nominator);
     for (let i = 1; i < xaxis.length; i++) {
       if ((nominator as any).balance.lockedBalance / decimals < xaxis[i]) {
         if (stake[i - 1] === undefined) {
           stake[i - 1] = {
-            stakeRange: `${xaxis[i - 1]}`,
+            stakeRange: `${xaxisTitle[i - 1]}`,
             count: 0,
           };
         }
@@ -60,7 +64,7 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
     for (let i = 0; i < stake.length; i++) {
       if (stake[i] === undefined) {
         stake[i] = {
-          stakeRange: `${xaxis[i]}`,
+          stakeRange: `${xaxisTitle[i]}`,
           count: 0,
         };
       }
@@ -116,6 +120,8 @@ const StakeDistributionChart = () => {
 const CDCXAxis = {
   polkadot: [0, 1, 2, 3, 5, 10, 20, 100],
   kusama: [0, 1, 2, 3, 5, 10, 20, 100],
+  polkadotTitle: ['<1%', '1%', '2%', '3%', '5%', '10%', '20%', '>20%'],
+  kusamaTitle: ['<1%', '1%', '2%', '3%', '5%', '10%', '20%', '>20%'],
 };
 
 interface ICommission {
@@ -127,22 +133,30 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
   const commissions: ICommission[] = [];
   validators.forEach((validator) => {
     let xaxis = CDCXAxis.polkadot;
+    let xaxisTitle = CDCXAxis.polkadotTitle;
     if (network === 'kusama') {
       xaxis = CDCXAxis.kusama;
+      xaxisTitle = CDCXAxis.kusamaTitle;
     }
-    for (let i = 1; i < xaxis.length; i++) {
-      if (validator.info.commission < xaxis[i]) {
+    for (let i = 1; i <= xaxis.length; i++) {
+      let c = validator.info.commission;
+      if (c < 0.01) {
+        c = 0;
+      }
+      if (c <= xaxis[i - 1]) {
         if (commissions[i - 1] === undefined) {
           commissions[i - 1] = {
-            commission: `${xaxis[i - 1]} %`,
+            commission: `${xaxisTitle[i - 1]}`,
             count: 0,
           };
         }
+        console.log(validator.info.commission, commissions[i - 1].commission);
         commissions[i - 1].count++;
         break;
       }
     }
   });
+  console.log(commissions);
   return commissions;
 };
 
