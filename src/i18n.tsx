@@ -186,50 +186,21 @@ i18n
               }
             }
           },
-        },
-        about: {
-          description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
-          subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
-          mission: 'Our missions are,',
-          mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
-          mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
-          mission3: 'provide stable validating service.',
-        },
-        pm: {
-          performance: {
-            title: 'Performance',
-            subtitle: 'Your current statement of profitibility',
-          },
-          table: {
-            header: {
-              stash: 'Stash',
-              staked: 'Staked Amount',
-              profit: 'Profit',
-              totalInFiat: 'Profit in Fiat',
-              apy: 'APY',
-              unclaimedEras: 'Unclaimed Eras'
-            }
-          },
-          about: {
-            description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
-            subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
-            mission: 'Our missions are,',
-            mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
-            mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
-            mission3: 'provide stable validating service.',
-          },
-          benchmark: {
-            charts: {
-              table: {
-                header: {
-                  network: 'Network',
-                  validators: 'Validators',
-                  waiting: 'Waiting',
-                  nominators: 'Nominators',
-                  averageReturns: 'Avg. Returns'
-                }
+          pm: {
+            performance: {
+              title: 'Performance',
+              subtitle: 'Your current statement of profitibility',
+            },
+            table: {
+              header: {
+                stash: 'Stash',
+                staked: 'Staked Amount',
+                profit: 'Profit',
+                totalInFiat: 'Profit in Fiat',
+                apy: 'APY',
+                unclaimedEras: 'Unclaimed Eras'
               }
-            }
+            },
           },
         },
       },
