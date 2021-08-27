@@ -1,6 +1,6 @@
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -113,7 +113,7 @@ const Chart: React.FC<IChart> = ({
     <MainLayout>
       {showTools && <Tools />}
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
+        <BarChart
           data={data}
           margin={{
             top: 0,
@@ -176,49 +176,50 @@ const Chart: React.FC<IChart> = ({
             iconSize={16}
             iconType="square"
             verticalAlign="bottom"
-            // height={50}
+            height={50}
             wrapperStyle={{
               width: '100%',
               position: 'relative',
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-around',
+              alignItems: 'flex-start',
               fontSize: 13,
               height: 40,
-              bottom: 16,
+              bottom: 20,
             }}
           />
           {chartConfig?.firstDataKey && (
-            <Line
+            <Bar
               yAxisId={chartConfig?.firstDataYAxis}
-              type="linear"
+              //   type="linear"
               dataKey={chartConfig?.firstDataKey}
-              stroke="#21aca8"
-              strokeWidth={5}
-              dot={false}
+              fill="#21aca8"
+              //   strokeWidth={5}
+              //   dot={false}
             />
           )}
           {chartConfig?.secondDataKey && (
-            <Line
+            <Bar
               yAxisId={chartConfig?.secondDataYAxis}
-              type="linear"
+              //   type="linear"
               dataKey={chartConfig?.secondDataKey}
-              stroke="#6e95c3"
-              strokeWidth={5}
-              dot={false}
+              fill="#6e95c3"
+              //   strokeWidth={5}
+              //   dot={false}
             />
           )}
           {chartConfig?.thirdDataKey && (
-            <Line
+            <Bar
               yAxisId={chartConfig?.thirdDataYAxis}
-              type="linear"
+              //   type="linear"
               dataKey={chartConfig?.thirdDataKey}
-              stroke="#236bbe"
-              strokeWidth={5}
-              dot={false}
+              fill="#236bbe"
+              //   strokeWidth={5}
+              //   dot={false}
             />
           )}
-        </LineChart>
+        </BarChart>
       </ResponsiveContainer>
     </MainLayout>
   );
@@ -227,6 +228,7 @@ const Chart: React.FC<IChart> = ({
 export default Chart;
 
 const MainLayout = styled.div`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   display: flex;

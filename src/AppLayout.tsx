@@ -452,7 +452,7 @@ const AppLayout = () => {
         </div>
       </div>
     );
-  }, []);
+  }, [t]);
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
@@ -590,6 +590,7 @@ const RouteContent = styled.div`
 `;
 
 const HeaderLeftDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-start;
 `;
@@ -604,6 +605,7 @@ const HeaderMidDiv = styled.div`
 `;
 
 const HeaderRightDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-end;
 `;

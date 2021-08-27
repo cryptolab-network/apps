@@ -41,7 +41,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'toolsForValidators',
+                toolsForValidators: 'Tools For Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
@@ -135,6 +135,10 @@ i18n
               slashes: 'Slashes',
               activeNominators: 'Active Nominators',
               inactiveNominators: 'Inactive Nominators',
+              errors: {
+                incorrectValidator1: `The validator data of Stash`,
+                incorrectValidator2: `does not exist. Please make sure that you entered a correct validator ID`,
+              }
             },
             stakingRewards: {
               title: 'Staking Rewards',
@@ -166,8 +170,21 @@ i18n
             mission: 'Therefore, we build the following services for all of us.',
             mission1: 'A simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
             mission2: 'A bunch of tools for Polkadot and Kusama validator operators.',
-          }
-        }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
+        },
       },
       'zh-Hant-TW': {
         translation: {
@@ -257,6 +274,10 @@ i18n
               slashes: '懲罰次數',
               activeNominators: '此Era將Stake分配給您的提名人',
               inactiveNominators: '此Era未將Stake分配給您的提名人',
+              errors: {
+                incorrectValidator1: `不存在的驗證者`,
+                incorrectValidator2: `請確認您輸入正確的ID`,
+              }
             },
             oneKv: {
               title: '1KV 提名人資訊',
@@ -318,11 +339,24 @@ i18n
             mission: '因此，我們為各位建立以下服務',
             mission1: '為持幣者打造的一個直覺易用的質押服務',
             mission2: '為營運者打造的一系列驗證節點輔助工具',
-          }
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: '網路',
+                  validators: '驗證人',
+                  waiting: '等待中',
+                  nominators: '提名人',
+                  averageReturns: '平均報酬'
+                }
+              }
+            }
+          },
         },
       },
     }
   });
 // i18n.changeLanguage('zh-Hant-TW');
-// i18n.changeLanguage('en-US');
+i18n.changeLanguage('en-US');
 export default i18n;

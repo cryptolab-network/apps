@@ -51,7 +51,6 @@ interface iOption {
 }
 
 const ValidatorGrid = ({ filters, validators }) => {
-  const { t } = useTranslation();
   const history = useHistory();
   const { network: networkName } = useContext(DataContext);
   const chain = NetworkConfig[networkName].token;

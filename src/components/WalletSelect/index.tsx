@@ -152,7 +152,8 @@ const WalletSelect: React.FC = () => {
           <WalletLayout>
             <div>{selectedAccount.name}</div>
             <div>
-              Balance: <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
+              <span style={{ color: '#75818d' }}>Balance : </span>
+              <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
               {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
               {/* <BalanceNumber>123</BalanceNumber> */}
             </div>
@@ -252,7 +253,7 @@ const WalletLayout = styled.div`
 `;
 
 const BalanceTitle = styled.span`
-  color: #75818d;
+  color: #23beb9;
 `;
 
 const BalanceNumber = styled.span`
