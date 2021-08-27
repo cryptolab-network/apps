@@ -439,15 +439,9 @@ const AppLayout = () => {
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
-            <AboutUsGoalFontStyle>
-              {t('about.mission1')}
-            </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>
-              {t('about.mission2')}
-            </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>
-              {t('about.mission3')}
-            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission3')}</AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
@@ -590,6 +584,7 @@ const RouteContent = styled.div`
 `;
 
 const HeaderLeftDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-start;
 `;
@@ -604,6 +599,7 @@ const HeaderMidDiv = styled.div`
 `;
 
 const HeaderRightDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-end;
 `;
