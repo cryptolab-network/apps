@@ -6,6 +6,7 @@ import { IEraRewards, IStashRewards } from "../../../apis/StashRewards";
 import Account from "../../../components/Account";
 import Table from "../../../components/Table";
 import { NetworkConfig } from "../../../utils/constants/Network";
+import { shortenStashId } from "../../../utils/string";
 
 interface TableContent {
   stash: string,
@@ -26,7 +27,7 @@ const PortfolioTable = ({chain, accounts, rewards}) => {
         Header: t('pm.table.header.stash'),
         accessor: 'stash',
         maxWidth: 180,
-        Cell: ({ value }) => <span>{<Account address={value} display={value}/>}</span>,
+        Cell: ({ value }) => <span>{<Account address={value} display={shortenStashId(value)}/>}</span>,
       },
       {
         Header: t('pm.table.header.staked'),
@@ -41,7 +42,7 @@ const PortfolioTable = ({chain, accounts, rewards}) => {
         Cell: ({ value, row }) => <span>{value} {NetworkConfig[chain].token} ({row.original.fromDate} - {row.original.toDate})</span>,
       },
       {
-        Header: t('pm.table.header.total'),
+        Header: t('pm.table.header.totalInFiat'),
         accessor: 'totalInFiat',
         maxWidth: 180,
         Cell: ({ value }) => <span>{value} {'USD'}</span>,

@@ -11,6 +11,7 @@ import { apiGetStashRewards, IStashRewards } from "../../../apis/StashRewards";
 import moment from "moment";
 import CustomScaleLoader from "../../../components/Spinner/ScaleLoader";
 import PortfolioTable from "./PortFolioTable";
+import ProfitChart from "./ProfitCharts"
 
 const PerformanceHeader = () => {
   const { t } = useTranslation();
@@ -51,8 +52,8 @@ const Performance = () => {
               return apiGetStashRewards({
                 params: account.address,
                 query: {
-                  startDate: '2020-01-01',
-                  endDate: moment().format('YYYY-MM-DD'),
+                  start: '2020-01-01',
+                  end: moment().format('YYYY-MM-DD'),
                   currency: 'USD',
                   startBalance: 0.1
                 }
@@ -83,6 +84,10 @@ const Performance = () => {
           <PerformanceHeader />
         )}
       >
+        <ProfitChart 
+          chain={networkName}
+          accounts={accountsChainInfo}
+          rewards={accountsRewards}/>
         <PortfolioTable
           chain={networkName}
           accounts={accountsChainInfo}
