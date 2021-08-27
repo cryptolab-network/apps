@@ -433,15 +433,21 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
+          width: 'calc(100%/3)'
         }}
       >
-        <AboutUsFontStyle>{t('about.subDescription')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
+        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
-            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>{t('about.mission3')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>
+              {t('about.mission1')}
+            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>
+              {t('about.mission2')}
+            </AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
