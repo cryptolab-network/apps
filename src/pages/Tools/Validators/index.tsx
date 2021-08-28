@@ -13,9 +13,10 @@ import {
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
+import Chart from '../../../components/Chart';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
-import { balanceUnit } from '../../../utils/string';
+import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
@@ -109,6 +110,8 @@ const ValidatorStatus = (props) => {
     info: [],
     averageApy: 0,
   });
+  const [chartData1, setChartData1] = useState<any[]>([]);
+  const [chartData2, setChartData2] = useState<any[]>([]);
   const chain = props.match.params.chain;
   const _formatBalance = useCallback(
     (value: any) => {
@@ -159,6 +162,21 @@ const ValidatorStatus = (props) => {
         // TODO: error handling not yet
         setValidator(validator);
         if (validator.info.length > 0) {
+          const chartData1 = validator.info.map((era) => {
+            return {
+              nominators: era.nominatorCount,
+              commission: era.commission,
+              era: era.era,
+            };
+          });
+          const chartData2 = validator.info.map((era) => {
+            return {
+              apy: era.apy.toFixed(4),
+              era: era.era,
+            };
+          });
+          setChartData1(chartData1);
+          setChartData2(chartData2);
           const lastEraInfo = findLastEra(validator.info);
           const _nominators = lastEraInfo.nominators;
           setSelfStake(_formatBalance(lastEraInfo.selfStake));
@@ -190,7 +208,9 @@ const ValidatorStatus = (props) => {
           _setSlashes(slashes);
         }
       } catch (err) {
-        notifyError(err);
+        notifyError(t('tools.validators.errors.incorrectValidator1') +
+          `${shortenStashId(props.match.params.id)} ` +
+          t('tools.validators.errors.incorrectValidator2'));
       }
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
@@ -217,7 +237,7 @@ const ValidatorStatus = (props) => {
       }
     }
     getValidator();
-  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError]);
+  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError, t]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>
@@ -234,6 +254,30 @@ const ValidatorStatus = (props) => {
             <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
             <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
           </ValidatorInfoLayout>
+          <ChartsLayout>
+            <ChartContainer>
+              <Chart showTools data={chartData1} leftLabel="Nominator Count" rightLabel="Commission ( % )"
+                config={{
+                  xKey: 'era',
+                  firstDataKey: 'nominators',
+                  secondDataKey: 'commission',
+                  firstDataYAxis: 'left',
+                  secondDataYAxis: 'right',
+                }}
+              />
+            </ChartContainer>
+            <ChartContainer>
+              <Chart
+                data={chartData2}
+                leftLabel="APY"
+                config={{
+                  xKey: 'era',
+                  firstDataKey: 'apy',
+                  firstDataYAxis: 'left',
+                }}
+              />
+            </ChartContainer>
+          </ChartsLayout>
           <ContentColumnLayout width="100%" justifyContent="flex-start">
             <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
             <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
@@ -372,6 +416,33 @@ type ContentColumnLayoutProps = {
   justifyContent?: string;
   width?: string;
 };
+
+const ChartsLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  // padding: 13px 18.7px 15.7px 16px;
+`;
+
+const ChartContainer = styled.div`
+  box-sizing: border-box;
+  flex: 1;
+  height: 500px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #2f3842;
+  padding: 13px 16px 13px 16px;
+  margin: 5px 4px 5px 4px;
+  border-radius: 6px;
+  color: white;
+  font-family: Montserrat;
+  font-size: 11px;
+  font-weight: 500;
+`;
+
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
   display: flex;
   flex-direction: column;

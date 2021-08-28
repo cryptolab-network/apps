@@ -10,8 +10,23 @@ export enum NetworkCodeName {
   WND = 'westend',
 }
 
-export const NetworkConfig = {
-  'Polkadot': {
+interface INetworkConfig {
+  name: string;
+  token: string;
+  prefix: number;
+  genesisHash: string;
+  wss: string;
+  maxNominateCount: number;
+  decimals: number;
+  handlingFee: number;
+}
+
+interface INetworkConfigs {
+  [key: string]: INetworkConfig;
+}
+
+export const NetworkConfig: INetworkConfigs = {
+  Polkadot: {
     name: 'Polkadot',
     token: 'DOT',
     prefix: 0,
@@ -19,8 +34,9 @@ export const NetworkConfig = {
     wss: 'wss://rpc.polkadot.io/',
     maxNominateCount: 16,
     decimals: 10,
+    handlingFee: 0.02,
   },
-  'Kusama': {
+  Kusama: {
     name: 'Kusama',
     token: 'KSM',
     prefix: 2,
@@ -28,8 +44,9 @@ export const NetworkConfig = {
     wss: 'wss://kusama-rpc.polkadot.io/',
     maxNominateCount: 24,
     decimals: 12,
+    handlingFee: 0.02,
   },
-  'Westend': {
+  Westend: {
     name: 'Westend',
     token: 'WND',
     prefix: 42,
@@ -37,5 +54,6 @@ export const NetworkConfig = {
     wss: 'wss://westend.api.onfinality.io/public-ws',
     maxNominateCount: 16,
     decimals: 12,
+    handlingFee: 0.02,
   },
-}
+};

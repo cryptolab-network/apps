@@ -41,7 +41,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'toolsForValidators',
+                toolsForValidators: 'Tools For Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
@@ -55,19 +55,19 @@ i18n
               }
             },
             portal: {
-              slogan: 'Built to maximize staking yield',
-              sloganDetail: 'CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more accessible, for technical and non-technical users alike.',
+              slogan: 'Built to create stable staking yields',//'Built to maximize staking yield',
+              sloganDetail: 'CryptoLab is making life way easier for crypto holders. We help you earn staking yield without taking custody of your assets. Stake once, CryptoLab will take care of the rest for you.',//'CryptoLab is a portfolio management platform for NPoS (nominated proof-of-stake) networks like Kusama and Polkadot. We aim to simplify portfolio management to make yield optimization easier and more accessible, for technical and non-technical users alike.',
               stakingGuide: {
                 title: 'Staking Guide',
                 detail: 'Learn how to use our services',
               },
               portfolioBenchmark: {
                 title: 'Portfolio Benchmark',
-                detail: 'Make assessment on validators, and select from them to stake.',
+                detail: 'We know validtors very well. You can use our prebuilt staking strategies or even invent yours.',//'Make assessment on validators, and select from them to stake.',
               },
               portfolioManagement: {
                 title: 'Portfolio Management',
-                detail: 'Manage after you stake. See rewards and validator status.',
+                detail: 'Stability is vital for the Long Haul. We will inform you to take action before things changed.',//'Manage after you stake. See rewards and validator status.',
               },
             }
           },
@@ -135,6 +135,10 @@ i18n
               slashes: 'Slashes',
               activeNominators: 'Active Nominators',
               inactiveNominators: 'Inactive Nominators',
+              errors: {
+                incorrectValidator1: `The validator data of Stash`,
+                incorrectValidator2: `does not exist. Please make sure that you entered a correct validator ID`,
+              }
             },
             stakingRewards: {
               title: 'Staking Rewards',
@@ -160,16 +164,27 @@ i18n
               from: 'From',
               to: 'to',
             },
-          }
+          },
+          about: {
+            description: 'We are CryptoLab, we operate Polkadot and Kusama validators. We believe that blockchain will change the way we live, work, and even thought. Our goal is to make everyone enjoys the benefit of blockchain technology.',
+            mission: 'Therefore, we build the following services for all of us.',
+            mission1: 'A simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
+            mission2: 'A bunch of tools for Polkadot and Kusama validator operators.',
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: 'Network',
+                  validators: 'Validators',
+                  waiting: 'Waiting',
+                  nominators: 'Nominators',
+                  averageReturns: 'Avg. Returns'
+                }
+              }
+            }
+          },
         },
-        about: {
-          description: 'We are CryptoLab. We operate Polkadot and Kusama validators.',
-          subDescription: 'We make the CryptoLab Network because we found the community needs useful tools to help us to have better information about staking.',
-          mission: 'Our missions are,',
-          mission1: 'provide a simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
-          mission2: 'provide data collection and analysis services for Polkadot and Kusama node operators.',
-          mission3: 'provide stable validating service.',
-        }
       },
       'zh-Hant-TW': {
         translation: {
@@ -209,19 +224,19 @@ i18n
               }
             },
             portal: {
-              slogan: '最大化您的質押收益',
-              sloganDetail: 'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
+              slogan: '創造穩定的質押收益',//'最大化您的質押收益',
+              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益，且無須託管您的資產。質押一次， CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
               stakingGuide: {
-                title: '質押說明',
-                detail: '使用我們的服務的教學',
+                title: '質押教學',
+                detail: '手把手說明如何使用我們的服務',
               },
               portfolioBenchmark: {
                 title: '質押評估',
-                detail: '依據不同的條件選擇適合的驗證節點 並完成質押',
+                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略，或是打造您自己的',
               },
               portfolioManagement: {
                 title: '質押管理',
-                detail: '進行質押後的管理 查看驗證節點資訊以及您的質押收益',
+                detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會即時通知您並採取行動',
               },
             }
           },
@@ -259,6 +274,10 @@ i18n
               slashes: '懲罰次數',
               activeNominators: '此Era將Stake分配給您的提名人',
               inactiveNominators: '此Era未將Stake分配給您的提名人',
+              errors: {
+                incorrectValidator1: `不存在的驗證者`,
+                incorrectValidator2: `請確認您輸入正確的ID`,
+              }
             },
             oneKv: {
               title: '1KV 提名人資訊',
@@ -316,16 +335,28 @@ i18n
             },
           },
           about: {
-            description: '我們是 CryptoLab. Polkadot 和 Kusama 驗證節點的運營者.',
-            subDescription: '我們提供CryptoLab是因為我們發現社群需要簡單易用的質押服務',
-            mission: '以下是我們的使命',
-            mission1: '為提名人提供簡單易用的質押服務',
-            mission2: '為節點管理者及提名人提供監控驗證人狀態的服務',
-            mission3: '為網路提供穩定的驗證節點',
-          }
+            description: '我們是 CryptoLab. Polkadot 和 Kusama 驗證節點的運營者. 我們相信區塊鏈技術將改變生活、工作、甚至思考方式。我們的目標是讓每個人都享受到區塊鏈技術帶來的美好',
+            mission: '因此，我們為各位建立以下服務',
+            mission1: '為持幣者打造的一個直覺易用的質押服務',
+            mission2: '為營運者打造的一系列驗證節點輔助工具',
+          },
+          benchmark: {
+            charts: {
+              table: {
+                header: {
+                  network: '網路',
+                  validators: '驗證人',
+                  waiting: '等待中',
+                  nominators: '提名人',
+                  averageReturns: '平均報酬'
+                }
+              }
+            }
+          },
         },
       },
     }
   });
-i18n.changeLanguage('zh-Hant-TW');
+// i18n.changeLanguage('zh-Hant-TW');
+i18n.changeLanguage('en-US');
 export default i18n;

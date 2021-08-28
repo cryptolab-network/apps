@@ -433,9 +433,12 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
+          width: 'calc(100%/3)'
         }}
       >
-        <AboutUsFontStyle>{t('about.subDescription')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
+        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
@@ -445,14 +448,11 @@ const AppLayout = () => {
             <AboutUsGoalFontStyle>
               {t('about.mission2')}
             </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>
-              {t('about.mission3')}
-            </AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
     );
-  }, []);
+  }, [t]);
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
@@ -590,6 +590,7 @@ const RouteContent = styled.div`
 `;
 
 const HeaderLeftDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-start;
 `;
@@ -604,6 +605,7 @@ const HeaderMidDiv = styled.div`
 `;
 
 const HeaderRightDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-end;
 `;

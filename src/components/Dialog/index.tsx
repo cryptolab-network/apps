@@ -7,9 +7,17 @@ interface IDialogWithImage {
   title?: string;
   isOpen: boolean;
   handleDialogClose: Function;
+  padding?: string;
 }
 
-const Dialog: React.FC<IDialogWithImage> = ({ image, title, isOpen, handleDialogClose, children }) => {
+const Dialog: React.FC<IDialogWithImage> = ({
+  image,
+  title,
+  isOpen,
+  handleDialogClose,
+  padding,
+  children,
+}) => {
   const customStyles = {
     overlay: {
       position: 'fixed',
@@ -54,7 +62,7 @@ const Dialog: React.FC<IDialogWithImage> = ({ image, title, isOpen, handleDialog
       style={customStyles}
       contentLabel="Example Modal"
     >
-      <DialogMainLayout>
+      <DialogMainLayout padding={padding}>
         {imageDOM}
         {titleDOM}
         {children}
@@ -65,8 +73,12 @@ const Dialog: React.FC<IDialogWithImage> = ({ image, title, isOpen, handleDialog
 
 export default Dialog;
 
-const DialogMainLayout = styled.div`
-  padding: 68px 16px 53px 16px;
+interface IDialogMainLayout {
+  padding: string | undefined;
+}
+
+const DialogMainLayout = styled.div<IDialogMainLayout>`
+  padding: ${(props) => (props.padding ? props.padding : '68px 16px 53px 16px')};
   display: flex;
   flex-direction: column;
   align-items: center;
