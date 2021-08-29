@@ -433,7 +433,7 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
-          width: 'calc(100%/3)'
+          width: 'calc(100%/3)',
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
@@ -442,12 +442,8 @@ const AppLayout = () => {
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
-            <AboutUsGoalFontStyle>
-              {t('about.mission1')}
-            </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>
-              {t('about.mission2')}
-            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
@@ -719,6 +715,7 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
+  min-width: fit-content;
   height: 75%;
   margin: 0;
   border: 0;
@@ -730,13 +727,10 @@ const SubmitButton = styled.button`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
   line-height: 1.23;
-  letter-spacing: normal;
 `;
 const CopyRightDiv = styled.div`
-  heigth: 64px;
+  height: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;
