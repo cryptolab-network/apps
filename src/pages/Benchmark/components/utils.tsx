@@ -229,7 +229,10 @@ export const apyCalculation = (tableData: ITableData[], selectableCount?: number
   for (let idx = 0; idx < tableData.length; idx++) {
     if (tableData[idx].select) {
       tempApyInfo.sum += tableData[idx].avgAPY;
-      tempApyInfo.counter += 1;
+      if (tableData[idx].avgAPY > 0) {
+        // we only count the avgAPY that is > 0, otherwise we just selected, but dont't count
+        tempApyInfo.counter += 1;
+      }
     } else {
       break;
     }
