@@ -36,8 +36,9 @@ import Dialog from './components/Dialog';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
-
 import { useTranslation } from 'react-i18next';
+import { isMobile } from "react-device-detect";
+import Mobile from './pages/Mobile';
 
 // header
 const Header: React.FC = () => {
@@ -553,19 +554,34 @@ const AppLayout = () => {
     visibleOurValidatorsDialog,
   ]);
 
-  return (
-    <>
-      <GradientLight>
-        <BrowserRouter>
-          {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
-          {/* <Api>{mainRender}</Api> */}
-        </BrowserRouter>
-        {/* <StarAnimation id="stars" />
-        <StarAnimation id="stars2" />
-        <StarAnimation id="stars3" /> */}
-      </GradientLight>
-    </>
-  );
+  if (isMobile) {
+    if (isToolsSite) {
+      return (
+        <>
+          <Mobile isTools={true} />
+        </>
+      )  
+    }
+    return (
+      <>
+        <Mobile isTools={false}/>
+      </>
+    )
+  } else {
+    return (
+      <>
+        <GradientLight>
+          <BrowserRouter>
+            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
+            {/* <Api>{mainRender}</Api> */}
+          </BrowserRouter>
+          {/* <StarAnimation id="stars" />
+          <StarAnimation id="stars2" />
+          <StarAnimation id="stars3" /> */}
+        </GradientLight>
+      </>
+    );
+  }
 };
 
 export default AppLayout;
