@@ -31,7 +31,7 @@ interface ITabItem {
 }
 
 const TabLayout = styled.div`
-  width: 70%;
+  /* width: 70%; */
   display: flex;
   justify-content: space-between;
   align-items: center;
