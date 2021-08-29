@@ -270,80 +270,6 @@ const StrategyConfig = {
 const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
 const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
 
-const queryStakingInfo = async (address, api: ApiPromise) => {
-  const [info, ledger] = await Promise.all([
-    api.derive.staking.account(address),
-    api.query.staking.ledger(address),
-  ]);
-
-  const rewardDestination = info.rewardDestination.isStaked
-    ? RewardDestinationType.STAKED
-    : info.rewardDestination.isStash
-    ? RewardDestinationType.STASH
-    : info.rewardDestination.isController
-    ? RewardDestinationType.CONTROLLER
-    : RewardDestinationType.ACCOUNT;
-  const rewardDestinationAddress =
-    rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
-
-  let role;
-  let isNominatable = false;
-  let bonded;
-  let validators;
-  if (info.nextSessionIds.length !== 0) {
-    role = AccountRole.VALIDATOR;
-    bonded = info.stakingLedger.total.unwrap().toHex();
-    validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = VALIDATOR`);
-  } else if (!info.stakingLedger.total.unwrap().isZero()) {
-    if (info.controllerId?.toHuman() === address) {
-      role = AccountRole.NOMINATOR_AND_CONTROLLER;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR_AND_CONTROLLER`);
-      isNominatable = true;
-    } else {
-      role = AccountRole.NOMINATOR;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR`);
-    }
-  } else if (!ledger.isNone) {
-    const stash = ledger.unwrap().stash.toHuman();
-    const staking = await api.derive.staking.account(stash);
-    if (staking.nextSessionIds.length !== 0) {
-      role = AccountRole.CONTROLLER_OF_VALIDATOR;
-      bonded = staking.stakingLedger.total.unwrap().toHex();
-      validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_VALIDATOR`);
-    } else {
-      role = AccountRole.CONTROLLER_OF_NOMINATOR;
-      bonded = staking.stakingLedger.total.unwrap().toHex();
-      validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_NOMINATOR`);
-      isNominatable = true;
-    }
-  } else {
-    role = AccountRole.NONE;
-    bonded = info.stakingLedger.total.unwrap().toHex();
-    validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = NONE`);
-    isNominatable = true;
-  }
-
-  return {
-    role,
-    controller: info.controllerId?.toHuman(),
-    validators,
-    rewardDestination,
-    rewardDestinationAddress,
-    bonded,
-    redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable,
-    isReady: true,
-  };
-};
-
 const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
   const {
     activeEra,
@@ -440,7 +366,8 @@ const Staking = () => {
   } as unknown as IAccountChainInfo);
   const [eraInfo, setEraInfo] = useState<IEraInfo>();
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
-  const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
+  // const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
+  const [isAccountInfoLoading, setIsAccountInfoLoading] = useState(true);
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -587,8 +514,85 @@ const Staking = () => {
     });
   }, []);
 
+  const queryStakingInfo = useCallback(async (address, api: ApiPromise) => {
+    const [info, ledger] = await Promise.all([
+      api.derive.staking.account(address),
+      api.query.staking.ledger(address),
+    ]);
+
+    const rewardDestination = info.rewardDestination.isStaked
+      ? RewardDestinationType.STAKED
+      : info.rewardDestination.isStash
+      ? RewardDestinationType.STASH
+      : info.rewardDestination.isController
+      ? RewardDestinationType.CONTROLLER
+      : RewardDestinationType.ACCOUNT;
+    const rewardDestinationAddress =
+      rewardDestination === RewardDestinationType.ACCOUNT
+        ? info.rewardDestination.asAccount.toString()
+        : null;
+
+    let role;
+    let isNominatable = false;
+    let bonded;
+    let validators;
+    if (info.nextSessionIds.length !== 0) {
+      role = AccountRole.VALIDATOR;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      validators = info.nominators.map((n) => n.toHuman());
+      console.log(`role = VALIDATOR`);
+    } else if (!info.stakingLedger.total.unwrap().isZero()) {
+      if (info.controllerId?.toHuman() === address) {
+        role = AccountRole.NOMINATOR_AND_CONTROLLER;
+        bonded = info.stakingLedger.total.unwrap().toHex();
+        validators = info.nominators.map((n) => n.toHuman());
+        console.log(`role = NOMINATOR_AND_CONTROLLER`);
+        isNominatable = true;
+      } else {
+        role = AccountRole.NOMINATOR;
+        bonded = info.stakingLedger.total.unwrap().toHex();
+        validators = info.nominators.map((n) => n.toHuman());
+        console.log(`role = NOMINATOR`);
+      }
+    } else if (!ledger.isNone) {
+      const stash = ledger.unwrap().stash.toHuman();
+      const staking = await api.derive.staking.account(stash);
+      if (staking.nextSessionIds.length !== 0) {
+        role = AccountRole.CONTROLLER_OF_VALIDATOR;
+        bonded = staking.stakingLedger.total.unwrap().toHex();
+        validators = staking.nominators.map((n) => n.toHuman());
+        console.log(`role = CONTROLLER_OF_VALIDATOR`);
+      } else {
+        role = AccountRole.CONTROLLER_OF_NOMINATOR;
+        bonded = staking.stakingLedger.total.unwrap().toHex();
+        validators = staking.nominators.map((n) => n.toHuman());
+        console.log(`role = CONTROLLER_OF_NOMINATOR`);
+        isNominatable = true;
+      }
+    } else {
+      role = AccountRole.NONE;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      validators = info.nominators.map((n) => n.toHuman());
+      console.log(`role = NONE`);
+      isNominatable = true;
+    }
+    setIsAccountInfoLoading(false);
+    return {
+      role,
+      controller: info.controllerId?.toHuman(),
+      validators,
+      rewardDestination,
+      rewardDestinationAddress,
+      bonded,
+      redeemable: info.redeemable ? info.redeemable.toHex() : '0',
+      isNominatable,
+      isReady: true,
+    };
+  }, []);
+
   const txStatusCallback = useCallback(
     ({ events = [], status }: { events?: EventRecord[]; status: ExtrinsicStatus }) => {
+      setIsAccountInfoLoading(true);
       if (status.isInvalid) {
         console.log('Transaction invalid');
         notifyWarn('Transaction invalid');
@@ -626,7 +630,16 @@ const Staking = () => {
         refreshAccountData(selectedAccount);
       }
     },
-    [notifyWarn, notifyInfo, selectedAccount, polkadotApi, refreshAccountData, notifySuccess, notifyFailed]
+    [
+      notifyWarn,
+      notifyInfo,
+      queryStakingInfo,
+      selectedAccount,
+      polkadotApi,
+      refreshAccountData,
+      notifySuccess,
+      notifyFailed,
+    ]
   );
 
   useEffect(() => {
@@ -643,6 +656,7 @@ const Staking = () => {
   }, [advancedOption.advanced]);
 
   useEffect(() => {
+    setIsAccountInfoLoading(true);
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
       setAccountChainInfo((prev) => ({ ...prev, isReady: false }));
       queryStakingInfo(selectedAccount.address, polkadotApi)
@@ -655,7 +669,7 @@ const Staking = () => {
         })
         .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -1666,6 +1680,74 @@ const Staking = () => {
     );
   }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData.tableData, filterResultInfo]);
 
+  const accountInfo = useMemo(() => {
+    if (isAccountInfoLoading) {
+      return <ScaleLoader />;
+    } else {
+      return (
+        <>
+          <BalanceContextLeft>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>Role</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>Nominees</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>Bonded</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+          </BalanceContextLeft>
+          <BalanceContextRight>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>Reserved</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>
+                  {_formatBalance(selectedAccount?.balances?.reservedBalance)}
+                </BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>Redeemable</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div style={{ height: '19px' }}></div>
+            </BalanceContextRow>
+          </BalanceContextRight>
+        </>
+      );
+    }
+  }, [
+    _formatBalance,
+    accountChainInfo?.bonded,
+    accountChainInfo?.redeemable,
+    accountChainInfo?.role,
+    accountChainInfo?.validators?.length,
+    selectedAccount?.balances?.reservedBalance,
+    isAccountInfoLoading,
+  ]);
+
   return (
     <>
       <CardHeader
@@ -1710,56 +1792,8 @@ const Staking = () => {
               />
             </ContentBlockRight>
           </ContentBlockBadgeBalance>
-          <BalanceContextBlock advanced={advancedOption.advanced} show={extraBalanceInfoVisible}>
-            <BalanceContextLeft>
-              <BalanceContextRow>
-                <div>
-                  <BalanceContextLabel>Role</BalanceContextLabel>
-                </div>
-                <div>
-                  <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
-                </div>
-              </BalanceContextRow>
-              <BalanceContextRow>
-                <div>
-                  <BalanceContextLabel>Nominees</BalanceContextLabel>
-                </div>
-                <div>
-                  <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
-                </div>
-              </BalanceContextRow>
-              <BalanceContextRow>
-                <div>
-                  <BalanceContextLabel>Bonded</BalanceContextLabel>
-                </div>
-                <div>
-                  <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
-                </div>
-              </BalanceContextRow>
-            </BalanceContextLeft>
-            <BalanceContextRight>
-              <BalanceContextRow>
-                <div>
-                  <BalanceContextLabel>Reserved</BalanceContextLabel>
-                </div>
-                <div>
-                  <BalanceContextValue>
-                    {_formatBalance(selectedAccount?.balances?.reservedBalance)}
-                  </BalanceContextValue>
-                </div>
-              </BalanceContextRow>
-              <BalanceContextRow>
-                <div>
-                  <BalanceContextLabel>Redeemable</BalanceContextLabel>
-                </div>
-                <div>
-                  <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
-                </div>
-              </BalanceContextRow>
-              <BalanceContextRow>
-                <div style={{ height: '19px' }}></div>
-              </BalanceContextRow>
-            </BalanceContextRight>
+          <BalanceContextBlock advanced={advancedOption.advanced} show={true}>
+            {accountInfo}
           </BalanceContextBlock>
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
@@ -1930,27 +1964,9 @@ const BalanceContextValue = styled.div`
   color: #23beb9;
 `;
 
-const BalanceContextUnit = styled.div`
-  font-family: Montserrat;
-  font-size: 12px;
-  font-weight: 500;
-  text-align: right;
-  color: white;
-`;
-
 type BalanceProps = {
   color?: string;
 };
-
-const DetailedBalance = styled.div<BalanceProps>`
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.23;
-  color: ${(props) => (props.color ? props.color : 'black')};
-`;
 
 interface ContentBlockWrapProps {
   advanced: Boolean;
