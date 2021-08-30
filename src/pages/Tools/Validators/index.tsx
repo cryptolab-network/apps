@@ -175,6 +175,7 @@ const ValidatorStatus = (props) => {
               era: era.era,
             };
           });
+
           setChartData1(chartData1);
           setChartData2(chartData2);
           const lastEraInfo = findLastEra(validator.info);
