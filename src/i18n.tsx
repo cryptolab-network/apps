@@ -52,6 +52,7 @@ i18n
                 privacyPolicy: 'Privacy Policy',
                 enterEmail: 'Enter your email address',
                 general: 'General',
+                language: 'Language',
               }
             },
             portal: {
@@ -226,6 +227,7 @@ i18n
                 disclaimer: '使用條款',
                 privacyPolicy: '隱私權政策',
                 general: '一般',
+                language: '多國語系',
               }
             },
             portal: {
