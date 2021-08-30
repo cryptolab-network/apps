@@ -106,7 +106,6 @@ const ValidNominator: React.FC<IValidNominator> = ({
           <EnhanceValue data-for="favorite" data-tip={t('tools.valnom.tips.tooManyUnclaimedPayouts')}>
             <UnclaimedPayoutsIcon />
           </EnhanceValue>
-          
         </div>
       );
     } else {
@@ -177,17 +176,17 @@ const ValidNominator: React.FC<IValidNominator> = ({
             {totalAmount}
           </span>
           <div data-for="apy" data-tip={t('tools.valnom.tips.apy')}>
-          {t('tools.valnom.tips.averageApy')}
+            {t('tools.valnom.tips.averageApy')}
             <EnhanceValue>{apy}%</EnhanceValue>
           </div>
         </ValuePart>
       </MainInfo>
       <SubInfo>
         <ValuePart>
-        {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
+          {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
         <ValuePart>
-        {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
+          {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
     </ValidNominatorLayout>
@@ -201,7 +200,7 @@ const ValidNominatorLayout = styled.div`
   height: 270px;
   box-sizing: border-box;
   padding: 20px 2px 15px;
-  margin: 4px;
+  /* margin: 4px; */
   border-radius: 8px;
   background-color: #2f3842;
   display: flex;
