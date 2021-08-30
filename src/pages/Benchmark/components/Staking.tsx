@@ -55,6 +55,7 @@ import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
+import { useTranslation } from 'react-i18next';
 
 enum Strategy {
   LOW_RISK,
@@ -267,9 +268,6 @@ const StrategyConfig = {
   },
 };
 
-const BASIC_DEFAULT_STRATEGY = { label: 'Low risk', value: Strategy.LOW_RISK };
-const ADVANCED_DEFAULT_STRATEGY = { label: 'Custom', value: Strategy.CUSTOM };
-
 const queryStakingInfo = async (address, api: ApiPromise) => {
   const [info, ledger] = await Promise.all([
     api.derive.staking.account(address),
@@ -400,6 +398,17 @@ enum StrategyType {
 }
 
 const Staking = () => {
+  const { t } = useTranslation();
+  
+  const BASIC_DEFAULT_STRATEGY = useMemo(() => {
+    return {
+      label: t('benchmark.staking.strategy.lowRisk'),
+      value: Strategy.LOW_RISK
+    };
+  }, [t]);
+  const ADVANCED_DEFAULT_STRATEGY = useMemo(() => {
+    return { label: t('benchmark.staking.strategy.custom'), value: Strategy.CUSTOM };
+  }, [t]);
   // context
   let {
     network: networkName,
@@ -461,21 +470,21 @@ const Staking = () => {
     } else {
       // while using basic mode, we use strategy in the list below
       return [
-        { label: 'Low risk', value: Strategy.LOW_RISK },
-        { label: 'High APY', value: Strategy.HIGH_APY },
-        { label: 'Decentralization', value: Strategy.DECENTRAL },
-        { label: '1KV validators', value: Strategy.ONE_KV },
+        { label: t('benchmark.staking.strategy.lowRisk'), value: Strategy.LOW_RISK },
+        { label: t('benchmark.staking.strategy.highApy'), value: Strategy.HIGH_APY },
+        { label: t('benchmark.staking.strategy.decentralized'), value: Strategy.DECENTRAL },
+        { label: t('benchmark.staking.strategy.onekv'), value: Strategy.ONE_KV },
       ];
     }
-  }, [advancedOption.advanced]);
+  }, [advancedOption.advanced, t]);
 
   const walletBalance = useMemo(() => {
     if (selectedAccount) {
       return _formatBalance(selectedAccount?.balances?.totalBalance);
     } else {
-      return '(please select a wallet)';
+      return t('benchmark.staking.selectWallet');
     }
-  }, [_formatBalance, selectedAccount]);
+  }, [_formatBalance, selectedAccount, t]);
 
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
@@ -591,33 +600,32 @@ const Staking = () => {
     ({ events = [], status }: { events?: EventRecord[]; status: ExtrinsicStatus }) => {
       if (status.isInvalid) {
         console.log('Transaction invalid');
-        notifyWarn('Transaction invalid');
+        notifyWarn(t('benchmark.staking.warnings.transactionFailed'));
       } else if (status.isReady) {
         console.log('Transaction is ready');
-        notifyInfo('Transaction is ready');
+        notifyInfo(t('benchmark.staking.warnings.transactionReady'));
       } else if (status.isBroadcast) {
         console.log('Transaction has been broadcasted');
-        notifyInfo(<div>Transaction has been broadcasted</div>);
+        notifyInfo(<div>{t('benchmark.staking.warnings.transactionBroadcasted')}</div>);
       } else if (status.isInBlock) {
         console.log('Transaction is included in block');
-        notifyInfo('Transaction is included in block');
+        notifyInfo(t('benchmark.staking.warnings.transactionIsIncluded'));
       } else if (status.isFinalized) {
         const blockHash = status.asFinalized.toHex();
         console.log(`Transaction is included in block ${blockHash}`);
         notifyInfo(
           <div>
-            Transaction has been included in <br />
-            blockHash {blockHash.substring(0, 9)}...
+            {t('benchmark.staking.warnings.transactionIsIncludedInBlock')} {blockHash.substring(0, 9)}...
             {blockHash.substring(blockHash.length - 8, blockHash.length)}
           </div>
         );
         events.forEach(({ event }) => {
           if (event.method === 'ExtrinsicSuccess') {
             console.log('Transaction succeeded');
-            notifySuccess('Transaction succeeded');
+            notifySuccess(t('benchmark.staking.warnings.transactionSucceeded'));
           } else if (event.method === 'ExtrinsicFailed') {
             console.log('Transaction failed');
-            notifyFailed('Transaction failed');
+            notifyFailed(t('benchmark.staking.warnings.transactionFailed'));
           }
         });
         // update account data
@@ -626,7 +634,7 @@ const Staking = () => {
         refreshAccountData(selectedAccount);
       }
     },
-    [notifyWarn, notifyInfo, selectedAccount, polkadotApi, refreshAccountData, notifySuccess, notifyFailed]
+    [notifyWarn, t, notifyInfo, selectedAccount, polkadotApi, refreshAccountData, notifySuccess, notifyFailed]
   );
 
   useEffect(() => {
@@ -640,7 +648,7 @@ const Staking = () => {
       setInputData((prev) => ({ ...prev, strategy: BASIC_DEFAULT_STRATEGY }));
       setAdvancedSetting(StrategyConfig.LOW_RISK);
     }
-  }, [advancedOption.advanced]);
+  }, [ADVANCED_DEFAULT_STRATEGY, BASIC_DEFAULT_STRATEGY, advancedOption.advanced]);
 
   useEffect(() => {
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
@@ -674,12 +682,13 @@ const Staking = () => {
   }, [networkName, networkStatus, polkadotApi, setMinNominatorBond]);
 
   const nominatableInfo = useMemo((): INomitableInfo => {
+    const msg = t('benchmark.staking.warnings.disconnectedFirst') + networkName + t('benchmark.staking.warnings.disconnectedSecond');
     if (networkStatus !== ApiState.READY) {
       return {
         nominatable: false,
         warning: (
           <Warning
-            msg={`Your have disconnected to ${networkName} network, please wait a moment or refresh the page.`}
+            msg={msg}
           />
         ),
       };
@@ -688,7 +697,7 @@ const Staking = () => {
     if (apiLoading) {
       return {
         nominatable: false,
-        warning: <Warning msg="Validator list is fetching. As such staking operations are not permitted." />,
+        warning: <Warning msg={t('benchmark.staking.warnings.fetching')} />,
       };
     }
 
@@ -696,7 +705,7 @@ const Staking = () => {
       return {
         nominatable: false,
         warning: (
-          <Warning msg="The filtered validator count is 0. As such staking operations are not permitted." />
+          <Warning msg={t('benchmark.staking.warnings.noFilteredValidators')} />
         ),
       };
     }
@@ -705,7 +714,7 @@ const Staking = () => {
       return {
         nominatable: false,
         warning: (
-          <Warning msg="You haven't selected any validators yet. As such staking operations are not permitted." />
+          <Warning msg={t('benchmark.staking.warnings.noSelectedValidators')} />
         ),
       };
     }
@@ -713,24 +722,21 @@ const Staking = () => {
     if (!accountChainInfo.isReady) {
       return {
         nominatable: false,
-        warning: <Warning msg="On-chain data is fetching. As such staking operations are not permitted." />,
+        warning: <Warning msg={t('benchmark.staking.warnings.fetchingStashData')} />,
       };
     }
 
     if (!accountChainInfo.isNominatable) {
-      let msg =
-        'This account cannot operate staking related extrinsics. As such staking operations are not permitted.';
+      let msg = t('benchmark.staking.warnings.stashInvalid');
       switch (accountChainInfo.role) {
         case AccountRole.VALIDATOR:
-          msg = "This account's role is Validator. As such staking operations are not permitted.";
+          msg = t('benchmark.staking.warnings.isValidator');
           break;
         case AccountRole.CONTROLLER_OF_VALIDATOR:
-          msg =
-            "This account's role is Controller of Validator. As such staking operations are not permitted.";
+          msg = t('benchmark.staking.warnings.isControllerOfValidator');
           break;
         case AccountRole.NOMINATOR:
-          msg =
-            "This account's role is Nominator which has a Controller account. As such staking operations are not permitted.";
+          msg = t('benchmark.staking.warnings.hasController');
           break;
       }
       return {
@@ -743,7 +749,7 @@ const Staking = () => {
       return {
         nominatable: false,
         warning: (
-          <Warning msg="This account's role is Validator. As such staking operations are not permitted." />
+          <Warning msg={t('benchmark.staking.warnings.isValidator')} />
         ),
       };
     }
@@ -752,15 +758,7 @@ const Staking = () => {
       nominatable: true,
       warning: null,
     };
-  }, [
-    networkStatus,
-    apiLoading,
-    finalFilteredTableData.tableData,
-    accountChainInfo.isReady,
-    accountChainInfo.isNominatable,
-    accountChainInfo.role,
-    networkName,
-  ]);
+  }, [t, networkName, networkStatus, apiLoading, finalFilteredTableData.tableData, accountChainInfo.isReady, accountChainInfo.isNominatable, accountChainInfo.role]);
 
   const applyAdvancedFilter = useCallback(() => {
     let filteredResult: IStakingInfo;
@@ -871,7 +869,7 @@ const Staking = () => {
                     tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
                     setFinalFilteredTableData(tempTableData);
                   } else {
-                    notifyWarn('maximum nomination has reached.');
+                    notifyWarn(t('benchmark.staking.warnings.maxNominations'));
                   }
                 }
               }}
@@ -883,13 +881,13 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Account',
+        Header: t('benchmark.staking.table.header.account'),
         accessor: 'account',
         Cell: ({ value, row }) => <Account address={value} display={row.original.display} />,
         sortType: 'basic',
       },
       {
-        Header: 'Self Stake',
+        Header: t('benchmark.staking.table.header.selfStake'),
         accessor: 'selfStake',
         collapse: true,
         Cell: ({ value }) => {
@@ -898,7 +896,7 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Era Inclusion',
+        Header: t('benchmark.staking.table.header.eraInclusion'),
         accessor: 'eraInclusion',
         collapse: true,
         Cell: ({ value }) => {
@@ -908,7 +906,7 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Unclaimed Eras',
+        Header: t('benchmark.staking.table.header.unclaimedEras'),
         accessor: 'unclaimedEras',
         collapse: true,
         Cell: ({ value, row, rows, toggleRowExpanded }) => {
@@ -968,7 +966,7 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Avg APY',
+        Header: t('benchmark.staking.table.header.avgApy'),
         accessor: 'avgAPY',
         collapse: true,
         Cell: ({ value }) => {
@@ -977,14 +975,14 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Active',
+        Header: t('benchmark.staking.table.header.active'),
         accessor: 'active',
         collapse: true,
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
         sortType: 'basic',
       },
     ];
-  }, [finalFilteredTableData, networkName, applyAdvancedFilter, notifyWarn, _formatBalance]);
+  }, [finalFilteredTableData, networkName, t, applyAdvancedFilter, notifyWarn, _formatBalance]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
@@ -1017,17 +1015,17 @@ const Staking = () => {
       case RewardDestinationType.CONTROLLER:
         // todo: Jack
         if (accountChainInfo?.controller) {
-          return <Node title={'Controller'} address={accountChainInfo?.controller} />;
+          return <Node title={t('benchmark.staking.controller.controller')} address={accountChainInfo?.controller} />;
         } else {
-          return <Node title={'controller account'} address="enter an address" />;
+          return <Node title={t('benchmark.staking.controller.controllerAccount')} address={t('benchmark.staking.controller.enterAddress')} />;
         }
       case RewardDestinationType.ACCOUNT:
         // todo: Jack
-        return <Node title={'Account'} address="enter an address" />;
+        return <Node title={t('benchmark.staking.controller.account')} address={t('benchmark.staking.controller.enterAddress')} />;
       default:
         return <></>;
     }
-  }, [inputData, accountChainInfo, selectedAccount]);
+  }, [inputData.rewardDestination?.value, selectedAccount.name, selectedAccount.address, accountChainInfo?.controller, t]);
 
   /**
    * for Header, option toggle
@@ -1529,11 +1527,11 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
+              <ContentBlockTitle color="white">{t('benchmark.staking.advancedSettings')}</ContentBlockTitle>
               <AdvancedSettingWrap>
                 <TitleInput
                   disabled={apiLoading}
-                  title="Min. Self Stake"
+                  title={t('benchmark.staking.filters.minSelfStake')}
                   placeholder="input minimum amount"
                   inputLength={170}
                   value={advancedSetting.minSelfStake}
@@ -1541,7 +1539,7 @@ const Staking = () => {
                 />
                 <TitleInput
                   disabled={apiLoading}
-                  title="Max. Unclaimed Eras"
+                  title={t('benchmark.staking.filters.maxUnclaimedEras')}
                   placeholder="input maximum amount"
                   inputLength={170}
                   value={advancedSetting.maxUnclaimedEras}
@@ -1549,7 +1547,7 @@ const Staking = () => {
                 />
                 <TitleInput
                   disabled={apiLoading}
-                  title="Historical APY"
+                  title={t('benchmark.staking.filters.apy')}
                   placeholder="0 - 100"
                   unit="%"
                   value={advancedSetting.historicalApy}
@@ -1557,7 +1555,7 @@ const Staking = () => {
                 />
                 <TitleInput
                   disabled={apiLoading}
-                  title="Min. Eras Inclusion Rate"
+                  title={t('benchmark.staking.filters.minEraInclusionRate')}
                   placeholder="0 - 100"
                   unit="%"
                   value={advancedSetting.minInclusion}
@@ -1565,7 +1563,7 @@ const Staking = () => {
                 />
                 <TitleSwitch
                   disabled={apiLoading}
-                  title="Identity"
+                  title={t('benchmark.staking.filters.hasIdentity')}
                   checked={advancedSetting.identity}
                   onChange={handleAdvancedFilter('identity')}
                 />
@@ -1577,25 +1575,25 @@ const Staking = () => {
                 />
                 <TitleSwitch
                   disabled={apiLoading}
-                  title="Is Sub-Identity"
+                  title={t('benchmark.staking.filters.isSubIdent')}
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
                 <TitleSwitch
                   disabled={apiLoading}
-                  title="Highest Avg.APY"
+                  title={t('benchmark.staking.filters.minApy')}
                   checked={advancedSetting.highApy}
                   onChange={handleAdvancedFilter('highApy')}
                 />
                 <TitleSwitch
                   disabled={apiLoading}
-                  title="Decentralized"
+                  title={t('benchmark.staking.filters.decentralized')}
                   checked={advancedSetting.decentralized}
                   onChange={handleAdvancedFilter('decentralized')}
                 />
                 <TitleSwitch
                   disabled={apiLoading}
-                  title="1kv programme"
+                  title={t('benchmark.staking.filters.onekv')}
                   checked={advancedSetting.oneKv}
                   onChange={handleAdvancedFilter('oneKv')}
                 />
@@ -1605,20 +1603,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [
-    advancedOption.advanced,
-    apiLoading,
-    advancedSetting.minSelfStake,
-    advancedSetting.maxUnclaimedEras,
-    advancedSetting.historicalApy,
-    advancedSetting.minInclusion,
-    advancedSetting.identity,
-    advancedSetting.noPreviousSlashes,
-    advancedSetting.isSubIdentity,
-    advancedSetting.highApy,
-    advancedSetting.decentralized,
-    advancedSetting.oneKv,
-  ]);
+  }, [advancedOption.advanced, t, apiLoading, advancedSetting.minSelfStake, advancedSetting.maxUnclaimedEras, advancedSetting.historicalApy, advancedSetting.minInclusion, advancedSetting.identity, advancedSetting.noPreviousSlashes, advancedSetting.isSubIdentity, advancedSetting.highApy, advancedSetting.decentralized, advancedSetting.oneKv]);
 
   const filterResultInfo = useMemo(() => {
     let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
@@ -1629,14 +1614,14 @@ const Staking = () => {
 
     return (
       <div>
-        <FilterInfo style={{ color: '#20aca8' }}>selected: {selectedValidatorsCount}</FilterInfo>
+        <FilterInfo style={{ color: '#20aca8' }}>{t('benchmark.staking.selected')}: {selectedValidatorsCount}</FilterInfo>
         <span>|</span>
-        <FilterInfo>filtered: {filterValidatorsCount}</FilterInfo>
+        <FilterInfo>{t('benchmark.staking.filtered')}: {filterValidatorsCount}</FilterInfo>
         <span>|</span>
-        <FilterInfo>total: {totalValidatorsCount}</FilterInfo>
+        <FilterInfo>{t('benchmark.staking.total')}: {totalValidatorsCount}</FilterInfo>
       </div>
     );
-  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData]);
+  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -1648,7 +1633,7 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Filter results{filterResultInfo}</ContentBlockTitle>
+              <ContentBlockTitle color="white">{t('benchmark.staking.filterResult')}: {filterResultInfo}</ContentBlockTitle>
               {!apiLoading ? (
                 <Table
                   type={tableType.stake}
@@ -1664,7 +1649,7 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns, apiLoading, finalFilteredTableData.tableData, filterResultInfo]);
+  }, [advancedOption.advanced, t, filterResultInfo, apiLoading, columns, finalFilteredTableData.tableData]);
 
   return (
     <>
@@ -1690,7 +1675,7 @@ const Staking = () => {
                   alignItems: 'center',
                 }}
               >
-                <Balance>Balance: {walletBalance}</Balance>
+                <Balance>{t('benchmark.staking.balance')}: {walletBalance}</Balance>
                 <div
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
                 >
@@ -1714,7 +1699,7 @@ const Staking = () => {
             <BalanceContextLeft>
               <BalanceContextRow>
                 <div>
-                  <BalanceContextLabel>Role</BalanceContextLabel>
+                  <BalanceContextLabel>{t('benchmark.staking.role')}</BalanceContextLabel>
                 </div>
                 <div>
                   <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
@@ -1722,7 +1707,7 @@ const Staking = () => {
               </BalanceContextRow>
               <BalanceContextRow>
                 <div>
-                  <BalanceContextLabel>Nominees</BalanceContextLabel>
+                  <BalanceContextLabel>{t('benchmark.staking.nominees')}</BalanceContextLabel>
                 </div>
                 <div>
                   <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
@@ -1730,7 +1715,7 @@ const Staking = () => {
               </BalanceContextRow>
               <BalanceContextRow>
                 <div>
-                  <BalanceContextLabel>Bonded</BalanceContextLabel>
+                  <BalanceContextLabel>{t('benchmark.staking.bonded')}</BalanceContextLabel>
                 </div>
                 <div>
                   <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
@@ -1740,7 +1725,7 @@ const Staking = () => {
             <BalanceContextRight>
               <BalanceContextRow>
                 <div>
-                  <BalanceContextLabel>Reserved</BalanceContextLabel>
+                  <BalanceContextLabel>{t('benchmark.staking.reserved')}</BalanceContextLabel>
                 </div>
                 <div>
                   <BalanceContextValue>
@@ -1750,7 +1735,7 @@ const Staking = () => {
               </BalanceContextRow>
               <BalanceContextRow>
                 <div>
-                  <BalanceContextLabel>Redeemable</BalanceContextLabel>
+                  <BalanceContextLabel>{t('benchmark.staking.redeemable')}</BalanceContextLabel>
                 </div>
                 <div>
                   <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
@@ -1767,7 +1752,7 @@ const Staking = () => {
           <ContentBlock>
             <ContentBlockLeft>
               <ContentColumnLayout>
-                <ContentBlockTitle>Strategy</ContentBlockTitle>
+                <ContentBlockTitle>{t('benchmark.staking.strategyString')}</ContentBlockTitle>
                 <DropdownCommon
                   style={{ flex: 1, width: '90%' }}
                   options={strategyOptions}
@@ -1779,7 +1764,7 @@ const Staking = () => {
               </ContentColumnLayout>
             </ContentBlockLeft>
             <ContentBlockRight>
-              <Balance>Calculated APY</Balance>
+              <Balance>{t('benchmark.staking.calculatedApy')}</Balance>
               {!apiLoading ? (
                 <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
               ) : (
@@ -1795,7 +1780,7 @@ const Staking = () => {
             style={{ backgroundColor: '#2E3843', height: 'auto' }}
           >
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+              <ContentBlockTitle color="white">{t('benchmark.staking.rewardDest')}</ContentBlockTitle>
               <DestinationWrap advanced={advancedOption.advanced}>
                 <RewardComponent advanced={advancedOption.advanced} marginTop={5}>
                   <DropdownCommon
@@ -1823,7 +1808,7 @@ const Staking = () => {
           <div style={{ marginBottom: 12 }}>
             <Button
               disabled={!nominatableInfo.nominatable}
-              title="Nominate"
+              title={t('benchmark.staking.nominate')}
               onClick={handleNominate}
               style={{ width: 220 }}
             />
