@@ -208,9 +208,11 @@ const ValidatorStatus = (props) => {
           _setSlashes(slashes);
         }
       } catch (err) {
-        notifyError(t('tools.validators.errors.incorrectValidator1') +
-          `${shortenStashId(props.match.params.id)} ` +
-          t('tools.validators.errors.incorrectValidator2'));
+        notifyError(
+          t('tools.validators.errors.incorrectValidator1') +
+            `${shortenStashId(props.match.params.id)} ` +
+            t('tools.validators.errors.incorrectValidator2')
+        );
       }
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
@@ -243,50 +245,64 @@ const ValidatorStatus = (props) => {
       <MainLayout>
         <CardHeader
           Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
+          mainPadding="0 0 0 0"
         >
-          <ValidatorInfoLayout>
-            <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
-            <InfoItem>{selfStake}</InfoItem>
-            <InfoDivider />
-            <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
-            <InfoItem>{unclaimedEras}</InfoItem>
-            <InfoDivider />
-            <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
-            <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
-          </ValidatorInfoLayout>
-          <ChartsLayout>
-            <ChartContainer>
-              <Chart showTools data={chartData1} leftLabel="Nominator Count" rightLabel="Commission ( % )"
-                config={{
-                  xKey: 'era',
-                  firstDataKey: 'nominators',
-                  secondDataKey: 'commission',
-                  firstDataYAxis: 'left',
-                  secondDataYAxis: 'right',
-                }}
-              />
-            </ChartContainer>
-            <ChartContainer>
-              <Chart
-                data={chartData2}
-                leftLabel="APY"
-                config={{
-                  xKey: 'era',
-                  firstDataKey: 'apy',
-                  firstDataYAxis: 'left',
-                }}
-              />
-            </ChartContainer>
-          </ChartsLayout>
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
-            <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
-          </ContentColumnLayout>
-          <Space />
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">{t('tools.validators.inactiveNominators')}</ContentBlockTitle>
-            <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
-          </ContentColumnLayout>
+          <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ValidatorInfoLayout>
+                <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
+                <InfoItem>{selfStake}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
+                <InfoItem>{unclaimedEras}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
+                <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+              </ValidatorInfoLayout>
+            </div>
+
+            <ChartsLayout>
+              <ChartContainer>
+                <Chart
+                  showTools
+                  data={chartData1}
+                  leftLabel="Nominator Count"
+                  rightLabel="Commission ( % )"
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'nominators',
+                    secondDataKey: 'commission',
+                    firstDataYAxis: 'left',
+                    secondDataYAxis: 'right',
+                  }}
+                />
+              </ChartContainer>
+              <ChartContainer>
+                <Chart
+                  data={chartData2}
+                  leftLabel="APY"
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'apy',
+                    firstDataYAxis: 'left',
+                  }}
+                />
+              </ChartContainer>
+            </ChartsLayout>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
+              </ContentColumnLayout>
+              <Space />
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">
+                  {t('tools.validators.inactiveNominators')}
+                </ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
+              </ContentColumnLayout>
+            </div>
+          </div>
         </CardHeader>
       </MainLayout>
     </ValidatorStatusLayout>
@@ -423,7 +439,6 @@ const ChartsLayout = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  // padding: 13px 18.7px 15.7px 16px;
 `;
 
 const ChartContainer = styled.div`
@@ -444,6 +459,7 @@ const ChartContainer = styled.div`
 `;
 
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'space-between')};
@@ -473,15 +489,14 @@ const Space = styled.div`
 `;
 
 const ValidatorInfoLayout = styled.div`
+  box-sizing: border-box;
   width: 100%;
   height: 50px;
-  margin: 9.6px 0 10.1px 0;
-  padding: 13px 0 18.4px 0;
+  padding: 12px;
   display: flex;
   flex-direction: row;
   border-radius: 6px;
   background-color: #2f3842;
-  padding: 0 0 0 18px;
   align-items: center;
 `;
 

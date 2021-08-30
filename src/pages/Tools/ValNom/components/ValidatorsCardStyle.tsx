@@ -17,8 +17,6 @@ import {
   IValidatorFilter,
   toValidatorFilter,
 } from './filterOptions';
-import { Grid } from '@material-ui/core';
-// import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
 import { balanceUnit } from '../../../../utils/string';
 import { NetworkConfig } from '../../../../utils/constants/Network';
@@ -174,10 +172,7 @@ const ValidatorGrid = ({ filters, validators }) => {
   if (validatorComponents.length > 0) {
     return (
       <GridLayout>
-        {/* <Grid container spacing={3} style={{ justifyContent: 'flex-start' }}> */}
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>{validatorComponents}</div>
-
-        {/* </Grid> */}
         <div style={{ margin: '20px 0 0 0' }}></div>
         <Pagination
           canNextPage={page < pageCount ? true : false}
