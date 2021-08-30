@@ -104,6 +104,26 @@ enum AccountRole {
   NOMINATOR_AND_CONTROLLER,
   NONE,
 }
+
+const displayRole = (role: AccountRole): string => {
+  switch(role) {
+    case AccountRole.VALIDATOR:
+      return 'Validator';
+    case AccountRole.CONTROLLER_OF_VALIDATOR:
+      return 'Controller of Validator';
+    case AccountRole.CONTROLLER_OF_NOMINATOR:
+      return 'Controller of Nominator';
+    case AccountRole.NOMINATOR:
+      return 'Nominator';
+    case AccountRole.NOMINATOR_AND_CONTROLLER:
+      return 'Nominator';
+    case AccountRole.NONE:
+      return 'None';
+    default:
+      return '';
+  }
+}
+
 interface IStrategy {
   label: string;
   value: Strategy;
@@ -112,6 +132,7 @@ interface IStrategy {
 interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
+  stash: string | undefined;
   validators: string[];
   rewardDestination: RewardDestinationType;
   rewardDestinationAddress: string | null;
@@ -290,26 +311,30 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   let isNominatable = false;
   let bonded;
   let validators;
+  let stash;
   if (info.nextSessionIds.length !== 0) {
     role = AccountRole.VALIDATOR;
     bonded = info.stakingLedger.total.unwrap().toHex();
     validators = info.nominators.map((n) => n.toHuman());
+    stash = info.stashId.toHuman();
     console.log(`role = VALIDATOR`);
   } else if (!info.stakingLedger.total.unwrap().isZero()) {
     if (info.controllerId?.toHuman() === address) {
       role = AccountRole.NOMINATOR_AND_CONTROLLER;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
+      stash = info.stashId.toHuman();
       console.log(`role = NOMINATOR_AND_CONTROLLER`);
       isNominatable = true;
     } else {
       role = AccountRole.NOMINATOR;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
+      stash = info.stashId.toHuman();
       console.log(`role = NOMINATOR`);
     }
   } else if (!ledger.isNone) {
-    const stash = ledger.unwrap().stash.toHuman();
+    stash = ledger.unwrap().stash.toHuman();
     const staking = await api.derive.staking.account(stash);
     if (staking.nextSessionIds.length !== 0) {
       role = AccountRole.CONTROLLER_OF_VALIDATOR;
@@ -327,6 +352,7 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
     role = AccountRole.NONE;
     bonded = info.stakingLedger.total.unwrap().toHex();
     validators = info.nominators.map((n) => n.toHuman());
+    stash = address;
     console.log(`role = NONE`);
     isNominatable = true;
   }
@@ -334,6 +360,7 @@ const queryStakingInfo = async (address, api: ApiPromise) => {
   return {
     role,
     controller: info.controllerId?.toHuman(),
+    stash,
     validators,
     rewardDestination,
     rewardDestinationAddress,
@@ -1011,15 +1038,20 @@ const Staking = () => {
   const renderRewardDestinationNode = useMemo(() => {
     switch (inputData.rewardDestination?.value) {
       case RewardDestinationType.STAKED:
-        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.STASH:
-        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+        if (accountChainInfo.role === AccountRole.NOMINATOR || accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER || accountChainInfo.role === AccountRole.NONE || accountChainInfo.role === AccountRole.VALIDATOR) {
+          return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+        } else {
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
+        }
       case RewardDestinationType.CONTROLLER:
-        // todo: Jack
         if (accountChainInfo?.controller) {
           return <Node title={'Controller'} address={accountChainInfo?.controller} />;
-        } else {
-          return <Node title={'controller account'} address="enter an address" />;
+        } else {  
+          if (accountChainInfo.stash === selectedAccount.address) {
+            return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+          }
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
         }
       case RewardDestinationType.ACCOUNT:
         // todo: Jack
@@ -1717,7 +1749,7 @@ const Staking = () => {
                   <BalanceContextLabel>Role</BalanceContextLabel>
                 </div>
                 <div>
-                  <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
+                  <BalanceContextValue>{displayRole(accountChainInfo?.role)}</BalanceContextValue>
                 </div>
               </BalanceContextRow>
               <BalanceContextRow>
