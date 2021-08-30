@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
 import {
@@ -18,8 +18,8 @@ import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
-
 import { useTranslation } from 'react-i18next';
+import { DataContext } from '../components/Data';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -112,7 +112,18 @@ const ValidatorStatus = (props) => {
   });
   const [chartData1, setChartData1] = useState<any[]>([]);
   const [chartData2, setChartData2] = useState<any[]>([]);
+  // context
+  const {network, changeNetwork} = useContext(DataContext);
   const chain = props.match.params.chain;
+
+  useEffect(() => {
+    if (chain === 'KSM' && network !== 'Kusama') {
+      changeNetwork('Kusama');
+    } else if (chain === 'DOT' && network !== 'Polkadot') {
+      changeNetwork('Polkadot');
+    }
+  }, [chain, network, changeNetwork]);
+
   const _formatBalance = useCallback(
     (value: any) => {
       if (chain === 'KSM') {
