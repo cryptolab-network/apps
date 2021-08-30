@@ -66,7 +66,6 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
           <Title>
             <Account address={validator.id} display={validator.identity.display} />
           </Title>
-          <Subtitle>{validator.id}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
@@ -264,10 +263,10 @@ const ValidatorStatus = (props) => {
             <ChartsLayout>
               <ChartContainer>
                 <Chart
-                  showTools
                   data={chartData1}
                   leftLabel="Nominator Count"
                   rightLabel="Commission ( % )"
+                  xAxisHeight={80}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
@@ -281,6 +280,7 @@ const ValidatorStatus = (props) => {
                 <Chart
                   data={chartData2}
                   leftLabel="APY"
+                  xAxisHeight={80}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'apy',
@@ -320,6 +320,7 @@ const ValidatorStatusLayout = styled.div`
 `;
 
 const MainLayout = styled.div`
+  width: 1400px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -329,6 +330,7 @@ const MainLayout = styled.div`
 
 const HeaderLayout = styled.div`
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -337,6 +339,7 @@ const HeaderLayout = styled.div`
 const HeaderLeft = styled.div`
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 `;
 
 const HeaderRight = styled.div`
@@ -386,7 +389,7 @@ const Subtitle = styled.div`
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  width: 240px;
+  /* width: 240px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -396,7 +399,7 @@ const Exposure = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: var(--nav-fg);
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ExposureActive = styled.div`
@@ -411,7 +414,7 @@ const ExposureTotal = styled.div`
 const Value = styled.div`
   display: flex;
   flex-direction: row;
-  width: 160px;
+  /* width: 160px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -421,7 +424,7 @@ const Value = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: #23beb9;
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ValueTitle = styled.div`
@@ -442,9 +445,9 @@ const ChartsLayout = styled.div`
 `;
 
 const ChartContainer = styled.div`
-  box-sizing: border-box;
   flex: 1;
   height: 500px;
+  box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -485,7 +488,7 @@ const ContentBlockTitle = styled.div`
 `;
 
 const Space = styled.div`
-  margin: 40px 0 0 0;
+  margin: 32px 0 0 0;
 `;
 
 const ValidatorInfoLayout = styled.div`
