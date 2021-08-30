@@ -104,6 +104,26 @@ enum AccountRole {
   NOMINATOR_AND_CONTROLLER,
   NONE,
 }
+
+const displayRole = (role: AccountRole): string => {
+  switch (role) {
+    case AccountRole.VALIDATOR:
+      return 'Validator';
+    case AccountRole.CONTROLLER_OF_VALIDATOR:
+      return 'Controller of Validator';
+    case AccountRole.CONTROLLER_OF_NOMINATOR:
+      return 'Controller of Nominator';
+    case AccountRole.NOMINATOR:
+      return 'Nominator';
+    case AccountRole.NOMINATOR_AND_CONTROLLER:
+      return 'Nominator';
+    case AccountRole.NONE:
+      return 'None';
+    default:
+      return '';
+  }
+};
+
 interface IStrategy {
   label: string;
   value: Strategy;
@@ -112,6 +132,7 @@ interface IStrategy {
 interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
+  stash?: string | undefined;
   validators: string[];
   rewardDestination: RewardDestinationType;
   rewardDestinationAddress: string | null;
@@ -1033,15 +1054,25 @@ const Staking = () => {
   const renderRewardDestinationNode = useMemo(() => {
     switch (inputData.rewardDestination?.value) {
       case RewardDestinationType.STAKED:
-        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
       case RewardDestinationType.STASH:
-        return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+        if (
+          accountChainInfo.role === AccountRole.NOMINATOR ||
+          accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER ||
+          accountChainInfo.role === AccountRole.NONE ||
+          accountChainInfo.role === AccountRole.VALIDATOR
+        ) {
+          return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+        } else {
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
+        }
       case RewardDestinationType.CONTROLLER:
-        // todo: Jack
         if (accountChainInfo?.controller) {
           return <Node title={'Controller'} address={accountChainInfo?.controller} />;
         } else {
-          return <Node title={'controller account'} address="enter an address" />;
+          if (accountChainInfo.stash === selectedAccount.address) {
+            return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+          }
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
         }
       case RewardDestinationType.ACCOUNT:
         // todo: Jack

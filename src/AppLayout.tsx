@@ -36,13 +36,15 @@ import Dialog from './components/Dialog';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
-
 import { useTranslation } from 'react-i18next';
+import { isMobile } from "react-device-detect";
+import Mobile from './pages/Mobile';
+import DropdownCommon from './components/Dropdown/Common';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -112,10 +114,33 @@ interface IValidator {
   theme: IconTheme;
 }
 
+interface ILanguage {
+  label: string;
+  value: string;
+  isDisabled?: boolean;
+}
+
+const languageOptions = [
+  { label: 'English', value: 'en'},
+  { label: '繁體中文', value: 'zh-Hant-TW'},
+  { label: '简体中文', value: 'zh-CN'},
+  { label: 'Deutsch', value: 'de'}
+]
+
 const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
+  const [language, setLanguage] = useState<ILanguage>({label: 'English', value: 'en'});
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  }
+
+  const handleLanguageChange = (e: ILanguage) => {
+    changeLanguage(e.value);
+    setLanguage(e);
+  }
 
   const onSubscribeNewsletter = () => {
     apiSubscribeNewsletter({
@@ -231,6 +256,18 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
           <TdDiv>
             <DotDiv />
             <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+          </TdDiv>
+        </ColumnDiv>
+        <ColumnDiv>
+          <ThDiv>{t('app.footer.title.language')}</ThDiv>
+          <TdDiv>
+            <DropdownCommon
+              style={{ flex: 1, width: '100%'}}
+              options={languageOptions}
+              value={language}
+              onChange={handleLanguageChange}
+              theme="dark"
+            />
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -549,19 +586,34 @@ const AppLayout = () => {
     visibleOurValidatorsDialog,
   ]);
 
-  return (
-    <>
-      <GradientLight>
-        <BrowserRouter>
-          {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
-          {/* <Api>{mainRender}</Api> */}
-        </BrowserRouter>
-        {/* <StarAnimation id="stars" />
-        <StarAnimation id="stars2" />
-        <StarAnimation id="stars3" /> */}
-      </GradientLight>
-    </>
-  );
+  if (isMobile) {
+    if (isToolsSite) {
+      return (
+        <>
+          <Mobile isTools={true} />
+        </>
+      )  
+    }
+    return (
+      <>
+        <Mobile isTools={false}/>
+      </>
+    )
+  } else {
+    return (
+      <>
+        <GradientLight>
+          <BrowserRouter>
+            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
+            {/* <Api>{mainRender}</Api> */}
+          </BrowserRouter>
+          {/* <StarAnimation id="stars" />
+          <StarAnimation id="stars2" />
+          <StarAnimation id="stars3" /> */}
+        </GradientLight>
+      </>
+    );
+  }
 };
 
 export default AppLayout;

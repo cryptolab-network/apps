@@ -52,6 +52,7 @@ i18n
                 privacyPolicy: 'Privacy Policy',
                 enterEmail: 'Enter your email address',
                 general: 'General',
+                language: 'Language',
               }
             },
             portal: {
@@ -69,6 +70,11 @@ i18n
                 title: 'Portfolio Management',
                 detail: 'Stability is vital for the Long Haul. We will inform you to take action before things changed.',//'Manage after you stake. See rewards and validator status.',
               },
+            },
+            mobile: {
+              warning: 'Mobile not supported yet!',
+              warningDetail: 'We are working on it.',
+              warningTools: 'Before that, please access our legacy website'
             }
           },
           tools: {
@@ -221,6 +227,7 @@ i18n
                 disclaimer: '使用條款',
                 privacyPolicy: '隱私權政策',
                 general: '一般',
+                language: '多國語系',
               }
             },
             portal: {
@@ -238,6 +245,11 @@ i18n
                 title: '質押管理',
                 detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會即時通知您並採取行動',
               },
+            },
+            mobile: {
+              warning: '目前不支援手持裝置',
+              warningDetail: '我們正在建置中',
+              warningTools: '在此之前，請使用我們的既有網站'
             }
           },
           tools: {
@@ -358,5 +370,5 @@ i18n
     }
   });
 // i18n.changeLanguage('zh-Hant-TW');
-i18n.changeLanguage('en-US');
+// i18n.changeLanguage('en-US');
 export default i18n;
