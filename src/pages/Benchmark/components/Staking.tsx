@@ -982,6 +982,14 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
+        Header: 'Commission %',
+        accessor: 'commission',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <div>{value.toFixed(1)}</div>;
+        },
+      },
+      {
         Header: 'Avg APY',
         accessor: 'avgAPY',
         collapse: true,

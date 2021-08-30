@@ -51,19 +51,15 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => {
-                  if ((typeof column.Header) === 'string') {
+                  if (typeof column.Header === 'string' && column.Header !== 'Commission %') {
                     return (
                       <th {...column.getSortByToggleProps()}>
                         {column.render('Header')}
                         <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       </th>
-                    )
+                    );
                   } else {
-                    return (
-                      <th>
-                        {column.render('Header')}
-                      </th>
-                    )
+                    return <th>{column.render('Header')}</th>;
                   }
                 })}
               </tr>
