@@ -34,7 +34,7 @@ export const NetworkConfig: INetworkConfigs = {
     wss: 'wss://rpc.polkadot.io/',
     maxNominateCount: 16,
     decimals: 10,
-    handlingFee: 0.02,
+    handlingFee: 0.1,
   },
   Kusama: {
     name: 'Kusama',
@@ -44,7 +44,7 @@ export const NetworkConfig: INetworkConfigs = {
     wss: 'wss://kusama-rpc.polkadot.io/',
     maxNominateCount: 24,
     decimals: 12,
-    handlingFee: 0.02,
+    handlingFee: 0.1,
   },
   Westend: {
     name: 'Westend',
@@ -54,6 +54,6 @@ export const NetworkConfig: INetworkConfigs = {
     wss: 'wss://westend.api.onfinality.io/public-ws',
     maxNominateCount: 16,
     decimals: 12,
-    handlingFee: 0.02,
+    handlingFee: 0.1,
   },
 };
