@@ -132,7 +132,7 @@ interface IStrategy {
 interface IAccountChainInfo {
   role: AccountRole;
   controller: string | undefined;
-  stash?: string | undefined;
+  stash: string | undefined;
   validators: string[];
   rewardDestination: RewardDestinationType;
   rewardDestinationAddress: string | null;
@@ -557,50 +557,50 @@ const Staking = () => {
     let isNominatable = false;
     let bonded;
     let validators;
+    let stash;
     if (info.nextSessionIds.length !== 0) {
       role = AccountRole.VALIDATOR;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = VALIDATOR`);
+      stash = info.stashId.toHuman();
     } else if (!info.stakingLedger.total.unwrap().isZero()) {
       if (info.controllerId?.toHuman() === address) {
         role = AccountRole.NOMINATOR_AND_CONTROLLER;
         bonded = info.stakingLedger.total.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
-        console.log(`role = NOMINATOR_AND_CONTROLLER`);
+        stash = info.stashId.toHuman();
         isNominatable = true;
       } else {
         role = AccountRole.NOMINATOR;
         bonded = info.stakingLedger.total.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
-        console.log(`role = NOMINATOR`);
+        stash = info.stashId.toHuman();
       }
     } else if (!ledger.isNone) {
-      const stash = ledger.unwrap().stash.toHuman();
+      stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
       if (staking.nextSessionIds.length !== 0) {
         role = AccountRole.CONTROLLER_OF_VALIDATOR;
         bonded = staking.stakingLedger.total.unwrap().toHex();
         validators = staking.nominators.map((n) => n.toHuman());
-        console.log(`role = CONTROLLER_OF_VALIDATOR`);
       } else {
         role = AccountRole.CONTROLLER_OF_NOMINATOR;
         bonded = staking.stakingLedger.total.unwrap().toHex();
         validators = staking.nominators.map((n) => n.toHuman());
-        console.log(`role = CONTROLLER_OF_NOMINATOR`);
         isNominatable = true;
       }
     } else {
       role = AccountRole.NONE;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NONE`);
+      stash = address;
       isNominatable = true;
     }
     setIsAccountInfoLoading(false);
     return {
       role,
       controller: info.controllerId?.toHuman(),
+      stash,
       validators,
       rewardDestination,
       rewardDestinationAddress,
