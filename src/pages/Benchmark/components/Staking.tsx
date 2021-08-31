@@ -1837,7 +1837,7 @@ const Staking = () => {
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
           </ArrowContainer>
-          <ContentBlock>
+          <ContentBlock advanced={advancedOption.advanced}>
             <ContentBlockLeft>
               <ContentColumnLayout>
                 <ContentBlockTitle>Strategy</ContentBlockTitle>
@@ -1911,7 +1911,10 @@ const Staking = () => {
 
 export default Staking;
 
-const ContentBlock = styled.div`
+interface IContentBlock {
+  advanced: Boolean;
+}
+const ContentBlock = styled.div<IContentBlock>`
   background-color: white;
   border-radius: 6px 6px 6px 6px;
   padding: 14px 25px 14px 25px;
@@ -1919,7 +1922,10 @@ const ContentBlock = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 62px;
-  width: 570px;
+  width: ${(props) => (props.advanced ? '400px' : '570px')};
+  @media (max-width: 1395px) {
+    width: 570px;
+  }
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
   }
