@@ -171,7 +171,7 @@ const ValidatorStatus = (props) => {
           });
           const chartData2 = validator.info.map((era) => {
             return {
-              apy: era.apy.toFixed(4),
+              apy: (era.apy * 100).toFixed(2),
               era: era.era,
             };
           });
@@ -270,7 +270,7 @@ const ValidatorStatus = (props) => {
             <ChartContainer>
               <Chart
                 data={chartData2}
-                leftLabel="APY"
+                leftLabel="APY (%)"
                 config={{
                   xKey: 'era',
                   firstDataKey: 'apy',
