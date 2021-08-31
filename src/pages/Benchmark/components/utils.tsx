@@ -204,6 +204,9 @@ export const prevValidatorsSelect = (
   selectableCount: number,
   prevValidators: string[]
 ): ISelectResult => {
+  if (prevValidators === undefined) {
+    prevValidators = [];
+  }
   let selectableData = tableData.filter((data) => !data.select);
   for (let idx = 0; idx < selectableData.length && selectableCount > 0; idx++) {
     const isPrevValidator = prevValidators.filter((v) => v === selectableData[idx].account);
