@@ -1301,7 +1301,8 @@ const Staking = () => {
     console.log('Nominate');
 
     if (!accountChainInfo) {
-      console.log('no account chain info');
+      // console.log('no account chain info');
+      notifyWarn('Failed to fetch on-chain data.');
       return;
     }
 
@@ -1317,7 +1318,8 @@ const Staking = () => {
 
     // checks
     if (counterForNominators >= maxNominatorsCount) {
-      console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
+      // console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
+      notifyWarn('It reaches maximum nominators count.');
       return;
     }
 
@@ -1326,23 +1328,26 @@ const Staking = () => {
       accountChainInfo?.role === AccountRole.CONTROLLER_OF_VALIDATOR ||
       accountChainInfo?.role === AccountRole.NOMINATOR
     ) {
-      console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
+      // console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
+      notifyWarn('This account\'s role is not allowed to nominate.');
       return;
     }
 
     if (stakeAmount < minNominatorBond) {
-      console.log(
-        `not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`
-      );
+      // console.log(
+      //   `not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`
+      // );
+      notifyWarn(`The minimal nominator bond is ${_formatBalance(minNominatorBond.toString())}`);
       return;
     }
 
     if (stakeAmount > bonded + transferrable) {
-      console.log(
-        `not allow to nominate, the input stake amount should be less than transferrable ${
-          bonded + transferrable
-        }`
-      );
+      // console.log(
+      //   `not allow to nominate, the input stake amount should be less than transferrable ${
+      //     bonded + transferrable
+      //   }`
+      // );
+      notifyWarn('Not sufficient balance.');
       return;
     }
 
@@ -1351,19 +1356,22 @@ const Staking = () => {
     console.log(selectedValidators.length);
 
     if (selectedValidators.length === 0) {
-      console.log(`not allow to nominate, selected validators should greater than zero.`);
+      // console.log(`not allow to nominate, selected validators should greater than zero.`);
+      notifyWarn('No selected validators.');
       return;
     }
 
     if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
-      console.log(
-        `not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`
-      );
+      // console.log(
+      //   `not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`
+      // );
+      notifyWarn('Too many selected validators.');
       return;
     }
 
     if (inputData.rewardDestination === null) {
-      console.log(`not allow to nominate, reward destination is null`);
+      // console.log(`not allow to nominate, reward destination is null`);
+      notifyWarn('Reward distination is null');
       return;
     }
 
@@ -1754,6 +1762,16 @@ const Staking = () => {
           <BalanceContextRight>
             <BalanceContextRow>
               <div>
+                <BalanceContextLabel>Transferrable</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>
+                  {_formatBalance(selectedAccount?.balances?.availableBalance)}
+                </BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
                 <BalanceContextLabel>Reserved</BalanceContextLabel>
               </div>
               <div>
@@ -1769,9 +1787,6 @@ const Staking = () => {
               <div>
                 <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
               </div>
-            </BalanceContextRow>
-            <BalanceContextRow>
-              <div style={{ height: '19px' }}></div>
             </BalanceContextRow>
           </BalanceContextRight>
         </>
