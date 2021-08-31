@@ -111,21 +111,18 @@ const Chart: React.FC<IChart> = ({
     rightLabel,
   ]);
 
-  useEffect(() => {
-    if (legendPayload && legendPayload.length > 0) {
-      for (let idx = 0; idx < legendPayload.length; idx++) {
-        legendPayload[idx]['type'] = 'square';
-        if (idx === 0) {
-          legendPayload[idx]['color'] = '#21aca8';
-        } else if (idx === 1) {
-          legendPayload[idx]['color'] = '#6e95c3';
-        } else if (idx === 2) {
-          legendPayload[idx]['color'] = '#236bbe';
-        }
+  if (legendPayload && legendPayload.length > 0) {
+    for (let idx = 0; idx < legendPayload.length; idx++) {
+      legendPayload[idx]['type'] = 'square';
+      if (idx === 0) {
+        legendPayload[idx]['color'] = '#21aca8';
+      } else if (idx === 1) {
+        legendPayload[idx]['color'] = '#6e95c3';
+      } else if (idx === 2) {
+        legendPayload[idx]['color'] = '#236bbe';
       }
     }
-    setCustomLegend(legendPayload);
-  }, [legendPayload]);
+  }
 
   if (data.length === 0) {
     return null;
