@@ -181,10 +181,11 @@ const ValidatorStatus = (props) => {
           });
           const chartData2 = validator.info.map((era) => {
             return {
-              apy: era.apy.toFixed(4),
+              apy: (era.apy * 100).toFixed(2),
               era: era.era,
             };
           });
+
           setChartData1(chartData1);
           setChartData2(chartData2);
           const lastEraInfo = findLastEra(validator.info);
