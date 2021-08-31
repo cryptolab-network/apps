@@ -5,14 +5,8 @@ import { NetworkConfig } from './Network';
 */
 
 export enum CryptolabKSMValidators {
-  CRYPTOLAB_NETWORK = 'DBBFZxZqGPb2LSQSA4WHugerXGwm2ivywqdPxVnsJA9oyV3',
-  CRYPTOLAB_NETWORK_TANIS = 'GA1WBfVMBReXjWKGnXneC682ZZYustFoc8aTsqXv5fFvi2e',
-  DRAGONLANCE = 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-  DRAGONLANCE_KRYNN = 'HRfhckygfiHkqVW19e71R2pXNbR6om7138sLAJENt2Tw1HF',
-  HSINCHU = 'CjU6xRgu5f9utpaCbYHBWZGxZPrpgUPSSXqSQQG5mkH9LKM',
-  TAICHUNG = 'CjU6xRgu5f9utpaCbYHBWZGxZPrpgUPSSXqSQQG5mkH9LKM',
-  TAIWAN_001 = 'GCNeCFUCEjcJ8XQxJe1QuExpS61MavucrnEAVpcngWBYsP2',
   CRYPTOLAB_01 = '16iiKwFsRKRsjAiEpD4zgNgEX84nzHtHHNFKXhz1sHtan3ne',
+  CRYPTOLAB_NETWORK = 'DBBFZxZqGPb2LSQSA4WHugerXGwm2ivywqdPxVnsJA9oyV3',
 }
 
 export enum CryptolabDOTValidators {

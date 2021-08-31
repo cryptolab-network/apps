@@ -86,7 +86,7 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
 };
 
 const StakeDistributionChart = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   let { network: networkName } = useContext(ApiContext);
   const [stake, setStake] = useState<IStake[]>([]);
   const chain = NetworkConfig[networkName].token;
@@ -172,7 +172,7 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
 };
 
 const CommissionDistributionChart = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   let { network: networkName } = useContext(ApiContext);
   const [commissions, setCommissions] = useState<ICommission[]>([]);
   const chain = NetworkConfig[networkName].token;

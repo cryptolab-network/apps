@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
 // import styled from 'styled-components';
 import { IOneKVValidator } from '../../../../apis/OneKV/validator';
-import Table from '../../../../components/Table';
+import Table from './invalidTable';
 import { useTranslation } from 'react-i18next';
 const InvalidValidatorTable = ({ filter, chain, validators }) => {
   const { t } = useTranslation();

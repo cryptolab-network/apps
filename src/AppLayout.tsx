@@ -39,11 +39,12 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
 import { isMobile } from "react-device-detect";
 import Mobile from './pages/Mobile';
+import DropdownCommon from './components/Dropdown/Common';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -113,10 +114,33 @@ interface IValidator {
   theme: IconTheme;
 }
 
+interface ILanguage {
+  label: string;
+  value: string;
+  isDisabled?: boolean;
+}
+
+const languageOptions = [
+  { label: 'English', value: 'en'},
+  { label: '繁體中文', value: 'zh-Hant-TW'},
+  { label: '简体中文', value: 'zh-CN'},
+  { label: 'Deutsch', value: 'de'}
+]
+
 const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
+  const [language, setLanguage] = useState<ILanguage>({label: 'English', value: 'en'});
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  }
+
+  const handleLanguageChange = (e: ILanguage) => {
+    changeLanguage(e.value);
+    setLanguage(e);
+  }
 
   const onSubscribeNewsletter = () => {
     apiSubscribeNewsletter({
@@ -232,6 +256,18 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
           <TdDiv>
             <DotDiv />
             <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+          </TdDiv>
+        </ColumnDiv>
+        <ColumnDiv>
+          <ThDiv>{t('app.footer.title.language')}</ThDiv>
+          <TdDiv>
+            <DropdownCommon
+              style={{ flex: 1, width: '100%'}}
+              options={languageOptions}
+              value={language}
+              onChange={handleLanguageChange}
+              theme="dark"
+            />
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -434,7 +470,7 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
-          width: 'calc(100%/3)'
+          width: 'calc(100%/3)',
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
@@ -443,12 +479,8 @@ const AppLayout = () => {
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
-            <AboutUsGoalFontStyle>
-              {t('about.mission1')}
-            </AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>
-              {t('about.mission2')}
-            </AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
@@ -735,6 +767,7 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
+  min-width: fit-content;
   height: 75%;
   margin: 0;
   border: 0;
@@ -746,13 +779,10 @@ const SubmitButton = styled.button`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
   line-height: 1.23;
-  letter-spacing: normal;
 `;
 const CopyRightDiv = styled.div`
-  heigth: 64px;
+  height: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;

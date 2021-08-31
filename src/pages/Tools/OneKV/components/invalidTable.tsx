@@ -1,13 +1,16 @@
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../../../utils/status/Table';
-import Pagination from './comopnents/Pagination';
+import Pagination from './invalidTablePagination';
+import { ReactComponent as SortingDescIcon } from '../../../../assets/images/sorting-desc.svg';
+import { ReactComponent as SortingAscIcon } from '../../../../assets/images/sorting-asc.svg';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
   type?: tableType;
   pagination?: boolean;
+  pgSize?: number;
 };
 
 const CustomTable: React.FC<ICOLUMN> = ({
@@ -15,6 +18,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
   data,
   type = tableType.common,
   pagination = false,
+  pgSize = 20,
 }) => {
   const {
     getTableProps,
@@ -26,7 +30,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
     // The rest of these things are super handy, too ;)
     canPreviousPage,
     canNextPage,
-    pageOptions,
+    // pageOptions,
     pageCount,
     gotoPage,
     nextPage,
@@ -37,11 +41,11 @@ const CustomTable: React.FC<ICOLUMN> = ({
     {
       columns: userColumns,
       data,
-      initialState: { pageSize: 20 },
+      initialState: { pageSize: pgSize },
     },
     useSortBy,
     useExpanded,
-    usePagination // Use the useExpanded plugin hook
+    usePagination // Use the useExpanded plugin hook,
   );
   return (
     <Style>
@@ -50,18 +54,16 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => {
-                  if (typeof column.Header === 'string' && column.Header !== 'Commission %') {
-                    return (
-                      <th {...column.getSortByToggleProps()}>
-                        {column.render('Header')}
-                        <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                      </th>
-                    );
-                  } else {
-                    return <th>{column.render('Header')}</th>;
-                  }
-                })}
+                {headerGroup.headers.map((column) => (
+                  <th {...column.getSortByToggleProps()}>
+                    {column.render('Header')}
+                    <span>
+                      {' '}
+                      {'  '}
+                      {column.isSorted ? column.isSortedDesc ? <SortingDescIcon /> : <SortingAscIcon /> : ''}
+                    </span>
+                  </th>
+                ))}
               </tr>
             ))}
           </thead>
@@ -111,12 +113,19 @@ const CustomTable: React.FC<ICOLUMN> = ({
         </table>
         <br />
       </div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         {pagination ? (
           <Pagination
             canPreviousPage={canPreviousPage}
             canNextPage={canNextPage}
-            pageOptions={pageOptions}
             pageCount={pageCount}
             gotoPage={gotoPage}
             nextPage={nextPage}
@@ -140,8 +149,10 @@ const Style = styled.div`
   .tableWrap {
     display: block;
     width: 100%;
-    overflow-x: scroll;
-    overflow-y: hidden;
+    height: 55vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 20px 0 0 0;
   }
 
   table {
@@ -168,18 +179,19 @@ const Style = styled.div`
       font-weight: 500;
       font-stretch: normal;
       font-style: normal;
-      width: 1%;
+      /* width: 1%; */
       text-align: center;
       &.collapse {
         width: 0.0000000001%;
-      }
-      :first-child {
-        width: 0.00001%;
       }
       :last-child {
         border-right: 0;
       }
       :nth-child(2) {
+        text-align: left;
+        max-width: 250px;
+      }
+      :nth-child(3) {
         text-align: left;
         max-width: 250px;
       }
