@@ -1731,7 +1731,7 @@ const Staking = () => {
                 <BalanceContextLabel>Role</BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>{accountChainInfo?.role}</BalanceContextValue>
+                <BalanceContextValue>{displayRole(accountChainInfo?.role)}</BalanceContextValue>
               </div>
             </BalanceContextRow>
             <BalanceContextRow>
