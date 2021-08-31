@@ -2,6 +2,33 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+const lcdOptions = {
+  // order and from where user language should be detected
+  order: ['localStorage', 'navigator'],
+
+  // keys or params to lookup language from
+  lookupQuerystring: 'lng',
+  lookupCookie: 'i18next',
+  lookupLocalStorage: 'i18nextLng',
+  lookupSessionStorage: 'i18nextLng',
+  lookupFromPathIndex: 0,
+  lookupFromSubdomainIndex: 0,
+
+  // cache user language on
+  caches: ['localStorage', 'cookie'],
+  excludeCacheFor: ['cimode'], // languages to not persist (cookie, localStorage)
+
+  // optional expire and domain for set cookie
+  cookieMinutes: 10,
+  cookieDomain: 'myDomain',
+
+  // optional htmlTag with lang attribute, the default is:
+  htmlTag: document.documentElement,
+
+  // optional set cookie options, reference:[MDN Set-Cookie docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
+  cookieOptions: { path: '/', sameSite: 'strict' }
+}
+
 i18n
   // detect user language
   // learn more: https://github.com/i18next/i18next-browser-languageDetector
@@ -11,6 +38,7 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
+    detection: lcdOptions,
     debug: true,
     fallbackLng: 'en',
     interpolation: {
@@ -187,12 +215,96 @@ i18n
                   nominators: 'Nominators',
                   averageReturns: 'Avg. Returns'
                 }
+              },
+              sd: {
+                title: 'Nominator Stake Distribution',
+                nominatorCount: 'Nominator Count'
+              },
+              cd: {
+                title: 'Commission Distribution',
+                validatorCount: 'Validator Count'
               }
+            },
+            staking: {
+              title: 'Staking',
+              strategy: {
+                lowRisk: 'Low Risk',
+                highApy: 'High Apy',
+                decentralized: 'Decentralized',
+                onekv: 'One Thousand Validator Program',
+                custom: 'Custom'
+              },
+              selectWallet: '(please select a wallet)',
+              warnings: {
+                transactionInvalid: 'Transaction invalid',
+                transactionReady: 'Transaction is ready',
+                transactionBroadcasted: 'Transaction has been broadcasted',
+                transactionIsIncluded: 'Transaction is included in block',
+                transactionIsIncludedInBlock: 'Transaction has been included in blockHash',
+                transactionSucceeded: 'Transaction Succeeded',
+                transactionFailed: 'Transaction Failed',
+                disconnectedFirst: 'Your have disconnected from the', 
+                disconnectedSecond: 'network, please wait for a moment or refresh the page.',
+                fetching: 'Fetching validator list. As such staking operations are not permitted.',
+                noFilteredValidators: 'The filtered validator count is 0. As such staking operations are not permitted.',
+                noSelectedValidators: 'You haven\'t selected any validators yet. As such staking operations are not permitted.',
+                fetchingStashData: 'Fetching On-chain data. As such staking operations are not permitted.',
+                stashInvalid: 'This account cannot operate staking related extrinsics. As such staking operations are not permitted.',
+                isValidator: "This account's role is Validator. As such staking operations are not permitted.",
+                isControllerOfValidator: "This account's role is Controller of Validator. As such staking operations are not permitted.",
+                hasController: "This account's role is Nominator which has a Controller account. As such staking operations are not permitted.",
+                maxNominations: 'maximum nomination has reached.',
+              },
+              table: {
+                header: {
+                  account: 'Account',
+                  selfStake: 'Self Stake',
+                  eraInclusion: 'Era Inclusion',
+                  unclaimedEras: 'UnclaimedEras',
+                  avgApy: 'Avg. APY',
+                  active: 'Active',
+                }
+              },
+              controller: {
+                enterAddress: "enter an address",
+                controllerAccount: 'Controller Account',
+                account: 'Account',
+                controller: 'Controller',
+              },
+              advancedSettings: 'Advanced Settings',
+              filters: {
+                minSelfStake: 'Min. Self Stake',
+                maxUnclaimedEras: 'Max Unclaimed Eras',
+                apy: 'Historical APY',
+                minEraInclusionRate: 'Min. Era Inclusion Rate',
+                hasIdentity: 'Has Identity',
+                isSubIdent: 'Is Sub Identity',
+                minApy: 'Min. APY',
+                decentralized: 'Decentralized',
+                onekv: '1KV Programme'
+              },
+              selected: 'Selected',
+              filtered: 'Filtered',
+              total: 'Total',
+              filterResult: 'Filter result',
+              balance: 'Balance',
+              role: 'Role',
+              nominees: 'Nominees',
+              bonded: 'Bonded',
+              reserved: 'Reserved',
+              redeemable: 'Redeemable',
+              strategyString: 'Strategy',
+              calculatedApy: 'Estimated APY',
+              rewardDest: 'Reward Destination',
+              nominate: 'Nominate',
+              advanced: 'Advanced',
+              subtitle: 'Select the preferred type for evaluation',
+              supportUs: 'Support Us'
             }
           },
         },
       },
-      'zh-Hant-TW': {
+      'zh-TW': {
         translation: {
           app: {
             title: {
@@ -287,7 +399,7 @@ i18n
               activeNominators: '此Era將Stake分配給您的提名人',
               inactiveNominators: '此Era未將Stake分配給您的提名人',
               errors: {
-                incorrectValidator1: `不存在的驗證者`,
+                incorrectValidator1: `不存在的驗證人`,
                 incorrectValidator2: `請確認您輸入正確的ID`,
               }
             },
@@ -362,13 +474,96 @@ i18n
                   nominators: '提名人',
                   averageReturns: '平均報酬'
                 }
+              },
+              sd: {
+                title: '提名人資金分布',
+                nominatorCount: '提名人數量'
+              },
+              cd: {
+                title: '佣金分布',
+                validatorCount: '驗證人數量'
               }
+            },
+            staking: {
+              title: '質押',
+              strategy: {
+                lowRisk: '低風險',
+                highApy: '高收益',
+                decentralized: '分散提名',
+                onekv: 'One Thousand Validator 計畫',
+                custom: '自訂'
+              },
+              selectWallet: '(請選擇一個錢包)',
+              warnings: {
+                transactionInvalid: '無效的交易',
+                transactionReady: '交易已經準備好',
+                transactionBroadcasted: '交易已經在鏈上廣播',
+                transactionIsIncluded: '交易已經被包含在區塊中',
+                transactionIsIncludedInBlock: '交易已經被包含在區塊',
+                transactionSucceeded: '質押完成',
+                transactionFailed: '質押失敗',
+                disconnectedFirst: '您已經從區塊鏈', 
+                disconnectedSecond: '網路斷開, 請稍待或刷新頁面',
+                fetching: '正在抓取驗證人清單. 在此期間無法執行質押',
+                noFilteredValidators: '您過濾驗證人條件後可選擇的驗證人數量為0. 請選擇新的條件',
+                noSelectedValidators: '您沒有選擇任何驗證人. 請選擇至少一個',
+                fetchingStashData: '正在抓取鏈上的資料. 在此期間無法執行質押',
+                stashInvalid: '此帳戶沒有執行質押相關操作的權限',
+                isValidator: "此帳戶的角色是驗證人 無法執行質押",
+                isControllerOfValidator: "此帳戶的角色是驗證人的控制者 無法執行質押",
+                hasController: "此帳戶已經設定控制者 無法執行質押",
+                maxNominations: '已經到達最大的提名數量.',
+              },
+              table: {
+                header: {
+                  account: '帳戶',
+                  selfStake: '驗證人自己質押的數量',
+                  eraInclusion: 'Active比例',
+                  unclaimedEras: '未分配收益的Era數',
+                  avgApy: '平均年化報酬率',
+                  active: 'Active',
+                }
+              },
+              controller: {
+                enterAddress: "輸入一個帳戶",
+                controllerAccount: '控制人帳戶',
+                account: '帳戶',
+                controller: '控制人',
+              },
+              advancedSettings: '進階設定',
+              filters: {
+                minSelfStake: '最小驗證人質押數',
+                maxUnclaimedEras: '最大未分配收益的Era數',
+                apy: '平均年化報酬率',
+                minEraInclusionRate: '最小Active比例',
+                hasIdentity: '有身分認證',
+                isSubIdent: '為子帳戶',
+                minApy: '最小年化報酬率',
+                decentralized: '只選擇一個同身分的驗證者',
+                onekv: '參加1KV 計畫'
+              },
+              selected: '選擇',
+              filtered: '過濾',
+              total: '總數',
+              filterResult: '過濾結果',
+              balance: '總金額',
+              role: '角色',
+              nominees: '提名人數量',
+              bonded: '綁定',
+              reserved: '保留',
+              redeemable: '可解除綁定',
+              strategyString: '策略',
+              calculatedApy: '預計的年化報酬率',
+              rewardDest: '收益對象',
+              nominate: '提名',
+              advanced: '進階',
+              subtitle: '選擇錢包',
+              supportUs: '支持我們'
             }
           },
         },
       },
     }
   });
-// i18n.changeLanguage('zh-Hant-TW');
-// i18n.changeLanguage('en-US');
+  console.log(i18n.language);
 export default i18n;

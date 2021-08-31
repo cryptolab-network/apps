@@ -109,7 +109,13 @@ enum State {
 
 const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
-  const { network: networkName } = useContext(DataContext);
+
+  const { network: networkName, changeNetwork } = useContext(DataContext);
+  if (filters.stashId.startsWith('1')) {
+    changeNetwork('Polkadot');
+  } else {
+    changeNetwork('Kusama');
+  }
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
@@ -272,7 +278,7 @@ const SRRContent = ({ filters }) => {
           {FilterOptionsLayout}
         </Dialog>
         <StashInformationLayout>
-          <StashInformation stashId={filters.stashId} stashData={stashData} currency={_filters.currency} />
+          <StashInformation stashId={filters.stashId} stashData={stashData} chain={chain} currency={_filters.currency} />
         </StashInformationLayout>
 
         <ContentLayout>
