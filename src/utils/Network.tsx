@@ -19,9 +19,19 @@ const KUSAMA_PARAMS = {
   stakeTarget: 0.75
 }
 
+const WESTEND_PARAMS = {
+  auctionAdjust: 0,
+  auctionMax: 0,
+  falloff: 0.05,
+  maxInflation: 0.1,
+  minInflation: 0.025,
+  stakeTarget: 0.5
+}
+
 const CHAIN_PARAMS = {
   Kusama: KUSAMA_PARAMS,
-  Polkadot: POLKADOT_PARAMS
+  Polkadot: POLKADOT_PARAMS,
+  Westend: WESTEND_PARAMS,
 }
 
 export const chainGetValidatorCounts = async (chain: string, api: ApiPromise): Promise<number> => {

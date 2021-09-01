@@ -49,7 +49,7 @@ import DropdownCommon from './components/Dropdown/Common';
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -127,7 +127,7 @@ interface ILanguage {
 
 const languageOptions = [
   { label: 'English', value: 'en' },
-  { label: '繁體中文', value: 'zh-Hant-TW' },
+  { label: '繁體中文', value: 'zh-TW' },
   { label: '简体中文', value: 'zh-CN' },
   { label: 'Deutsch', value: 'de' },
 ];
@@ -136,10 +136,13 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
-  const [language, setLanguage] = useState<ILanguage>({ label: 'English', value: 'en' });
+  const defaultLng = localStorage.getItem('i18nextLng');
+  const lng = languageOptions.find((l) => l.value === defaultLng);
+  const [language, setLanguage] = useState<ILanguage>((lng) ? lng : { label: 'English', value: 'en'});
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
   };
 
   const handleLanguageChange = (e: ILanguage) => {
