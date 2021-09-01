@@ -195,8 +195,8 @@ const Chart: React.FC<IChart> = ({
               iconSize={16}
               iconType="square"
               verticalAlign="bottom"
+              payload={legendPayload}
               // height={50}
-              payload={customLegend}
               wrapperStyle={{
                 width: '100%',
                 position: 'relative',

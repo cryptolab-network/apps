@@ -33,7 +33,12 @@ import Network from './pages/Tools/components/Network';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
 import Dialog from './components/Dialog';
-import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
+import {
+  CryptolabKSMValidators,
+  CryptolabDOTValidators,
+  CryptolabKSMValidatorsName,
+  CryptolabDOTValidatorsName,
+} from './utils/constants/Validator';
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
@@ -387,13 +392,21 @@ const AppLayout = () => {
 
     Object.keys(CryptolabDOTValidators).forEach((item) => {
       polkadotValidator.push(
-        <ValidatorNode name={item} address={CryptolabDOTValidators[item]} theme="polkadot" />
+        <ValidatorNode
+          name={CryptolabDOTValidatorsName[item]}
+          address={CryptolabDOTValidators[item]}
+          theme="polkadot"
+        />
       );
     });
 
     Object.keys(CryptolabKSMValidators).forEach((item) => {
       kusamaValidator.push(
-        <ValidatorNode name={item} address={CryptolabKSMValidators[item]} theme="polkadot" />
+        <ValidatorNode
+          name={CryptolabKSMValidatorsName[item]}
+          address={CryptolabKSMValidators[item]}
+          theme="polkadot"
+        />
       );
     });
 
