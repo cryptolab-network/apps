@@ -72,7 +72,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                 <tr {...row.getRowProps()}>
                   {type === tableType.stake && !row.canExpand && (
                     <>
-                      <td colSpan={7}>{row.cells[4].render('Cell')}</td>
+                      <td colSpan={8}>{row.cells[4].render('Cell')}</td>
                     </>
                   )}
                   {type === tableType.stake &&
