@@ -185,7 +185,20 @@ const ValidatorStatus = (props) => {
               era: era.era,
             };
           });
-
+          chartData1.sort((a, b) => {
+            if(a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
+          chartData2.sort((a, b) => {
+            if(a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
           setChartData1(chartData1);
           setChartData2(chartData2);
           const lastEraInfo = findLastEra(validator.info);
