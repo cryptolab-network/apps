@@ -67,6 +67,8 @@ const SRRChart = ({ stashData, chain }) => {
       data={chartData}
       leftLabel={`Amount (${chain})`}
       xAxisHeight={80}
+      xAxisFontSize={12}
+      legendPayload={[{ value: `Amount (${chain})` }]}
       config={{
         xKey: 'key',
         firstDataKey: undefined,

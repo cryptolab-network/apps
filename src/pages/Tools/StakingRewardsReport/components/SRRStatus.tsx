@@ -111,10 +111,14 @@ const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
 
   const { network: networkName, changeNetwork } = useContext(DataContext);
-  if (filters.stashId.startsWith('1')) {
-    changeNetwork('Polkadot');
-  } else {
-    changeNetwork('Kusama');
+  if (filters.stashId.length > 0) {
+    if(validateAddress(filters.stashId)) {
+      if (filters.stashId.startsWith('1')) {
+        changeNetwork('Polkadot');
+      } else {
+        changeNetwork('Kusama');
+      }
+    }
   }
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
