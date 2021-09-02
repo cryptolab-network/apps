@@ -111,9 +111,9 @@ const displayRole = (role: AccountRole): string => {
     case AccountRole.VALIDATOR:
       return 'Validator';
     case AccountRole.CONTROLLER_OF_VALIDATOR:
-      return 'Controller of Validator';
+      return 'Controller';
     case AccountRole.CONTROLLER_OF_NOMINATOR:
-      return 'Controller of Nominator';
+      return 'Controller';
     case AccountRole.NOMINATOR:
       return 'Nominator';
     case AccountRole.NOMINATOR_AND_CONTROLLER:
