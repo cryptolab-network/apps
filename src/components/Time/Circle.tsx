@@ -58,8 +58,8 @@ const calcLeftMinute = (type, eraInfo) => {
   if (type === 'era') {
     leftMinute = Math.floor((leftTime % HOUR) / MINUTE);
   } else {
-    const epochTime = eraInfo.sessionLength * 6 * 1000;
-    leftMinute = Math.floor(((leftTime % epochTime) % (eraInfo.sessionLength * SLOT_TIME)) / MINUTE);
+    const epochTime = eraInfo.sessionLength * SLOT_TIME;
+    leftMinute = Math.floor(((leftTime % epochTime) % HOUR) / MINUTE);
   }
   return leftMinute;
 };
@@ -130,8 +130,19 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
         mainValue = type === 'era' ? 1 : 4;
         mainUnit = type === 'era' ? t('benchmark.staking.timeCircle.day') : t('benchmark.staking.timeCircle.hrs');
         if (leftHour > 0) {
-          subValue =
-            type === 'era' ? `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}` : `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftMinute} ${t('benchmark.staking.timeCircle.s')}`;
+          if (type === 'era') {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          } else {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          }
         } else {
           subValue = `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
         }
