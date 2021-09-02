@@ -45,7 +45,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
     },
     useSortBy,
     useExpanded,
-    usePagination, // Use the useExpanded plugin hook,
+    usePagination // Use the useExpanded plugin hook,
   );
   return (
     <Style>
@@ -57,12 +57,10 @@ const CustomTable: React.FC<ICOLUMN> = ({
                 {headerGroup.headers.map((column) => (
                   <th {...column.getSortByToggleProps()}>
                     {column.render('Header')}
-                    <span> {'  '}
-                    {column.isSorted
-                      ? column.isSortedDesc
-                        ? <SortingDescIcon />
-                        : <SortingAscIcon />
-                      : ''}
+                    <span>
+                      {' '}
+                      {'  '}
+                      {column.isSorted ? column.isSortedDesc ? <SortingDescIcon /> : <SortingAscIcon /> : ''}
                     </span>
                   </th>
                 ))}
@@ -115,7 +113,15 @@ const CustomTable: React.FC<ICOLUMN> = ({
         </table>
         <br />
       </div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         {pagination ? (
           <Pagination
             canPreviousPage={canPreviousPage}

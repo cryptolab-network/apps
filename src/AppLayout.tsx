@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useCallback, useContext } from 'react';
+import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
@@ -9,9 +9,13 @@ import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
+import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
+import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
+import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import Guide from './pages/Guide';
 import Benchmark from './pages/Benchmark';
@@ -26,11 +30,26 @@ import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
+import { Helmet } from 'react-helmet';
+import { apiSubscribeNewsletter } from './apis/Validator';
+import Dialog from './components/Dialog';
+import {
+  CryptolabKSMValidators,
+  CryptolabDOTValidators,
+  CryptolabKSMValidatorsName,
+  CryptolabDOTValidatorsName,
+} from './utils/constants/Validator';
+import Identicon from '@polkadot/react-identicon';
+import { IconTheme } from '@polkadot/react-identicon/types';
+import { useTranslation } from 'react-i18next';
+import { isMobile } from 'react-device-detect';
+import Mobile from './pages/Mobile';
+import DropdownCommon from './components/Dropdown/Common';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
-
+  const { t } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -40,13 +59,13 @@ const Header: React.FC = () => {
       </HeaderLeftDiv>
       <HeaderMidDiv>
         <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
-          Staking Guide
+          {t('app.title.stakingGuide')}
         </NavLink>
         <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
-          Portfolio Benchmark
+          {t('app.title.portfolioBenchmark')}
         </NavLink>
         <NavLink to="/management" className="header-item" activeClassName="header-item-active">
-          Portfolio Management
+          {t('app.title.portfolioManagement')}
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
@@ -54,7 +73,7 @@ const Header: React.FC = () => {
           <NetworkWallet />
         ) : (
           <NavLink to="/benchmark">
-            <Button title="Use Benchmark" />
+            <Button title={t('app.title.useBenchmark')} />
           </NavLink>
         )}
       </HeaderRightDiv>
@@ -64,6 +83,7 @@ const Header: React.FC = () => {
 
 // tools header
 const ToolsHeader: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -73,13 +93,13 @@ const ToolsHeader: React.FC = () => {
       </HeaderLeftDiv>
       <HeaderMidDiv>
         <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-          Validator / Nominator status
+          {t('tools.title.valnom')}
         </NavLink>
         <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-          1KV Monitor
+          {t('tools.title.oneKvMonitor')}
         </NavLink>
         <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-          Staking Rewards
+          {t('tools.title.stakingRewards')}
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
@@ -89,60 +109,183 @@ const ToolsHeader: React.FC = () => {
   );
 };
 
-const Footer: React.FC = () => {
+interface IFooter {
+  handleDialogOpen: Function;
+}
+
+interface IValidator {
+  name: string;
+  address: string;
+  theme: IconTheme;
+}
+
+interface ILanguage {
+  label: string;
+  value: string;
+  isDisabled?: boolean;
+}
+
+const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: '繁體中文', value: 'zh-TW' },
+  { label: '简体中文', value: 'zh-CN' },
+  { label: 'Deutsch', value: 'de' },
+];
+
+const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
+  const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
+  const [email, setEmail] = useState<string>('');
+  const defaultLng = localStorage.getItem('i18nextLng');
+  const lng = languageOptions.find((l) => l.value === defaultLng);
+  const [language, setLanguage] = useState<ILanguage>((lng) ? lng : { label: 'English', value: 'en'});
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
+  };
+
+  const handleLanguageChange = (e: ILanguage) => {
+    changeLanguage(e.value);
+    setLanguage(e);
+  };
+
+  const onSubscribeNewsletter = () => {
+    apiSubscribeNewsletter({
+      email: email,
+    })
+      .then((result) => {
+        let message = '';
+        console.log(result);
+        if (result === 0) {
+          message = t('app.newsletter.subscribe.successful');
+          toast.info(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        } else if (result === -2000) {
+          message = t('app.newsletter.subscribe.duplicated');
+          toast.error(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        } else if (result === -1002) {
+          message = t('app.newsletter.subscribe.incorrectFormat');
+          toast.error(`${message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
+        }
+      })
+      .catch((err) => {
+        toast.error(t('app.newsletter.subscribe.failed'), {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: undefined,
+        });
+      });
+  };
   return (
     <>
       <TableDiv>
         <ColumnDiv>
-          <ThDiv>General</ThDiv>
+          <ThDiv>{t('app.footer.title.general')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">About</LinkA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('aboutus');
+              }}
+            >
+              {t('app.footer.title.about')}
+            </DialogA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Contact</LinkA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('contactus');
+              }}
+            >
+              {t('app.footer.title.contact')}
+            </DialogA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Our Validators</LinkA>
+            <DialogA
+              onClick={() => {
+                handleDialogOpen('validators');
+              }}
+            >
+              {t('app.footer.title.ourValidators')}
+            </DialogA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
-          <ThDiv>Technology</ThDiv>
+          <ThDiv>{t('app.footer.title.technology')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={staking_url}>Staking Service</LinkA>
+            <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href={tools_url}>Tools for Validators</LinkA>
+            <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Telegram Bots</LinkA>
+            <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
-          <ThDiv>Community</ThDiv>
+          <ThDiv>{t('app.footer.title.community')}</ThDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Blog</LinkA>
+            <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
           </TdDiv>
           <TdDiv>
             <DotDiv />
-            <LinkA href="#">Medium</LinkA>
+            <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+          </TdDiv>
+        </ColumnDiv>
+        <ColumnDiv style={{ minWidth: '85px' }}>
+          <ThDiv>{t('app.footer.title.language')}</ThDiv>
+          <TdDiv>
+            <DropdownCommon
+              style={{ flex: 1, width: '100%' }}
+              options={languageOptions}
+              value={language}
+              onChange={handleLanguageChange}
+              theme="dark"
+            />
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
           <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" target="_blank" rel="noreferrer">
+            <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
               <SocialMediaWrapper>
                 <TwitterIcon width="36px" height="36px" />
               </SocialMediaWrapper>
             </a>
-            <a href="https://github.com/cryptolab-network" target="_blank" rel="noreferrer">
+            <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
               <SocialMediaWrapper>
                 <GithubIcon width="36px" height="36px" />
               </SocialMediaWrapper>
@@ -153,18 +296,45 @@ const Footer: React.FC = () => {
               </SocialMediaWrapper>
             </a>
           </TdDiv>
-          <TdDiv align_items="flex-end">Subscribe to receive CryptoLab updates!</TdDiv>
+          <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
           <TdDiv justify_content="center">
-            <Input placeholder="Enter your email address"></Input>
-            <SubmitButton>Subscribe</SubmitButton>
+            <Input
+              placeholder={t('app.footer.title.enterEmail')}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            ></Input>
+            <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
           </TdDiv>
         </ColumnDiv>
       </TableDiv>
       <CopyRightDiv>
         <CopyRightTitleDiv>
           @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <TextLinkA href="#">Disclaimer</TextLinkA> &nbsp;| &nbsp;
-          <TextLinkA href="#">Privacy</TextLinkA>
+          <a
+            href="https://www.iubenda.com/terms-and-conditions/37411829"
+            style={{ textDecoration: 'none', color: 'white' }}
+            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+            title="Terms and Conditions "
+          >
+            T&C
+          </a>{' '}
+          &nbsp;| &nbsp;
+          <Helmet>
+            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+          </Helmet>
+          <a
+            href="https://www.iubenda.com/privacy-policy/37411829"
+            style={{ textDecoration: 'none', color: 'white' }}
+            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+            title={t('app.footer.title.privacyPolicy')}
+          >
+            {t('app.footer.title.privacyPolicy')}
+          </a>
+          <Helmet>
+            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+          </Helmet>
         </CopyRightTitleDiv>
       </CopyRightDiv>
     </>
@@ -173,77 +343,293 @@ const Footer: React.FC = () => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
+  const { t } = useTranslation();
   const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
+
+  const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
+  const [visibleContactUsDialog, setVisibleContactUsDialog] = useState(false);
+  const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
+
+  const handleDialogClose = (name) => {
+    console.log('close name: ', name);
+    switch (name) {
+      case 'validators':
+        setVisibleOurValidatorsDialog(false);
+        break;
+      case 'contactus':
+        setVisibleContactUsDialog(false);
+        break;
+      case 'aboutus':
+        setVisibleAboutUsDialog(false);
+        break;
+    }
+  };
+
+  const handleDialogOpen = (name) => {
+    console.log('open name: ', name);
+    switch (name) {
+      case 'validators':
+        setVisibleOurValidatorsDialog(true);
+        break;
+      case 'contactus':
+        setVisibleContactUsDialog(true);
+        break;
+      case 'aboutus':
+        setVisibleAboutUsDialog(true);
+        break;
+    }
+  };
+
+  const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
+    return (
+      <Validator>
+        <Identicon value={address} size={35} theme={theme} />
+        <span style={{ marginLeft: 8 }}>{name}</span>
+      </Validator>
+    );
+  };
+
+  const ourValidatorsDOM = useMemo(() => {
+    let polkadotValidator: any = [];
+    let kusamaValidator: any = [];
+
+    Object.keys(CryptolabDOTValidators).forEach((item) => {
+      polkadotValidator.push(
+        <ValidatorNode
+          name={CryptolabDOTValidatorsName[item]}
+          address={CryptolabDOTValidators[item]}
+          theme="polkadot"
+        />
+      );
+    });
+
+    Object.keys(CryptolabKSMValidators).forEach((item) => {
+      kusamaValidator.push(
+        <ValidatorNode
+          name={CryptolabKSMValidatorsName[item]}
+          address={CryptolabKSMValidators[item]}
+          theme="polkadot"
+        />
+      );
+    });
+
+    return (
+      <>
+        <DialogMainContainer>
+          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <div style={{ marginBottom: 12 }}>Polkadot</div>
+            {polkadotValidator}
+          </DialogListContainer>
+          <DialogListContainer>
+            <div style={{ marginBottom: 12 }}>Kusama</div>
+            {kusamaValidator}
+          </DialogListContainer>
+        </DialogMainContainer>
+        <div
+          style={{
+            width: '100%',
+            display: 'inline-box',
+            boxSizing: 'border-box',
+            justifyContent: 'flex-start',
+            marginTop: 18,
+            color: 'white',
+            fontSize: 13,
+            fontFamily: 'Montserrat',
+            fontWeight: 500,
+            paddingLeft: 50,
+          }}
+        >
+          Toggle
+          <span style={{ color: '#23beb9', fontSize: 13, fontFamily: 'Montserrat', fontWeight: 500 }}>
+            {' '}
+            Support Us{' '}
+          </span>
+          on
+          <span style={{ color: '#23beb9', fontSize: 13, fontFamily: 'Montserrat', fontWeight: 500 }}>
+            {' '}
+            Portfolio Benchmark{' '}
+          </span>
+          to support us.
+        </div>
+      </>
+    );
+  }, []);
+
+  const contactUsDOM = useMemo(() => {
+    return (
+      <>
+        <DialogMainContainer>
+          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+            <div style={{ marginBottom: 12 }}>Riot</div>
+            <ul style={{ paddingLeft: 20 }}>
+              <LiStyle>tanis_37:matrix.org</LiStyle>
+              <LiStyle>yaohsin:matrix.org</LiStyle>
+            </ul>
+          </DialogListContainer>
+          <DialogListContainer>
+            <div style={{ marginBottom: 12 }}>Github</div>
+            <ul style={{ paddingLeft: 20 }}>
+              <LiStyle>Https://github.com/crytolab-network</LiStyle>
+            </ul>
+          </DialogListContainer>
+        </DialogMainContainer>
+      </>
+    );
+  }, []);
+
+  const aboutUsDOM = useMemo(() => {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          boxSizing: 'border-box',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+          width: 'calc(100%/3)',
+        }}
+      >
+        <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
+        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
+        <div style={{ marginTop: 34, textAlign: 'left' }}>
+          <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
+          <ul style={{ paddingLeft: 20 }}>
+            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
+            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
+          </ul>
+        </div>
+      </div>
+    );
+  }, [t]);
+
+  const headerDOM = useMemo(() => {
+    if (isToolsSite) {
+      return <ToolsHeader />;
+    }
+    return <Header />;
+  }, [isToolsSite]);
+
+  const switchtDOM = useMemo(() => {
+    if (isToolsSite) {
+      return (
+        <Switch>
+          <Route exact path="/" component={ToolsPortal} />
+          <Route path="/valnom" component={ValNom} />
+          <Route path="/validator/:id/:chain" component={ValidatorStatus} />
+          <Route path="/onekv" component={OneKV} />
+          <Route path="/rewards" component={StakingRewardsReport} />
+          {/* <Route path="/contact" component={Contact} /> */}
+          {/* <Route path="/ourValidators" component={OurValidators} /> */}
+          {/* <Route path="/about" component={About} /> */}
+        </Switch>
+      );
+    }
+    return (
+      <Switch>
+        <Route exact path="/" component={Portal} />
+        <Route path="/guide" component={Guide} />
+        <Route path="/benchmark" component={Benchmark} />
+        <Route path="/management" component={Management} />
+      </Switch>
+    );
+  }, [isToolsSite]);
+
   const mainRender = useMemo(() => {
+    return (
+      <>
+        {headerDOM}
+        <RouteContent>
+          <Dialog
+            image={<PeopleIcon />}
+            title={t('app.footer.title.ourValidators')}
+            isOpen={visibleOurValidatorsDialog}
+            handleDialogClose={() => {
+              handleDialogClose('validators');
+            }}
+          >
+            {ourValidatorsDOM}
+          </Dialog>
+          <Dialog
+            image={<ContactIcon />}
+            title={t('app.footer.title.contact')}
+            isOpen={visibleContactUsDialog}
+            handleDialogClose={() => {
+              handleDialogClose('contactus');
+            }}
+          >
+            {contactUsDOM}
+          </Dialog>
+          <Dialog
+            image={<AboutIcon />}
+            title={t('app.footer.title.about')}
+            isOpen={visibleAboutUsDialog}
+            handleDialogClose={() => {
+              handleDialogClose('aboutus');
+            }}
+          >
+            {aboutUsDOM}
+          </Dialog>
+          <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+          {switchtDOM}
+        </RouteContent>
+        <Footer
+          handleDialogOpen={(name) => {
+            handleDialogOpen(name);
+          }}
+        />
+      </>
+    );
+  }, [
+    aboutUsDOM,
+    contactUsDOM,
+    headerDOM,
+    ourValidatorsDOM,
+    switchtDOM,
+    t,
+    visibleAboutUsDialog,
+    visibleContactUsDialog,
+    visibleOurValidatorsDialog,
+  ]);
+
+  if (isMobile) {
     if (isToolsSite) {
       return (
         <>
-          <ToolsHeader />
-          <RouteContent>
-            <ToastContainer
-              position="top-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-            <Switch>
-              <Route exact path="/" component={ToolsPortal} />
-              <Route path="/valnom" component={ValNom} />
-              <Route path="/validator/:id/:chain" component={ValidatorStatus} />
-              <Route path="/onekv" component={OneKV} />
-              <Route path="/rewards" component={StakingRewardsReport} />
-            </Switch>
-          </RouteContent>
-          <Footer />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Header />
-          <RouteContent>
-            <ToastContainer
-              position="top-center"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
-            <Switch>
-              <Route exact path="/" component={Portal} />
-              <Route path="/guide" component={Guide} />
-              <Route path="/benchmark" component={Benchmark} />
-              <Route path="/management" component={Management} />
-            </Switch>
-          </RouteContent>
-          <Footer />
+          <Mobile isTools={true} />
         </>
       );
     }
-  }, []);
-  
-  return (
-    <>
-      <GradientLight>
-        <BrowserRouter>
-          {isToolsSite? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
+    return (
+      <>
+        <Mobile isTools={false} />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <GradientLight>
+          <BrowserRouter>
+            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
             {/* <Api>{mainRender}</Api> */}
-        </BrowserRouter>
-        {/* <StarAnimation id="stars" />
-        <StarAnimation id="stars2" />
-        <StarAnimation id="stars3" /> */}
-      </GradientLight>
-    </>
-  );
+          </BrowserRouter>
+          {/* <StarAnimation id="stars" />
+          <StarAnimation id="stars2" />
+          <StarAnimation id="stars3" /> */}
+        </GradientLight>
+      </>
+    );
+  }
 };
 
 export default AppLayout;
@@ -263,11 +649,12 @@ const HeaderDiv = styled.div`
 const RouteContent = styled.div`
   display: flex;
   // height: 100%;
-  // min-height: calc(100vh - 93px);
+  min-height: calc(100vh - 344px - 64px - 96px);
   overflow-y: visible;
 `;
 
 const HeaderLeftDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-start;
 `;
@@ -282,6 +669,7 @@ const HeaderMidDiv = styled.div`
 `;
 
 const HeaderRightDiv = styled.div`
+  flex: 2;
   display: flex;
   justify-content: flex-end;
 `;
@@ -303,9 +691,18 @@ const TableDiv = styled.div`
   display: flex;
   flex-flow: row;
   justify-content: space-between;
-  height: 14em;
-  margin: 80px 0 0 0;
+  height: 224px;
+  margin: auto;
+  margin-top: 80px;
   padding: 20px 15% 20px 15%;
+  width: auto;
+  @media (min-width: 1000px) {
+    width: 70%;
+  }
+  @media (max-width: 1000px) {
+    width: 90%;
+    padding: 0px;
+  }
 `;
 
 const ColumnDiv = styled.div`
@@ -365,6 +762,14 @@ const LinkA = styled.a`
   }
 `;
 
+const DialogA = styled.span`
+  color: white;
+  text-decoration: none;
+  :hover {
+    color: #23beb9;
+  }
+`;
+
 const Input = styled.input`
   width: 100%;
   height: 70%;
@@ -378,6 +783,7 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
+  min-width: fit-content;
   height: 75%;
   margin: 0;
   border: 0;
@@ -389,13 +795,10 @@ const SubmitButton = styled.button`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
   line-height: 1.23;
-  letter-spacing: normal;
 `;
 const CopyRightDiv = styled.div`
-  heigth: 64px;
+  height: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;
@@ -417,10 +820,67 @@ const CopyRightTitleDiv = styled.div`
   color: white;
   text-align: center;
 `;
-const TextLinkA = styled.a`
-  text-decoration: none;
-  color: white;
-`;
+
 const SocialMediaWrapper = styled.div`
   margin-right: 15px;
+`;
+
+const DialogMainContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-family: Montserrat;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: left;
+  color: white;
+`;
+
+const DialogListContainer = styled.span`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 6px 50px 6px 50px;
+`;
+
+const Validator = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 6px 0px 6px 0px;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+
+  text-align: left;
+  color: #23beb9;
+`;
+
+const LiStyle = styled.li`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #23beb9;
+  margin-top: 3px;
+  margin-bottom: 3px;
+`;
+
+const AboutUsFontStyle = styled.div`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: white;
+`;
+
+const AboutUsGoalFontStyle = styled.li`
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: #1faaa6;
+  margin-top: 6px;
+  margin-bottom: 6px;
 `;

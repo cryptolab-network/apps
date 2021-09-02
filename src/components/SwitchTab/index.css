@@ -4,6 +4,8 @@
   text-decoration: none;
   background-color: transparent;
   border-radius: 100px;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 .navlink.navlink-active {
   background-color: #23beb9;

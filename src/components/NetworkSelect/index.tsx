@@ -3,14 +3,27 @@ import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactComponent as KSMLogo } from '../../assets/images/ksm-logo.svg';
 import { ReactComponent as DOTLogo } from '../../assets/images/dot-logo.svg';
+import { ReactComponent as WNDLogo } from '../../assets/images/wnd-logo.svg';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import './index.css';
 import styled from 'styled-components';
 import { ApiContext } from '../Api';
+import { NetworkConfig } from '../../utils/constants/Network';
+
+const getLogoDiv = (network) => {
+  switch (network) {
+    case 'Kusama':
+      return <KSMLogo style={{ width: 36, height: 36 }} />;
+    case 'Polkadot':
+      return <DOTLogo style={{ width: 36, height: 36 }} />;
+    case 'Westend':
+      return <WNDLogo style={{ width: 36, height: 36 }} />;
+  }
+};
 
 const NetworkSelect: React.FC = () => {
   // context
-  const {network, changeNetwork} = useContext(ApiContext);
+  const { network, changeNetwork } = useContext(ApiContext);
   // state
   const [isOpen, setOpen] = useState(false);
   //ref
@@ -50,29 +63,35 @@ const NetworkSelect: React.FC = () => {
   }, [network]);
 
   const DisplayNetworkPanelDOM = useMemo(() => {
-    let dom = {};
-    switch (network) {
-      case 'Kusama':
-        dom = (
-          <>
-            <KSMLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>Kusama</NetworkTitle>
-          </>
-        );
-        break;
-      case 'Polkadot':
-        dom = (
-          <>
-            <DOTLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>Polkadot</NetworkTitle>
-          </>
-        );
-        break;
-      default:
-        break;
-    }
-    return dom;
+    return (
+      <>
+        {getLogoDiv(network)}
+        <NetworkTitle>{network}</NetworkTitle>
+      </>
+    );
   }, [network]);
+
+  const DisplayDropDownItem = useMemo(() => {
+    const list = Object.keys(NetworkConfig).map((key, index, array) => {
+      let classname = 'li';
+      if (index === 0) classname = 'li first';
+      if (index === array.length - 1) classname = 'li last';
+
+      return (
+        <li
+          key={key}
+          className={classname}
+          onClick={() => {
+            changeNetwork(NetworkConfig[key].name);
+          }}
+        >
+          {getLogoDiv(NetworkConfig[key].name)}
+          <NetworkTitleLight>{NetworkConfig[key].name}</NetworkTitleLight>
+        </li>
+      );
+    });
+    return list;
+  }, [changeNetwork]);
 
   return (
     <>
@@ -104,7 +123,8 @@ const NetworkSelect: React.FC = () => {
                 backgroundColor="#23beb9"
                 layerSide="bottom"
               />
-              <li
+              {DisplayDropDownItem}
+              {/* <li
                 className="li first"
                 onClick={() => {
                   console.log(`Kusama`);
@@ -123,7 +143,7 @@ const NetworkSelect: React.FC = () => {
               >
                 <DOTLogo style={{ width: 36, height: 36 }} />
                 <NetworkTitleLight>Polkadot</NetworkTitleLight>
-              </li>
+              </li> */}
             </motion.ul>
           )}
         </AnimatePresence>

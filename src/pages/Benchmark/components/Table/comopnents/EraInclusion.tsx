@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { eraStatus } from '../../../../../utils/status/Era';
 
 interface IEraInclusion {
   rate: number;

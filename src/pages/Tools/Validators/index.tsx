@@ -1,28 +1,39 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
-import { apiGetSingleValidator, apiGetValidatorSlashes, apiGetValidatorUnclaimedEras, IEraInfo, INominator, IValidatorHistory, IValidatorSlash } from '../../../apis/Validator';
+import {
+  apiGetSingleValidator,
+  apiGetValidatorSlashes,
+  apiGetValidatorUnclaimedEras,
+  IEraInfo,
+  INominator,
+  IValidatorHistory,
+  IValidatorSlash,
+} from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
+import Chart from '../../../components/Chart';
 import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
+import { balanceUnit, shortenStashId } from '../../../utils/string';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { DataContext } from '../components/Data';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
   info.forEach((eraInfo, i) => {
-    if(eraInfo.era > lastEraInfo.era) {
+    if (eraInfo.era > lastEraInfo.era) {
       lastEraInfo = eraInfo;
     }
   });
   return lastEraInfo;
 };
 
-const ValidatorStatusHeader = ({
-  chain,
-  validator
-}) => {
+const ValidatorStatusHeader = ({ chain, validator }) => {
   const history = useHistory();
+  const { t } = useTranslation();
   let active = 0;
   let total = 0;
   let nominatorCount = 0;
@@ -30,64 +41,50 @@ const ValidatorStatusHeader = ({
   if (validator.info.length > 0) {
     const lastEraInfo = findLastEra(validator.info);
     total = lastEraInfo.nominators.reduce((acc, n) => {
-      return acc += n.balance.lockedBalance;
+      return (acc += n.balance.lockedBalance);
     }, 0);
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
-  }, [chain]);
+  const _formatBalance = useCallback(
+    (value: any) => {
+      return balanceUnit(chain, value);
+    },
+    [chain]
+  );
   return (
     <HeaderLayout>
       <HeaderLeft>
         <PrevArrowLayout>
-          <PrevArrow onClick={() => {
-            history.goBack();
-          }}/>
+          <PrevArrow
+            onClick={() => {
+              history.goBack();
+            }}
+          />
         </PrevArrowLayout>
         <HeaderTitle>
           <Title>
-            <Account address={validator.id} display={validator.identity.display}/>
+            <Account address={validator.id} display={validator.identity.display} />
           </Title>
           <Subtitle>{validator.id}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
         <Exposure>
-          <ExposureActive>
-            {_formatBalance(active)}
-          </ExposureActive>
-          <span style={{color: 'white', margin:'0 4px 0 4px'}}>/</span>
-          <ExposureTotal>
-            {_formatBalance(total)}
-          </ExposureTotal>
+          <ExposureActive>{_formatBalance(active)}</ExposureActive>
+          <span style={{ color: 'white', margin: '0 4px 0 4px' }}>/</span>
+          <ExposureTotal>{_formatBalance(total)}</ExposureTotal>
         </Exposure>
         <Value>
-          <ValueTitle>APY:</ValueTitle>
+          <ValueTitle>{t('tools.validators.apy')}:</ValueTitle>
           {(validator.averageApy * 100).toFixed(2)} %
         </Value>
         <Value>
-          <ValueTitle>Nominator Count:</ValueTitle>
+          <ValueTitle>{t('tools.validators.nominatorCount')}:</ValueTitle>
           {nominatorCount}
         </Value>
         <Value>
-          <ValueTitle>Commission:</ValueTitle>
+          <ValueTitle>{t('tools.validators.commission')}:</ValueTitle>
           {commission} %
         </Value>
       </HeaderRight>
@@ -96,6 +93,7 @@ const ValidatorStatusHeader = ({
 };
 
 const ValidatorStatus = (props) => {
+  const { t } = useTranslation();
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
   const [selfStake, setSelfStake] = useState<string>('0');
@@ -104,53 +102,143 @@ const ValidatorStatus = (props) => {
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
-      commissionChange: 0
+      commissionChange: 0,
     },
     identity: {
-      display: ''
+      display: '',
     },
     info: [],
-    averageApy: 0
+    averageApy: 0,
   });
+  const [chartData1, setChartData1] = useState<any[]>([]);
+  const [chartData2, setChartData2] = useState<any[]>([]);
+  // context
+  const { network, changeNetwork } = useContext(DataContext);
   const chain = props.match.params.chain;
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(BigInt(value), {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
+
+  useEffect(() => {
+    if (chain === 'KSM' && network !== 'Kusama') {
+      changeNetwork('Kusama');
+    } else if (chain === 'DOT' && network !== 'Polkadot') {
+      changeNetwork('Polkadot');
     }
-  }, [chain]);
+  }, [chain, network, changeNetwork]);
+
+  const _formatBalance = useCallback(
+    (value: any) => {
+      if (chain === 'KSM') {
+        return formatBalance(BigInt(value), {
+          decimals: 12,
+          withUnit: 'KSM',
+        });
+      } else if (chain === 'DOT') {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'DOT',
+        });
+      } else {
+        return formatBalance(BigInt(value), {
+          decimals: 10,
+          withUnit: 'Unit',
+        });
+      }
+    },
+    [chain]
+  );
+  const notifyError = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
   useEffect(() => {
     async function getValidator() {
       // load stash data from backend
-      let validator: IValidatorHistory = await apiGetSingleValidator({ params: `${props.match.params.id}/${props.match.params.chain}` });
-      let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({ params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}` });
-      let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({ params: `${props.match.params.id}/slashes/${props.match.params.chain}` });
-      // TODO: error handling not yet
-      setValidator(validator);
-      if (validator.info.length > 0) {
-        const lastEraInfo = findLastEra(validator.info);
-        const _nominators = lastEraInfo.nominators;
-        setSelfStake(_formatBalance(lastEraInfo.selfStake));
-        const active = _nominators.filter(({ address: id1 }) => lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1));
-        setActiveNominators(active);
-        const inactive = _nominators.filter(({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1));
-        setNominators(inactive);
-        _setUnclaimedEras(unclaimedEras);
-        _setSlashes(slashes);
+      try {
+        let validator: IValidatorHistory = await apiGetSingleValidator({
+          params: `${props.match.params.id}/${props.match.params.chain}`,
+        });
+        let unclaimedEras: number[] = await apiGetValidatorUnclaimedEras({
+          params: `${props.match.params.id}/unclaimedEras/${props.match.params.chain}`,
+        });
+        let slashes: IValidatorSlash[] = await apiGetValidatorSlashes({
+          params: `${props.match.params.id}/slashes/${props.match.params.chain}`,
+        });
+        // TODO: error handling not yet
+        setValidator(validator);
+        if (validator.info.length > 0) {
+          const chartData1 = validator.info.map((era) => {
+            return {
+              nominators: era.nominatorCount,
+              commission: era.commission,
+              era: era.era,
+            };
+          });
+          const chartData2 = validator.info.map((era) => {
+            return {
+              apy: (era.apy * 100).toFixed(2),
+              era: era.era,
+            };
+          });
+          chartData1.sort((a, b) => {
+            if (a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
+          chartData2.sort((a, b) => {
+            if (a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
+          setChartData1(chartData1);
+          setChartData2(chartData2);
+          const lastEraInfo = findLastEra(validator.info);
+          const _nominators = lastEraInfo.nominators;
+          setSelfStake(_formatBalance(lastEraInfo.selfStake));
+          let active = _nominators.filter(({ address: id1 }) =>
+            lastEraInfo.exposure.others.some(({ who: id2 }) => id2 === id1)
+          );
+          active = active.sort((a, b) => {
+            if (a.balance.lockedBalance > b.balance.lockedBalance) {
+              return -1;
+            } else if (a.balance.lockedBalance < b.balance.lockedBalance) {
+              return 1;
+            }
+            return 0;
+          });
+          setActiveNominators(active);
+          let inactive = _nominators.filter(
+            ({ address: id1 }) => !active.some(({ address: id2 }) => id2 === id1)
+          );
+          inactive = inactive.sort((a, b) => {
+            if (a.balance.lockedBalance > b.balance.lockedBalance) {
+              return -1;
+            } else if (a.balance.lockedBalance < b.balance.lockedBalance) {
+              return 1;
+            }
+            return 0;
+          });
+          setNominators(inactive);
+          _setUnclaimedEras(unclaimedEras);
+          _setSlashes(slashes);
+        }
+      } catch (err) {
+        notifyError(
+          t('tools.validators.errors.incorrectValidator1') +
+            `${shortenStashId(props.match.params.id)} ` +
+            t('tools.validators.errors.incorrectValidator2')
+        );
       }
-
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
           setUnclaimedEras('None');
@@ -176,53 +264,71 @@ const ValidatorStatus = (props) => {
       }
     }
     getValidator();
-  }, [props.match.params.id, props.match.params.chain, _formatBalance]);
+  }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError, t]);
   return (
     <ValidatorStatusLayout>
       <MainLayout>
         <CardHeader
-          Header={() => (
-            <ValidatorStatusHeader
-              validator={validator}
-              chain={props.match.params.chain}
-            />
-          )}
+          Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
+          mainPadding="0 0 0 0"
         >
-          <ValidatorInfoLayout>
-            <InfoTitle>
-              Self Stake:
-            </InfoTitle>
-            <InfoItem>
-              {selfStake}
-            </InfoItem>
-            <InfoDivider />
-            <InfoTitle>
-              Unclaimed Eras:
-            </InfoTitle>
-            <InfoItem>
-              {unclaimedEras}
-            </InfoItem>
-            <InfoDivider />
-            <InfoTitle>
-              Slashes:
-            </InfoTitle>
-            <InfoItem>
-              {slashes.length === 0 ? 'None' : slashes.length}
-            </InfoItem>
-          </ValidatorInfoLayout>
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Active Nominators</ContentBlockTitle>
-              <NominatorGrid
-              chain={props.match.params.chain}
-              nominators={activeNominators}/>
-          </ContentColumnLayout>
-          <Space />
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Inactive Nominators</ContentBlockTitle>
-              <NominatorGrid
-              chain={props.match.params.chain}
-              nominators={nominators}/>
-          </ContentColumnLayout>
+          <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ValidatorInfoLayout>
+                <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
+                <InfoItem>{selfStake}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
+                <InfoItem>{unclaimedEras}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
+                <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+              </ValidatorInfoLayout>
+            </div>
+
+            <ChartsLayout>
+              <ChartContainer>
+                <Chart
+                  data={chartData1}
+                  leftLabel="Nominator Count"
+                  rightLabel="Commission ( % )"
+                  xAxisHeight={80}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'nominators',
+                    secondDataKey: 'commission',
+                    firstDataYAxis: 'left',
+                    secondDataYAxis: 'right',
+                  }}
+                />
+              </ChartContainer>
+              <ChartContainer>
+                <Chart
+                  data={chartData2}
+                  leftLabel="APY"
+                  xAxisHeight={80}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'apy',
+                    firstDataYAxis: 'left',
+                  }}
+                />
+              </ChartContainer>
+            </ChartsLayout>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
+              </ContentColumnLayout>
+              <Space />
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">
+                  {t('tools.validators.inactiveNominators')}
+                </ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
+              </ContentColumnLayout>
+            </div>
+          </div>
         </CardHeader>
       </MainLayout>
     </ValidatorStatusLayout>
@@ -240,6 +346,7 @@ const ValidatorStatusLayout = styled.div`
 `;
 
 const MainLayout = styled.div`
+  width: 1400px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -249,6 +356,7 @@ const MainLayout = styled.div`
 
 const HeaderLayout = styled.div`
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -257,6 +365,7 @@ const HeaderLayout = styled.div`
 const HeaderLeft = styled.div`
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 `;
 
 const HeaderRight = styled.div`
@@ -306,7 +415,7 @@ const Subtitle = styled.div`
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  width: 240px;
+  /* width: 240px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -316,7 +425,7 @@ const Exposure = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: var(--nav-fg);
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ExposureActive = styled.div`
@@ -331,7 +440,7 @@ const ExposureTotal = styled.div`
 const Value = styled.div`
   display: flex;
   flex-direction: row;
-  width: 160px;
+  /* width: 160px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -341,7 +450,7 @@ const Value = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: #23beb9;
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ValueTitle = styled.div`
@@ -352,7 +461,34 @@ type ContentColumnLayoutProps = {
   justifyContent?: string;
   width?: string;
 };
+
+const ChartsLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  height: 500px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #2f3842;
+  padding: 13px 16px 13px 16px;
+  margin: 5px 4px 5px 4px;
+  border-radius: 6px;
+  color: white;
+  font-family: Montserrat;
+  font-size: 11px;
+  font-weight: 500;
+`;
+
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'space-between')};
@@ -378,19 +514,18 @@ const ContentBlockTitle = styled.div`
 `;
 
 const Space = styled.div`
-  margin: 40px 0 0 0;
+  margin: 32px 0 0 0;
 `;
 
 const ValidatorInfoLayout = styled.div`
+  box-sizing: border-box;
   width: 100%;
   height: 50px;
-  margin: 9.6px 0 10.1px 0;
-  padding: 13px 0 18.4px 0;
+  padding: 12px;
   display: flex;
   flex-direction: row;
   border-radius: 6px;
   background-color: #2f3842;
-  padding: 0 0 0 18px;
   align-items: center;
 `;
 

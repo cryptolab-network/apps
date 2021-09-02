@@ -7,10 +7,25 @@ import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
 import Identicon from '@polkadot/react-identicon';
 import { ApiContext } from '../Api';
-import { formatBalance } from '@polkadot/util';
+import { balanceUnit } from '../../utils/string';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { isEmpty } from '../../utils/helper';
 
 const WalletSelect: React.FC = () => {
-  const { network, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } = useContext(ApiContext);
+  const { t } = useTranslation();
+  const {
+    network,
+    hasWeb3Injected,
+    isWeb3AccessDenied,
+    accounts,
+    selectedAccount,
+    selectAccount,
+    isLoading,
+  } = useContext(ApiContext);
+  console.log(`accounts`);
+  console.log(accounts);
+  console.log(selectedAccount);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -44,6 +59,18 @@ const WalletSelect: React.FC = () => {
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
   const installWallet = () => {
     console.log('in installWallet');
     window.open('https://polkadot.js.org/extension/', '_blank', 'noopener noreferrer');
@@ -63,7 +90,6 @@ const WalletSelect: React.FC = () => {
     } else if (accounts.length > 0) {
       setOpen(!isOpen);
     } else {
-      
     }
   }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, isOpen, accounts]);
 
@@ -77,30 +103,15 @@ const WalletSelect: React.FC = () => {
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      if (network === 'Kusama') {
-        return (formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM'
-        }));
-      } else if (network === 'Polkadot') {
-        return (formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT'
-        }));
-      } else {
-        return (formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit'
-        }));
-      }
+      return balanceUnit(network, value, true);
     },
     [network]
-  )
+  );
 
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
     if (accounts.length === 0) {
-      // console.log('no length');
+      console.log('no length');
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
@@ -132,7 +143,7 @@ const WalletSelect: React.FC = () => {
       });
     }
     return <div className="w-list">{dom}</div>;
-  }, [accounts, selectAccount]);
+  }, [_formatBalance, accounts, selectAccount]);
 
   const walletDisplayDOM = useMemo(() => {
     if (!hasWeb3Injected) {
@@ -153,33 +164,37 @@ const WalletSelect: React.FC = () => {
           <ScaleLoader color="#23beb9" css={css} height={20} />
         </div>
       );
-    } else if (selectedAccount) {
-        return (
-          <>
-            <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-            <WalletLayout>
-              <div>{selectedAccount.name}</div>
-              <div>
-                Balance: <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
-                {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-                {/* <BalanceNumber>123</BalanceNumber> */}
-              </div>
-            </WalletLayout>
-            <div style={{ width: 40 }}>
-              <DropDownIcon
-                style={{
-                  stroke: 'black',
-                  transform: isOpen ? 'rotate(90deg)' : 'none',
-                  transitionDuration: '0.2s',
-                }}
-              />
+    } else if (selectedAccount && !isEmpty(selectedAccount)) {
+      return (
+        <>
+          <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
+          <WalletLayout>
+            <div>{selectedAccount.name}</div>
+            <div>
+              <span style={{ color: '#75818d' }}>Balance : </span>
+              <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
+              {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+              {/* <BalanceNumber>123</BalanceNumber> */}
             </div>
-          </>
-        );
+          </WalletLayout>
+          <div style={{ width: 40 }}>
+            <DropDownIcon
+              style={{
+                stroke: 'black',
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transitionDuration: '0.2s',
+              }}
+            />
+          </div>
+        </>
+      );
+    } else if (isEmpty(selectedAccount)) {
+      notifyWarn(t('benchmark.staking.warnings.noAccount'));
+      return <Hint>No Account</Hint>;
     } else {
       
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, selectedAccount, isLoading, css, isOpen]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen]);
 
   return (
     <>
@@ -261,7 +276,7 @@ const WalletLayout = styled.div`
 `;
 
 const BalanceTitle = styled.span`
-  color: #75818d;
+  color: #23beb9;
 `;
 
 const BalanceNumber = styled.span`

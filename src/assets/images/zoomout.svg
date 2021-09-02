@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17">
+    <defs>
+        <style>
+            .cls-zoomout-1{fill:none;stroke:#fff}
+            .cls-zoomout-2{fill:none;stroke:#fff;stroke-linecap:round}
+        </style>
+    </defs>
+    <g>
+        <g>
+            <g class="cls-zoomout-1" transform="translate(-819 -352) translate(26) translate(793 352)">
+                <circle cx="8.5" cy="8.5" r="8.5" stroke="none"/>
+                <circle cx="8.5" cy="8.5" r="8"/>
+            </g>
+        </g>
+        <path d="M0 0L8 0" class="cls-zoomout-2" transform="translate(-819 -352) translate(823.5 360.5)"/>
+    </g>
+</svg>

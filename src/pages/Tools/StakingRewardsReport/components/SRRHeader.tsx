@@ -1,16 +1,17 @@
 import styled from 'styled-components';
 import { ReactComponent as MedalIcon } from '../../../../assets/images/medal.svg';
 
+import { useTranslation } from 'react-i18next';
+
 const SRRHeader = () => {
+  const { t } = useTranslation();
   return (
     <HeaderLayout>
       <HeaderLeft>
-        <MedalIcon />
+        <MedalIcon width="38.8px" height="38px" />
         <HeaderTitle>
-          <Title>Staking Rewards</Title>
-          <Subtitle>
-            See staking rewards of your stash
-          </Subtitle>
+          <Title>{t('tools.stakingRewards.title')}</Title>
+          <Subtitle>{t('tools.stakingRewards.subtitle')}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -20,7 +21,9 @@ const SRRHeader = () => {
 export default SRRHeader;
 
 const HeaderLayout = styled.div`
+  box-sizing: border-box;
   width: 80vw;
+  max-height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;

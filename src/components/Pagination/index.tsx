@@ -26,7 +26,7 @@ const Pagination = ({
 
   return (
     <MainLayout>
-      <ToPageButton style={{ marginRight: 9 }} disabled={!canPreviousPage}>
+      <ToPageButton style={{ marginRight: 9 }} disabled={!canPreviousPage} onClick={() => {gotoPage(0)}}>
         <ArrowIcon
           style={{
             stroke: '#2f3842',
@@ -40,7 +40,7 @@ const Pagination = ({
           }}
         />
       </ToPageButton>
-      <ToPageButton style={{ marginRight: 9 }} disabled={!canPreviousPage}>
+      <ToPageButton style={{ marginRight: 9 }} disabled={!canPreviousPage} onClick={() => {previousPage()}}>
         <ArrowIcon
           style={{
             stroke: '#2f3842',
@@ -49,7 +49,7 @@ const Pagination = ({
         />
       </ToPageButton>
       <Pages>{pageNumDOM}</Pages>
-      <ToPageButton style={{ marginLeft: 9 }} disabled={!canNextPage}>
+      <ToPageButton style={{ marginLeft: 9 }} disabled={!canNextPage} onClick={() => {nextPage()}}>
         <ArrowIcon
           style={{
             stroke: '#2f3842',
@@ -57,7 +57,7 @@ const Pagination = ({
           }}
         />
       </ToPageButton>
-      <ToPageButton style={{ marginLeft: 9 }} disabled={!canNextPage}>
+      <ToPageButton style={{ marginLeft: 9 }} disabled={!canNextPage} onClick={() => {gotoPage(pageCount - 1)}}>
         <ArrowIcon
           style={{
             stroke: '#2f3842',

@@ -4,19 +4,7 @@ import keys from '../../config/keys';
 import { web3Enable, isWeb3Injected, web3Accounts } from '@polkadot/extension-dapp';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
-
-const networkInfo = [
-  {
-    name: 'Polkadot',
-    prefix: 0,
-    genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
-  },
-  {
-    name: 'Kusama',
-    prefix: 2,
-    genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-  },
-];
+import { NetworkConfig } from '../../utils/constants/Network';
 
 export enum ApiState {
   DISCONNECTED,
@@ -49,18 +37,19 @@ export interface ApiProps {
   selectedAccount: IAccount;
   selectAccount: Function;
   isLoading: boolean;
+  refreshAccountData: Function;
 }
 
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
-  const info = networkInfo.find((info) => info.name === network);
+  const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
-    return account.genesisHash === null || account.genesisHash === info?.genesisHash;
+    return account.genesisHash === null || account.genesisHash === networkConfig?.genesisHash;
   });
 
   return filtered.map((account) => {
     const address = encodeAddress(
       isHex(account.address) ? hexToU8a(account.address) : decodeAddress(account.address),
-      info?.prefix
+      networkConfig?.prefix
     );
     return {
       address,
@@ -73,25 +62,25 @@ const accountTransform = (accounts: IAccount[], network: string): IAccount[] => 
 
 const queryBalances = async (accounts: IAccount[], api: ApiPromise) => {
   const temp = await Promise.all(
-    accounts.map((account) => 
+    accounts.map((account) =>
       api.derive.balances.all(account.address).then((balances) => {
         return {
           address: account.address,
           name: account.name,
           genesisHash: account.genesisHash,
           balances: {
-            totalBalance: balances.freeBalance.add(balances.freeBalance).toString(),
+            totalBalance: balances.freeBalance.add(balances.reservedBalance).toString(),
             freeBalance: balances.freeBalance.toString(),
             reservedBalance: balances.reservedBalance.toString(),
             lockedBalance: balances.lockedBalance.toString(),
-            availableBalance: balances.availableBalance.toString()
-          }
-        }
+            availableBalance: balances.availableBalance.toString(),
+          },
+        };
       })
     )
-  )
+  );
   return temp;
-}
+};
 
 let api: ApiPromise;
 export { api };
@@ -99,7 +88,7 @@ export { api };
 export const ApiContext = React.createContext({} as unknown as ApiProps);
 
 const Api: React.FC = (props) => {
-  const [network, setNetwork] = useState('Kusama');
+  const [network, setNetwork] = useState(keys.defaultNetwork);
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiState, setApiState] = useState(ApiState.DISCONNECTED);
   const [hasWeb3Injected, setHasWeb3Injected] = useState(isWeb3Injected);
@@ -111,6 +100,7 @@ const Api: React.FC = (props) => {
   const changeNetwork = useCallback(
     (target: string) => {
       if (target !== network) {
+        setApiState(ApiState.DISCONNECTED);
         setNetwork(target);
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);
@@ -126,51 +116,107 @@ const Api: React.FC = (props) => {
     [setSelectedAccount]
   );
 
+  const refreshAccountData = useCallback(
+    (account: IAccount) => {
+      if (apiState === ApiState.READY) {
+        queryBalances(accounts, api)
+          .then((accountsWithBalances) => {
+            setAccounts(accountsWithBalances);
+            if (accountsWithBalances.length > 0) {
+              const target = accountsWithBalances.find((a) => a.address === account.address);
+              if (target) {
+                setSelectedAccount(target);
+              } else {
+                setSelectedAccount(accountsWithBalances[0]);
+              }
+            }
+            setIsLoading(false);
+          })
+          .catch(console.error);
+      }
+    },
+    [accounts, apiState]
+  );
+
   const value = useMemo<ApiProps>(
-    () => ({network, changeNetwork, api, isApiInitialized, apiState, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading}),
-    [network, changeNetwork, api, isApiInitialized, apiState, hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading]
+    () => ({
+      network,
+      changeNetwork,
+      api,
+      isApiInitialized,
+      apiState,
+      hasWeb3Injected,
+      isWeb3AccessDenied,
+      accounts,
+      selectedAccount,
+      selectAccount,
+      isLoading,
+      refreshAccountData,
+    }),
+    [
+      network,
+      changeNetwork,
+      isApiInitialized,
+      apiState,
+      hasWeb3Injected,
+      isWeb3AccessDenied,
+      accounts,
+      selectedAccount,
+      selectAccount,
+      isLoading,
+      refreshAccountData,
+    ]
   );
 
   useEffect(() => {
     if (apiState === ApiState.READY) {
-      web3Accounts().then((injected: any) => {
-        const all = injected.map((account) => {
-          return {
-            address: account.address,
-            name: account.meta.name,
-            source: account.meta.source,
-            genesisHash: account.meta.genesisHash,
-            balances: {
-              totalBalance: '0',
-              freeBalance: '0',
-              reservedBalance: '0',
-              lockedBalance: '0',
-              availableBalance: '0',
-            }
-          }
-        });
-        
-        const accounts = accountTransform(all, network);
-        queryBalances(accounts, api).then((accountsWithBalances) => {
-          setAccounts(accountsWithBalances);
-          if (accountsWithBalances.length > 0) {
-            setSelectedAccount(accountsWithBalances[0]);
-          }
-          setIsLoading(false);
-        }).catch(console.error);
-  
-      }).catch(console.error);
+      web3Accounts()
+        .then((injected: any) => {
+          const all = injected.map((account) => {
+            return {
+              address: account.address,
+              name: account.meta.name,
+              source: account.meta.source,
+              genesisHash: account.meta.genesisHash,
+              balances: {
+                totalBalance: '0',
+                freeBalance: '0',
+                reservedBalance: '0',
+                lockedBalance: '0',
+                availableBalance: '0',
+              },
+            };
+          });
+
+          const accounts = accountTransform(all, network);
+          queryBalances(accounts, api)
+            .then((accountsWithBalances) => {
+              setAccounts(accountsWithBalances);
+              if (accountsWithBalances.length > 0) {
+                setSelectedAccount(accountsWithBalances[0]);
+              }
+              setIsLoading(false);
+            })
+            .catch(console.error);
+        })
+        .catch(console.error);
     }
-  }, [isWeb3AccessDenied, hasWeb3Injected, apiState])
+  }, [apiState, network]);
 
   useEffect(() => {
-    const endpoint = network === 'Polkadot' ? keys.polkadotWSS : keys.kusamaWSS;
+    setApiState(ApiState.DISCONNECTED);
+    const endpoint = NetworkConfig[network]?.wss;
     const provider = new WsProvider(endpoint, 1000);
     api = new ApiPromise({ provider });
 
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
       console.log(`api connected to ${endpoint}`);
+      api.isReady
+        .then(() => {
+          setApiState(ApiState.READY);
+        })
+        .catch(console.error);
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);
@@ -184,21 +230,20 @@ const Api: React.FC = (props) => {
       setApiState(ApiState.READY);
       console.log(`api is ready for ${endpoint}`);
 
-      web3Enable('CryptoLab').then((injected) => {
-        if (isWeb3Injected !== hasWeb3Injected) {
+      web3Enable('CryptoLab')
+        .then((injected) => {
           setHasWeb3Injected(isWeb3Injected);
-        }
-        if (injected.length === 0) {
-          setIsWeb3AccessDenied(true);
-        } else {
-          setIsWeb3AccessDenied(false);
-        }
-      }).catch(console.error);
-
+          if (injected.length === 0) {
+            setIsWeb3AccessDenied(true);
+          } else {
+            setIsWeb3AccessDenied(false);
+          }
+        })
+        .catch(console.error);
     });
 
     setIsApiInitialized(true);
-  }, [network]);
+  }, [setHasWeb3Injected, network]);
 
   if (!isApiInitialized) {
     return null;
