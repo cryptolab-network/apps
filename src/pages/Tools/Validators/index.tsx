@@ -66,6 +66,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
           <Title>
             <Account address={validator.id} display={validator.identity.display} />
           </Title>
+          <Subtitle>{validator.id}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
@@ -112,7 +113,7 @@ const ValidatorStatus = (props) => {
   const [chartData1, setChartData1] = useState<any[]>([]);
   const [chartData2, setChartData2] = useState<any[]>([]);
   // context
-  const {network, changeNetwork} = useContext(DataContext);
+  const { network, changeNetwork } = useContext(DataContext);
   const chain = props.match.params.chain;
 
   useEffect(() => {
@@ -186,14 +187,14 @@ const ValidatorStatus = (props) => {
             };
           });
           chartData1.sort((a, b) => {
-            if(a.era > b.era) {
+            if (a.era > b.era) {
               return 1;
             } else {
               return -1;
             }
           });
           chartData2.sort((a, b) => {
-            if(a.era > b.era) {
+            if (a.era > b.era) {
               return 1;
             } else {
               return -1;

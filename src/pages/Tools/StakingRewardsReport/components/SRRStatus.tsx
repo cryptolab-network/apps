@@ -120,6 +120,7 @@ const SRRContent = ({ filters }) => {
       }
     }
   }
+  
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);

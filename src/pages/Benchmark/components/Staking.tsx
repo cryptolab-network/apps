@@ -56,6 +56,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import { title } from 'process';
 
 enum Strategy {
   LOW_RISK,
@@ -191,7 +192,10 @@ export interface ITableData {
   avgAPY: number;
   active: boolean;
   subRows: {
-    unclaimedEras: number[];
+    unclaimedEras: {
+      era: number[];
+      status: number[];
+    };
   }[];
   commission: number;
   hasSlash: boolean;
@@ -420,11 +424,11 @@ enum StrategyType {
 
 const Staking = () => {
   const { t } = useTranslation();
-  
+
   const BASIC_DEFAULT_STRATEGY = useMemo(() => {
     return {
       label: t('benchmark.staking.strategy.lowRisk'),
-      value: Strategy.LOW_RISK
+      value: Strategy.LOW_RISK,
     };
   }, [t]);
   const ADVANCED_DEFAULT_STRATEGY = useMemo(() => {
@@ -733,7 +737,17 @@ const Staking = () => {
         refreshAccountData(selectedAccount);
       }
     },
-    [notifyWarn, t, notifyInfo, selectedAccount, polkadotApi, refreshAccountData, notifySuccess, notifyFailed]
+    [
+      notifyWarn,
+      t,
+      notifyInfo,
+      queryStakingInfo,
+      selectedAccount,
+      polkadotApi,
+      refreshAccountData,
+      notifySuccess,
+      notifyFailed,
+    ]
   );
 
   useEffect(() => {
@@ -782,15 +796,14 @@ const Staking = () => {
   }, [networkName, networkStatus, polkadotApi, setMinNominatorBond]);
 
   const nominatableInfo = useMemo((): INomitableInfo => {
-    const msg = t('benchmark.staking.warnings.disconnectedFirst') + networkName + t('benchmark.staking.warnings.disconnectedSecond');
+    const msg =
+      t('benchmark.staking.warnings.disconnectedFirst') +
+      networkName +
+      t('benchmark.staking.warnings.disconnectedSecond');
     if (networkStatus !== ApiState.READY) {
       return {
         nominatable: false,
-        warning: (
-          <Warning
-            msg={msg}
-          />
-        ),
+        warning: <Warning msg={msg} />,
       };
     }
 
@@ -804,18 +817,14 @@ const Staking = () => {
     if (finalFilteredTableData.tableData.length <= 0) {
       return {
         nominatable: false,
-        warning: (
-          <Warning msg={t('benchmark.staking.warnings.noFilteredValidators')} />
-        ),
+        warning: <Warning msg={t('benchmark.staking.warnings.noFilteredValidators')} />,
       };
     }
 
     if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
       return {
         nominatable: false,
-        warning: (
-          <Warning msg={t('benchmark.staking.warnings.noSelectedValidators')} />
-        ),
+        warning: <Warning msg={t('benchmark.staking.warnings.noSelectedValidators')} />,
       };
     }
 
@@ -848,9 +857,7 @@ const Staking = () => {
     if (accountChainInfo.role === AccountRole.VALIDATOR) {
       return {
         nominatable: false,
-        warning: (
-          <Warning msg={t('benchmark.staking.warnings.isValidator')} />
-        ),
+        warning: <Warning msg={t('benchmark.staking.warnings.isValidator')} />,
       };
     }
 
@@ -858,7 +865,16 @@ const Staking = () => {
       nominatable: true,
       warning: null,
     };
-  }, [t, networkName, networkStatus, apiLoading, finalFilteredTableData.tableData, accountChainInfo.isReady, accountChainInfo.isNominatable, accountChainInfo.role]);
+  }, [
+    t,
+    networkName,
+    networkStatus,
+    apiLoading,
+    finalFilteredTableData.tableData,
+    accountChainInfo.isReady,
+    accountChainInfo.isNominatable,
+    accountChainInfo.role,
+  ]);
 
   const applyAdvancedFilter = useCallback(() => {
     let filteredResult: IStakingInfo;
@@ -1011,18 +1027,18 @@ const Staking = () => {
         collapse: true,
         Cell: ({ value, row, rows, toggleRowExpanded }) => {
           let renderComponent: Object[] = [];
-          if (Array.isArray(value)) {
+          if (value && value.status && value.era) {
             for (let idx = 0; idx < 84; idx++) {
-              if (idx < value.length) {
-                if (value[idx] === eraStatus.active) {
-                  renderComponent.push(<Era statusCode={eraStatus.active} />);
-                } else if (value[idx] === eraStatus.inactive) {
-                  renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+              if (idx < value.status.length) {
+                if (value.status[idx] === eraStatus.active) {
+                  renderComponent.push(<Era statusCode={eraStatus.active} eraNumber={value.era[idx]} />);
+                } else if (value.status[idx] === eraStatus.inactive) {
+                  renderComponent.push(<Era statusCode={eraStatus.inactive} eraNumber={value.era[idx]} />);
                 } else {
-                  renderComponent.push(<Era statusCode={eraStatus.unclaimed} />);
+                  renderComponent.push(<Era statusCode={eraStatus.unclaimed} eraNumber={value.era[idx]} />);
                 }
               } else {
-                renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+                renderComponent.push(<Era statusCode={eraStatus.inactive} eraNumber={value.era[idx]} />);
               }
             }
           } else {
@@ -1058,6 +1074,7 @@ const Staking = () => {
                   row.toggleRowExpanded();
                 },
               })}
+              title={null}
             >
               {renderComponent}
             </span>
@@ -1130,7 +1147,12 @@ const Staking = () => {
         }
       case RewardDestinationType.CONTROLLER:
         if (accountChainInfo?.controller) {
-          return <Node title={t('benchmark.staking.controller.controller')} address={accountChainInfo?.controller} />;
+          return (
+            <Node
+              title={t('benchmark.staking.controller.controller')}
+              address={accountChainInfo?.controller}
+            />
+          );
         } else {
           if (accountChainInfo.stash === selectedAccount.address) {
             return <Node title={selectedAccount.name} address={selectedAccount.address} />;
@@ -1139,11 +1161,24 @@ const Staking = () => {
         }
       case RewardDestinationType.ACCOUNT:
         // todo: Jack
-        return <Node title={t('benchmark.staking.controller.account')} address={t('benchmark.staking.controller.enterAddress')} />;
+        return (
+          <Node
+            title={t('benchmark.staking.controller.account')}
+            address={t('benchmark.staking.controller.enterAddress')}
+          />
+        );
       default:
         return <></>;
     }
-  }, [inputData.rewardDestination?.value, selectedAccount.name, selectedAccount.address, accountChainInfo?.controller, t]);
+  }, [
+    inputData.rewardDestination?.value,
+    accountChainInfo.role,
+    accountChainInfo?.controller,
+    accountChainInfo.stash,
+    t,
+    selectedAccount.name,
+    selectedAccount.address,
+  ]);
 
   /**
    * for Header, option toggle
@@ -1392,7 +1427,7 @@ const Staking = () => {
       accountChainInfo?.role === AccountRole.NOMINATOR
     ) {
       // console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
-      notifyWarn('This account\'s role is not allowed to nominate.');
+      notifyWarn("This account's role is not allowed to nominate.");
       return;
     }
 
@@ -1545,6 +1580,7 @@ const Staking = () => {
     notifyProcessing,
     txStatusCallback,
     notifyWarn,
+    _formatBalance,
   ]);
 
   // while network status change, reset input stake amount
@@ -1729,7 +1765,21 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, t, apiLoading, advancedSetting.minSelfStake, advancedSetting.maxUnclaimedEras, advancedSetting.historicalApy, advancedSetting.minInclusion, advancedSetting.identity, advancedSetting.noPreviousSlashes, advancedSetting.isSubIdentity, advancedSetting.highApy, advancedSetting.decentralized, advancedSetting.oneKv]);
+  }, [
+    advancedOption.advanced,
+    t,
+    apiLoading,
+    advancedSetting.minSelfStake,
+    advancedSetting.maxUnclaimedEras,
+    advancedSetting.historicalApy,
+    advancedSetting.minInclusion,
+    advancedSetting.identity,
+    advancedSetting.noPreviousSlashes,
+    advancedSetting.isSubIdentity,
+    advancedSetting.highApy,
+    advancedSetting.decentralized,
+    advancedSetting.oneKv,
+  ]);
 
   const filterResultInfo = useMemo(() => {
     let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
@@ -1740,11 +1790,17 @@ const Staking = () => {
 
     return (
       <div>
-        <FilterInfo style={{ color: '#20aca8' }}>{t('benchmark.staking.selected')}: {selectedValidatorsCount}</FilterInfo>
+        <FilterInfo style={{ color: '#20aca8' }}>
+          {t('benchmark.staking.selected')}: {selectedValidatorsCount}
+        </FilterInfo>
         <span>|</span>
-        <FilterInfo>{t('benchmark.staking.filtered')}: {filterValidatorsCount}</FilterInfo>
+        <FilterInfo>
+          {t('benchmark.staking.filtered')}: {filterValidatorsCount}
+        </FilterInfo>
         <span>|</span>
-        <FilterInfo>{t('benchmark.staking.total')}: {totalValidatorsCount}</FilterInfo>
+        <FilterInfo>
+          {t('benchmark.staking.total')}: {totalValidatorsCount}
+        </FilterInfo>
       </div>
     );
   }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
@@ -1759,7 +1815,9 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">{t('benchmark.staking.filterResult')}: {filterResultInfo}</ContentBlockTitle>
+              <ContentBlockTitle color="white">
+                {t('benchmark.staking.filterResult')}: {filterResultInfo}
+              </ContentBlockTitle>
               {!apiLoading ? (
                 <Table
                   type={tableType.stake}
@@ -1843,13 +1901,14 @@ const Staking = () => {
       );
     }
   }, [
-    _formatBalance,
-    accountChainInfo?.bonded,
-    accountChainInfo?.redeemable,
+    isAccountInfoLoading,
     accountChainInfo?.role,
     accountChainInfo?.validators?.length,
+    accountChainInfo?.bonded,
+    accountChainInfo?.redeemable,
+    _formatBalance,
+    selectedAccount?.balances?.availableBalance,
     selectedAccount?.balances?.reservedBalance,
-    isAccountInfoLoading,
   ]);
 
   return (
@@ -1876,7 +1935,9 @@ const Staking = () => {
                   alignItems: 'center',
                 }}
               >
-                <Balance>{t('benchmark.staking.balance')}: {walletBalance}</Balance>
+                <Balance>
+                  {t('benchmark.staking.balance')}: {walletBalance}
+                </Balance>
                 <div
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
                 >

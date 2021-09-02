@@ -11,23 +11,29 @@ const ROUND = 10;
 const KSM_MIN_SELF_STAKE = 50;
 const DOT_MIN_SELF_STAKE = 1000;
 
+interface IEraStatusBar {
+  era: number[];
+  status: number[];
+}
+
 export const formatToTableData = (data: IValidator[]): ITableData[] => {
   return data.map((validator) => {
     let activeCount = 0;
     let total = 0;
     let nowActive = validator.stakerPoints[validator.stakerPoints.length - 1].points > 0 ? true : false;
-    let eraStatusBar: number[] = [];
+    let eraStatusBar: IEraStatusBar = { era: [], status: [] };
     for (let idx = 0; idx < 84; idx++) {
-      eraStatusBar.push(eraStatus.inactive);
+      eraStatusBar.era.push(validator.stakerPoints[idx].era);
+      eraStatusBar.status.push(eraStatus.inactive);
     }
     for (let idx = 0; idx < validator.stakerPoints.length && idx < 84; idx++) {
       total += 1;
       if (validator.stakerPoints[idx].points > 0) {
         activeCount += 1;
-        eraStatusBar[idx] = eraStatus.active;
+        eraStatusBar.status[idx] = eraStatus.active;
       }
       if (validator.info.unclaimedEras.includes(validator.stakerPoints[idx].era)) {
-        eraStatusBar[idx] = eraStatus.unclaimed;
+        eraStatusBar.status[idx] = eraStatus.unclaimed;
       }
     }
     return {
