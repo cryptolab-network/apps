@@ -29,6 +29,9 @@ const HeaderLayout = styled.div`
   border-bottom: solid 1px #23beb9;
   padding: 17px 27px 17px 27px;
   box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 interface MainContentLayoutProps {
