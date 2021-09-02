@@ -307,7 +307,7 @@ i18n
               rewardDest: 'Reward Destination',
               nominate: 'Nominate',
               advanced: 'Advanced',
-              subtitle: 'Select the preferred strategy to evaluation',
+              subtitle: 'Select the preferred strategy for evaluation',
               supportUs: 'Support Us',
               displayRole: {
                 validator: 'Validator',
