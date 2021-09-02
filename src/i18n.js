@@ -583,7 +583,7 @@ i18n
               filterResult: '篩選結果',
               balance: '總金額',
               role: '角色',
-              nominees: '提名人數量',
+              nominees: '已提名數量',
               bonded: '綁定',
               max: '最大',
               transferrable: '可轉帳',
