@@ -25,7 +25,7 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
-import { hasValues } from '../../../utils/helper';
+import { hasValues, isEmpty } from '../../../utils/helper';
 import { apiGetAllValidator } from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
@@ -112,9 +112,9 @@ const displayRole = (role: AccountRole): string => {
     case AccountRole.VALIDATOR:
       return 'Validator';
     case AccountRole.CONTROLLER_OF_VALIDATOR:
-      return 'Controller of Validator';
+      return 'Controller';
     case AccountRole.CONTROLLER_OF_NOMINATOR:
-      return 'Controller of Nominator';
+      return 'Controller';
     case AccountRole.NOMINATOR:
       return 'Nominator';
     case AccountRole.NOMINATOR_AND_CONTROLLER:
@@ -293,80 +293,6 @@ const StrategyConfig = {
   },
 };
 
-const queryStakingInfo = async (address, api: ApiPromise) => {
-  const [info, ledger] = await Promise.all([
-    api.derive.staking.account(address),
-    api.query.staking.ledger(address),
-  ]);
-
-  const rewardDestination = info.rewardDestination.isStaked
-    ? RewardDestinationType.STAKED
-    : info.rewardDestination.isStash
-    ? RewardDestinationType.STASH
-    : info.rewardDestination.isController
-    ? RewardDestinationType.CONTROLLER
-    : RewardDestinationType.ACCOUNT;
-  const rewardDestinationAddress =
-    rewardDestination === RewardDestinationType.ACCOUNT ? info.rewardDestination.asAccount.toString() : null;
-
-  let role;
-  let isNominatable = false;
-  let bonded;
-  let validators;
-  if (info.nextSessionIds.length !== 0) {
-    role = AccountRole.VALIDATOR;
-    bonded = info.stakingLedger.total.unwrap().toHex();
-    validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = VALIDATOR`);
-  } else if (!info.stakingLedger.total.unwrap().isZero()) {
-    if (info.controllerId?.toHuman() === address) {
-      role = AccountRole.NOMINATOR_AND_CONTROLLER;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR_AND_CONTROLLER`);
-      isNominatable = true;
-    } else {
-      role = AccountRole.NOMINATOR;
-      bonded = info.stakingLedger.total.unwrap().toHex();
-      validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR`);
-    }
-  } else if (!ledger.isNone) {
-    const stash = ledger.unwrap().stash.toHuman();
-    const staking = await api.derive.staking.account(stash);
-    if (staking.nextSessionIds.length !== 0) {
-      role = AccountRole.CONTROLLER_OF_VALIDATOR;
-      bonded = staking.stakingLedger.total.unwrap().toHex();
-      validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_VALIDATOR`);
-    } else {
-      role = AccountRole.CONTROLLER_OF_NOMINATOR;
-      bonded = staking.stakingLedger.total.unwrap().toHex();
-      validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_NOMINATOR`);
-      isNominatable = true;
-    }
-  } else {
-    role = AccountRole.NONE;
-    bonded = info.stakingLedger.total.unwrap().toHex();
-    validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = NONE`);
-    isNominatable = true;
-  }
-
-  return {
-    role,
-    controller: info.controllerId?.toHuman(),
-    validators,
-    rewardDestination,
-    rewardDestinationAddress,
-    bonded,
-    redeemable: info.redeemable ? info.redeemable.toHex() : '0',
-    isNominatable,
-    isReady: true,
-  };
-};
-
 const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
   const {
     activeEra,
@@ -441,6 +367,7 @@ const Staking = () => {
     apiState: networkStatus,
     selectedAccount,
     refreshAccountData,
+    hasWeb3Injected
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -764,7 +691,11 @@ const Staking = () => {
   }, [ADVANCED_DEFAULT_STRATEGY, BASIC_DEFAULT_STRATEGY, advancedOption.advanced]);
 
   useEffect(() => {
-    setIsAccountInfoLoading(true);
+    if (hasWeb3Injected && !isEmpty(selectedAccount)) {
+      setIsAccountInfoLoading(true);
+    } else {
+      setIsAccountInfoLoading(false);
+    }
     if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
       setAccountChainInfo((prev) => ({ ...prev, isReady: false }));
       queryStakingInfo(selectedAccount.address, polkadotApi)
@@ -777,7 +708,7 @@ const Staking = () => {
         })
         .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo, hasWeb3Injected]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -826,6 +757,20 @@ const Staking = () => {
         nominatable: false,
         warning: <Warning msg={t('benchmark.staking.warnings.noSelectedValidators')} />,
       };
+    }
+
+    if (!hasWeb3Injected) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.installWallet')} />,
+      }
+    }
+
+    if (isEmpty(selectedAccount)) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.noAccount')} />,
+      }
     }
 
     if (!accountChainInfo.isReady) {
@@ -1245,7 +1190,7 @@ const Staking = () => {
     let tmpValue;
     switch (name) {
       case 'stakeAmount':
-        if (!isNaN(e.target.value)) {
+        if (!isNaN(e.target.value) && !isEmpty(selectedAccount)) {
           tmpValue = e.target.value;
           // TODO: deal with input number format and range
           // input unit is KSM
@@ -1957,9 +1902,11 @@ const Staking = () => {
               />
             </ContentBlockRight>
           </ContentBlockBadgeBalance>
-          <BalanceContextBlock advanced={advancedOption.advanced} show={true}>
-            {accountInfo}
-          </BalanceContextBlock>
+          {(!isEmpty(selectedAccount)) ? (
+            <BalanceContextBlock advanced={advancedOption.advanced} show={true}>
+              {accountInfo}
+            </BalanceContextBlock>
+          ) : (<></>)}
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
           </ArrowContainer>

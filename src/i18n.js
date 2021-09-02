@@ -69,7 +69,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'Tools For Validators',
+                toolsForValidators: 'Tools for Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
@@ -254,6 +254,8 @@ i18n
                 isControllerOfValidator: "This account's role is Controller of Validator. As such staking operations are not permitted.",
                 hasController: "This account's role is Nominator which has a Controller account. As such staking operations are not permitted.",
                 maxNominations: 'maximum nomination has reached.',
+                installWallet: 'Please install wallet.',
+                noAccount: "You currently don't have any accounts. Use the polkadot{.js} extension to create your first account.",
               },
               table: {
                 header: {
@@ -513,6 +515,8 @@ i18n
                 isControllerOfValidator: "此帳戶的角色是驗證人的控制者 無法執行質押",
                 hasController: "此帳戶已經設定控制者 無法執行質押",
                 maxNominations: '已經到達最大的提名數量.',
+                installWallet: '請先安裝錢包',
+                noAccount: "您沒有任何帳戶，請先使用錢包 polkadot{.js} 來創建帳戶.",
               },
               table: {
                 header: {
