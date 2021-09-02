@@ -69,7 +69,7 @@ i18n
                 ourValidators: 'Our Validators',
                 technology: 'Technology',
                 stakingService: 'Staking Service',
-                toolsForValidators: 'Tools For Validators',
+                toolsForValidators: 'Tools for Validators',
                 telegramBots: 'telegramBots',
                 community: 'Community',
                 blog: 'Blog',
