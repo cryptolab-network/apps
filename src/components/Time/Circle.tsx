@@ -4,6 +4,7 @@ import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-pro
 import './index.css';
 import { IEraInfo } from '../../pages/Benchmark/components/Staking';
 import useInterval from '../../hooks/useInterval';
+import { useTranslation } from 'react-i18next';
 
 const SECOND = 1000;
 const MINUTE = 60000;
@@ -57,8 +58,8 @@ const calcLeftMinute = (type, eraInfo) => {
   if (type === 'era') {
     leftMinute = Math.floor((leftTime % HOUR) / MINUTE);
   } else {
-    const epochTime = eraInfo.sessionLength * 6 * 1000;
-    leftMinute = Math.floor(((leftTime % epochTime) % (eraInfo.sessionLength * SLOT_TIME)) / MINUTE);
+    const epochTime = eraInfo.sessionLength * SLOT_TIME;
+    leftMinute = Math.floor(((leftTime % epochTime) % HOUR) / MINUTE);
   }
   return leftMinute;
 };
@@ -86,6 +87,7 @@ interface Props {
 }
 
 const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0);
   const [leftHour, setLeftHour] = useState(0);
   const [leftMinute, setLeftMinute] = useState(0);
@@ -116,22 +118,33 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
       case 'Kusama':
       case 'Westend':
         mainValue = type === 'era' ? 6 : 1;
-        mainUnit = type === 'era' ? ' hrs' : ' hr';
+        mainUnit = type === 'era' ? t('benchmark.staking.timeCircle.hrs') : t('benchmark.staking.timeCircle.hr');
         if (leftHour > 0) {
           subValue =
-            type === 'era' ? `${leftHour} hrs ${leftMinute} mins` : `${leftMinute} mins ${leftSecond} s`;
+            type === 'era' ? `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}` : `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
         } else {
-          subValue = `${leftMinute} mins ${leftSecond} s`;
+          subValue = `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
         }
         break;
       case 'Polkadot':
         mainValue = type === 'era' ? 1 : 4;
-        mainUnit = type === 'era' ? ' day' : ' hrs';
+        mainUnit = type === 'era' ? t('benchmark.staking.timeCircle.day') : t('benchmark.staking.timeCircle.hrs');
         if (leftHour > 0) {
-          subValue =
-            type === 'era' ? `${leftHour} hrs ${leftMinute} mins` : `${leftMinute} mins ${leftMinute} s`;
+          if (type === 'era') {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          } else {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          }
         } else {
-          subValue = `${leftMinute} mins ${leftSecond} s`;
+          subValue = `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
         }
         break;
       default:
@@ -141,7 +154,7 @@ const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
       mainUnit,
       subValue,
     };
-  }, [network, type, leftHour, leftMinute, leftSecond]);
+  }, [network, type, leftHour, leftMinute, leftSecond, t]);
 
   const ContentDOM = useMemo(() => {
     if (type === 'epoch') {

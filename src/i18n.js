@@ -70,7 +70,7 @@ i18n
                 technology: 'Technology',
                 stakingService: 'Staking Service',
                 toolsForValidators: 'Tools for Validators',
-                telegramBots: 'telegramBots',
+                telegramBots: 'Telegram Bots',
                 community: 'Community',
                 blog: 'Blog',
                 medium: 'Medium',
@@ -206,6 +206,10 @@ i18n
             mission2: 'A bunch of tools for Polkadot and Kusama validator operators.',
           },
           benchmark: {
+            routes: {
+              benchmark: 'Benchmark',
+              charts: 'Charts'
+            },
             charts: {
               table: {
                 header: {
@@ -263,6 +267,7 @@ i18n
                   selfStake: 'Self Stake',
                   eraInclusion: 'Era Inclusion',
                   unclaimedEras: 'UnclaimedEras',
+                  commission: 'Commission',
                   avgApy: 'Avg. APY',
                   active: 'Active',
                 }
@@ -293,6 +298,8 @@ i18n
               role: 'Role',
               nominees: 'Nominees',
               bonded: 'Bonded',
+              max: 'max',
+              transferrable: 'transferrable',
               reserved: 'Reserved',
               redeemable: 'Redeemable',
               strategyString: 'Strategy',
@@ -300,8 +307,27 @@ i18n
               rewardDest: 'Reward Destination',
               nominate: 'Nominate',
               advanced: 'Advanced',
-              subtitle: 'Select the preferred type for evaluation',
-              supportUs: 'Support Us'
+              subtitle: 'Select the preferred strategy for evaluation',
+              supportUs: 'Support Us',
+              displayRole: {
+                validator: 'Validator',
+                controller: 'Controller',
+                nominator: 'Nominator',
+                none: 'None',
+              },
+              rewardsDestination: {
+                selectOne: '--- Select one ---',
+                staked: 'Stash account (increase the amount at stake)',
+                stash: 'Stash account (do not increase the amount at stake)',
+                controller: 'Controller account'
+              },
+              timeCircle: {
+                day: ' day',
+                hrs: ' hrs',
+                hr: ' hr',
+                mins: ' mins',
+                s: ' s'
+              }
             }
           },
         },
@@ -467,6 +493,10 @@ i18n
             mission2: '為營運者打造的一系列驗證節點輔助工具',
           },
           benchmark: {
+            routes: {
+              benchmark: '評估',
+              charts: '圖表'
+            },
             charts: {
               table: {
                 header: {
@@ -524,6 +554,7 @@ i18n
                   selfStake: '驗證人自己質押的數量',
                   eraInclusion: 'Active比例',
                   unclaimedEras: '未分配收益的Era數',
+                  commission: '佣金',
                   avgApy: '平均年化報酬率',
                   active: 'Active',
                 }
@@ -546,23 +577,44 @@ i18n
                 decentralized: '只選擇一個同身分的驗證者',
                 onekv: '參加1KV 計畫'
               },
-              selected: '選擇',
-              filtered: '過濾',
+              selected: '已選擇',
+              filtered: '已篩選',
               total: '總數',
-              filterResult: '過濾結果',
+              filterResult: '篩選結果',
               balance: '總金額',
               role: '角色',
-              nominees: '提名人數量',
+              nominees: '提名數量',
               bonded: '綁定',
+              max: '最大',
+              transferrable: '可轉帳',
               reserved: '保留',
               redeemable: '可解除綁定',
               strategyString: '策略',
-              calculatedApy: '預計的年化報酬率',
+              calculatedApy: '預估的年化報酬率',
               rewardDest: '收益對象',
               nominate: '提名',
               advanced: '進階',
-              subtitle: '選擇錢包',
-              supportUs: '支持我們'
+              subtitle: '選擇喜歡的策略進行評估',
+              supportUs: '支持我們',
+              displayRole: {
+                validator: '驗證人',
+                controller: '控制人',
+                nominator: '提名人',
+                none: '無',
+              },
+              rewardsDestination: {
+                selectOne: '--- 選擇一個 ---',
+                staked: '儲存帳戶(增加質押數量)',
+                stash: '儲存帳戶(不增加質押數量)',
+                controller: '控制帳戶'
+              },
+              timeCircle: {
+                day: ' 天',
+                hrs: ' 小時',
+                hr: ' 小時',
+                mins: ' 分',
+                s: ' 秒'
+              }
             }
           },
         },

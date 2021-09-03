@@ -74,30 +74,6 @@ enum RewardDestinationType {
   ACCOUNT,
 }
 
-const rewardDestinationOptions = [
-  {
-    label: '--- Select one ---',
-    value: RewardDestinationType.NULL,
-    isDisabled: true,
-  },
-  {
-    label: 'Stash account (increase the amount at stake)',
-    value: RewardDestinationType.STAKED,
-  },
-  {
-    label: 'Stash account (do not increase the amount at stake)',
-    value: RewardDestinationType.STASH,
-  },
-  {
-    label: 'Controller account',
-    value: RewardDestinationType.CONTROLLER,
-  },
-  // {
-  //   label: 'Specified payment account',
-  //   value: RewardDestinationType.ACCOUNT,
-  // },
-];
-
 enum AccountRole {
   VALIDATOR,
   CONTROLLER_OF_VALIDATOR,
@@ -106,25 +82,6 @@ enum AccountRole {
   NOMINATOR_AND_CONTROLLER,
   NONE,
 }
-
-const displayRole = (role: AccountRole): string => {
-  switch (role) {
-    case AccountRole.VALIDATOR:
-      return 'Validator';
-    case AccountRole.CONTROLLER_OF_VALIDATOR:
-      return 'Controller';
-    case AccountRole.CONTROLLER_OF_NOMINATOR:
-      return 'Controller';
-    case AccountRole.NOMINATOR:
-      return 'Nominator';
-    case AccountRole.NOMINATOR_AND_CONTROLLER:
-      return 'Nominator';
-    case AccountRole.NONE:
-      return 'None';
-    default:
-      return '';
-  }
-};
 
 interface IStrategy {
   label: string;
@@ -415,6 +372,52 @@ const Staking = () => {
     [networkName]
   );
 
+  const displayRole = useCallback((role: AccountRole): string => {
+    switch (role) {
+      case AccountRole.VALIDATOR:
+        return t('benchmark.staking.displayRole.validator');
+      case AccountRole.CONTROLLER_OF_VALIDATOR:
+        return t('benchmark.staking.displayRole.controller');
+      case AccountRole.CONTROLLER_OF_NOMINATOR:
+        return t('benchmark.staking.displayRole.controller');
+      case AccountRole.NOMINATOR:
+        return t('benchmark.staking.displayRole.nominator');
+      case AccountRole.NOMINATOR_AND_CONTROLLER:
+        return t('benchmark.staking.displayRole.nominator');
+      case AccountRole.NONE:
+        return t('benchmark.staking.displayRole.none');
+      default:
+        return '';
+    }
+  }, [t]);
+
+  const rewardDestinationOptions = useMemo(() => {
+    const options =[
+      {
+        label: t('benchmark.staking.rewardsDestination.selectOne'),
+        value: RewardDestinationType.NULL,
+        isDisabled: true,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.staked'),
+        value: RewardDestinationType.STAKED,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.stash'),
+        value: RewardDestinationType.STASH,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.controller'),
+        value: RewardDestinationType.CONTROLLER,
+      },
+      // {
+      //   label: 'Specified payment account',
+      //   value: RewardDestinationType.ACCOUNT,
+      // },
+    ];
+    return options;
+  }, [t]);
+
   // memo
   const strategyOptions = useMemo(() => {
     // while advanced option is on, no strategy options is available
@@ -555,14 +558,14 @@ const Staking = () => {
       api.query.staking.ledger(address),
     ]);
 
-    const rewardDestination = info.rewardDestination.isStaked
+    let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
       : info.rewardDestination.isStash
       ? RewardDestinationType.STASH
       : info.rewardDestination.isController
       ? RewardDestinationType.CONTROLLER
       : RewardDestinationType.ACCOUNT;
-    const rewardDestinationAddress =
+    let rewardDestinationAddress =
       rewardDestination === RewardDestinationType.ACCOUNT
         ? info.rewardDestination.asAccount.toString()
         : null;
@@ -593,6 +596,17 @@ const Staking = () => {
     } else if (!ledger.isNone) {
       stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
+      rewardDestination = staking.rewardDestination.isStaked
+        ? RewardDestinationType.STAKED
+        : staking.rewardDestination.isStash
+        ? RewardDestinationType.STASH
+        : staking.rewardDestination.isController
+        ? RewardDestinationType.CONTROLLER
+        : RewardDestinationType.ACCOUNT;
+      rewardDestinationAddress =
+        rewardDestination === RewardDestinationType.ACCOUNT
+          ? info.rewardDestination.asAccount.toString()
+          : null;
       if (staking.nextSessionIds.length !== 0) {
         role = AccountRole.CONTROLLER_OF_VALIDATOR;
         bonded = staking.stakingLedger.total.unwrap().toHex();
@@ -708,7 +722,7 @@ const Staking = () => {
         })
         .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo, hasWeb3Injected]);
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo, hasWeb3Injected, rewardDestinationOptions]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -1028,7 +1042,7 @@ const Staking = () => {
         sortType: 'basic',
       },
       {
-        Header: 'Commission %',
+        Header: t('benchmark.staking.table.header.commission') + ' %',
         accessor: 'commission',
         collapse: true,
         Cell: ({ value }) => {
@@ -1789,7 +1803,7 @@ const Staking = () => {
           <BalanceContextLeft>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Role</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.role')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>{displayRole(accountChainInfo?.role)}</BalanceContextValue>
@@ -1797,7 +1811,7 @@ const Staking = () => {
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Nominees</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.nominees')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
@@ -1805,7 +1819,7 @@ const Staking = () => {
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Bonded</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.bonded')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
@@ -1815,7 +1829,7 @@ const Staking = () => {
           <BalanceContextRight>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Transferrable</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.transferrable')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>
@@ -1825,7 +1839,7 @@ const Staking = () => {
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Reserved</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.reserved')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>
@@ -1835,7 +1849,7 @@ const Staking = () => {
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>Redeemable</BalanceContextLabel>
+                <BalanceContextLabel>{t('benchmark.staking.redeemable')}</BalanceContextLabel>
               </div>
               <div>
                 <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
@@ -1854,6 +1868,7 @@ const Staking = () => {
     _formatBalance,
     selectedAccount?.balances?.availableBalance,
     selectedAccount?.balances?.reservedBalance,
+    t
   ]);
 
   return (
@@ -1886,12 +1901,12 @@ const Staking = () => {
                 <div
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
                 >
-                  {showBondedBtn && <TinyButton title="bonded" onClick={handleBondedClick} primary={false} />}
+                  {showBondedBtn && <TinyButton title={t('benchmark.staking.bonded')} onClick={handleBondedClick} primary={false} />}
                 </div>
                 <div
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
                 >
-                  {showMaxBtn && <TinyButton title="max" onClick={handleMaxClick} primary={false} />}
+                  {showMaxBtn && <TinyButton title={t('benchmark.staking.max')} onClick={handleMaxClick} primary={false} />}
                 </div>
               </div>
 
