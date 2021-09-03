@@ -558,14 +558,14 @@ const Staking = () => {
       api.query.staking.ledger(address),
     ]);
 
-    const rewardDestination = info.rewardDestination.isStaked
+    let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
       : info.rewardDestination.isStash
       ? RewardDestinationType.STASH
       : info.rewardDestination.isController
       ? RewardDestinationType.CONTROLLER
       : RewardDestinationType.ACCOUNT;
-    const rewardDestinationAddress =
+    let rewardDestinationAddress =
       rewardDestination === RewardDestinationType.ACCOUNT
         ? info.rewardDestination.asAccount.toString()
         : null;
@@ -596,6 +596,17 @@ const Staking = () => {
     } else if (!ledger.isNone) {
       stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
+      rewardDestination = staking.rewardDestination.isStaked
+        ? RewardDestinationType.STAKED
+        : staking.rewardDestination.isStash
+        ? RewardDestinationType.STASH
+        : staking.rewardDestination.isController
+        ? RewardDestinationType.CONTROLLER
+        : RewardDestinationType.ACCOUNT;
+      rewardDestinationAddress =
+        rewardDestination === RewardDestinationType.ACCOUNT
+          ? info.rewardDestination.asAccount.toString()
+          : null;
       if (staking.nextSessionIds.length !== 0) {
         role = AccountRole.CONTROLLER_OF_VALIDATOR;
         bonded = staking.stakingLedger.total.unwrap().toHex();
