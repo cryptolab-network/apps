@@ -798,7 +798,6 @@ const SubmitButton = styled.button`
   line-height: 1.23;
 `;
 const CopyRightDiv = styled.div`
-  height: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;

@@ -43,7 +43,6 @@ const Dialog: React.FC<IDialogWithImage> = ({
       border: 'solid 1px #23beb9',
       borderRadius: 8,
       backgroundColor: '#18232f',
-      opacity: 0.89,
     },
   };
 
