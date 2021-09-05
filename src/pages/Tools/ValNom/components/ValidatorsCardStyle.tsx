@@ -144,6 +144,14 @@ const ValidatorGrid = ({ filters, validators }) => {
     }
   }, [filters, page, validators]);
 
+  const pageOptions = useMemo(() => {
+    let result: number[] = [];
+    for (let idx = 0; idx < pageCount; idx++) {
+      result.push(idx);
+    }
+    return result;
+  }, [pageCount]);
+
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
@@ -177,7 +185,7 @@ const ValidatorGrid = ({ filters, validators }) => {
         <Pagination
           canNextPage={page < pageCount ? true : false}
           canPreviousPage={page > 0 ? true : false}
-          pageOptions={{}}
+          pageOptions={pageOptions}
           pageCount={pageCount}
           gotoPage={(p) => {
             setPage(p);
@@ -192,6 +200,7 @@ const ValidatorGrid = ({ filters, validators }) => {
               setPage(page - 1);
             }
           }}
+          currentPage={page}
         ></Pagination>
       </GridLayout>
     );
@@ -210,7 +219,6 @@ const ValNomContent = () => {
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {
-    console.log('e: ', e);
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
