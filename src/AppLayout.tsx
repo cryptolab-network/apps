@@ -138,7 +138,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const [email, setEmail] = useState<string>('');
   const defaultLng = localStorage.getItem('i18nextLng');
   const lng = languageOptions.find((l) => l.value === defaultLng);
-  const [language, setLanguage] = useState<ILanguage>((lng) ? lng : { label: 'English', value: 'en'});
+  const [language, setLanguage] = useState<ILanguage>(lng ? lng : { label: 'English', value: 'en' });
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -486,7 +486,7 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
-          width: 'calc(100%/3)',
+          width: 'calc(100vw - 652)>0' ? '652px' : '90vw',
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
@@ -798,7 +798,6 @@ const SubmitButton = styled.button`
   line-height: 1.23;
 `;
 const CopyRightDiv = styled.div`
-  height: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;

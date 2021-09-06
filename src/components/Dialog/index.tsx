@@ -35,15 +35,14 @@ const Dialog: React.FC<IDialogWithImage> = ({
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      minWidth: 'calc(100vw - 652)>0' ? '652' : '90vw',
-      minHeight: 'calc(100vh - 493)>0' ? '493' : '70vh',
+      minWidth: 'calc(100vw - 652)>0' ? '652px' : '90vw',
+      minHeight: 'calc(100vh - 493)>0' ? '493px' : '70vh',
       maxWidth: '90vw',
       maxHeight: '90vh',
       OverflowY: 'scroll',
       border: 'solid 1px #23beb9',
       borderRadius: 8,
       backgroundColor: '#18232f',
-      opacity: 0.89,
     },
   };
 
