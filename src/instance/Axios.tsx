@@ -41,3 +41,6 @@ export const subscribeNewsletterAxios =  Axios.create({
   baseURL: `${prefix}/newsletter/`
 });
 
+export const nominateAxios = Axios.create({
+  baseURL: `${prefix}/nominate`
+});
