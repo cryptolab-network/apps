@@ -17,8 +17,6 @@ import {
   IValidatorFilter,
   toValidatorFilter,
 } from './filterOptions';
-import { Grid } from '@material-ui/core';
-// import { ApiContext } from '../../../../components/Api';
 import { DataContext } from '../../components/Data';
 import { balanceUnit } from '../../../../utils/string';
 import { NetworkConfig } from '../../../../utils/constants/Network';
@@ -33,12 +31,10 @@ const ValNomHeader = () => {
   return (
     <HeaderLayout>
       <HeaderLeft>
-        <PeopleIcon />
+        <PeopleIcon width="38.8px" height="38px" />
         <HeaderTitle>
           <Title>{t('tools.valnom.title')}</Title>
-          <Subtitle>
-            {t('tools.valnom.subtitle')}
-          </Subtitle>
+          <Subtitle>{t('tools.valnom.subtitle')}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -147,13 +143,22 @@ const ValidatorGrid = ({ filters, validators }) => {
       console.error(err);
     }
   }, [filters, page, validators]);
+
+  const pageOptions = useMemo(() => {
+    let result: number[] = [];
+    for (let idx = 0; idx < pageCount; idx++) {
+      result.push(idx);
+    }
+    return result;
+  }, [pageCount]);
+
   const validatorComponents = useMemo(() => {
     const openValidatorStatus = (id) => {
       history.push(`/validator/${id}/${chain}`);
     };
     return displayValidators.map((v, idx) => {
       return (
-        <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
+        <div style={{ padding: 4, boxSizing: 'border-box' }}>
           <ValidNominator
             address={v.id}
             name={v.identity.display}
@@ -167,21 +172,20 @@ const ValidatorGrid = ({ filters, validators }) => {
             favorite={v.favorite}
             onClick={() => openValidatorStatus(v.id)}
           ></ValidNominator>
-        </Grid>
+        </div>
       );
     });
   }, [_formatBalance, chain, history, displayValidators]);
+
   if (validatorComponents.length > 0) {
     return (
       <GridLayout>
-        <Grid container spacing={3} style={{ justifyContent: 'flex-start' }}>
-          {validatorComponents}
-        </Grid>
-        <div style={{margin: '20px 0 0 0'}}></div>
+        <div style={{ display: 'flex', flexWrap: 'wrap' }}>{validatorComponents}</div>
+        <div style={{ margin: '20px 0 0 0' }}></div>
         <Pagination
-          canNextPage={page < pageCount ? true: false}
-          canPreviousPage={page > 0 ? true: false}
-          pageOptions={{}}
+          canNextPage={page < pageCount ? true : false}
+          canPreviousPage={page > 0 ? true : false}
+          pageOptions={pageOptions}
           pageCount={pageCount}
           gotoPage={(p) => {
             setPage(p);
@@ -196,6 +200,7 @@ const ValidatorGrid = ({ filters, validators }) => {
               setPage(page - 1);
             }
           }}
+          currentPage={page}
         ></Pagination>
       </GridLayout>
     );
@@ -214,7 +219,6 @@ const ValNomContent = () => {
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
   const handleFilterChange = (name) => (e) => {
-    console.log('e: ', e);
     switch (name) {
       case 'stashId':
         setFilters((prev) => ({ ...prev, stashId: e.target.value }));
@@ -286,33 +290,36 @@ const ValNomContent = () => {
   }, []);
   if (isLoading) {
     return (
-      <CustomScaleLoader
-      />
+      <div style={{ marginTop: 32, marginBottom: 32 }}>
+        <CustomScaleLoader />
+      </div>
     );
   }
   return (
     <ValNomContentLayout>
-      <OptionBar>
-        <HeaderLayout>
-          <HeaderLeft>
-            <IconInput
-              Icon={Search}
-              iconSize="16px"
-              placeholder="Polkadot/Kusama Stash ID"
-              inputLength={256}
-              value={filters.stashId}
-              onChange={handleFilterChange('stashId')}
-            />
-          </HeaderLeft>
-          <HeaderRight>
-            <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
-              <div onClick={onShowFilters}>
-                <OptionIcon />
-              </div>
-            </Tooltip>
-          </HeaderRight>
-        </HeaderLayout>
-      </OptionBar>
+      <div style={{ width: 'calc(100% - 2px)', boxSizing: 'border-box', padding: 4 }}>
+        <OptionBar>
+          <HeaderLayout>
+            <HeaderLeft>
+              <IconInput
+                Icon={Search}
+                iconSize="16px"
+                placeholder="Polkadot/Kusama Stash ID"
+                inputLength={256}
+                value={filters.stashId}
+                onChange={handleFilterChange('stashId')}
+              />
+            </HeaderLeft>
+            <HeaderRight>
+              <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
+                <div onClick={onShowFilters}>
+                  <OptionIcon />
+                </div>
+              </Tooltip>
+            </HeaderRight>
+          </HeaderLayout>
+        </OptionBar>
+      </div>
       <ValidatorGrid filters={toValidatorFilter(filters)} validators={validators} />
     </ValNomContentLayout>
   );
@@ -320,7 +327,7 @@ const ValNomContent = () => {
 
 const ValNomStatus = () => {
   return (
-    <CardHeader Header={() => <ValNomHeader />}>
+    <CardHeader Header={() => <ValNomHeader />} mainPadding="0 0 0 0">
       <ValNomContent />
     </CardHeader>
   );
@@ -329,7 +336,6 @@ const ValNomStatus = () => {
 export default ValNomStatus;
 
 const HeaderLayout = styled.div`
-  width: 80vw;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -357,7 +363,7 @@ const HeaderTitle = styled.div`
 `;
 
 const Title = styled.div`
-  width: 1400px;
+  /* width: 1400px; */
   font-family: Montserrat;
   font-size: 18px;
   font-weight: bold;
@@ -376,16 +382,17 @@ const Subtitle = styled.div`
 `;
 
 const OptionBar = styled.div`
-  width: 100%;
-  height: 62px;
-  padding: 12px 0px 0px 13.8px;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 12px;
   border-radius: 6px;
   background-color: #2f3842;
-  margin: 0 0 9px 0;
 `;
 
 const ValNomContentLayout = styled.div`
-  width: 80vw;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
 `;
 
 const FilterOptionLayout = styled.div`
@@ -413,4 +420,11 @@ const GridLayout = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media (max-width: 1920px) {
+    width: 1392px;
+  }
+
+  @media (max-width: 1440px) {
+    width: 928px;
+  }
 `;

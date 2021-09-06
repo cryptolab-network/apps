@@ -13,7 +13,7 @@ import { apiGetStashRewards, IStashRewards } from '../../../../apis/StashRewards
 import moment from 'moment';
 import { Grid } from '@material-ui/core';
 import SRRTable from './SRRTable';
-import IconButton from '../../../../components/Button/IconButton';
+// import IconButton from '../../../../components/Button/IconButton';
 import { apiGetNominatedValidators, IStatusChange, IValidator } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import ValidNominator from '../../../../components/ValidNominator';
@@ -28,7 +28,7 @@ import { toast } from 'react-toastify';
 
 import { useTranslation } from 'react-i18next';
 import SRRChart from './SRRChart';
-import Button from '../../../../components/Button';
+// import Button from '../../../../components/Button';
 
 interface ISRRFilters {
   stashId: string;
@@ -109,7 +109,16 @@ enum State {
 
 const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
-  const { network: networkName } = useContext(DataContext);
+
+  const { network: networkName, changeNetwork } = useContext(DataContext);
+  if (filters.stashId !== '') {
+    if (filters.stashId.startsWith('1')) {
+      changeNetwork('Polkadot');
+    } else {
+      changeNetwork('Kusama');
+    }
+  }
+  
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
@@ -186,19 +195,19 @@ const SRRContent = ({ filters }) => {
     filters,
   ]);
 
-  const [showFilters, toggleFilters] = useState(false);
-  const onShowFilters = useCallback(() => {
-    toggleFilters(true);
-  }, []);
-  const handleOptionToggle = useCallback((visible) => {
-    console.log('visible: ', visible);
-    toggleFilters(visible);
-  }, []);
+  // const [showFilters, toggleFilters] = useState(false);
+  // const onShowFilters = useCallback(() => {
+  //   toggleFilters(true);
+  // }, []);
+  // const handleOptionToggle = useCallback((visible) => {
+  //   console.log('visible: ', visible);
+  //   toggleFilters(visible);
+  // }, []);
 
   const [showDownload, toggleDownload] = useState(false);
-  const onShowDownload = useCallback(() => {
-    toggleDownload(true);
-  }, []);
+  // const onShowDownload = useCallback(() => {
+  //   toggleDownload(true);
+  // }, []);
   const handleDownloadToggle = useCallback((visible) => {
     toggleDownload(visible);
   }, []);
@@ -274,7 +283,7 @@ const SRRContent = ({ filters }) => {
           {FilterOptionsLayout}
         </Dialog>
         <StashInformationLayout>
-          <StashInformation stashId={filters.stashId} stashData={stashData} currency={_filters.currency} />
+          <StashInformation stashId={filters.stashId} stashData={stashData} chain={chain} currency={_filters.currency} />
         </StashInformationLayout>
 
         <ContentLayout>
@@ -427,14 +436,6 @@ const EmptyStashDescription = styled.div`
   text-align: center;
   color: white;
   margin: 24.5px 0 24.5px 0;
-`;
-
-const StashRewardsLayout = styled.div`
-  width: 100%;
-  margin: 9.6px 0 10.1px 0;
-  padding: 13px 0 18.4px 0;
-  display: flex;
-  flex-direction: column;
 `;
 
 const StashInformationLayout = styled.div`

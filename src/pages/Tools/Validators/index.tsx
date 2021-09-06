@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { formatBalance } from '@polkadot/util';
 import {
@@ -18,8 +18,8 @@ import { useHistory } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
-
 import { useTranslation } from 'react-i18next';
+import { DataContext } from '../components/Data';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -112,7 +112,18 @@ const ValidatorStatus = (props) => {
   });
   const [chartData1, setChartData1] = useState<any[]>([]);
   const [chartData2, setChartData2] = useState<any[]>([]);
+  // context
+  const { network, changeNetwork } = useContext(DataContext);
   const chain = props.match.params.chain;
+
+  useEffect(() => {
+    if (chain === 'KSM' && network !== 'Kusama') {
+      changeNetwork('Kusama');
+    } else if (chain === 'DOT' && network !== 'Polkadot') {
+      changeNetwork('Polkadot');
+    }
+  }, [chain, network, changeNetwork]);
+
   const _formatBalance = useCallback(
     (value: any) => {
       if (chain === 'KSM') {
@@ -171,9 +182,23 @@ const ValidatorStatus = (props) => {
           });
           const chartData2 = validator.info.map((era) => {
             return {
-              apy: era.apy.toFixed(4),
+              apy: (era.apy * 100).toFixed(2),
               era: era.era,
             };
+          });
+          chartData1.sort((a, b) => {
+            if (a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
+          chartData2.sort((a, b) => {
+            if (a.era > b.era) {
+              return 1;
+            } else {
+              return -1;
+            }
           });
           setChartData1(chartData1);
           setChartData2(chartData2);
@@ -208,9 +233,11 @@ const ValidatorStatus = (props) => {
           _setSlashes(slashes);
         }
       } catch (err) {
-        notifyError(t('tools.validators.errors.incorrectValidator1') +
-          `${shortenStashId(props.match.params.id)} ` +
-          t('tools.validators.errors.incorrectValidator2'));
+        notifyError(
+          t('tools.validators.errors.incorrectValidator1') +
+            `${shortenStashId(props.match.params.id)} ` +
+            t('tools.validators.errors.incorrectValidator2')
+        );
       }
       function _setUnclaimedEras(unclaimedEras: number[]) {
         if (unclaimedEras === undefined || unclaimedEras === null) {
@@ -243,50 +270,65 @@ const ValidatorStatus = (props) => {
       <MainLayout>
         <CardHeader
           Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
+          mainPadding="0 0 0 0"
         >
-          <ValidatorInfoLayout>
-            <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
-            <InfoItem>{selfStake}</InfoItem>
-            <InfoDivider />
-            <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
-            <InfoItem>{unclaimedEras}</InfoItem>
-            <InfoDivider />
-            <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
-            <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
-          </ValidatorInfoLayout>
-          <ChartsLayout>
-            <ChartContainer>
-              <Chart showTools data={chartData1} leftLabel="Nominator Count" rightLabel="Commission ( % )"
-                config={{
-                  xKey: 'era',
-                  firstDataKey: 'nominators',
-                  secondDataKey: 'commission',
-                  firstDataYAxis: 'left',
-                  secondDataYAxis: 'right',
-                }}
-              />
-            </ChartContainer>
-            <ChartContainer>
-              <Chart
-                data={chartData2}
-                leftLabel="APY"
-                config={{
-                  xKey: 'era',
-                  firstDataKey: 'apy',
-                  firstDataYAxis: 'left',
-                }}
-              />
-            </ChartContainer>
-          </ChartsLayout>
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
-            <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
-          </ContentColumnLayout>
-          <Space />
-          <ContentColumnLayout width="100%" justifyContent="flex-start">
-            <ContentBlockTitle color="white">{t('tools.validators.inactiveNominators')}</ContentBlockTitle>
-            <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
-          </ContentColumnLayout>
+          <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ValidatorInfoLayout>
+                <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
+                <InfoItem>{selfStake}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
+                <InfoItem>{unclaimedEras}</InfoItem>
+                <InfoDivider />
+                <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
+                <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+              </ValidatorInfoLayout>
+            </div>
+
+            <ChartsLayout>
+              <ChartContainer>
+                <Chart
+                  data={chartData1}
+                  leftLabel="Nominator Count"
+                  rightLabel="Commission ( % )"
+                  xAxisHeight={80}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'nominators',
+                    secondDataKey: 'commission',
+                    firstDataYAxis: 'left',
+                    secondDataYAxis: 'right',
+                  }}
+                />
+              </ChartContainer>
+              <ChartContainer>
+                <Chart
+                  data={chartData2}
+                  leftLabel="APY"
+                  xAxisHeight={80}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'apy',
+                    firstDataYAxis: 'left',
+                  }}
+                />
+              </ChartContainer>
+            </ChartsLayout>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
+              </ContentColumnLayout>
+              <Space />
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">
+                  {t('tools.validators.inactiveNominators')}
+                </ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
+              </ContentColumnLayout>
+            </div>
+          </div>
         </CardHeader>
       </MainLayout>
     </ValidatorStatusLayout>
@@ -304,6 +346,7 @@ const ValidatorStatusLayout = styled.div`
 `;
 
 const MainLayout = styled.div`
+  width: 1400px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -313,6 +356,7 @@ const MainLayout = styled.div`
 
 const HeaderLayout = styled.div`
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -321,6 +365,7 @@ const HeaderLayout = styled.div`
 const HeaderLeft = styled.div`
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 `;
 
 const HeaderRight = styled.div`
@@ -370,7 +415,7 @@ const Subtitle = styled.div`
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  width: 240px;
+  /* width: 240px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -380,7 +425,7 @@ const Exposure = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: var(--nav-fg);
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ExposureActive = styled.div`
@@ -395,7 +440,7 @@ const ExposureTotal = styled.div`
 const Value = styled.div`
   display: flex;
   flex-direction: row;
-  width: 160px;
+  /* width: 160px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -405,7 +450,7 @@ const Value = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: #23beb9;
-  margin: 0 21.4px 0 0;
+  margin-left: 32px;
 `;
 
 const ValueTitle = styled.div`
@@ -423,13 +468,12 @@ const ChartsLayout = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  // padding: 13px 18.7px 15.7px 16px;
 `;
 
 const ChartContainer = styled.div`
-  box-sizing: border-box;
   flex: 1;
   height: 500px;
+  box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -444,6 +488,7 @@ const ChartContainer = styled.div`
 `;
 
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: ${(props) => (props.justifyContent ? props.justifyContent : 'space-between')};
@@ -469,19 +514,18 @@ const ContentBlockTitle = styled.div`
 `;
 
 const Space = styled.div`
-  margin: 40px 0 0 0;
+  margin: 32px 0 0 0;
 `;
 
 const ValidatorInfoLayout = styled.div`
+  box-sizing: border-box;
   width: 100%;
   height: 50px;
-  margin: 9.6px 0 10.1px 0;
-  padding: 13px 0 18.4px 0;
+  padding: 12px;
   display: flex;
   flex-direction: row;
   border-radius: 6px;
   background-color: #2f3842;
-  padding: 0 0 0 18px;
   align-items: center;
 `;
 

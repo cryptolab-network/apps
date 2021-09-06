@@ -1,12 +1,19 @@
 import styled from 'styled-components';
 import { eraStatus } from '../../../../../utils/status/Era';
+import ReactTooltip from 'react-tooltip';
 
 interface IEra {
   statusCode: eraStatus;
+  eraNumber: number;
 }
 
-const Era: React.FC<IEra> = ({ statusCode }) => {
-  return <EraLayout statusCode={statusCode} />;
+const Era: React.FC<IEra> = ({ statusCode, eraNumber }) => {
+  return (
+    <span>
+      <ReactTooltip id="eratip" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
+      <EraLayout statusCode={statusCode} eraNumber={eraNumber} data-for="eratip" data-tip={eraNumber} />
+    </span>
+  );
 };
 
 export default Era;

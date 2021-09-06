@@ -21,6 +21,8 @@ interface IChart {
   leftLabel: string;
   rightLabel?: string;
   xAxisHeight?: number;
+  xAxisFontSize?: number;
+  legendPayload?: any[];
   config?: {
     xKey: string | undefined;
     firstDataKey: string | undefined;
@@ -40,6 +42,8 @@ const Chart: React.FC<IChart> = ({
   leftLabel = '',
   rightLabel = '',
   xAxisHeight = 30,
+  xAxisFontSize = 15,
+  legendPayload = [],
   config = {
     xKey: undefined,
     firstDataKey: undefined,
@@ -63,6 +67,7 @@ const Chart: React.FC<IChart> = ({
     leftLabel: '',
     rightLabel: '',
   });
+  const [customLegend, setCustomLegend] = useState<any>([]);
 
   useEffect(() => {
     const tempConfig: IChart['config'] = {
@@ -106,6 +111,19 @@ const Chart: React.FC<IChart> = ({
     rightLabel,
   ]);
 
+  if (legendPayload && legendPayload.length > 0) {
+    for (let idx = 0; idx < legendPayload.length; idx++) {
+      legendPayload[idx]['type'] = 'square';
+      if (idx === 0) {
+        legendPayload[idx]['color'] = '#21aca8';
+      } else if (idx === 1) {
+        legendPayload[idx]['color'] = '#6e95c3';
+      } else if (idx === 2) {
+        legendPayload[idx]['color'] = '#236bbe';
+      }
+    }
+  }
+
   if (data.length === 0) {
     return null;
   }
@@ -124,7 +142,7 @@ const Chart: React.FC<IChart> = ({
         >
           <CartesianGrid vertical={false} stroke="#404952" />
           <XAxis
-            tick={{ fill: 'white' }}
+            tick={{ fill: 'white', fontSize: xAxisFontSize }}
             stroke="#404952"
             dataKey={chartConfig?.xKey}
             angle={-55}
@@ -172,22 +190,43 @@ const Chart: React.FC<IChart> = ({
           )}
 
           <Tooltip />
-          <Legend
-            iconSize={16}
-            iconType="square"
-            verticalAlign="bottom"
-            // height={50}
-            wrapperStyle={{
-              width: '100%',
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              fontSize: 13,
-              height: 40,
-              bottom: 16,
-            }}
-          />
+          {legendPayload.length > 0 ? (
+            <Legend
+              iconSize={16}
+              iconType="square"
+              verticalAlign="bottom"
+              payload={legendPayload}
+              // height={50}
+              wrapperStyle={{
+                width: '100%',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                fontSize: 13,
+                height: 40,
+                bottom: 16,
+              }}
+            />
+          ) : (
+            <Legend
+              iconSize={16}
+              iconType="square"
+              verticalAlign="bottom"
+              // height={50}
+              wrapperStyle={{
+                width: '100%',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                fontSize: 13,
+                height: 40,
+                bottom: 16,
+              }}
+            />
+          )}
+
           {chartConfig?.firstDataKey && (
             <Line
               yAxisId={chartConfig?.firstDataYAxis}

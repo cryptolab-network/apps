@@ -19,6 +19,16 @@ export function validateAddress(address: string): boolean {
   }
 }
 
+export function makeMonth(month: number): string {
+  if (month >= 0 && month <= 8) {
+    return '0' + (month + 1);
+  } else if (month > 8 && month <= 11) {
+    return (month + 1).toString();
+  } else {
+    return '';
+  }
+}
+
 export const balanceUnit = (
   network: string,
   value: string | number | undefined = 0,

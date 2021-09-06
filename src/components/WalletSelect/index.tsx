@@ -8,8 +8,12 @@ import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg
 import Identicon from '@polkadot/react-identicon';
 import { ApiContext } from '../Api';
 import { balanceUnit } from '../../utils/string';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { isEmpty } from '../../utils/helper';
 
 const WalletSelect: React.FC = () => {
+  const { t } = useTranslation();
   const {
     network,
     hasWeb3Injected,
@@ -19,6 +23,9 @@ const WalletSelect: React.FC = () => {
     selectAccount,
     isLoading,
   } = useContext(ApiContext);
+  console.log(`accounts`);
+  console.log(accounts);
+  console.log(selectedAccount);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -51,6 +58,18 @@ const WalletSelect: React.FC = () => {
 
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
+
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
 
   const installWallet = () => {
     console.log('in installWallet');
@@ -92,7 +111,7 @@ const WalletSelect: React.FC = () => {
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
     if (accounts.length === 0) {
-      // console.log('no length');
+      console.log('no length');
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
@@ -145,7 +164,7 @@ const WalletSelect: React.FC = () => {
           <ScaleLoader color="#23beb9" css={css} height={20} />
         </div>
       );
-    } else if (selectedAccount) {
+    } else if (selectedAccount && !isEmpty(selectedAccount)) {
       return (
         <>
           <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
@@ -169,7 +188,11 @@ const WalletSelect: React.FC = () => {
           </div>
         </>
       );
+    } else if (isEmpty(selectedAccount)) {
+      notifyWarn(t('benchmark.staking.warnings.noAccount'));
+      return <Hint>No Account</Hint>;
     } else {
+      
     }
   }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen]);
 

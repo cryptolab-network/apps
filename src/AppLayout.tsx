@@ -33,11 +33,18 @@ import Network from './pages/Tools/components/Network';
 import { Helmet } from 'react-helmet';
 import { apiSubscribeNewsletter } from './apis/Validator';
 import Dialog from './components/Dialog';
-import { CryptolabKSMValidators, CryptolabDOTValidators } from './utils/constants/Validator';
+import {
+  CryptolabKSMValidators,
+  CryptolabDOTValidators,
+  CryptolabKSMValidatorsName,
+  CryptolabDOTValidatorsName,
+} from './utils/constants/Validator';
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
-
 import { useTranslation } from 'react-i18next';
+import { isMobile } from 'react-device-detect';
+import Mobile from './pages/Mobile';
+import DropdownCommon from './components/Dropdown/Common';
 
 // header
 const Header: React.FC = () => {
@@ -112,10 +119,36 @@ interface IValidator {
   theme: IconTheme;
 }
 
+interface ILanguage {
+  label: string;
+  value: string;
+  isDisabled?: boolean;
+}
+
+const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: '繁體中文', value: 'zh-TW' },
+  { label: '简体中文', value: 'zh-CN' },
+  { label: 'Deutsch', value: 'de' },
+];
+
 const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [email, setEmail] = useState<string>('');
+  const defaultLng = localStorage.getItem('i18nextLng');
+  const lng = languageOptions.find((l) => l.value === defaultLng);
+  const [language, setLanguage] = useState<ILanguage>(lng ? lng : { label: 'English', value: 'en' });
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng);
+  };
+
+  const handleLanguageChange = (e: ILanguage) => {
+    changeLanguage(e.value);
+    setLanguage(e);
+  };
 
   const onSubscribeNewsletter = () => {
     apiSubscribeNewsletter({
@@ -231,6 +264,18 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
           <TdDiv>
             <DotDiv />
             <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+          </TdDiv>
+        </ColumnDiv>
+        <ColumnDiv style={{ minWidth: '85px' }}>
+          <ThDiv>{t('app.footer.title.language')}</ThDiv>
+          <TdDiv>
+            <DropdownCommon
+              style={{ flex: 1, width: '100%' }}
+              options={languageOptions}
+              value={language}
+              onChange={handleLanguageChange}
+              theme="dark"
+            />
           </TdDiv>
         </ColumnDiv>
         <ColumnDiv>
@@ -350,13 +395,21 @@ const AppLayout = () => {
 
     Object.keys(CryptolabDOTValidators).forEach((item) => {
       polkadotValidator.push(
-        <ValidatorNode name={item} address={CryptolabDOTValidators[item]} theme="polkadot" />
+        <ValidatorNode
+          name={CryptolabDOTValidatorsName[item]}
+          address={CryptolabDOTValidators[item]}
+          theme="polkadot"
+        />
       );
     });
 
     Object.keys(CryptolabKSMValidators).forEach((item) => {
       kusamaValidator.push(
-        <ValidatorNode name={item} address={CryptolabKSMValidators[item]} theme="polkadot" />
+        <ValidatorNode
+          name={CryptolabKSMValidatorsName[item]}
+          address={CryptolabKSMValidators[item]}
+          theme="polkadot"
+        />
       );
     });
 
@@ -433,15 +486,17 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
+          width: 'calc(100vw - 652)>0' ? '652px' : '90vw',
         }}
       >
-        <AboutUsFontStyle>{t('about.subDescription')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
+        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
+        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
             <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
             <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>{t('about.mission3')}</AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
@@ -547,19 +602,34 @@ const AppLayout = () => {
     visibleOurValidatorsDialog,
   ]);
 
-  return (
-    <>
-      <GradientLight>
-        <BrowserRouter>
-          {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
-          {/* <Api>{mainRender}</Api> */}
-        </BrowserRouter>
-        {/* <StarAnimation id="stars" />
-        <StarAnimation id="stars2" />
-        <StarAnimation id="stars3" /> */}
-      </GradientLight>
-    </>
-  );
+  if (isMobile) {
+    if (isToolsSite) {
+      return (
+        <>
+          <Mobile isTools={true} />
+        </>
+      );
+    }
+    return (
+      <>
+        <Mobile isTools={false} />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <GradientLight>
+          <BrowserRouter>
+            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
+            {/* <Api>{mainRender}</Api> */}
+          </BrowserRouter>
+          {/* <StarAnimation id="stars" />
+          <StarAnimation id="stars2" />
+          <StarAnimation id="stars3" /> */}
+        </GradientLight>
+      </>
+    );
+  }
 };
 
 export default AppLayout;
@@ -713,6 +783,7 @@ const Input = styled.input`
 `;
 
 const SubmitButton = styled.button`
+  min-width: fit-content;
   height: 75%;
   margin: 0;
   border: 0;
@@ -724,13 +795,9 @@ const SubmitButton = styled.button`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
   line-height: 1.23;
-  letter-spacing: normal;
 `;
 const CopyRightDiv = styled.div`
-  heigth: 64px;
   width: 100%;
   margin: 0px;
   padding: 25px 0px 25px;

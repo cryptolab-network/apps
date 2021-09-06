@@ -33,34 +33,50 @@ interface IStake {
 }
 
 const SDCXAxis = {
-  polkadot: [10000, 100000, 500000, 1000000, 20000000, 50000000, 100000000],
-  kusama: [1000, 5000, 10000, 20000, 30000, 50000, 100000],
+  polkadot: [100, 500, 1000, 10000, 100000, 500000, 1000000, 20000000, 50000000],
+  kusama: [1, 10, 100, 500, 1000, 2000, 3000, 10000, 100000],
+  polkadotTitle: ['<=100', '<=500', '<=1k', '<=10k', '<=100k', '<=500k', '<=1M', '<=2M', '>2M'],
+  kusamaTitle: ['<=1', '<=10', '<=100', '<=500', '<=1k', '<=2k', '<=3k', '<=10k', '>10k'],
 };
 
 const parseNominatorStakes = (network: string, decimals: number, nominators: INominatorInfo[]): IStake[] => {
   const stake: IStake[] = [];
   nominators.forEach((nominator) => {
     let xaxis = SDCXAxis.polkadot;
-    if (network === 'kusama') {
+    let xaxisTitle = SDCXAxis.polkadotTitle;
+    if (network === 'Kusama') {
       xaxis = SDCXAxis.kusama;
+      xaxisTitle = SDCXAxis.kusamaTitle;
     }
-    // console.log(nominator);
-    for (let i = 1; i < xaxis.length; i++) {
-      if ((nominator as any).balance.lockedBalance / decimals < xaxis[i]) {
-        if (stake[i - 1] === undefined) {
-          stake[i - 1] = {
-            stakeRange: `${xaxis[i - 1]}`,
+    for (let i = 0; i < xaxis.length; i++) {
+      if ((nominator as any).balance.lockedBalance / Math.pow(10, decimals) <= xaxis[i]) {
+        if (stake[i] === undefined) {
+          stake[i] = {
+            stakeRange: `${xaxisTitle[i]}`,
             count: 0,
           };
         }
-        stake[i - 1].count++;
+        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
+        stake[i].count++;
+        break;
+      }
+      if (i === xaxis.length - 1) {
+        if (stake[i] === undefined) {
+          stake[i] = {
+            stakeRange: `${xaxisTitle[i]}`,
+            count: 0,
+          };
+        }
+        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
+        stake[i].count++;
         break;
       }
     }
+    
     for (let i = 0; i < stake.length; i++) {
       if (stake[i] === undefined) {
         stake[i] = {
-          stakeRange: `${xaxis[i]}`,
+          stakeRange: `${xaxisTitle[i]}`,
           count: 0,
         };
       }
@@ -90,11 +106,11 @@ const StakeDistributionChart = () => {
 
   return (
     <StakeDistributionChartLayout>
-      <SDCTitle>Stake Distrubution</SDCTitle>
+      <SDCTitle>{t('benchmark.charts.sd.title')}</SDCTitle>
       <ChartLayout>
         <BarChart
           data={stake}
-          leftLabel={`Nominator Count`}
+          leftLabel={t('benchmark.charts.sd.nominatorCount')}
           xAxisHeight={80}
           config={{
             xKey: 'stakeRange',
@@ -104,7 +120,7 @@ const StakeDistributionChart = () => {
             firstDataYAxis: 'left',
             secondDataYAxis: undefined,
             thirdDataYAxis: undefined,
-            leftLabel: `Nominator Count`,
+            leftLabel: t('benchmark.charts.sd.nominatorCount'),
             rightLabel: undefined,
           }}
         />
@@ -116,6 +132,8 @@ const StakeDistributionChart = () => {
 const CDCXAxis = {
   polkadot: [0, 1, 2, 3, 5, 10, 20, 100],
   kusama: [0, 1, 2, 3, 5, 10, 20, 100],
+  polkadotTitle: ['<1%', '1%', '2%', '3%', '5%', '10%', '20%', '>20%'],
+  kusamaTitle: ['<1%', '1%', '2%', '3%', '5%', '10%', '20%', '>20%'],
 };
 
 interface ICommission {
@@ -127,14 +145,20 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
   const commissions: ICommission[] = [];
   validators.forEach((validator) => {
     let xaxis = CDCXAxis.polkadot;
-    if (network === 'kusama') {
+    let xaxisTitle = CDCXAxis.polkadotTitle;
+    if (network === 'Kusama') {
       xaxis = CDCXAxis.kusama;
+      xaxisTitle = CDCXAxis.kusamaTitle;
     }
-    for (let i = 1; i < xaxis.length; i++) {
-      if (validator.info.commission < xaxis[i]) {
+    for (let i = 1; i <= xaxis.length; i++) {
+      let c = validator.info.commission;
+      if (c < 0.01) {
+        c = 0;
+      }
+      if (c <= xaxis[i - 1]) {
         if (commissions[i - 1] === undefined) {
           commissions[i - 1] = {
-            commission: `${xaxis[i - 1]} %`,
+            commission: `${xaxisTitle[i - 1]}`,
             count: 0,
           };
         }
@@ -143,6 +167,7 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
       }
     }
   });
+  console.log(commissions);
   return commissions;
 };
 
@@ -164,11 +189,11 @@ const CommissionDistributionChart = () => {
   }, [chain, networkName]);
   return (
     <CommissionDistributionChartLayout>
-      <CDCTitle>Commission Distrubution</CDCTitle>
+      <CDCTitle>{t('benchmark.charts.cd.title')}</CDCTitle>
       <ChartLayout>
         <BarChart
           data={commissions}
-          leftLabel={`Validator Count`}
+          leftLabel={t('benchmark.charts.cd.validatorCount')}
           xAxisHeight={80}
           config={{
             xKey: 'commission',
@@ -178,7 +203,7 @@ const CommissionDistributionChart = () => {
             firstDataYAxis: 'left',
             secondDataYAxis: undefined,
             thirdDataYAxis: undefined,
-            leftLabel: `Validator Count`,
+            leftLabel: t('benchmark.charts.cd.validatorCount'),
             rightLabel: undefined,
           }}
         />

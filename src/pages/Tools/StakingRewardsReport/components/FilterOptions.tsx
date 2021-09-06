@@ -1,5 +1,7 @@
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState, useContext } from 'react';
 import Button from '../../../../components/Button';
+import { DataContext } from '../../components/Data';
+import { networkCapitalCodeName } from '../../../../utils/parser';
 import { createTheme } from '@material-ui/core/styles';
 import { MuiPickersOverrides } from '@material-ui/pickers/typings/overrides';
 import { ThemeProvider } from '@material-ui/styles';
@@ -76,6 +78,7 @@ export const filterOptionDropdownList = filterOptions.map((o, idx) => {
 });
 
 const FilterOptions = ({ startDate, endDate, currency, startBalance, onCancel, onConfirm }) => {
+  let { network: networkName } = useContext(DataContext);
   const [sDate, setSDate] = useState(startDate);
   const [eDate, setEDate] = useState(endDate);
   const [_currency, setCurrency] = useState(currency);
@@ -203,11 +206,14 @@ const FilterOptions = ({ startDate, endDate, currency, startBalance, onCancel, o
               >
                 Start Balance
               </span>
-              <Input
-                style={{ width: '100%', borderBottom: '1px solid rgba(215, 216, 217, 0.42)' }}
-                onChange={handleStartBalanceChange}
-                value={_startBalance}
-              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Input
+                  style={{ width: '80%', borderBottom: '1px solid rgba(215, 216, 217, 0.42)' }}
+                  onChange={handleStartBalanceChange}
+                  value={_startBalance}
+                />
+                <span style={{ color: '#23beb9', fontSize: 20 }}>{networkCapitalCodeName(networkName)}</span>
+              </div>
             </div>
           </FilterItem>
         </AdvancedOption>
@@ -227,6 +233,7 @@ const FilterOptions = ({ startDate, endDate, currency, startBalance, onCancel, o
     handleStartBalanceChange,
     handleStartDateChange,
     materialTheme,
+    networkName,
     onCancel,
     sDate,
     selectedOption,

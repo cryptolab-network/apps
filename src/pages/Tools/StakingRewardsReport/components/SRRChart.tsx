@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import Chart from '../../../../components/Chart';
+import { makeMonth } from '../../../../utils/string';
 
 // export interface IStashRewards {
 //   stash: string;
@@ -36,11 +37,11 @@ const SRRChart = ({ stashData, chain }) => {
     let rewardDistribution: number[] = [];
     const units: string[] = [];
     dayRewards.forEach((reward: any) => {
-      const week = moment(reward.date).week();
+      const month = moment(reward.date).month();
       const year = moment(reward.date).year();
-      const i = units.findIndex((element) => element === year + ' W' + week);
+      const i = units.findIndex((element) => element === year + '/' + makeMonth(month));
       if (i < 0) {
-        units.push(year + ' W' + week);
+        units.push(year + '/' + makeMonth(month));
         rewardDistribution.push(reward.amount);
       } else {
         rewardDistribution[i] += reward.amount;
