@@ -8,6 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
   Label,
+  TooltipProps,
 } from 'recharts';
 import './index.css';
 import Tools from './components/Tools';
@@ -35,6 +36,37 @@ interface IChart {
     rightLabel?: string | undefined;
   };
 }
+
+const CustomTooltipLegends = ({ active, payload, label, legends }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ backgroundColor: 'white', borderRadius: 6 }}>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${label}`}</p>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${legends[0].value} : ${payload[0].value}`}</p>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${legends[1].value} : ${payload[1].value}`}</p>
+        {/* <p className="intro">{getIntroOfPage(label)}</p> */}
+      </div>
+    );
+  }
+
+  return null;
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ backgroundColor: 'white', borderRadius: 6 }}>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${label}`}</p>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${payload[0].name} : ${payload[0].value}`}</p>
+        <p style={{ fontSize: 12, color: 'black' }}>{`${payload[1].name} : ${payload[1].value}`}</p>
+        {/* <p className="intro">{getIntroOfPage(label)}</p> */}
+      </div>
+    );
+  }
+
+  return null;
+};
+
 const Chart: React.FC<IChart> = ({
   data = [],
   showTools = false,
@@ -189,42 +221,47 @@ const Chart: React.FC<IChart> = ({
             </YAxis>
           )}
 
-          <Tooltip />
           {legendPayload.length > 0 ? (
-            <Legend
-              iconSize={16}
-              iconType="square"
-              verticalAlign="bottom"
-              payload={legendPayload}
-              // height={50}
-              wrapperStyle={{
-                width: '100%',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                fontSize: 13,
-                height: 40,
-                bottom: 16,
-              }}
-            />
+            <>
+              <Tooltip content={<CustomTooltipLegends legends={legendPayload} />} />
+              <Legend
+                iconSize={16}
+                iconType="square"
+                verticalAlign="bottom"
+                payload={legendPayload}
+                // height={50}
+                wrapperStyle={{
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  fontSize: 13,
+                  height: 40,
+                  bottom: 16,
+                }}
+              />
+            </>
           ) : (
-            <Legend
-              iconSize={16}
-              iconType="square"
-              verticalAlign="bottom"
-              // height={50}
-              wrapperStyle={{
-                width: '100%',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                fontSize: 13,
-                height: 40,
-                bottom: 16,
-              }}
-            />
+            <>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                iconSize={16}
+                iconType="square"
+                verticalAlign="bottom"
+                // height={50}
+                wrapperStyle={{
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  fontSize: 13,
+                  height: 40,
+                  bottom: 16,
+                }}
+              />
+            </>
           )}
 
           {chartConfig?.firstDataKey && (
