@@ -205,6 +205,22 @@ i18n
             mission1: 'A simple, easy-to-use staking service for Polkadot and Kusama HODLers.',
             mission2: 'A bunch of tools for Polkadot and Kusama validator operators.',
           },
+          pm: {
+            performance: {
+              title: 'Performance',
+              subtitle: 'Your current statement of profitibility',
+            },
+            table: {
+              header: {
+                stash: 'Stash',
+                staked: 'Staked Amount',
+                profit: 'Profit',
+                totalInFiat: 'Profit in Fiat',
+                apy: 'APY',
+                unclaimedEras: 'Unclaimed Eras'
+              }
+            },
+          },
           benchmark: {
             routes: {
               benchmark: 'Benchmark',
@@ -491,6 +507,22 @@ i18n
             mission: '因此，我們為各位建立以下服務',
             mission1: '為持幣者打造的一個直覺易用的質押服務',
             mission2: '為營運者打造的一系列驗證節點輔助工具',
+          },
+          pm: {
+            performance: {
+              title: '收益表現',
+              subtitle: '您目前的質押收益',
+            },
+            table: {
+              header: {
+                stash: '帳戶',
+                staked: '質押數量',
+                profit: '收益',
+                total: '收益(美金)',
+                apy: '年化報酬率',
+                unclaimedEras: '尚未分配收益的Era數'
+              }
+            }
           },
           benchmark: {
             routes: {
