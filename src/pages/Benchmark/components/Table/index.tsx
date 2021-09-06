@@ -26,7 +26,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
     // The rest of these things are super handy, too ;)
     canPreviousPage,
     canNextPage,
-    // pageOptions,
+    pageOptions,
     pageCount,
     gotoPage,
     nextPage,
@@ -50,12 +50,18 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getSortByToggleProps()}>
-                    {column.render('Header')}
-                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
-                  </th>
-                ))}
+                {headerGroup.headers.map((column) => {
+                  if (typeof column.Header === 'string' && column.Header !== 'Commission %') {
+                    return (
+                      <th {...column.getSortByToggleProps()}>
+                        {column.render('Header')}
+                        <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      </th>
+                    );
+                  } else {
+                    return <th>{column.render('Header')}</th>;
+                  }
+                })}
               </tr>
             ))}
           </thead>
@@ -66,7 +72,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                 <tr {...row.getRowProps()}>
                   {type === tableType.stake && !row.canExpand && (
                     <>
-                      <td colSpan={7}>{row.cells[4].render('Cell')}</td>
+                      <td colSpan={8}>{row.cells[4].render('Cell')}</td>
                     </>
                   )}
                   {type === tableType.stake &&
@@ -110,6 +116,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
           <Pagination
             canPreviousPage={canPreviousPage}
             canNextPage={canNextPage}
+            pageOptions={pageOptions}
             pageCount={pageCount}
             gotoPage={gotoPage}
             nextPage={nextPage}

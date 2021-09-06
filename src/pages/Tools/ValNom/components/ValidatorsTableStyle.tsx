@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as PeopleIcon } from '../../../../assets/images/people.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import Table from '../../../../components/Table';
-import { useAppSelector } from '../../../../hooks';
-import { formatBalance } from '@polkadot/util';
 import Account from '../../../../components/Account';
 import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+import { DataContext } from '../../components/Data';
+import { balanceUnit } from '../../../../utils/string';
+import { NetworkConfig } from '../../../../utils/constants/Network';
 
 const ValNomHeader = () => {
   return (
@@ -17,7 +18,9 @@ const ValNomHeader = () => {
         <PeopleIcon />
         <HeaderTitle>
           <Title>Validator / Nominator Status</Title>
-          <Subtitle>See filtered validator status or enter a nominator stash ID to see its nominated validators</Subtitle>
+          <Subtitle>
+            See filtered validator status or enter a nominator stash ID to see its nominated validators
+          </Subtitle>
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -25,21 +28,14 @@ const ValNomHeader = () => {
 };
 
 const ValidatorTable = () => {
-  const networkName = useAppSelector(state => state.network.name);
-  const chain = (networkName === 'Polkadot') ? "DOT" : "KSM";
-  const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (<span>{formatBalance(value, {
-        decimals: 12,
-        withUnit: 'KSM'
-      })}</span>);
-    } else if (chain === 'DOT') {
-      return (<span>{formatBalance(value, {
-        decimals: 10,
-        withUnit: 'DOT'
-      })}</span>);
-    }
-  }, [chain]);
+  const { network: networkName } = useContext(DataContext);
+  const chain = NetworkConfig[networkName].token;
+  const _formatBalance = useCallback(
+    (value: any) => {
+      return <span>{balanceUnit(chain, value)}</span>;
+    },
+    [chain]
+  );
   const columns = useMemo(() => {
     return [
       {
@@ -53,7 +49,7 @@ const ValidatorTable = () => {
         accessor: 'id',
         maxWidth: 180,
         Cell: (props) => {
-          return (<Account address={props.row.original.id} display={props.row.original.identity.display} />);
+          return <Account address={props.row.original.id} display={props.row.original.identity.display} />;
         },
       },
       {
@@ -67,7 +63,7 @@ const ValidatorTable = () => {
         accessor: 'averageApy',
         maxWidth: 60,
         Cell: ({ value }) => {
-          return (<span>{(value * 100).toFixed(2)}%</span>);
+          return <span>{(value * 100).toFixed(2)}%</span>;
         },
       },
       {
@@ -75,81 +71,32 @@ const ValidatorTable = () => {
         accessor: 'info.exposure.own',
         maxWidth: 150,
         Cell: ({ value }) => {
-          return (<span>{_formatBalance(value)}</span>);
-        }
+          return <span>{_formatBalance(value)}</span>;
+        },
       },
       {
         Header: 'Total Stake',
         accessor: 'info.exposure.total',
         maxWidth: 150,
         Cell: ({ value }) => {
-          // console.log(value);
-          return (<span>{_formatBalance(value)}</span>);
+          return <span>{_formatBalance(value)}</span>;
         },
       },
-    ]
+    ];
   }, [_formatBalance]);
   const [validators, setValidators] = useState<IValidator[]>([]);
   useEffect(() => {
     async function getValidators() {
       try {
-        const validators = await apiGetAllValidator({ params: 'KSM'});
+        const validators = await apiGetAllValidator({ params: 'KSM' });
         setValidators(validators);
       } catch (err) {
         console.error(err);
       }
-    };
+    }
     getValidators();
   }, [chain]);
-  return (
-    <Table
-      columns={columns}
-      data={validators}
-    />
-  );
-};
-
-const ValNomContent = () => {
-  const [filters, setFilters] = useState({
-    stashId: '',
-  });
-  const handleFilterChange = (name) => (e) => {
-    // TODO: input validator, limit
-    switch (name) {
-      case 'stashId':
-        setFilters((prev) => ({ ...prev, stashId: e.target.value }));
-        break;
-      default:
-        break;
-    }
-  };
-  return (
-    <div>
-      <OptionBar>
-        <IconInput
-          Icon={Search}
-          iconSize="16px"
-          placeholder="Polkadot/Kusama StashId"
-          inputLength={256}
-          value={filters.stashId}
-          onChange={handleFilterChange('stashId')}
-        />
-      </OptionBar>
-      <ValidatorTable />
-    </div>
-  );
-};
-
-const ValNomStatus = () => {
-  return (
-    <CardHeader
-      Header={() => (
-        <ValNomHeader/>
-      )}
-    >
-      <ValNomContent/>
-    </CardHeader>
-  );
+  return <Table columns={columns} data={validators} />;
 };
 
 const HeaderLayout = styled.div`

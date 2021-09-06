@@ -24,7 +24,11 @@ const DropdownCommon = ({ options, ...props }) => {
       width: '100%',
       display: 'flex',
       paddingBottom: 11,
-      borderBottom: props.theme && props.theme === 'dark' ? 'solid 1px #525a63' : 'solid 1px #d7d8d9',
+      borderBottom: props.borderBottom
+        ? props.borderBottom
+        : props.theme && props.theme === 'dark'
+        ? 'solid 1px #525a63'
+        : 'solid 1px #d7d8d9',
     }),
     indicatorSeparator: () => ({
       width: 0,
@@ -35,7 +39,7 @@ const DropdownCommon = ({ options, ...props }) => {
     }),
     singleValue: (provided, state) => ({
       ...provided,
-      opacity: state.isDisabled ? 0.5 : 1,
+      opacity: 1,
       transition: 'opacity 300ms',
       fontFamily: 'Montserrat',
       fontSize: 13,
@@ -44,26 +48,29 @@ const DropdownCommon = ({ options, ...props }) => {
       fontStyle: 'normal',
       lineHeight: 1.23,
       textAlign: 'left',
-      color: props.theme && props.theme === 'dark' ? 'white' : '#17222d',
+      color: props.disabled ? '#b1b1b1' : props.theme && props.theme === 'dark' ? 'white' : '#17222d',
     }),
     dropdownIndicator: (provided, state) => ({
       display: 'flex',
       width: '100%',
       transform: state.isFocused ? 'rotate(45deg)' : 'none',
       transitionDuration: '0.2s',
-      stroke: props.theme && props.theme === 'dark' ? 'white' : 'black',
+      stroke: props.disabled ? '#b1b1b1' : props.theme && props.theme === 'dark' ? 'white' : 'black',
     }),
   };
 
   return (
-    <DropdownLayout width={props.style.width} backgroundColor={props.style.backgroundColor}>
+    <DropdownLayout width={props.style.width} backgroundColor={props.style.backgroundColor} {...props}>
       <Select
         options={options}
         isSearchable={false}
+        isDisabled={props.disabled ? props.disabled : false}
         styles={customStyles}
         components={{ DropdownIndicator }}
-        value={props.value ? props.value : options[0]}
-        onChange={props.onChange}
+        value={props.value ? props.value : options[1]}
+        onChange={(e) => {
+          props.onChange(e);
+        }}
       />
     </DropdownLayout>
   );
@@ -74,8 +81,10 @@ export default DropdownCommon;
 type DropdownLayoutProps = {
   width: string;
   backgroundColor: string;
+  disabled?: boolean;
 };
 const DropdownLayout = styled.div<DropdownLayoutProps>`
   width: ${(props) => (props.width ? props.width : '90%')};
   background-color: ${(props) => (props.backgroundColor ? props.backgroundColor : 'transparent')};
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'default')};
 `;

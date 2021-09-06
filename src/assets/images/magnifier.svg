@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="15.891" height="16.454" viewBox="0 0 15.891 16.454">
+    <defs>
+        <style>
+            .cls-magnifier{fill:none;stroke:#fff;stroke-linecap:round}
+        </style>
+    </defs>
+    <g id="Group_4527" transform="translate(-845 -352)">
+        <g id="Group_4526" transform="translate(52)">
+            <g id="Group_4522" transform="translate(793 352)">
+                <g id="Ellipse_193" fill="none" stroke="#fff">
+                    <circle cx="6.5" cy="6.5" r="6.5" stroke="none"/>
+                    <circle cx="6.5" cy="6.5" r="6"/>
+                </g>
+            </g>
+            <path id="Line_30" d="M0 0L6.177 0" class="cls-magnifier" transform="translate(796.475 358.563)"/>
+            <path id="Line_31" d="M0 0L6.177 0" class="cls-magnifier" transform="translate(799.563 355.475) rotate(90)"/>
+        </g>
+        <path id="Line_33" d="M0 0L6.177 0" class="cls-magnifier" transform="translate(855.816 363.379) rotate(45)"/>
+    </g>
+</svg>

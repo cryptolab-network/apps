@@ -4,40 +4,36 @@ import Tooltip from '../../../components/Tooltip';
 import Switch from '../../../components/Switch';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
+import { useTranslation } from 'react-i18next';
 
 const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
+  const { t } = useTranslation();
   const advancedDOM = useMemo(() => {
     return (
       <AdvancedOptionLayout>
         <AdvancedOption>
-          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>Advanced</span>
+          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>{t('benchmark.staking.advanced')}</span>
           <div style={{ marginLeft: 16 }}>
             <Switch checked={advancedOption.advanced} onChange={onChange('advanced')} />
           </div>
         </AdvancedOption>
         <AdvancedOption>
-          <span style={{ color: advancedOption.decentralized ? '#23beb9' : '#fff' }}>Decentralized</span>
-          <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.decentralized} onChange={onChange('decentralized')} />
-          </div>
-        </AdvancedOption>
-        <AdvancedOption>
-          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>Support us</span>
+          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>{t('benchmark.staking.supportUs')}</span>
           <div style={{ marginLeft: 16 }}>
             <Switch checked={advancedOption.supportus} onChange={onChange('supportus')} />
           </div>
         </AdvancedOption>
       </AdvancedOptionLayout>
     );
-  }, [advancedOption.advanced, advancedOption.decentralized, advancedOption.supportus, onChange]);
+  }, [advancedOption.advanced, advancedOption.supportus, onChange, t]);
 
   return (
     <HeaderLayout>
       <HeaderLeft>
         <BeakerSmall />
         <HeaderTitle>
-          <Title>Staking</Title>
-          <Subtitle>Select the preferred type for evaluation</Subtitle>
+          <Title>{t('benchmark.staking.title')}</Title>
+          <Subtitle>{t('benchmark.staking.subtitle')}</Subtitle>
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>

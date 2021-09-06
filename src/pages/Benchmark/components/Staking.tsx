@@ -1,18 +1,22 @@
-import { useEffect, useState, useMemo, useCallback, useContext } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
 import DropdownCommon from '../../../components/Dropdown/Common';
 import Node from '../../../components/Node';
-import Warning from '../../../components/Hint/Warn';
 import TimeCircle from '../../../components/Time/Circle';
 import TitleInput from '../../../components/Input/TitleInput';
 import TitleSwitch from '../../../components/Switch/TitleSwitch';
 import Table from './Table';
 import Account from '../../../components/Account';
 import Button from '../../../components/Button';
-import Era from '../../../components/Table/comopnents/Era';
+import TinyButton from '../../../components/Button/tiny';
+import Era from './Table/comopnents/Era';
+import EraInclusion from './Table/comopnents/EraInclusion';
+import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { ReactComponent as KSMLogo } from '../../../assets/images/ksm-logo.svg';
+import { ReactComponent as DOTLogo } from '../../../assets/images/dot-logo.svg';
+import { ReactComponent as WNDLogo } from '../../../assets/images/wnd-logo.svg';
 import { ReactComponent as GreenArrow } from '../../../assets/images/green-arrow.svg';
 import { ReactComponent as HandTrue } from '../../../assets/images/hand-up-true.svg';
 import { ReactComponent as HandFalse } from '../../../assets/images/hand-up-false.svg';
@@ -21,95 +25,979 @@ import { ReactComponent as CheckFalse } from '../../../assets/images/check-false
 import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
+import { hasValues, isEmpty } from '../../../utils/helper';
 import { apiGetAllValidator } from '../../../apis/Validator';
-import { useAppSelector } from '../../../hooks';
 import { ApiContext } from '../../../components/Api';
-
 import StakingHeader from './Header';
+import { ApiState } from '../../../components/Api';
+import { NetworkCodeName, NetworkConfig } from '../../../utils/constants/Network';
+import {
+  formatToStakingInfo,
+  lowRiskStrategy,
+  highApyStrategy,
+  decentralStrategy,
+  oneKvStrategy,
+  advancedConditionFilter,
+  apyCalculation,
+  resetSelected,
+  stakeAmountValidate,
+  IStakeAmountValidateType,
+} from './utils';
+import axios from 'axios';
+import { toast, ToastOptions } from 'react-toastify';
+import { ApiPromise } from '@polkadot/api';
+import { balanceUnit } from '../../../utils/string';
+import { getCandidateNumber } from '../../../utils/constants/Validator';
+import keys from '../../../config/keys';
+import { useDebounce } from 'use-debounce';
+import { web3FromAddress } from '@polkadot/extension-dapp';
+import { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
+import Warning from '../../../components/Hint/Warn';
+import '../index.css';
+import ReactTooltip from 'react-tooltip';
+import { useTranslation } from 'react-i18next';
+import { title } from 'process';
 
 enum Strategy {
   LOW_RISK,
   HIGH_APY,
   DECENTRAL,
   ONE_KV,
+  CUSTOM,
+}
+
+enum RewardDestinationType {
+  NULL,
+  STAKED,
+  STASH,
+  CONTROLLER,
+  ACCOUNT,
+}
+
+enum AccountRole {
+  VALIDATOR,
+  CONTROLLER_OF_VALIDATOR,
+  CONTROLLER_OF_NOMINATOR,
+  NOMINATOR,
+  NOMINATOR_AND_CONTROLLER,
+  NONE,
+}
+
+interface IStrategy {
+  label: string;
+  value: Strategy;
+}
+
+interface IAccountChainInfo {
+  role: AccountRole;
+  controller: string | undefined;
+  stash: string | undefined;
+  validators: string[];
+  rewardDestination: RewardDestinationType;
+  rewardDestinationAddress: string | null;
+  bonded: string;
+  redeemable: string;
+  isNominatable: boolean;
+  isReady: boolean;
+}
+
+// session and epoch are same.
+export interface IEraInfo {
+  activeEra: number;
+  activeEraStart: number;
+  currentEra: number;
+  currentSessionIndex: number;
+  eraLength: number;
+  eraProgress: number;
+  isEpoch: boolean;
+  sessionLength: number;
+  sessionPerEra: number;
+}
+
+export interface IAdvancedSetting {
+  minSelfStake: string | null; // input amount
+  // maxCommission?: string | null; // input amount
+  identity?: boolean; // switch
+  maxUnclaimedEras?: string | null; // input amount
+  noPreviousSlashes?: boolean; // switch
+  isSubIdentity?: boolean; // switch
+  historicalApy?: string | null; // input %
+  minInclusion?: string | null; // input %
+  telemetry?: boolean; // switch
+  highApy?: boolean; // switch
+  decentralized?: boolean; // switch
+  oneKv?: boolean; // switch
+}
+
+export interface IStakingInfo {
+  tableData: ITableData[];
+  calculatedApy: number;
+  selectableCount?: number;
+}
+
+export interface ITableData {
+  select: boolean;
+  account: string;
+  display: string;
+  selfStake: number;
+  eraInclusion: {
+    rate: string;
+    activeCount: number;
+    total: number;
+  };
+  unclaimedEras: number;
+  avgAPY: number;
+  active: boolean;
+  subRows: {
+    unclaimedEras: {
+      era: number[];
+      status: number[];
+    };
+  }[];
+  commission: number;
+  hasSlash: boolean;
+  isSubIdentity: boolean;
+  identity: {
+    parent: string | null | undefined;
+    isVerified: boolean;
+  };
+  blockNomination: boolean;
+}
+
+interface IApiParams {
+  network: string;
+  page?: number;
+  size?: number;
+  has_telemetry?: boolean;
+  apy_min?: number;
+  apy_max?: number;
+  commission_min?: number;
+  commission_max?: number;
+  has_verified_identity?: boolean;
+  has_joined_1kv?: boolean;
+}
+
+interface INomitableInfo {
+  nominatable: boolean;
+  warning: any;
+}
+
+const StrategyConfig = {
+  LOW_RISK: {
+    minSelfStake: '',
+    identity: true, // switch
+    maxUnclaimedEras: '16', // input amount
+    noPreviousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: true, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
+  },
+  HIGH_APY: {
+    minSelfStake: '',
+    identity: false, // switch
+    maxUnclaimedEras: '', // input amount
+    noPreviousSlashes: true, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: false, // switch
+    highApy: true, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
+  },
+  DECENTRAL: {
+    minSelfStake: '',
+    identity: true, // switch
+    maxUnclaimedEras: '', // input amount
+    noPreviousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: true, // switch
+    oneKv: false, // switch
+  },
+  ONE_KV: {
+    minSelfStake: '',
+    identity: false, // switch
+    maxUnclaimedEras: '', // input amount
+    noPreviousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: true, // switch
+  },
+  CUSTOM: {
+    minSelfStake: '',
+    identity: false, // switch
+    maxUnclaimedEras: '', // input amount
+    noPreviousSlashes: false, // switch
+    isSubIdentity: false, // switch
+    historicalApy: '', // input %
+    minInclusion: '', // input %
+    telemetry: false, // switch
+    highApy: false, // switch
+    decentralized: false, // switch
+    oneKv: false, // switch
+  },
+};
+
+const queryEraInfo = async (api: ApiPromise): Promise<IEraInfo> => {
+  const {
+    activeEra,
+    activeEraStart,
+    currentEra,
+    eraLength,
+    eraProgress,
+    isEpoch,
+    sessionLength,
+    sessionsPerEra,
+  } = await api.derive.session.progress();
+  return {
+    activeEra: activeEra.toNumber(),
+    activeEraStart: activeEraStart.unwrap().toNumber(),
+    currentEra: currentEra.toNumber(),
+    currentSessionIndex: eraProgress.divRound(sessionLength).toNumber(),
+    eraLength: eraLength.toNumber(),
+    eraProgress: eraProgress.toNumber(),
+    isEpoch: isEpoch,
+    sessionLength: sessionLength.toNumber(),
+    sessionPerEra: sessionsPerEra.toNumber(),
+  };
+};
+
+const queryNominatorLimits = async (api: ApiPromise) => {
+  const [maxNominatorsCount, minNominatorBond, counterForNominators] = await Promise.all([
+    api.query.staking.maxNominatorsCount(),
+    api.query.staking.minNominatorBond(),
+    api.query.staking.counterForNominators(),
+  ]);
+
+  return {
+    maxNominatorsCount,
+    minNominatorBond,
+    counterForNominators,
+  };
+};
+
+interface IOptions {
+  label: string;
+  value: Strategy | RewardDestinationType;
+  isDisabled?: boolean;
+}
+interface IInputData {
+  stakeAmount: number;
+  strategy: IOptions;
+  rewardDestination: IOptions | null;
+  paymentAccount?: string;
+}
+
+enum StrategyType {
+  Common = 'common',
+  OneKv = '1kv',
 }
 
 const Staking = () => {
+  const { t } = useTranslation();
+
+  const BASIC_DEFAULT_STRATEGY = useMemo(() => {
+    return {
+      label: t('benchmark.staking.strategy.lowRisk'),
+      value: Strategy.LOW_RISK,
+    };
+  }, [t]);
+  const ADVANCED_DEFAULT_STRATEGY = useMemo(() => {
+    return { label: t('benchmark.staking.strategy.custom'), value: Strategy.CUSTOM };
+  }, [t]);
   // context
-  const polkadotApi = useContext(ApiContext);
-  // redux
-  let { name: networkName, status: networkStatus } = useAppSelector((state) => state.network);
-
-  // const
-  const strategyOptions = [
-    { label: 'Low risk', value: Strategy.LOW_RISK },
-    { label: 'High APY', value: Strategy.HIGH_APY },
-    { label: 'Decentralization', value: Strategy.DECENTRAL },
-    { label: '1KV validators', value: Strategy.ONE_KV },
-  ];
-
+  let {
+    network: networkName,
+    api: polkadotApi,
+    apiState: networkStatus,
+    selectedAccount,
+    refreshAccountData,
+    hasWeb3Injected
+  } = useContext(ApiContext);
   // state
-  const [inputData, setInputData] = useState({
+  const [inputData, setInputData] = useState<IInputData>({
     stakeAmount: 0,
-    strategy: Strategy.LOW_RISK,
+    strategy: BASIC_DEFAULT_STRATEGY,
     rewardDestination: null,
   });
+
   const [advancedOption, setAdvancedOption] = useState({
     toggle: false,
     advanced: false,
-    decentralized: false,
     supportus: false,
   });
-  const [advancedSetting, setAdvancedSetting] = useState({
-    minSelfStake: undefined, // input amount
-    maxCommission: undefined, // input amount
-    identity: false, // switch
-    maxUnclaimedEras: undefined, // input amount
-    previousSlashes: false, // switch
-    isSubIdentity: false, // switch
-    historicalApy: undefined, // input %
-    minInclusion: undefined, // input %
-    telemetry: false, // switch
+  const [advancedSetting, setAdvancedSetting] = useState<IAdvancedSetting>(StrategyConfig.LOW_RISK);
+  const [apiParams, setApiParams] = useState<IApiParams>({
+    network: keys.defaultNetwork,
   });
-  const [apiParams, setApiParams] = useState({
-    network: 'KSM',
-    page: 0,
-    size: 24,
+  const [apiLoading, setApiLoading] = useState(true);
+  const [apiOriginTableData, setApiOriginTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+    selectableCount: 0,
   });
+  const [finalFilteredTableData, setFinalFilteredTableData] = useState<IStakingInfo>({
+    tableData: [],
+    calculatedApy: 0,
+    selectableCount: 0,
+  });
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({
+    isReady: false,
+  } as unknown as IAccountChainInfo);
+  const [eraInfo, setEraInfo] = useState<IEraInfo>();
+  const [minNominatorBond, setMinNominatorBond] = useState<string>('');
+  // const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
+  const [isAccountInfoLoading, setIsAccountInfoLoading] = useState(true);
+
+  const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
+
+  const strategyRef = useRef(StrategyType.Common);
+
+  const _formatBalance = useCallback(
+    (value: string = '0') => {
+      return balanceUnit(networkName, value, true);
+    },
+    [networkName]
+  );
+
+  const displayRole = useCallback((role: AccountRole): string => {
+    switch (role) {
+      case AccountRole.VALIDATOR:
+        return t('benchmark.staking.displayRole.validator');
+      case AccountRole.CONTROLLER_OF_VALIDATOR:
+        return t('benchmark.staking.displayRole.controller');
+      case AccountRole.CONTROLLER_OF_NOMINATOR:
+        return t('benchmark.staking.displayRole.controller');
+      case AccountRole.NOMINATOR:
+        return t('benchmark.staking.displayRole.nominator');
+      case AccountRole.NOMINATOR_AND_CONTROLLER:
+        return t('benchmark.staking.displayRole.nominator');
+      case AccountRole.NONE:
+        return t('benchmark.staking.displayRole.none');
+      default:
+        return '';
+    }
+  }, [t]);
+
+  const rewardDestinationOptions = useMemo(() => {
+    const options =[
+      {
+        label: t('benchmark.staking.rewardsDestination.selectOne'),
+        value: RewardDestinationType.NULL,
+        isDisabled: true,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.staked'),
+        value: RewardDestinationType.STAKED,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.stash'),
+        value: RewardDestinationType.STASH,
+      },
+      {
+        label: t('benchmark.staking.rewardsDestination.controller'),
+        value: RewardDestinationType.CONTROLLER,
+      },
+      // {
+      //   label: 'Specified payment account',
+      //   value: RewardDestinationType.ACCOUNT,
+      // },
+    ];
+    return options;
+  }, [t]);
+
+  // memo
+  const strategyOptions = useMemo(() => {
+    // while advanced option is on, no strategy options is available
+    if (advancedOption.advanced) {
+      return [];
+    } else {
+      // while using basic mode, we use strategy in the list below
+      return [
+        { label: t('benchmark.staking.strategy.lowRisk'), value: Strategy.LOW_RISK },
+        { label: t('benchmark.staking.strategy.highApy'), value: Strategy.HIGH_APY },
+        { label: t('benchmark.staking.strategy.decentralized'), value: Strategy.DECENTRAL },
+        { label: t('benchmark.staking.strategy.onekv'), value: Strategy.ONE_KV },
+      ];
+    }
+  }, [advancedOption.advanced, t]);
+
+  const walletBalance = useMemo(() => {
+    if (selectedAccount) {
+      return _formatBalance(selectedAccount?.balances?.totalBalance);
+    } else {
+      return t('benchmark.staking.selectWallet');
+    }
+  }, [_formatBalance, selectedAccount, t]);
+
+  const networkDisplayDOM = useMemo(() => {
+    if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
+      return (
+        <>
+          <KSMLogo />
+          <LogoTitle>KSM</LogoTitle>
+        </>
+      );
+    } else if (networkCapitalCodeName(networkName) === NetworkCodeName.DOT) {
+      return (
+        <>
+          <DOTLogo />
+          <LogoTitle>DOT</LogoTitle>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <WNDLogo />
+          <LogoTitle>WND</LogoTitle>
+        </>
+      );
+    }
+  }, [networkName]);
+
+  const eraInfoDisplayDom = useMemo(() => {
+    if (eraInfo) {
+      return (
+        <>
+          <TimeCircle type="epoch" eraInfo={eraInfo} network={networkName} />
+          <TimeCircle type="era" eraInfo={eraInfo} network={networkName} />
+        </>
+      );
+    } else {
+      return <></>;
+    }
+  }, [eraInfo, networkName]);
+
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
+  const notifyInfo = useCallback((msg: string | React.ReactElement) => {
+    const options: ToastOptions = {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    };
+
+    if (typeof msg === 'string') {
+      toast.info(`${msg}`, options);
+    } else {
+      toast.info(msg, options);
+    }
+  }, []);
+
+  const notifySuccess = useCallback((msg: string) => {
+    toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      },
+    });
+  }, []);
+
+  const notifyFailed = useCallback((msg: string) => {
+    toast.error(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+      onClose: () => {
+        toast.dismiss();
+      },
+    });
+  }, []);
+
+  const notifyProcessing = useCallback((msg: string) => {
+    toast.success(`${msg}`, {
+      position: 'top-right',
+      autoClose: 30000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
+  const queryStakingInfo = useCallback(async (address, api: ApiPromise) => {
+    const [info, ledger] = await Promise.all([
+      api.derive.staking.account(address),
+      api.query.staking.ledger(address),
+    ]);
+
+    let rewardDestination = info.rewardDestination.isStaked
+      ? RewardDestinationType.STAKED
+      : info.rewardDestination.isStash
+      ? RewardDestinationType.STASH
+      : info.rewardDestination.isController
+      ? RewardDestinationType.CONTROLLER
+      : RewardDestinationType.ACCOUNT;
+    let rewardDestinationAddress =
+      rewardDestination === RewardDestinationType.ACCOUNT
+        ? info.rewardDestination.asAccount.toString()
+        : null;
+
+    let role;
+    let isNominatable = false;
+    let bonded;
+    let validators;
+    let stash;
+    if (info.nextSessionIds.length !== 0) {
+      role = AccountRole.VALIDATOR;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      validators = info.nominators.map((n) => n.toHuman());
+      stash = info.stashId.toHuman();
+    } else if (!info.stakingLedger.total.unwrap().isZero()) {
+      if (info.controllerId?.toHuman() === address) {
+        role = AccountRole.NOMINATOR_AND_CONTROLLER;
+        bonded = info.stakingLedger.total.unwrap().toHex();
+        validators = info.nominators.map((n) => n.toHuman());
+        stash = info.stashId.toHuman();
+        isNominatable = true;
+      } else {
+        role = AccountRole.NOMINATOR;
+        bonded = info.stakingLedger.total.unwrap().toHex();
+        validators = info.nominators.map((n) => n.toHuman());
+        stash = info.stashId.toHuman();
+      }
+    } else if (!ledger.isNone) {
+      stash = ledger.unwrap().stash.toHuman();
+      const staking = await api.derive.staking.account(stash);
+      rewardDestination = staking.rewardDestination.isStaked
+        ? RewardDestinationType.STAKED
+        : staking.rewardDestination.isStash
+        ? RewardDestinationType.STASH
+        : staking.rewardDestination.isController
+        ? RewardDestinationType.CONTROLLER
+        : RewardDestinationType.ACCOUNT;
+      rewardDestinationAddress =
+        rewardDestination === RewardDestinationType.ACCOUNT
+          ? info.rewardDestination.asAccount.toString()
+          : null;
+      if (staking.nextSessionIds.length !== 0) {
+        role = AccountRole.CONTROLLER_OF_VALIDATOR;
+        bonded = staking.stakingLedger.total.unwrap().toHex();
+        validators = staking.nominators.map((n) => n.toHuman());
+      } else {
+        role = AccountRole.CONTROLLER_OF_NOMINATOR;
+        bonded = staking.stakingLedger.total.unwrap().toHex();
+        validators = staking.nominators.map((n) => n.toHuman());
+        isNominatable = true;
+      }
+    } else {
+      role = AccountRole.NONE;
+      bonded = info.stakingLedger.total.unwrap().toHex();
+      validators = info.nominators.map((n) => n.toHuman());
+      stash = address;
+      isNominatable = true;
+    }
+    setIsAccountInfoLoading(false);
+    return {
+      role,
+      controller: info.controllerId?.toHuman(),
+      stash,
+      validators,
+      rewardDestination,
+      rewardDestinationAddress,
+      bonded,
+      redeemable: info.redeemable ? info.redeemable.toHex() : '0',
+      isNominatable,
+      isReady: true,
+    };
+  }, []);
+
+  const txStatusCallback = useCallback(
+    ({ events = [], status }: { events?: EventRecord[]; status: ExtrinsicStatus }) => {
+      setIsAccountInfoLoading(true);
+      if (status.isInvalid) {
+        console.log('Transaction invalid');
+        notifyWarn(t('benchmark.staking.warnings.transactionFailed'));
+      } else if (status.isReady) {
+        console.log('Transaction is ready');
+        notifyInfo(t('benchmark.staking.warnings.transactionReady'));
+      } else if (status.isBroadcast) {
+        console.log('Transaction has been broadcasted');
+        notifyInfo(<div>{t('benchmark.staking.warnings.transactionBroadcasted')}</div>);
+      } else if (status.isInBlock) {
+        console.log('Transaction is included in block');
+        notifyInfo(t('benchmark.staking.warnings.transactionIsIncluded'));
+      } else if (status.isFinalized) {
+        const blockHash = status.asFinalized.toHex();
+        console.log(`Transaction is included in block ${blockHash}`);
+        notifyInfo(
+          <div>
+            {t('benchmark.staking.warnings.transactionIsIncludedInBlock')} {blockHash.substring(0, 9)}...
+            {blockHash.substring(blockHash.length - 8, blockHash.length)}
+          </div>
+        );
+        events.forEach(({ event }) => {
+          if (event.method === 'ExtrinsicSuccess') {
+            console.log('Transaction succeeded');
+            notifySuccess(t('benchmark.staking.warnings.transactionSucceeded'));
+          } else if (event.method === 'ExtrinsicFailed') {
+            console.log('Transaction failed');
+            notifyFailed(t('benchmark.staking.warnings.transactionFailed'));
+          }
+        });
+        // update account data
+        setAccountChainInfo((prev) => ({ ...prev, isReady: false }));
+        queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+        refreshAccountData(selectedAccount);
+      }
+    },
+    [
+      notifyWarn,
+      t,
+      notifyInfo,
+      queryStakingInfo,
+      selectedAccount,
+      polkadotApi,
+      refreshAccountData,
+      notifySuccess,
+      notifyFailed,
+    ]
+  );
+
+  useEffect(() => {
+    // while advanced option is on, we use custom filter setting as their own strategy
+    if (advancedOption.advanced) {
+      setInputData((prev) => ({ ...prev, strategy: ADVANCED_DEFAULT_STRATEGY }));
+      setAdvancedSetting(StrategyConfig.CUSTOM);
+    } else {
+      // while using basic mode, we use strategy with default filter setting as strategy
+      // and default is 'low risk' strategy
+      setInputData((prev) => ({ ...prev, strategy: BASIC_DEFAULT_STRATEGY }));
+      setAdvancedSetting(StrategyConfig.LOW_RISK);
+    }
+  }, [ADVANCED_DEFAULT_STRATEGY, BASIC_DEFAULT_STRATEGY, advancedOption.advanced]);
+
+  useEffect(() => {
+    if (hasWeb3Injected && !isEmpty(selectedAccount)) {
+      setIsAccountInfoLoading(true);
+    } else {
+      setIsAccountInfoLoading(false);
+    }
+    if (hasValues(selectedAccount) === true && networkStatus === ApiState.READY) {
+      setAccountChainInfo((prev) => ({ ...prev, isReady: false }));
+      queryStakingInfo(selectedAccount.address, polkadotApi)
+        .then((info) => {
+          setAccountChainInfo(info);
+          setInputData((prev) => ({
+            ...prev,
+            rewardDestination: rewardDestinationOptions[info.rewardDestination],
+          }));
+        })
+        .catch(console.error);
+    }
+  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo, hasWeb3Injected, rewardDestinationOptions]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY) {
+      queryEraInfo(polkadotApi).then(setEraInfo).catch(console.error);
+    }
+  }, [networkStatus, networkName, polkadotApi]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY) {
+      queryNominatorLimits(polkadotApi)
+        .then((data) => {
+          setMinNominatorBond(data.minNominatorBond.toHex());
+        })
+        .catch(console.error);
+    }
+  }, [networkName, networkStatus, polkadotApi, setMinNominatorBond]);
+
+  const nominatableInfo = useMemo((): INomitableInfo => {
+    const msg =
+      t('benchmark.staking.warnings.disconnectedFirst') +
+      networkName +
+      t('benchmark.staking.warnings.disconnectedSecond');
+    if (networkStatus !== ApiState.READY) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={msg} />,
+      };
+    }
+
+    if (apiLoading) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.fetching')} />,
+      };
+    }
+
+    if (finalFilteredTableData.tableData.length <= 0) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.noFilteredValidators')} />,
+      };
+    }
+
+    if (finalFilteredTableData.tableData.filter((data) => data.select === true).length <= 0) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.noSelectedValidators')} />,
+      };
+    }
+
+    if (!hasWeb3Injected) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.installWallet')} />,
+      }
+    }
+
+    if (isEmpty(selectedAccount)) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.noAccount')} />,
+      }
+    }
+
+    if (!accountChainInfo.isReady) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.fetchingStashData')} />,
+      };
+    }
+
+    if (!accountChainInfo.isNominatable) {
+      let msg = t('benchmark.staking.warnings.stashInvalid');
+      switch (accountChainInfo.role) {
+        case AccountRole.VALIDATOR:
+          msg = t('benchmark.staking.warnings.isValidator');
+          break;
+        case AccountRole.CONTROLLER_OF_VALIDATOR:
+          msg = t('benchmark.staking.warnings.isControllerOfValidator');
+          break;
+        case AccountRole.NOMINATOR:
+          msg = t('benchmark.staking.warnings.hasController');
+          break;
+      }
+      return {
+        nominatable: false,
+        warning: <Warning msg={msg} />,
+      };
+    }
+
+    if (accountChainInfo.role === AccountRole.VALIDATOR) {
+      return {
+        nominatable: false,
+        warning: <Warning msg={t('benchmark.staking.warnings.isValidator')} />,
+      };
+    }
+
+    return {
+      nominatable: true,
+      warning: null,
+    };
+  }, [
+    t,
+    networkName,
+    networkStatus,
+    apiLoading,
+    finalFilteredTableData.tableData,
+    accountChainInfo.isReady,
+    accountChainInfo.isNominatable,
+    accountChainInfo.role,
+  ]);
+
+  const applyAdvancedFilter = useCallback(() => {
+    let filteredResult: IStakingInfo;
+    if (advancedOption.advanced) {
+      // is in advanced mode, need advanced filtered
+      filteredResult = advancedConditionFilter(
+        {
+          minSelfStake: advancedSettingDebounceVal.minSelfStake,
+          maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
+          historicalApy: advancedSettingDebounceVal.historicalApy,
+          minInclusion: advancedSettingDebounceVal.minInclusion,
+          identity: advancedSettingDebounceVal.identity,
+          noPreviousSlashes: advancedSettingDebounceVal.noPreviousSlashes,
+          isSubIdentity: advancedSettingDebounceVal.isSubIdentity,
+          highApy: advancedSettingDebounceVal.highApy,
+          decentralized: advancedSettingDebounceVal.decentralized,
+        },
+        apiOriginTableData,
+        advancedOption.supportus,
+        networkName,
+        accountChainInfo.validators
+      );
+      setFinalFilteredTableData(filteredResult);
+    }
+  }, [
+    advancedSettingDebounceVal.maxUnclaimedEras,
+    advancedSettingDebounceVal.noPreviousSlashes,
+    advancedSettingDebounceVal.isSubIdentity,
+    advancedSettingDebounceVal.minInclusion,
+    advancedSettingDebounceVal.highApy,
+    advancedSettingDebounceVal.decentralized,
+    apiOriginTableData,
+    advancedOption.advanced,
+    advancedOption.supportus,
+    networkName,
+    advancedSettingDebounceVal.historicalApy,
+    advancedSettingDebounceVal.identity,
+    advancedSettingDebounceVal.minSelfStake,
+    accountChainInfo.validators,
+  ]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName]);
 
   const columns = useMemo(() => {
+    console.log(`call `);
     return [
       {
-        Header: 'Select',
+        Header: (
+          <span
+            onClick={() => {
+              const candidateNumber = getCandidateNumber(networkName);
+              if (
+                finalFilteredTableData.selectableCount !== undefined &&
+                finalFilteredTableData.selectableCount < candidateNumber
+              ) {
+                let tempTableData = { ...finalFilteredTableData };
+                tempTableData.tableData = resetSelected(tempTableData.tableData);
+                tempTableData.selectableCount = getCandidateNumber(networkName);
+                tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                setFinalFilteredTableData(tempTableData);
+              } else {
+                applyAdvancedFilter();
+              }
+            }}
+          >
+            {finalFilteredTableData.selectableCount !== getCandidateNumber(networkName) ? (
+              <>
+                <ReactTooltip id="HandTrueTip" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
+                <HandTrue data-for="HandTrueTip" data-tip="Unselect all" />
+              </>
+            ) : (
+              <>
+                <ReactTooltip
+                  id="HandFalseTip"
+                  effect="solid"
+                  backgroundColor="#18232f"
+                  textColor="#21aca8"
+                />
+                <HandFalse data-for="HandFalseTip" data-tip="Auto select" />
+              </>
+            )}
+          </span>
+        ),
         accessor: 'select',
         maxWidth: 150,
-        Cell: ({ value }) => <span>{value ? <HandTrue /> : <HandFalse />}</span>,
+        Cell: ({ value, row, rows }) => {
+          return (
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                let tempTableData = { ...finalFilteredTableData };
+                if (tempTableData.tableData[row.index].select) {
+                  // unselect
+                  tempTableData.tableData[row.index].select = false;
+                  tempTableData.selectableCount =
+                    tempTableData.selectableCount !== undefined
+                      ? (tempTableData.selectableCount += 1)
+                      : tempTableData.selectableCount;
+                  tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                  setFinalFilteredTableData(tempTableData);
+                } else {
+                  // select
+                  if (tempTableData.selectableCount !== undefined && tempTableData.selectableCount > 0) {
+                    tempTableData.tableData[row.index].select = true;
+                    tempTableData.selectableCount -= 1;
+                    tempTableData = apyCalculation(tempTableData.tableData, tempTableData.selectableCount);
+                    setFinalFilteredTableData(tempTableData);
+                  } else {
+                    notifyWarn(t('benchmark.staking.warnings.maxNominations'));
+                  }
+                }
+              }}
+            >
+              {value ? <HandTrue /> : <HandFalse />}
+            </span>
+          );
+        },
+        sortType: 'basic',
       },
       {
-        Header: 'Account',
+        Header: t('benchmark.staking.table.header.account'),
         accessor: 'account',
-        Cell: ({ value }) => <Account address={value} display={value} />,
+        Cell: ({ value, row }) => <Account address={value} display={row.original.display} />,
+        sortType: 'basic',
       },
-      { Header: 'Self Stake', accessor: 'selfStake', collapse: true },
-      { Header: 'Era Inclusion', accessor: 'eraInclusion', collapse: true },
       {
-        Header: 'Unclaimed Eras',
+        Header: t('benchmark.staking.table.header.selfStake'),
+        accessor: 'selfStake',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <span>{_formatBalance(value)}</span>;
+        },
+        sortType: 'basic',
+      },
+      {
+        Header: t('benchmark.staking.table.header.eraInclusion'),
+        accessor: 'eraInclusion',
+        collapse: true,
+        Cell: ({ value }) => {
+          // 25.00%  [ 21/84 ]
+          return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
+        },
+        sortType: 'basic',
+      },
+      {
+        Header: t('benchmark.staking.table.header.unclaimedEras'),
         accessor: 'unclaimedEras',
         collapse: true,
         Cell: ({ value, row, rows, toggleRowExpanded }) => {
           let renderComponent: Object[] = [];
-          if (Array.isArray(value)) {
+          if (value && value.status && value.era) {
             for (let idx = 0; idx < 84; idx++) {
-              if (idx < value.length) {
-                if (value[idx] === eraStatus.active) {
-                  renderComponent.push(<Era statusCode={eraStatus.active} />);
-                } else if (value[idx] === eraStatus.inactive) {
-                  renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+              if (idx < value.status.length) {
+                if (value.status[idx] === eraStatus.active) {
+                  renderComponent.push(<Era statusCode={eraStatus.active} eraNumber={value.era[idx]} />);
+                } else if (value.status[idx] === eraStatus.inactive) {
+                  renderComponent.push(<Era statusCode={eraStatus.inactive} eraNumber={value.era[idx]} />);
                 } else {
-                  renderComponent.push(<Era statusCode={eraStatus.unclaimed} />);
+                  renderComponent.push(<Era statusCode={eraStatus.unclaimed} eraNumber={value.era[idx]} />);
                 }
               } else {
-                renderComponent.push(<Era statusCode={eraStatus.inactive} />);
+                renderComponent.push(<Era statusCode={eraStatus.inactive} eraNumber={value.era[idx]} />);
               }
             }
           } else {
@@ -145,35 +1033,56 @@ const Staking = () => {
                   row.toggleRowExpanded();
                 },
               })}
+              title={null}
             >
               {renderComponent}
             </span>
           );
         },
+        sortType: 'basic',
       },
-      { Header: 'Avg APY', accessor: 'avgAPY', collapse: true },
       {
-        Header: 'Active',
+        Header: t('benchmark.staking.table.header.commission') + ' %',
+        accessor: 'commission',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <div>{value.toFixed(1)}</div>;
+        },
+      },
+      {
+        Header: t('benchmark.staking.table.header.avgApy'),
+        accessor: 'avgAPY',
+        collapse: true,
+        Cell: ({ value }) => {
+          return <div>{(value * 100).toFixed(1)}</div>;
+        },
+        sortType: 'basic',
+      },
+      {
+        Header: t('benchmark.staking.table.header.active'),
         accessor: 'active',
         collapse: true,
         Cell: ({ value }) => <span>{value ? <CheckTrue /> : <CheckFalse />}</span>,
+        sortType: 'basic',
       },
     ];
-  }, []);
+  }, [finalFilteredTableData, networkName, t, applyAdvancedFilter, notifyWarn, _formatBalance]);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
       switch (optionName) {
         case 'advanced':
           setAdvancedOption((prev) => ({ ...prev, advanced: checked }));
-          break;
-        case 'decentralized':
-          setAdvancedOption((prev) => ({ ...prev, decentralized: checked }));
+          if (strategyRef.current !== StrategyType.Common) {
+            setApiParams((prev) => ({
+              network: prev.network,
+            }));
+            strategyRef.current = StrategyType.Common;
+          }
           break;
         case 'supportus':
           setAdvancedOption((prev) => ({ ...prev, supportus: checked }));
           break;
-
         default:
           break;
       }
@@ -181,64 +1090,136 @@ const Staking = () => {
     []
   );
 
+  const renderRewardDestinationNode = useMemo(() => {
+    switch (inputData.rewardDestination?.value) {
+      case RewardDestinationType.STAKED:
+      case RewardDestinationType.STASH:
+        if (
+          accountChainInfo.role === AccountRole.NOMINATOR ||
+          accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER ||
+          accountChainInfo.role === AccountRole.NONE ||
+          accountChainInfo.role === AccountRole.VALIDATOR
+        ) {
+          return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+        } else {
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
+        }
+      case RewardDestinationType.CONTROLLER:
+        if (accountChainInfo?.controller) {
+          return (
+            <Node
+              title={t('benchmark.staking.controller.controller')}
+              address={accountChainInfo?.controller}
+            />
+          );
+        } else {
+          if (accountChainInfo.stash === selectedAccount.address) {
+            return <Node title={selectedAccount.name} address={selectedAccount.address} />;
+          }
+          return <Node title={'Stash'} address={accountChainInfo.stash} />;
+        }
+      case RewardDestinationType.ACCOUNT:
+        // todo: Jack
+        return (
+          <Node
+            title={t('benchmark.staking.controller.account')}
+            address={t('benchmark.staking.controller.enterAddress')}
+          />
+        );
+      default:
+        return <></>;
+    }
+  }, [
+    inputData.rewardDestination?.value,
+    accountChainInfo.role,
+    accountChainInfo?.controller,
+    accountChainInfo.stash,
+    t,
+    selectedAccount.name,
+    selectedAccount.address,
+  ]);
+
+  /**
+   * for Header, option toggle
+   */
   const handleOptionToggle = useCallback((visible) => {
     setAdvancedOption((prev) => ({ ...prev, toggle: visible }));
   }, []);
 
-  // useEffect(() => {
-  //   // get strategy options
-  //   const result = [
-  //     { label: 'General', value: 1 },
-  //     { label: 'Aggressive', value: 2 },
-  //     { label: 'High frenquency ', value: 3 },
-  //   ];
+  /**
+   * handle strategy change,
+   * while strategy changing, advanced filter and api parameter also need to be changed
+   * to its corresponding setting/configuration
+   */
+  const handleStrategyChange = (e: IStrategy) => {
+    console.log('strategy ref: ', strategyRef);
+    switch (e.value) {
+      case Strategy.LOW_RISK:
+        setAdvancedSetting(StrategyConfig.LOW_RISK);
+        if (strategyRef.current !== StrategyType.Common) {
+          setApiParams((prev) => ({
+            network: prev.network,
+          }));
+          strategyRef.current = StrategyType.Common;
+        }
+        break;
+      case Strategy.HIGH_APY:
+        setAdvancedSetting(StrategyConfig.HIGH_APY);
+        if (strategyRef.current !== StrategyType.Common) {
+          setApiParams((prev) => ({
+            network: prev.network,
+          }));
+          strategyRef.current = StrategyType.Common;
+        }
 
-  //   setStrategyOptions(result);
-  //   setInputData((prev) => {
-  //     if (_.isEmpty(prev.strategy)) {
-  //       return { ...prev, strategy: result[0] };
-  //     } else {
-  //       return { ...prev };
-  //     }
-  //   });
-  // }, []);
+        break;
+      case Strategy.DECENTRAL:
+        setAdvancedSetting(StrategyConfig.DECENTRAL);
+        if (strategyRef.current !== StrategyType.Common) {
+          setApiParams((prev) => ({
+            network: prev.network,
+          }));
+          strategyRef.current = StrategyType.Common;
+        }
+        break;
+      case Strategy.ONE_KV:
+        setAdvancedSetting(StrategyConfig.ONE_KV);
+        if (strategyRef.current !== StrategyType.OneKv) {
+          setApiParams((prev) => ({
+            network: prev.network,
+            has_joined_1kv: true,
+          }));
+          strategyRef.current = StrategyType.OneKv;
+        }
+        break;
+    }
 
-  useEffect(() => {
-    setApiParams((prev) => ({
-      ...prev,
-      network: networkCapitalCodeName(networkName),
-    }));
-  }, [networkName]);
-
-  useEffect(() => {
-    (async () => {
-      let result = await apiGetAllValidator({
-        params: apiParams.network,
-        query: { size: apiParams.size, page: apiParams.page },
-      });
-      console.log('result: ', result);
-    })();
-  }, [apiParams]);
-
-  const handleStrategyChange = (e) => {
-    console.log('current strategy: ', e);
+    setInputData((prev) => ({ ...prev, strategy: e }));
   };
 
+  /**
+   * handle user input for stake amount and reward destination
+   */
   const handleInputChange = (name) => (e) => {
     let tmpValue;
     switch (name) {
       case 'stakeAmount':
-        if (!isNaN(e.target.value)) {
+        if (!isNaN(e.target.value) && !isEmpty(selectedAccount)) {
           tmpValue = e.target.value;
           // TODO: deal with input number format and range
+          // input unit is KSM
+          const input = BigInt(tmpValue * Math.pow(10, NetworkConfig[networkName].decimals));
+          const transferrable = BigInt(selectedAccount.balances.availableBalance);
+          const bonded = accountChainInfo ? BigInt(accountChainInfo.bonded) : BigInt(0);
+          const minBonded = BigInt(minNominatorBond);
+          if (input > transferrable + bonded || input < minBonded) {
+            console.log(`input value should be <= transferrable and >= minBonded`);
+          }
         } else {
           // not a number
           return;
         }
         break;
-      // case 'strategy':
-      //   tmpValue = e;
-      //   break;
       case 'rewardDestination':
         tmpValue = e;
         break;
@@ -250,37 +1231,412 @@ const Staking = () => {
     setInputData((prev) => ({ ...prev, [name]: tmpValue }));
   };
 
+  const handleBondedClick = useCallback(() => {
+    stakeAmountValidate(
+      Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
+      IStakeAmountValidateType.BONDED,
+      notifyWarn
+    );
+    setInputData((prev) => ({
+      ...prev,
+      stakeAmount: Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
+    }));
+  }, [_formatBalance, accountChainInfo?.bonded, notifyWarn]);
+
+  const handleMaxClick = useCallback(() => {
+    console.log('bonded: ', Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]));
+    console.log(
+      'transferable:',
+      Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0])
+    );
+
+    let bonded = Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]);
+    let transferable = Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0]);
+    let fee = NetworkConfig[networkName].handlingFee;
+
+    if (stakeAmountValidate(bonded + transferable - fee, IStakeAmountValidateType.STAKEAMOUNT, notifyWarn)) {
+      setInputData((prev) => ({
+        ...prev,
+        stakeAmount: bonded + transferable - fee,
+      }));
+    }
+  }, [_formatBalance, accountChainInfo?.bonded, networkName, notifyWarn, selectedAccount.balances]);
+
+  const showBondedBtn = useMemo(() => {
+    let show = false;
+    if (
+      accountChainInfo.role === AccountRole.CONTROLLER_OF_NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER
+    ) {
+      show = true;
+    }
+
+    return show;
+  }, [accountChainInfo.role]);
+
+  const showMaxBtn = useMemo(() => {
+    let show = false;
+    if (
+      accountChainInfo.role === AccountRole.NOMINATOR ||
+      accountChainInfo.role === AccountRole.NOMINATOR_AND_CONTROLLER ||
+      accountChainInfo.role === AccountRole.NONE
+    ) {
+      show = true;
+    }
+
+    return show;
+  }, [accountChainInfo.role]);
+
+  /**
+   * handle advanced filter changing,
+   */
   const handleAdvancedFilter = (name) => (e) => {
     // TODO: input validator, limit
     switch (name) {
       case 'minSelfStake':
-        console.log('value: ', e.target.value);
         setAdvancedSetting((prev) => ({ ...prev, minSelfStake: e.target.value }));
-        break;
-      case 'maxCommission':
         break;
       case 'identity':
         setAdvancedSetting((prev) => ({ ...prev, identity: e }));
         break;
       case 'maxUnclaimedEras':
+        setAdvancedSetting((prev) => ({ ...prev, maxUnclaimedEras: e.target.value }));
         break;
-      case 'previousSlashes':
-        setAdvancedSetting((prev) => ({ ...prev, previousSlashes: e }));
+      case 'noPreviousSlashes':
+        setAdvancedSetting((prev) => ({ ...prev, noPreviousSlashes: e }));
         break;
       case 'isSubIdentity':
         setAdvancedSetting((prev) => ({ ...prev, isSubIdentity: e }));
         break;
       case 'historicalApy':
+        setAdvancedSetting((prev) => ({ ...prev, historicalApy: e.target.value }));
         break;
       case 'minInclusion':
+        setAdvancedSetting((prev) => ({ ...prev, minInclusion: e.target.value }));
         break;
-      case 'telemetry':
-        setAdvancedSetting((prev) => ({ ...prev, telemetry: e }));
+      case 'highApy':
+        setAdvancedSetting((prev) => ({ ...prev, highApy: e }));
+        break;
+      case 'decentralized':
+        setAdvancedSetting((prev) => ({ ...prev, decentralized: e }));
+        break;
+      case 'oneKv':
+        setApiParams((prev) => ({
+          ...prev,
+          has_joined_1kv: e,
+        }));
+        setAdvancedSetting((prev) => ({ ...prev, oneKv: e }));
         break;
       default:
         break;
     }
   };
+
+  const handleValidatorStrategy = useCallback(
+    (data: IStakingInfo, isSupportUs: boolean, networkName: string): IStakingInfo => {
+      switch (inputData.strategy.value) {
+        case Strategy.LOW_RISK:
+          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+        case Strategy.HIGH_APY:
+          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+        case Strategy.DECENTRAL:
+          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+        case Strategy.ONE_KV:
+          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+        default:
+          return { tableData: [], calculatedApy: 0 };
+      }
+    },
+    [inputData.strategy.value, accountChainInfo.validators]
+  );
+
+  /**
+   * handle nominate transaction
+   */
+  const handleNominate = useCallback(async () => {
+    console.log('Nominate');
+
+    if (!accountChainInfo) {
+      // console.log('no account chain info');
+      notifyWarn('Failed to fetch on-chain data.');
+      return;
+    }
+
+    const limits = await queryNominatorLimits(polkadotApi);
+    const maxNominatorsCount = limits.maxNominatorsCount.isEmpty
+      ? 0
+      : parseInt(limits.maxNominatorsCount.toString());
+    const minNominatorBond = parseInt(limits.minNominatorBond.toString());
+    const counterForNominators = parseInt(limits.counterForNominators.toString());
+    const stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
+    const bonded = BigInt(accountChainInfo.bonded);
+    const transferrable = BigInt(selectedAccount.balances.availableBalance);
+
+    // checks
+    if (counterForNominators >= maxNominatorsCount) {
+      // console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
+      notifyWarn('It reaches maximum nominators count.');
+      return;
+    }
+
+    if (
+      accountChainInfo?.role === AccountRole.VALIDATOR ||
+      accountChainInfo?.role === AccountRole.CONTROLLER_OF_VALIDATOR ||
+      accountChainInfo?.role === AccountRole.NOMINATOR
+    ) {
+      // console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
+      notifyWarn("This account's role is not allowed to nominate.");
+      return;
+    }
+
+    if (stakeAmount < minNominatorBond) {
+      // console.log(
+      //   `not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`
+      // );
+      notifyWarn(`The minimal nominator bond is ${_formatBalance(minNominatorBond.toString())}`);
+      return;
+    }
+
+    if (stakeAmount > bonded + transferrable) {
+      // console.log(
+      //   `not allow to nominate, the input stake amount should be less than transferrable ${
+      //     bonded + transferrable
+      //   }`
+      // );
+      notifyWarn('Not sufficient balance.');
+      return;
+    }
+
+    const selectedValidators = finalFilteredTableData.tableData.filter((v) => v.select);
+    console.log(selectedValidators);
+    console.log(selectedValidators.length);
+
+    if (selectedValidators.length === 0) {
+      // console.log(`not allow to nominate, selected validators should greater than zero.`);
+      notifyWarn('No selected validators.');
+      return;
+    }
+
+    if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
+      // console.log(
+      //   `not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`
+      // );
+      notifyWarn('Too many selected validators.');
+      return;
+    }
+
+    if (inputData.rewardDestination === null) {
+      // console.log(`not allow to nominate, reward destination is null`);
+      notifyWarn('Reward distination is null');
+      return;
+    }
+
+    // reward destination
+    console.log(inputData.rewardDestination.value);
+    let payee;
+    switch (inputData.rewardDestination.value) {
+      case RewardDestinationType.STAKED:
+        payee = 'Staked';
+        break;
+      case RewardDestinationType.STASH:
+        payee = 'Stash';
+        break;
+      case RewardDestinationType.CONTROLLER:
+        // todo, change to input controller address
+        payee = 'Controller';
+        break;
+      case RewardDestinationType.ACCOUNT:
+        payee = accountChainInfo.rewardDestinationAddress;
+        break;
+      default:
+        payee = null;
+    }
+
+    let txs;
+    let txFee;
+    switch (accountChainInfo.role) {
+      case AccountRole.NONE:
+        txs = [
+          polkadotApi.tx.staking.bond(selectedAccount.address, stakeAmount, payee),
+          polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+        ];
+
+        txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+
+        console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+
+        break;
+      case AccountRole.NOMINATOR_AND_CONTROLLER:
+        {
+          const extraBondAmount = stakeAmount - bonded;
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+            txs = [
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+            ];
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+            ];
+          }
+
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+      case AccountRole.CONTROLLER_OF_NOMINATOR:
+        {
+          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+            txs = [polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))];
+          } else {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+            ];
+          }
+          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+          console.log(`
+            class=${txFee.class.toString()},
+            weight=${txFee.weight.toString()},
+            partialFee=${txFee.partialFee.toHuman()}
+          `);
+        }
+        break;
+    }
+
+    // finds an injector for an address
+    const injector = await web3FromAddress(selectedAccount.address);
+
+    // ready to sign and send tx
+    notifyProcessing('Trasaction is processing ');
+    polkadotApi.tx.utility
+      .batch(txs)
+      .signAndSend(selectedAccount.address, { signer: injector.signer }, txStatusCallback)
+      .catch((err) => {
+        console.log(err);
+        toast.dismiss();
+        notifyWarn('Transaction is cancelled');
+      });
+  }, [
+    accountChainInfo,
+    polkadotApi,
+    inputData.stakeAmount,
+    inputData.rewardDestination,
+    networkName,
+    selectedAccount,
+    finalFilteredTableData.tableData,
+    notifyProcessing,
+    txStatusCallback,
+    notifyWarn,
+    _formatBalance,
+  ]);
+
+  // while network status change, reset input stake amount
+  useEffect(() => {
+    if (networkStatus) {
+      setInputData((prev) => ({ ...prev, stakeAmount: 0 }));
+    }
+  }, [networkStatus]);
+
+  // while network changing, set api parameter for network
+  useEffect(() => {
+    setApiParams((prev) => ({
+      ...prev,
+      network: networkCapitalCodeName(networkName),
+    }));
+  }, [networkName]);
+
+  /**
+   *  while network changing or api status changes to ready, or query parameter are changing, trigger the api
+   * to get the new list
+   */
+  useEffect(() => {
+    let tempId = Math.round(Math.random() * 100);
+    const validatorAxiosSource = axios.CancelToken.source();
+    (async () => {
+      if (networkStatus === ApiState.READY) {
+        try {
+          console.log('========== API Launch ==========', tempId);
+          setApiLoading(true);
+          let result = await apiGetAllValidator({
+            params: apiParams.network,
+            query: { ...apiParams },
+            cancelToken: validatorAxiosSource.token,
+          });
+          console.log('========== API RETURN ==========', tempId);
+          setApiOriginTableData(formatToStakingInfo(result, networkName));
+          setApiLoading(false);
+        } catch (error) {
+          console.log('error: ', error);
+        }
+      } else {
+        setApiLoading(true);
+      }
+    })();
+    return () => {
+      if (networkStatus === ApiState.READY) {
+        console.log('========== API CANCEL ==========', tempId);
+        validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
+      }
+    };
+  }, [networkStatus, apiParams, networkName]);
+
+  /**
+   * user changing the advanced setting mannually, we set the new api query parameter
+   */
+  useEffect(() => {
+    let filteredResult: IStakingInfo;
+    if (advancedOption.advanced) {
+      // is in advanced mode, need advanced filtered
+      filteredResult = advancedConditionFilter(
+        {
+          minSelfStake: advancedSettingDebounceVal.minSelfStake,
+          maxUnclaimedEras: advancedSettingDebounceVal.maxUnclaimedEras,
+          historicalApy: advancedSettingDebounceVal.historicalApy,
+          minInclusion: advancedSettingDebounceVal.minInclusion,
+          identity: advancedSettingDebounceVal.identity,
+          noPreviousSlashes: advancedSettingDebounceVal.noPreviousSlashes,
+          isSubIdentity: advancedSettingDebounceVal.isSubIdentity,
+          highApy: advancedSettingDebounceVal.highApy,
+          decentralized: advancedSettingDebounceVal.decentralized,
+        },
+        apiOriginTableData,
+        advancedOption.supportus,
+        networkName,
+        accountChainInfo.validators
+      );
+    } else {
+      filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
+    }
+    setFinalFilteredTableData(filteredResult);
+  }, [
+    advancedSettingDebounceVal.maxUnclaimedEras,
+    advancedSettingDebounceVal.noPreviousSlashes,
+    advancedSettingDebounceVal.isSubIdentity,
+    advancedSettingDebounceVal.minInclusion,
+    advancedSettingDebounceVal.highApy,
+    advancedSettingDebounceVal.decentralized,
+    apiOriginTableData,
+    advancedOption.advanced,
+    advancedOption.supportus,
+    networkName,
+    advancedSettingDebounceVal.historicalApy,
+    advancedSettingDebounceVal.identity,
+    handleValidatorStrategy,
+    advancedSettingDebounceVal.minSelfStake,
+    accountChainInfo.validators,
+  ]);
 
   const advancedSettingDOM = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -292,62 +1648,75 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Advanced Setting</ContentBlockTitle>
+              <ContentBlockTitle color="white">{t('benchmark.staking.advancedSettings')}</ContentBlockTitle>
               <AdvancedSettingWrap>
                 <TitleInput
-                  title="Min. Self Stake"
-                  placeholder="input minimal amount"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.minSelfStake')}
+                  placeholder="input minimum amount"
                   inputLength={170}
                   value={advancedSetting.minSelfStake}
                   onChange={handleAdvancedFilter('minSelfStake')}
                 />
                 <TitleInput
-                  title="Max. Commission"
-                  placeholder="input maximum amount"
-                  inputLength={170}
-                  value={advancedSetting.maxCommission}
-                  onChange={handleAdvancedFilter('maxCommission')}
-                />
-                <TitleInput
-                  title="Max. Unclaimed Eras"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.maxUnclaimedEras')}
                   placeholder="input maximum amount"
                   inputLength={170}
                   value={advancedSetting.maxUnclaimedEras}
                   onChange={handleAdvancedFilter('maxUnclaimedEras')}
                 />
                 <TitleInput
-                  title="Historical APY"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.apy')}
                   placeholder="0 - 100"
                   unit="%"
                   value={advancedSetting.historicalApy}
                   onChange={handleAdvancedFilter('historicalApy')}
                 />
                 <TitleInput
-                  title="Min. Eras Inclusion Rate"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.minEraInclusionRate')}
                   placeholder="0 - 100"
                   unit="%"
                   value={advancedSetting.minInclusion}
                   onChange={handleAdvancedFilter('minInclusion')}
                 />
                 <TitleSwitch
-                  title="Identity"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.hasIdentity')}
                   checked={advancedSetting.identity}
                   onChange={handleAdvancedFilter('identity')}
                 />
                 <TitleSwitch
-                  title="Prev. Slashes"
-                  checked={advancedSetting.previousSlashes}
-                  onChange={handleAdvancedFilter('previousSlashes')}
+                  disabled={apiLoading}
+                  title="No Prev. Slashes"
+                  checked={advancedSetting.noPreviousSlashes}
+                  onChange={handleAdvancedFilter('noPreviousSlashes')}
                 />
                 <TitleSwitch
-                  title="Is Sub-Identity"
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.isSubIdent')}
                   checked={advancedSetting.isSubIdentity}
                   onChange={handleAdvancedFilter('isSubIdentity')}
                 />
                 <TitleSwitch
-                  title="Is Telemeterable"
-                  checked={advancedSetting.telemetry}
-                  onChange={handleAdvancedFilter('telemetry')}
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.minApy')}
+                  checked={advancedSetting.highApy}
+                  onChange={handleAdvancedFilter('highApy')}
+                />
+                <TitleSwitch
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.decentralized')}
+                  checked={advancedSetting.decentralized}
+                  onChange={handleAdvancedFilter('decentralized')}
+                />
+                <TitleSwitch
+                  disabled={apiLoading}
+                  title={t('benchmark.staking.filters.onekv')}
+                  checked={advancedSetting.oneKv}
+                  onChange={handleAdvancedFilter('oneKv')}
                 />
               </AdvancedSettingWrap>
             </ContentColumnLayout>
@@ -357,16 +1726,43 @@ const Staking = () => {
     );
   }, [
     advancedOption.advanced,
+    t,
+    apiLoading,
     advancedSetting.minSelfStake,
-    advancedSetting.maxCommission,
     advancedSetting.maxUnclaimedEras,
     advancedSetting.historicalApy,
     advancedSetting.minInclusion,
     advancedSetting.identity,
-    advancedSetting.previousSlashes,
+    advancedSetting.noPreviousSlashes,
     advancedSetting.isSubIdentity,
-    advancedSetting.telemetry,
+    advancedSetting.highApy,
+    advancedSetting.decentralized,
+    advancedSetting.oneKv,
   ]);
+
+  const filterResultInfo = useMemo(() => {
+    let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
+      (data) => data.select === true
+    ).length;
+    let filterValidatorsCount = finalFilteredTableData.tableData.length;
+    let totalValidatorsCount = apiOriginTableData.tableData.length;
+
+    return (
+      <div>
+        <FilterInfo style={{ color: '#20aca8' }}>
+          {t('benchmark.staking.selected')}: {selectedValidatorsCount}
+        </FilterInfo>
+        <span>|</span>
+        <FilterInfo>
+          {t('benchmark.staking.filtered')}: {filterValidatorsCount}
+        </FilterInfo>
+        <span>|</span>
+        <FilterInfo>
+          {t('benchmark.staking.total')}: {totalValidatorsCount}
+        </FilterInfo>
+      </div>
+    );
+  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -378,50 +1774,102 @@ const Staking = () => {
         <AdvancedBlockWrap>
           <AdvancedFilterBlock style={{ backgroundColor: '#2E3843', height: 'auto' }}>
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Filter results: </ContentBlockTitle>
-              <Table
-                type={tableType.stake}
-                columns={columns}
-                data={[
-                  {
-                    select: true,
-                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                    selfStake: '5705',
-                    eraInclusion: '25.00% [21/84]',
-                    unclaimedEras: 5,
-                    avgAPY: '18.5%',
-                    active: true,
-                    subRows: [{ unclaimedEras: [1, 1, 1, 2, 0, 0, 0, 0, 0] }],
-                  },
-                  {
-                    select: true,
-                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                    selfStake: '5705',
-                    eraInclusion: '25.00% [21/84]',
-                    unclaimedEras: 5,
-                    avgAPY: '18.5%',
-                    active: false,
-                    subRows: [{ unclaimedEras: 'test2' }],
-                  },
-                  {
-                    select: false,
-                    account: '14AzFH6Vq1Vefp6eQYPK8DWuvYuUm3xVAvcN9wS352QsCH8L',
-                    selfStake: '5705',
-                    eraInclusion: '25.00% [21/84]',
-                    unclaimedEras: 5,
-                    avgAPY: '18.5%',
-                    active: false,
-                    subRows: [{ unclaimedEras: 'test3' }],
-                  },
-                ]}
-                pagination
-              />
+              <ContentBlockTitle color="white">
+                {t('benchmark.staking.filterResult')}: {filterResultInfo}
+              </ContentBlockTitle>
+              {!apiLoading ? (
+                <Table
+                  type={tableType.stake}
+                  columns={columns}
+                  data={finalFilteredTableData.tableData}
+                  pagination
+                />
+              ) : (
+                <ScaleLoader />
+              )}
             </ContentColumnLayout>
           </AdvancedFilterBlock>
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, columns]);
+  }, [advancedOption.advanced, t, filterResultInfo, apiLoading, columns, finalFilteredTableData.tableData]);
+
+  const accountInfo = useMemo(() => {
+    if (isAccountInfoLoading) {
+      return <ScaleLoader />;
+    } else {
+      return (
+        <>
+          <BalanceContextLeft>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.role')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{displayRole(accountChainInfo?.role)}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.nominees')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.bonded')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+          </BalanceContextLeft>
+          <BalanceContextRight>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.transferrable')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>
+                  {_formatBalance(selectedAccount?.balances?.availableBalance)}
+                </BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.reserved')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>
+                  {_formatBalance(selectedAccount?.balances?.reservedBalance)}
+                </BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel>{t('benchmark.staking.redeemable')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+          </BalanceContextRight>
+        </>
+      );
+    }
+  }, [
+    isAccountInfoLoading,
+    accountChainInfo?.role,
+    accountChainInfo?.validators?.length,
+    accountChainInfo?.bonded,
+    accountChainInfo?.redeemable,
+    _formatBalance,
+    selectedAccount?.balances?.availableBalance,
+    selectedAccount?.balances?.reservedBalance,
+    t
+  ]);
 
   return (
     <>
@@ -435,39 +1883,69 @@ const Staking = () => {
         )}
       >
         <ContentBlockWrap advanced={advancedOption.advanced}>
-          <ContentBlock>
-            <ContentBlockLeft>
-              <KSMLogo />
-              <LogoTitle>KSM</LogoTitle>
-            </ContentBlockLeft>
+          <ContentBlockBadgeBalance advanced={advancedOption.advanced}>
+            <ContentBlockLeft>{networkDisplayDOM}</ContentBlockLeft>
             <ContentBlockRight>
-              <Balance>Balance: 23778.50331</Balance>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                }}
+              >
+                <Balance>
+                  {t('benchmark.staking.balance')}: {walletBalance}
+                </Balance>
+                <div
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                >
+                  {showBondedBtn && <TinyButton title={t('benchmark.staking.bonded')} onClick={handleBondedClick} primary={false} />}
+                </div>
+                <div
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                >
+                  {showMaxBtn && <TinyButton title={t('benchmark.staking.max')} onClick={handleMaxClick} primary={false} />}
+                </div>
+              </div>
+
               <Input
                 style={{ width: '80%' }}
                 onChange={handleInputChange('stakeAmount')}
                 value={inputData.stakeAmount}
               />
             </ContentBlockRight>
-          </ContentBlock>
+          </ContentBlockBadgeBalance>
+          {(!isEmpty(selectedAccount)) ? (
+            <BalanceContextBlock advanced={advancedOption.advanced} show={true}>
+              {accountInfo}
+            </BalanceContextBlock>
+          ) : (<></>)}
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
           </ArrowContainer>
-          <ContentBlock>
+          <ContentBlock advanced={advancedOption.advanced}>
             <ContentBlockLeft>
               <ContentColumnLayout>
-                <ContentBlockTitle>Strategy</ContentBlockTitle>
+                <ContentBlockTitle>{t('benchmark.staking.strategyString')}</ContentBlockTitle>
                 <DropdownCommon
                   style={{ flex: 1, width: '90%' }}
                   options={strategyOptions}
                   value={inputData.strategy}
                   onChange={handleStrategyChange}
+                  disabled={advancedOption.advanced ? true : false}
                 />
                 <ContentBlockFooter />
               </ContentColumnLayout>
             </ContentBlockLeft>
             <ContentBlockRight>
-              <Balance>Calculated APY</Balance>
-              <ValueStyle>16.5%</ValueStyle>
+              <Balance>{t('benchmark.staking.calculatedApy')}</Balance>
+              {!apiLoading ? (
+                <ValueStyle>{(finalFilteredTableData.calculatedApy * 100).toFixed(1)}%</ValueStyle>
+              ) : (
+                <ScaleLoader />
+              )}
             </ContentBlockRight>
           </ContentBlock>
         </ContentBlockWrap>
@@ -478,7 +1956,7 @@ const Staking = () => {
             style={{ backgroundColor: '#2E3843', height: 'auto' }}
           >
             <ContentColumnLayout width="100%" justifyContent="flex-start">
-              <ContentBlockTitle color="white">Reward Destination</ContentBlockTitle>
+              <ContentBlockTitle color="white">{t('benchmark.staking.rewardDest')}</ContentBlockTitle>
               <DestinationWrap advanced={advancedOption.advanced}>
                 <RewardComponent advanced={advancedOption.advanced} marginTop={5}>
                   <DropdownCommon
@@ -486,18 +1964,14 @@ const Staking = () => {
                       flex: 1,
                       width: '100%',
                     }}
-                    options={[
-                      { label: 'Specified payment account', value: 0, isDisabled: true },
-                      { label: 'wallet 001', value: 1 },
-                      { label: 'wallet 002', value: 2 },
-                    ]}
+                    options={rewardDestinationOptions}
                     value={inputData.rewardDestination}
                     onChange={handleInputChange('rewardDestination')}
                     theme="dark"
                   />
                 </RewardComponent>
                 <RewardComponent advanced={advancedOption.advanced}>
-                  <Node title="CONTROLLER-HSINCHU" address="GiCAS2RKmFajjJNvc39rMRc83hMhg0BgT…" />
+                  {renderRewardDestinationNode}
                 </RewardComponent>
               </DestinationWrap>
               <ContentBlockFooter style={{ minHeight: advancedOption.advanced ? 0 : 50 }} />
@@ -509,39 +1983,123 @@ const Staking = () => {
         <FooterLayout>
           <div style={{ marginBottom: 12 }}>
             <Button
-              title="Nominate"
-              onClick={() => {
-                console.log('Nominate');
-              }}
+              disabled={!nominatableInfo.nominatable}
+              title={t('benchmark.staking.nominate')}
+              onClick={handleNominate}
               style={{ width: 220 }}
             />
           </div>
-          <Warning msg="There is currently an ongoing election for new validator candidates. As such staking operations are not permitted." />
+          {nominatableInfo.warning}
         </FooterLayout>
       </CardHeader>
-      <DashboardLayout>
-        <TimeCircle type="epoch" percentage={68} />
-        <TimeCircle type="era" percentage={75} />
-      </DashboardLayout>
+      <DashboardLayout>{eraInfoDisplayDom}</DashboardLayout>
     </>
   );
 };
 
 export default Staking;
 
-const ContentBlock = styled.div`
+interface IContentBlock {
+  advanced: Boolean;
+}
+const ContentBlock = styled.div<IContentBlock>`
   background-color: white;
-  border-radius: 6px;
+  border-radius: 6px 6px 6px 6px;
   padding: 14px 25px 14px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 62px;
-  width: 570px;
+  width: ${(props) => (props.advanced ? '400px' : '570px')};
+  @media (max-width: 1395px) {
+    width: 570px;
+  }
   @media (max-width: 720px) {
     width: calc(100vw - 160px);
   }
 `;
+
+interface IContentBlockBadgeBalance {
+  advanced: Boolean;
+}
+const ContentBlockBadgeBalance = styled.div<IContentBlockBadgeBalance>`
+  background-color: white;
+  border-radius: ${(props) => (props.advanced ? '6px 0px 0px 6px' : '6px 6px 0px 0px')};
+  padding: 14px 25px 14px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 62px;
+  width: ${(props) => (props.advanced ? '500px' : '570px')};
+  @media (max-width: 1395px) {
+    border-radius: 6px 6px 0px 0px;
+    width: 570px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+    border-radius: 6px 6px 0px 0px;
+  }
+`;
+
+interface IBalanceContextBlock {
+  advanced: boolean;
+  show: boolean;
+}
+const BalanceContextBlock = styled.div<IBalanceContextBlock>`
+  background-color: #0b0d13;
+  border-radius: ${(props) => (props.advanced ? '0px 6px 6px 0px' : '0px 0px 6px 6px')};
+  display: ${(props) => (props.show ? 'flex' : 'none')};
+  justify-content: space-around;
+  align-items: center;
+  padding: 14px 25px 14px 25px;
+  height: 62px;
+  width: ${(props) => (props.advanced ? '640px' : '570px')};
+  @media (max-width: 1395px) {
+    border-radius: 0px 0px 6px 6px;
+    width: 570px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 160px);
+    border-radius: 0px 0px 6px 6px;
+  }
+`;
+
+const BalanceContextLeft = styled.div`
+  flex: 1;
+  width: 100%;
+`;
+
+const BalanceContextRight = styled.div`
+  flex: 1;
+  width: 100%;
+`;
+
+const BalanceContextRow = styled.div`
+  display: flex;
+  box-sizing: border-box;
+  padding: 0px 10px 0px 16px;
+  justify-content: space-between;
+`;
+
+const BalanceContextLabel = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  color: white;
+`;
+
+const BalanceContextValue = styled.div`
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  color: #23beb9;
+`;
+
+type BalanceProps = {
+  color?: string;
+};
 
 interface ContentBlockWrapProps {
   advanced: Boolean;
@@ -646,7 +2204,7 @@ const LogoTitle = styled.div`
   line-height: 1.22;
 `;
 
-const Balance = styled.div`
+const Balance = styled.div<BalanceProps>`
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 500;
@@ -802,4 +2360,8 @@ const AdvancedBlockWrap = styled.div`
   @media (max-width: 720px) {
     width: calc(100vw - 110px);
   }
+`;
+
+const FilterInfo = styled.span`
+  margin: 0 16px 0 16px;
 `;

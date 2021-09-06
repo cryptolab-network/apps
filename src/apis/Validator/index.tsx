@@ -1,56 +1,95 @@
-import { singleValidatorAxios, validatorAxios } from '../../instance/Axios';
+import { CancelToken } from 'axios';
+import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios } from '../../instance/Axios';
 
 export interface IStatusChange {
-  commissionChange: number
+  commissionChange: number;
 }
 
 export interface IIdentity {
-  display: string
+  display: string;
+  parent?: string | null;
+  sub?: string | null;
+  isVerified?: boolean;
+}
+
+export interface Balance {
+  freeBalance: number;
+  lockedBalance: number;
 }
 
 export interface INominator {
-  address: string
-  balance: number
+  address: string;
+  balance: Balance;
 }
 
 export interface IExposureOthers {
-  who: string
-  value: number
+  who: string;
+  value: number;
 }
 
 export interface IExposure {
-  total: number
-  own: number
-  others: IExposureOthers[]
+  total: number;
+  own: number;
+  others: IExposureOthers[];
 }
 
 export interface IEraInfo {
-  nominators: INominator[]
-  nominatorCount: number
-  era: number
-  exposure: IExposure
-  commission: number
-  apy: number
-  unclaimedEras: number[]
-  total: number
-  selfStake: number
+  nominators: INominator[];
+  nominatorCount: number;
+  era: number;
+  exposure: IExposure;
+  commission: number;
+  apy: number;
+  unclaimedEras: number[];
+  total: number;
+  selfStake: number;
+}
+
+export interface IStakerPoints {
+  era: number;
+  points: number;
+}
+
+export interface ISlash {
+  era: number;
+  validator: string;
+  total: number;
+  others: {
+    address: string;
+    value: number;
+  }[];
 }
 
 export interface IValidator {
-  id: string
-  statusChange: IStatusChange
-  identity: IIdentity
-  info: IEraInfo
-  averageApy: number
-  favorite: boolean
+  id: string;
+  statusChange: IStatusChange;
+  identity: IIdentity;
+  stakerPoints: IStakerPoints[];
+  info: IEraInfo;
+  averageApy: number;
+  slashes: ISlash[];
+  favorite: boolean;
+  blockNomination: boolean;
 }
 
 export interface IValidatorHistory {
-  id: string
-  statusChange: IStatusChange
-  identity: IIdentity
-  info: IEraInfo[]
-  averageApy: number
+  id: string;
+  statusChange: IStatusChange;
+  identity: IIdentity;
+  info: IEraInfo[];
+  averageApy: number;
+}
+
+export interface IValidatorSlashedNominator {
+  address: string;
+  value: number;
+}
+
+export interface IValidatorSlash {
+  address: string;
+  total: number;
+  era: number;
+  others: IValidatorSlashedNominator[];
 }
 
 export interface IValidatorQuery {
@@ -66,16 +105,57 @@ export interface IValidatorQuery {
 export interface IValidatorRequest {
   params: string;
   query?: IValidatorQuery;
+  cancelToken?: CancelToken;
 }
+
+export interface ISubscribeNewsletter {
+  email: string;
+}
+
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
-validatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+  validatorAxios
+    .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      throw err;
+    });
+export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
+  singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+    if (res.data.length > 0) {
+      return res.data[0];
+    } else {
+      throw new Error('The stash is not a validaor');
+    }
+  });
+export const apiGetNominatedValidators = (data: IValidatorRequest): Promise<IValidator[]> =>
+  nominatedValidatorsAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+    return res.data;
+  });
+
+
+export const apiGetValidatorUnclaimedEras = (
+  data: IValidatorRequest,
+): Promise<number[]> => 
+singleValidatorAxios.get(`${data.params}`).then((res) => {
   return res.data;
 });
-export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
-singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
-  if (res.data.length > 0) {
-    return res.data[0];
-  } else {
-    throw new Error('The stash is not a validaor');
-  }
+
+export const apiGetValidatorSlashes = (
+  data: IValidatorRequest,
+): Promise<IValidatorSlash[]> => 
+singleValidatorAxios.get(`${data.params}`).then((res) => {
+  return res.data;
 });
+
+
+export const apiSubscribeNewsletter = (
+  data: ISubscribeNewsletter
+): Promise<number> => {
+  return subscribeNewsletterAxios.post('', data).then((res) => {
+    return 0;
+  }).catch((err) => {
+    return err.response.data.code;
+  });
+};

@@ -1,21 +1,27 @@
 import styled from 'styled-components';
 import SwitchTab from '../../components/SwitchTab';
 import Staking from './components/Staking';
+import Charts from './components/Charts';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 
 const Benchmark = () => {
+  const { t } = useTranslation();
   let { path } = useRouteMatch();
 
-  const tabs = [
-    {
-      label: 'Benchmark',
-      value: '',
-    },
-    {
-      label: 'Charts',
-      value: 'charts',
-    },
-  ];
+  const tabs = useMemo(() => {
+    return [
+      {
+        label: t('benchmark.routes.benchmark'),
+        value: '',
+      },
+      {
+        label: t('benchmark.routes.charts'),
+        value: 'charts',
+      },
+    ]
+  }, [t]);
 
   return (
     <BenchmarkLayout>
@@ -24,7 +30,7 @@ const Benchmark = () => {
         <div style={{ width: '100%' }}>
           <Switch>
             <Route exact path={`${path}`} component={Staking} />
-            <Route exact path={`${path}/charts`} component={() => <div>charts</div>} />
+            <Route exact path={`${path}/charts`} component={Charts} />
           </Switch>
         </div>
       </MainLayout>

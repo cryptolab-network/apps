@@ -34,7 +34,7 @@ const Tooltip = ({ content, visible, tooltipToggle, children }) => {
 
   return (
     <>
-      <div {...triggerProps} onClick={() => tooltipToggle(!visible)}>
+      <div {...triggerProps} style={{ cursor: 'pointer' }} onClick={() => tooltipToggle(!visible)}>
         {children}
       </div>
 

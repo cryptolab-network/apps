@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useContext } from "react";
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import styled from "styled-components";
-import { formatBalance } from '@polkadot/util';
 import { INominator } from "../../../apis/Validator";
 import Account from "../../../components/Account";
-import { useAppSelector } from "../../../hooks";
-import { NominatorsStatus } from "../../../redux/nominatorsSlice";
+import { DataContext } from "../components/Data";
+import { balanceUnit } from "../../../utils/string";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -14,25 +13,9 @@ export const NominatorGrid = ({
   nominators
 }) => {
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (formatBalance(BigInt(value), {
-        decimals: 12,
-        withUnit: 'KSM'
-      }));
-    } else if (chain === 'DOT') {
-      return (formatBalance(value, {
-        decimals: 10,
-        withUnit: 'DOT'
-      }));
-    } else {
-      return (formatBalance(value, {
-        decimals: 10,
-        withUnit: 'Unit'
-      }));
-    }
+    return balanceUnit(chain, value);
   }, [chain]);
-  const isNominatedLoaded: NominatorsStatus = useAppSelector((state) => state.nominators.status);
-  const nominatorDetail = useAppSelector((state) => state.nominators.elements);
+  const { isNominatedLoaded, nominators: nominatorDetail } = useContext(DataContext);
   const [cols, setCols] = useState(8);
   const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
     setCols(newCols);
@@ -41,19 +24,23 @@ export const NominatorGrid = ({
     return nominators.map((n: INominator, idx) => {
       const x = idx % cols;
       const y = Math.floor(idx / cols);
-      if(isNominatedLoaded === NominatorsStatus.FULFILLED) {
-        return (
-          <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
-            <AccountLayout>
-              <Account
-                address={n.address}
-                display={n.address}
-                showNominatedInfo={true}
-                amount={_formatBalance(nominatorDetail[n.address].balance.lockedBalance)}
-                nominatedCount={nominatorDetail[n.address].targets.length}
-              ></Account>
-            </AccountLayout>
-          </div>);
+      if(isNominatedLoaded) {
+        if (nominatorDetail[n.address] !== undefined) {
+          return (
+            <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>
+              <AccountLayout>
+                <Account
+                  address={n.address}
+                  display={n.address}
+                  showNominatedInfo={true}
+                  amount={_formatBalance(nominatorDetail[n.address].balance.lockedBalance)}
+                  nominatedCount={nominatorDetail[n.address].targets.length}
+                ></Account>
+              </AccountLayout>
+            </div>);
+        } else {
+          return (<div></div>);
+        }
       } else {
         return (
           <div key={idx} data-grid={{x: x, y: y, w: 1, h: 1, static: true}}>

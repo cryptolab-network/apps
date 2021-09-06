@@ -1,0 +1,8 @@
+.recharts-default-legend {
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}

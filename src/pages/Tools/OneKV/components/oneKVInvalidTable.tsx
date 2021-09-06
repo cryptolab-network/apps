@@ -3,9 +3,10 @@ import { useHistory } from 'react-router-dom';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
 // import styled from 'styled-components';
 import { IOneKVValidator } from '../../../../apis/OneKV/validator';
-import Table from '../../../../components/Table';
-
+import Table from './invalidTable';
+import { useTranslation } from 'react-i18next';
 const InvalidValidatorTable = ({ filter, chain, validators }) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const onClickDashboard = useCallback(
     (id: string) => {
@@ -17,7 +18,7 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Dashboard',
+        Header: t('tools.oneKv.table.header.dashboard'),
         accessor: 'dashboard',
         maxWidth: 48,
         disableSortBy: true,
@@ -34,13 +35,13 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
         },
       },
       {
-        Header: 'Name',
+        Header: t('tools.oneKv.table.header.name'),
         accessor: 'name',
         maxWidth: 180,
         Cell: ({ value }) => <span>{value}</span>,
       },
       {
-        Header: 'Reasons',
+        Header: t('tools.oneKv.table.header.reasons'),
         accessor: 'validity',
         maxWidth: 180,
         Cell: ({ value }) => {
@@ -60,7 +61,7 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
         },
       },
     ];
-  }, [onClickDashboard]);
+  }, [onClickDashboard, t]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
   useEffect(() => {
     setDisplayValidators(validators);

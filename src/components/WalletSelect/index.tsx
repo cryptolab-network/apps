@@ -1,25 +1,31 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useContext } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import './index.css';
 import ScaleLoader from 'react-spinners/ScaleLoader';
 import { ReactComponent as DropDownIcon } from '../../assets/images/dropdown.svg';
-import { IAccount, WalletStatus } from '../../redux';
 import Identicon from '@polkadot/react-identicon';
+import { ApiContext } from '../Api';
+import { balanceUnit } from '../../utils/string';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { isEmpty } from '../../utils/helper';
 
-// interface IWallet {
-//   accountName: string;
-//   address: string;
-//   balance: string;
-// }
-interface IWalletSelect {
-  onChange: Function;
-  accountList: Array<IAccount>;
-  status: number;
-  selectedAccount?: IAccount | null;
-}
-const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, selectedAccount }) => {
+const WalletSelect: React.FC = () => {
+  const { t } = useTranslation();
+  const {
+    network,
+    hasWeb3Injected,
+    isWeb3AccessDenied,
+    accounts,
+    selectedAccount,
+    selectAccount,
+    isLoading,
+  } = useContext(ApiContext);
+  console.log(`accounts`);
+  console.log(accounts);
+  console.log(selectedAccount);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -53,12 +59,39 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
   arrowProps.style = { ...arrowProps.style, ...arrowPropsCustom };
   layerProps.style = { ...layerProps.style, ...ulPropsCustom };
 
+  const notifyWarn = useCallback((msg: string) => {
+    toast.warn(`${msg}`, {
+      position: 'top-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      progress: undefined,
+    });
+  }, []);
+
+  const installWallet = () => {
+    console.log('in installWallet');
+    window.open('https://polkadot.js.org/extension/', '_blank', 'noopener noreferrer');
+  };
+
+  const pleaseAllow = () => {
+    // TODO: teach user how to allow
+  };
+
   const handleClick = useCallback(() => {
-    if (status === WalletStatus.CONNECTED) {
+    if (!hasWeb3Injected) {
+      installWallet();
+    } else if (isWeb3AccessDenied) {
+      pleaseAllow();
+    } else if (isLoading) {
+      // do nothing
+    } else if (accounts.length > 0) {
       setOpen(!isOpen);
+    } else {
     }
-    onChange(selectedAccount);
-  }, [isOpen, onChange, selectedAccount, status]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, isOpen, accounts]);
 
   const css = `
     display: flex;
@@ -68,10 +101,17 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
     height: 100%;
   `;
 
+  const _formatBalance = useCallback(
+    (value: string = '0') => {
+      return balanceUnit(network, value, true);
+    },
+    [network]
+  );
+
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
-    if (accountList.length === 0) {
-      // console.log('no length');
+    if (accounts.length === 0) {
+      console.log('no length');
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
@@ -80,14 +120,14 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
         </li>
       );
     } else {
-      accountList.forEach((account, idx) => {
+      accounts.forEach((account, idx) => {
         dom.push(
           <li
             key={`wallet-select-${idx}`}
             className="li"
             onClick={() => {
               console.log('wallet in li: ', account);
-              onChange(account);
+              selectAccount(account);
               close();
             }}
           >
@@ -95,7 +135,7 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
             <WalletLayout>
               <div>{account.name}</div>
               <div>
-                Balance : <BalanceNumber>{account.balance}</BalanceNumber>
+                Balance : <BalanceNumber>{_formatBalance(account.balances.totalBalance)}</BalanceNumber>
               </div>
             </WalletLayout>
           </li>
@@ -103,63 +143,58 @@ const WalletSelect: React.FC<IWalletSelect> = ({ onChange, accountList, status, 
       });
     }
     return <div className="w-list">{dom}</div>;
-  }, [onChange, accountList]);
+  }, [_formatBalance, accounts, selectAccount]);
 
   const walletDisplayDOM = useMemo(() => {
-    console.log('WalletSelect: status : ', status);
-    switch (status) {
-      case WalletStatus.IDLE:
-        return <Hint>Connect Wallet</Hint>;
-      case WalletStatus.LOADING:
-        return (
-          <div
-            style={{
-              width: '100%',
-              display: 'block',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-          >
-            <ScaleLoader color="#23beb9" css={css} height={20} />
+    if (!hasWeb3Injected) {
+      return <Hint>Install Wallet</Hint>;
+    } else if (isWeb3AccessDenied) {
+      return <Hint>Please Allow</Hint>;
+    } else if (isLoading) {
+      return (
+        <div
+          style={{
+            width: '100%',
+            display: 'block',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <ScaleLoader color="#23beb9" css={css} height={20} />
+        </div>
+      );
+    } else if (selectedAccount && !isEmpty(selectedAccount)) {
+      return (
+        <>
+          <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
+          <WalletLayout>
+            <div>{selectedAccount.name}</div>
+            <div>
+              <span style={{ color: '#75818d' }}>Balance : </span>
+              <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
+              {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+              {/* <BalanceNumber>123</BalanceNumber> */}
+            </div>
+          </WalletLayout>
+          <div style={{ width: 40 }}>
+            <DropDownIcon
+              style={{
+                stroke: 'black',
+                transform: isOpen ? 'rotate(90deg)' : 'none',
+                transitionDuration: '0.2s',
+              }}
+            />
           </div>
-        );
-      case WalletStatus.NO_EXTENSION:
-        return <Hint>Install Wallet</Hint>;
-      case WalletStatus.DENIED:
-        return <Hint>Please Allow</Hint>;
-      case WalletStatus.CONNECTED:
-        // console.log('current account info: ', selectedAccount);
-        if (selectedAccount) {
-          return (
-            <>
-              <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-              <WalletLayout>
-                <div>{selectedAccount.name}</div>
-                <div>
-                  Balance: <BalanceTitle>{selectedAccount.balance}</BalanceTitle>
-                  {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-                  {/* <BalanceNumber>123</BalanceNumber> */}
-                </div>
-              </WalletLayout>
-              <div style={{ width: 40 }}>
-                <DropDownIcon
-                  style={{
-                    stroke: 'black',
-                    transform: isOpen ? 'rotate(90deg)' : 'none',
-                    transitionDuration: '0.2s',
-                  }}
-                />
-              </div>
-            </>
-          );
-        } else {
-          return <Hint>Select Address</Hint>;
-        }
-      default:
-        break;
+        </>
+      );
+    } else if (isEmpty(selectedAccount)) {
+      notifyWarn(t('benchmark.staking.warnings.noAccount'));
+      return <Hint>No Account</Hint>;
+    } else {
+      
     }
-  }, [status, css, selectedAccount, isOpen]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen]);
 
   return (
     <>
@@ -241,7 +276,7 @@ const WalletLayout = styled.div`
 `;
 
 const BalanceTitle = styled.span`
-  color: #75818d;
+  color: #23beb9;
 `;
 
 const BalanceNumber = styled.span`

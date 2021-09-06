@@ -4,11 +4,14 @@ import ReactTooltip from 'react-tooltip';
 import { ReactComponent as FavoriteIcon } from '../../assets/images/favorite-selected.svg';
 import { ReactComponent as FavoriteUnselectedIcon } from '../../assets/images/favorite-unselected.svg';
 import { ReactComponent as UnclaimedPayoutsIcon } from '../../assets/images/unclaimed-payouts.svg';
+import { ReactComponent as ActiveBannerIcon } from '../../assets/images/active-banner.svg';
 import '../../css/ToolTip.css';
 import { shortenStashId } from '../../utils/string';
-import { useCallback, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { lsSetFavorite, lsUnsetFavorite } from '../../utils/localStorage';
 import { IStatusChange } from '../../apis/Validator';
+
+import { useTranslation } from 'react-i18next';
 
 export interface IValidNominator {
   address: string;
@@ -24,6 +27,51 @@ export interface IValidNominator {
   onClick?: React.MouseEventHandler<HTMLDivElement> | undefined;
 }
 
+const Favorite = ({ address, _favorite }) => {
+  const { t } = useTranslation();
+  const [favorite, setFavoriteIcon] = useState(_favorite);
+  if (favorite) {
+    return (
+      <div>
+        <ReactTooltip
+          id="unfavorite"
+          place="bottom"
+          effect="solid"
+          backgroundColor="#18232f"
+          textColor="#21aca8"
+        />
+        <EnhanceValue data-for="unfavorite" data-tip={t('tools.valnom.unfavorite')}>
+          <FavoriteIcon
+            onClick={() => {
+              lsUnsetFavorite(address);
+              setFavoriteIcon(false);
+            }}
+          />
+        </EnhanceValue>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <ReactTooltip
+          id="favorite"
+          place="bottom"
+          effect="solid"
+          backgroundColor="#18232f"
+          textColor="#21aca8"
+        />
+        <EnhanceValue data-for="favorite" data-tip={t('tools.valnom.favorite')}>
+          <FavoriteUnselectedIcon
+            onClick={() => {
+              lsSetFavorite(address);
+              setFavoriteIcon(true);
+            }}
+          />
+        </EnhanceValue>
+      </div>
+    );
+  }
+};
 const ValidNominator: React.FC<IValidNominator> = ({
   address,
   name,
@@ -37,38 +85,56 @@ const ValidNominator: React.FC<IValidNominator> = ({
   favorite,
   onClick,
 }) => {
+  const { t } = useTranslation();
 
-  const Favorite = ({ address, _favorite }) => {
-    const [favorite, setFavoriteIcon] = useState(_favorite);
-    const setFavorite = useCallback(() => {
-      lsSetFavorite(address);
-    }, [address]);
-    const unsetFavorite = useCallback(() => {
-      lsUnsetFavorite(address);
-    }, [address]);
-    if (favorite) {
-      return (<FavoriteIcon 
-        onClick={() => {
-          unsetFavorite();
-          setFavoriteIcon(false);
-        }} />);
-    } else {
-      return (<FavoriteUnselectedIcon 
-        onClick={() => {
-          setFavorite();
-          setFavoriteIcon(true);
-        }
-        } />);
-    }
-  }
-
-  const Status = () => {
+  const Status = useMemo(() => {
     if (unclaimedPayouts >= 20) {
-      return (<UnclaimedPayoutsIcon />);
+      return (
+        <div>
+          <ReactTooltip
+            id="unclaimed-payouts"
+            place="bottom"
+            effect="solid"
+            backgroundColor="#18232f"
+            textColor="#21aca8"
+          />
+          <EnhanceValue data-for="favorite" data-tip={t('tools.valnom.tips.tooManyUnclaimedPayouts')}>
+            <UnclaimedPayoutsIcon />
+          </EnhanceValue>
+        </div>
+      );
     } else {
-      return (<div></div>);
+      return <div></div>;
     }
-  };
+  }, [t, unclaimedPayouts]);
+
+  const activeBanner = useMemo(() => {
+    if (parseFloat(activeAmount) > 0) {
+      return (
+        <ActiveBannerLayout>
+          <ActiveBannerIcon />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <StatusLayout
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              {Status}
+            </StatusLayout>
+            <FavoriteLayout
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Favorite address={address} _favorite={favorite} />
+            </FavoriteLayout>
+          </div>
+        </ActiveBannerLayout>
+      );
+    } else {
+      return <div style={{ width: '100%', height: '18.38px' }}></div>;
+    }
+  }, [Status, activeAmount, address, favorite]);
 
   const shortenName = shortenStashId(name);
   return (
@@ -89,36 +155,36 @@ const ValidNominator: React.FC<IValidNominator> = ({
       />
       <ReactTooltip id="apy" place="bottom" effect="solid" backgroundColor="#18232f" textColor="#21aca8" />
       <MainInfo>
-        <Identicon value={address} size={35} theme={'polkadot'} />
-        <FavoriteLayout>
-          <Favorite 
-          address={address}
-          _favorite={favorite}/>
-        </FavoriteLayout>
-        <StatusLayout>
-          <Status />
-        </StatusLayout>
+        <div style={{ width: '100%' }}>{activeBanner}</div>
+
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Identicon value={address} size={35} theme={'polkadot'} />
+        </div>
         <Name>{shortenName}</Name>
         <ValuePart>
-          <EnhanceValue data-for="activeAmount" data-tip="active amount">
+          <EnhanceValue data-for="activeAmount" data-tip={t('tools.valnom.tips.activeAmounts')}>
             {activeAmount}
           </EnhanceValue>{' '}
           /{' '}
-          <span data-for="totalAmount" data-tip="total amount">
+          <span data-for="totalAmount" data-tip={t('tools.valnom.tips.totalAmounts')}>
             {totalAmount}
           </span>
-          <div data-for="apy" data-tip="Annual Percentage Yield">
-            Average APY：
+          <div data-for="apy" data-tip={t('tools.valnom.tips.apy')}>
+            {t('tools.valnom.tips.averageApy')}
             <EnhanceValue>{apy}%</EnhanceValue>
           </div>
         </ValuePart>
       </MainInfo>
       <SubInfo>
         <ValuePart>
-          Nominator Count：<EnhanceValue>{count}</EnhanceValue>
+          {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
         <ValuePart>
-          Commission：<EnhanceValue>{commission}%</EnhanceValue>
+          {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
     </ValidNominatorLayout>
@@ -131,8 +197,8 @@ const ValidNominatorLayout = styled.div`
   width: 224px;
   height: 270px;
   box-sizing: border-box;
-  padding: 20px 2px 15px;
-  margin: 4px;
+  padding: 20px 1px 15px;
+  /* margin: 4px; */
   border-radius: 8px;
   background-color: #2f3842;
   display: flex;
@@ -141,7 +207,7 @@ const ValidNominatorLayout = styled.div`
   align-items: center;
   &:hover {
     border: solid 1px #23beb9;
-    padding: 19px 0px 14px;
+    padding: 19px 0px 14px 0px;
   }
 `;
 
@@ -161,6 +227,8 @@ const Name = styled.div`
   font-style: normal;
   text-align: center;
   color: white;
+  word-wrap: break-word;
+  width: 90%;
 `;
 const ValuePart = styled.div`
   font-family: Montserrat;
@@ -189,7 +257,17 @@ const FavoriteLayout = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  margin: -80px 48px 0 0;
+  margin-right: 16px;
+`;
+
+const ActiveBannerLayout = styled.div`
+  flex: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 0 0;
 `;
 
 const StatusLayout = styled.div`
@@ -197,6 +275,7 @@ const StatusLayout = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
-  margin: -20px 48px 0 0;
+  justify-content: center;
+  align-items: center;
+  margin-right: 16px;
 `;

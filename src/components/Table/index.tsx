@@ -2,12 +2,15 @@ import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
+import { ReactComponent as SortingDescIcon } from '../../assets/images/sorting-desc.svg';
+import { ReactComponent as SortingAscIcon } from '../../assets/images/sorting-asc.svg';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
   type?: tableType;
   pagination?: boolean;
+  pgSize?: number;
 };
 
 const CustomTable: React.FC<ICOLUMN> = ({
@@ -15,6 +18,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
   data,
   type = tableType.common,
   pagination = false,
+  pgSize = 20,
 }) => {
   const {
     getTableProps,
@@ -37,11 +41,11 @@ const CustomTable: React.FC<ICOLUMN> = ({
     {
       columns: userColumns,
       data,
-      initialState: { pageSize: 20 },
+      initialState: { pageSize: pgSize },
     },
     useSortBy,
     useExpanded,
-    usePagination // Use the useExpanded plugin hook
+    usePagination // Use the useExpanded plugin hook,
   );
   return (
     <Style>
@@ -53,7 +57,11 @@ const CustomTable: React.FC<ICOLUMN> = ({
                 {headerGroup.headers.map((column) => (
                   <th {...column.getSortByToggleProps()}>
                     {column.render('Header')}
-                    <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                    <span>
+                      {' '}
+                      {'  '}
+                      {column.isSorted ? column.isSortedDesc ? <SortingDescIcon /> : <SortingAscIcon /> : ''}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -105,7 +113,15 @@ const CustomTable: React.FC<ICOLUMN> = ({
         </table>
         <br />
       </div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         {pagination ? (
           <Pagination
             canPreviousPage={canPreviousPage}
@@ -132,7 +148,7 @@ const Style = styled.div`
 
   .tableWrap {
     display: block;
-    width: 80vw;
+    width: 100%;
     height: 55vh;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -167,9 +183,6 @@ const Style = styled.div`
       text-align: center;
       &.collapse {
         width: 0.0000000001%;
-      }
-      :first-child {
-        width: 0.00001%;
       }
       :last-child {
         border-right: 0;

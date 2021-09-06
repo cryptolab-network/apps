@@ -34,7 +34,7 @@ export interface INominators {
   params: INominatorsParams;
 }
 
-export const apiGetInfoNominator = (data: INominator): Promise<INominatorInfo[]> =>
+export const apiGetInfoNominator = (data: INominator): Promise<INominatorInfo> =>
   nominatorAxios.get(`${data.params.id}/${data.params.chain}`).then((res) => {
     return res.data;
   });

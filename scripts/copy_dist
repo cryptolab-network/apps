@@ -1,0 +1,11 @@
+#!/bin/bash
+#cd /home/ubuntu/frontend
+cd /var/www/cryptolab.network/html
+if [ $DEPLOY == 'production' ]; then
+	echo 'this is production'
+  aws s3 sync s3://prod.cryptolab-apps . --delete --exact-timestamps
+else
+	echo 'this is staging'
+  aws s3 sync s3://cryptolab-apps . --delete --exact-timestamps
+fi
+

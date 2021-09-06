@@ -5,16 +5,18 @@ import { ReactComponent as MedalIcon } from '../../../assets/images/medal.svg';
 import { ReactComponent as PeopleIcon } from '../../../assets/images/people.svg';
 import { ReactComponent as MonitorIcon } from '../../../assets/images/monitor.svg';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export const Portal = () => {
   const history = useHistory();
+  const { t } = useTranslation();
   return (
     <PortalLayout>
       <CardsLayout>
         <CardContent
           Icon={PeopleIcon}
-          title={'Validator / Nominator Status'}
-          detail="Useful criterias for both validators and nominators to monitor and evaluate your staking information."
+          title={t('tools.valnom.title')}
+          detail={t('tools.valnom.detail')}
           className="card-layout"
           onClick={() => {
             history.push("/valnom");
@@ -22,8 +24,8 @@ export const Portal = () => {
         />
         <CardContent
           Icon={MonitorIcon}
-          title={'One Thousand Validator Monitor'}
-          detail="Information that allow 1kv node operators to predict when they will be nominated."
+          title={t('tools.oneKv.title')}
+          detail={t('tools.oneKv.detail')}
           className="card-layout"
           onClick = {() => {
             history.push("/onekv");
@@ -31,9 +33,12 @@ export const Portal = () => {
         />
         <CardContent
           Icon={MedalIcon}
-          title={'Staking Rewards'}
-          detail="Exportable reports of your staking rewards."
+          title={t('tools.stakingRewards.title')}
+          detail={t('tools.stakingRewards.detail')}
           className="card-layout"
+          onClick = {() => {
+            history.push("/rewards");
+          }}
         />
       </CardsLayout>
       <GrantCardContent className="card-layout" />

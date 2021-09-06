@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { BooleanLiteral } from 'typescript';
 
 const Button = ({ title = '', onClick = () => {}, children = {}, primary = false, ...props }) => {
   return (
@@ -20,8 +21,10 @@ Button.prototype = {
 
 type ButtonProps = {
   primary: boolean;
+  disabled?: BooleanLiteral;
 };
 const ButtonStyle = styled.button<ButtonProps>`
+  opacity: ${(props) => (props.disabled ? '0.5' : '1')};
   background: ${(props) => (props.primary ? '#17222d' : '#17222d')};
   color: ${(props) => (props.primary ? '#23beb9' : '23beb9')};
   font-family: Montserrat;
@@ -30,8 +33,8 @@ const ButtonStyle = styled.button<ButtonProps>`
   padding: 6px 20px;
   border: solid 1px #23beb9;
   border-radius: 100px;
-  cursor: pointer;
-  :hover {
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  :hover:not([disabled]) {
     background-color: #169692;
     color: #ffffff;
     border: solid 1px #169692;

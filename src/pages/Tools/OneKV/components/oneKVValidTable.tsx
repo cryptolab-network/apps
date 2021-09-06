@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { formatBalance } from '@polkadot/util';
 import { ReactComponent as ActiveIcon } from '../../../../assets/images/active.svg';
 import { ReactComponent as InactiveIcon } from '../../../../assets/images/inactive.svg';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
@@ -8,29 +7,23 @@ import styled from "styled-components";
 import moment from "moment";
 import { IOneKVValidator } from "../../../../apis/OneKV/validator";
 import Table from "../../../../components/Table";
+import { balanceUnit } from "../../../../utils/string";
+
+import { useTranslation } from 'react-i18next';
 
 const ValidatorTable = ({filter, chain, validators}) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const onClickDashboard = useCallback((id: string) => {
     history.push(`/validator/${id}/${chain}`);
   }, [chain, history]);
   const _formatBalance = useCallback((value: any) => {
-    if (chain === 'KSM') {
-      return (<span>{formatBalance(value, {
-        decimals: 12,
-        withUnit: 'KSM'
-      })}</span>);
-    } else if (chain === 'DOT') {
-      return (<span>{formatBalance(value, {
-        decimals: 10,
-        withUnit: 'DOT'
-      })}</span>);
-    }
+    return (<span>{balanceUnit(chain, value)}</span>);
   }, [chain]);
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Dashboard',
+        Header: t('tools.oneKv.table.header.dashboard'),
         accessor: 'dashboard',
         maxWidth: 48,
         disableSortBy: true,
@@ -40,19 +33,19 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Name',
+        Header: t('tools.oneKv.table.header.name'),
         accessor: 'name',
         maxWidth: 180,
         Cell: ({ value }) => <span>{value}</span>,
       },
       {
-        Header: 'Commission',
+        Header: t('tools.oneKv.table.header.commission'),
         accessor: 'stakingInfo.validatorPrefs.commission',
         maxWidth: 48,
         Cell: ({ value }) => <span>{value / 10000000}%</span>,
       },
       {
-        Header: 'Active',
+        Header: t('tools.oneKv.table.header.active'),
         accessor: 'activeNominators',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -64,7 +57,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: '1KV nominated',
+        Header: t('tools.oneKv.table.header.oneKvNominated'),
         accessor: 'elected',
         maxWidth: 100,
         Cell: ({ value, row }) => {
@@ -78,9 +71,10 @@ const ValidatorTable = ({filter, chain, validators}) => {
             </OneKVNominated>);
           }
         },
+        sortType: 'basic',
       },
       {
-        Header: 'Nomination Order',
+        Header: t('tools.oneKv.table.header.nominationOrder'),
         accessor: 'nominationOrder',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -88,7 +82,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Self Stake',
+        Header: t('tools.oneKv.table.header.selfStake'),
         accessor: 'selfStake',
         maxWidth: 150,
         Cell: ({ value }) => {
@@ -96,7 +90,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         }
       },
       {
-        Header: 'Rank',
+        Header: t('tools.oneKv.table.header.rank'),
         accessor: 'rank',
         maxWidth: 60,
         Cell: ({ value }) => {
@@ -104,15 +98,16 @@ const ValidatorTable = ({filter, chain, validators}) => {
         },
       },
       {
-        Header: 'Inclusion',
+        Header: t('tools.oneKv.table.header.inclusion'),
         accessor: 'inclusion',
         maxWidth: 60,
         Cell: ({ value }) => {
           return (<span>{(value * 100).toFixed(2)}%</span>);
         },
+        sortType: 'basic',
       },
     ]
-  }, [_formatBalance, onClickDashboard]);
+  }, [_formatBalance, onClickDashboard, t]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
   useEffect(() => {
     setDisplayValidators(validators);
@@ -136,6 +131,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
     <Table
       columns={columns}
       data={displayValidators}
+      pagination={true}
     />
   );
 };

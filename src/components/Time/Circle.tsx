@@ -1,11 +1,160 @@
-import { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
-import { setInterval } from 'timers';
 import './index.css';
+import { IEraInfo } from '../../pages/Benchmark/components/Staking';
+import useInterval from '../../hooks/useInterval';
+import { useTranslation } from 'react-i18next';
 
-const TimeCircle = ({ type, percentage }) => {
+const SECOND = 1000;
+const MINUTE = 60000;
+const HOUR = 3600000;
+const SLOT_TIME = 6000;
+
+const calcProgress = (type, eraInfo) => {
+  let progress = 0;
+  const currentTime = Date.now();
+  if (type === 'era') {
+    const eraTime = eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
+    progress = Math.floor(((currentTime - eraInfo.activeEraStart) / eraTime) * 100);
+  } else {
+    const epochTime = eraInfo.sessionLength * SLOT_TIME;
+    progress = Math.floor((((currentTime - eraInfo.activeEraStart) % epochTime) / epochTime) * 100);
+  }
+  if (progress >= 100) {
+    return 100;
+  }
+  return progress;
+};
+
+const calcLeftHour = (type, eraInfo) => {
+  let leftHour = 0;
+  const currentTime = Date.now();
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
+  const leftTime = endTime - currentTime;
+
+  if (leftTime < 0) {
+    return 0;
+  }
+
+  if (type === 'era') {
+    leftHour = Math.floor(leftTime / HOUR);
+  } else {
+    leftHour = Math.floor(leftTime / HOUR);
+  }
+  return leftHour;
+};
+
+const calcLeftMinute = (type, eraInfo) => {
+  let leftMinute = 0;
+  const currentTime = Date.now();
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
+  const leftTime = endTime - currentTime;
+
+  if (leftTime < 0) {
+    return 0;
+  }
+
+  if (type === 'era') {
+    leftMinute = Math.floor((leftTime % HOUR) / MINUTE);
+  } else {
+    const epochTime = eraInfo.sessionLength * SLOT_TIME;
+    leftMinute = Math.floor(((leftTime % epochTime) % HOUR) / MINUTE);
+  }
+  return leftMinute;
+};
+
+const calcLeftSecond = (type, eraInfo) => {
+  let leftSecond = 0;
+  const currentTime = Date.now();
+  const endTime = eraInfo.activeEraStart + eraInfo.sessionPerEra * eraInfo.sessionLength * SLOT_TIME;
+  const leftTime = endTime - currentTime;
+
+  if (leftTime < 0) {
+    return 0;
+  }
+
+  if (type === 'epoch') {
+    const epochTime = eraInfo.sessionLength * SLOT_TIME;
+    leftSecond = Math.floor(((leftTime % epochTime) % MINUTE) / SECOND);
+  }
+  return leftSecond;
+};
+interface Props {
+  type: string;
+  eraInfo: IEraInfo | null;
+  network: string;
+}
+
+const TimeCircle: React.FC<Props> = ({ type, eraInfo, network }) => {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0);
+  const [leftHour, setLeftHour] = useState(0);
+  const [leftMinute, setLeftMinute] = useState(0);
+  const [leftSecond, setLeftSecond] = useState(0);
+
+  useInterval(() => {
+    setProgress(calcProgress(type, eraInfo));
+  }, 6000);
+
+  useInterval(() => {
+    setLeftHour(calcLeftHour(type, eraInfo));
+  }, 6000);
+
+  useInterval(() => {
+    setLeftMinute(calcLeftMinute(type, eraInfo));
+  }, 6000);
+
+  useInterval(() => {
+    setLeftSecond(calcLeftSecond(type, eraInfo));
+  }, 6000);
+
+  const displayValues = useMemo(() => {
+    let mainValue;
+    let mainUnit;
+    let subValue;
+
+    switch (network) {
+      case 'Kusama':
+      case 'Westend':
+        mainValue = type === 'era' ? 6 : 1;
+        mainUnit = type === 'era' ? t('benchmark.staking.timeCircle.hrs') : t('benchmark.staking.timeCircle.hr');
+        if (leftHour > 0) {
+          subValue =
+            type === 'era' ? `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}` : `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
+        } else {
+          subValue = `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
+        }
+        break;
+      case 'Polkadot':
+        mainValue = type === 'era' ? 1 : 4;
+        mainUnit = type === 'era' ? t('benchmark.staking.timeCircle.day') : t('benchmark.staking.timeCircle.hrs');
+        if (leftHour > 0) {
+          if (type === 'era') {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          } else {
+            if (leftHour === 1) {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hr')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            } else {
+              subValue = `${leftHour} ${t('benchmark.staking.timeCircle.hrs')} ${leftMinute} ${t('benchmark.staking.timeCircle.mins')}`;
+            }
+          }
+        } else {
+          subValue = `${leftMinute} ${t('benchmark.staking.timeCircle.mins')} ${leftSecond} ${t('benchmark.staking.timeCircle.s')}`;
+        }
+        break;
+      default:
+    }
+    return {
+      mainValue,
+      mainUnit,
+      subValue,
+    };
+  }, [network, type, leftHour, leftMinute, leftSecond, t]);
 
   const ContentDOM = useMemo(() => {
     if (type === 'epoch') {
@@ -13,7 +162,7 @@ const TimeCircle = ({ type, percentage }) => {
         <div
           style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
         >
-          <EpochNumber>5</EpochNumber>
+          <EpochNumber>{eraInfo?.currentSessionIndex}</EpochNumber>
           <EpochWord>epoch</EpochWord>
         </div>
       );
@@ -23,22 +172,17 @@ const TimeCircle = ({ type, percentage }) => {
           style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
         >
           <EraNumber>
-            <span>91</span>
+            <span>{progress}</span>
             <span style={{ fontSize: 15 }}>%</span>
           </EraNumber>
           <EraWord>era</EraWord>
-          <EraSubWord>2356</EraSubWord>
+          <EraSubWord>{eraInfo?.currentEra}</EraSubWord>
         </div>
       );
     } else {
       return null;
     }
-  }, [type]);
-  useEffect(() => {
-    setInterval(() => {
-      setProgress(percentage);
-    }, 500);
-  }, [percentage]);
+  }, [type, eraInfo, progress]);
 
   return (
     <MainLayout>
@@ -47,11 +191,11 @@ const TimeCircle = ({ type, percentage }) => {
           <TimeType>{type}</TimeType>
         </div>
         <div style={{ lineHeight: '80%', marginTop: 8 }}>
-          <MainValue>3</MainValue>
-          <MainUnit> hrs</MainUnit>
+          <MainValue>{displayValues.mainValue}</MainValue>
+          <MainUnit>{displayValues.mainUnit}</MainUnit>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-          <SubValue>1 hr 33 mins</SubValue>
+          <SubValue>{displayValues.subValue}</SubValue>
         </div>
       </WordLayout>
       <CircleLayout>
