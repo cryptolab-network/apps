@@ -56,7 +56,6 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
-import { title } from 'process';
 
 enum Strategy {
   LOW_RISK,
@@ -436,14 +435,6 @@ const Staking = () => {
       ];
     }
   }, [advancedOption.advanced, t]);
-
-  const walletBalance = useMemo(() => {
-    if (selectedAccount) {
-      return _formatBalance(selectedAccount?.balances?.totalBalance);
-    } else {
-      return t('benchmark.staking.selectWallet');
-    }
-  }, [_formatBalance, selectedAccount, t]);
 
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
@@ -838,6 +829,8 @@ const Staking = () => {
     };
   }, [
     t,
+    hasWeb3Injected,
+    selectedAccount,
     networkName,
     networkStatus,
     apiLoading,
@@ -1875,6 +1868,7 @@ const Staking = () => {
     selectedAccount?.balances?.availableBalance,
     selectedAccount?.balances?.reservedBalance,
     t,
+    displayRole,
   ]);
 
   return (
