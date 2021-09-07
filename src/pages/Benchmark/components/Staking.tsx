@@ -1904,7 +1904,8 @@ const Staking = () => {
                 }}
               >
                 <Balance>
-                  <div>{t('benchmark.staking.balance')}: {walletBalance}</div>
+                  <div>{t('benchmark.staking.balance')}:</div>
+                  <div>{walletBalance}</div>
                 </Balance>
 
                 {showBondedBtn && (
