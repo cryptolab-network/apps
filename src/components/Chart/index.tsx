@@ -8,14 +8,13 @@ import {
   Legend,
   ResponsiveContainer,
   Label,
-  TooltipProps,
 } from 'recharts';
 import './index.css';
 import Tools from './components/Tools';
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 
-interface IChart {
+export interface IChart {
   data: any[];
   showTools?: boolean;
   secondYAxis?: boolean;
@@ -346,13 +345,14 @@ const MainLayout = styled.div`
 const TooltipLayout = styled.div`
   background-color: #18232f;
   border-radius: 6px;
-
   border: solid 1px #23beb9;
 `;
 const TooltipHeader = styled.div`
   border-bottom: solid 1px #23beb9;
   padding: 8px;
   font-weight: bold;
+  font-size: 12px;
+  color: white;
 `;
 const TooltipBody = styled.div`
   padding: 8px;
