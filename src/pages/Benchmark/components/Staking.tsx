@@ -56,7 +56,6 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
-import { title } from 'process';
 
 enum Strategy {
   LOW_RISK,
@@ -324,7 +323,7 @@ const Staking = () => {
     apiState: networkStatus,
     selectedAccount,
     refreshAccountData,
-    hasWeb3Injected
+    hasWeb3Injected,
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -372,27 +371,30 @@ const Staking = () => {
     [networkName]
   );
 
-  const displayRole = useCallback((role: AccountRole): string => {
-    switch (role) {
-      case AccountRole.VALIDATOR:
-        return t('benchmark.staking.displayRole.validator');
-      case AccountRole.CONTROLLER_OF_VALIDATOR:
-        return t('benchmark.staking.displayRole.controller');
-      case AccountRole.CONTROLLER_OF_NOMINATOR:
-        return t('benchmark.staking.displayRole.controller');
-      case AccountRole.NOMINATOR:
-        return t('benchmark.staking.displayRole.nominator');
-      case AccountRole.NOMINATOR_AND_CONTROLLER:
-        return t('benchmark.staking.displayRole.nominator');
-      case AccountRole.NONE:
-        return t('benchmark.staking.displayRole.none');
-      default:
-        return '';
-    }
-  }, [t]);
+  const displayRole = useCallback(
+    (role: AccountRole): string => {
+      switch (role) {
+        case AccountRole.VALIDATOR:
+          return t('benchmark.staking.displayRole.validator');
+        case AccountRole.CONTROLLER_OF_VALIDATOR:
+          return t('benchmark.staking.displayRole.controller');
+        case AccountRole.CONTROLLER_OF_NOMINATOR:
+          return t('benchmark.staking.displayRole.controller');
+        case AccountRole.NOMINATOR:
+          return t('benchmark.staking.displayRole.nominator');
+        case AccountRole.NOMINATOR_AND_CONTROLLER:
+          return t('benchmark.staking.displayRole.nominator');
+        case AccountRole.NONE:
+          return t('benchmark.staking.displayRole.none');
+        default:
+          return '';
+      }
+    },
+    [t]
+  );
 
   const rewardDestinationOptions = useMemo(() => {
-    const options =[
+    const options = [
       {
         label: t('benchmark.staking.rewardsDestination.selectOne'),
         value: RewardDestinationType.NULL,
@@ -433,14 +435,6 @@ const Staking = () => {
       ];
     }
   }, [advancedOption.advanced, t]);
-
-  const walletBalance = useMemo(() => {
-    if (selectedAccount) {
-      return _formatBalance(selectedAccount?.balances?.totalBalance);
-    } else {
-      return t('benchmark.staking.selectWallet');
-    }
-  }, [_formatBalance, selectedAccount, t]);
 
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
@@ -722,7 +716,16 @@ const Staking = () => {
         })
         .catch(console.error);
     }
-  }, [selectedAccount, networkStatus, setAccountChainInfo, polkadotApi, setInputData, queryStakingInfo, hasWeb3Injected, rewardDestinationOptions]);
+  }, [
+    selectedAccount,
+    networkStatus,
+    setAccountChainInfo,
+    polkadotApi,
+    setInputData,
+    queryStakingInfo,
+    hasWeb3Injected,
+    rewardDestinationOptions,
+  ]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -777,14 +780,14 @@ const Staking = () => {
       return {
         nominatable: false,
         warning: <Warning msg={t('benchmark.staking.warnings.installWallet')} />,
-      }
+      };
     }
 
     if (isEmpty(selectedAccount)) {
       return {
         nominatable: false,
         warning: <Warning msg={t('benchmark.staking.warnings.noAccount')} />,
-      }
+      };
     }
 
     if (!accountChainInfo.isReady) {
@@ -826,6 +829,8 @@ const Staking = () => {
     };
   }, [
     t,
+    hasWeb3Injected,
+    selectedAccount,
     networkName,
     networkStatus,
     apiLoading,
@@ -1244,12 +1249,6 @@ const Staking = () => {
   }, [_formatBalance, accountChainInfo?.bonded, notifyWarn]);
 
   const handleMaxClick = useCallback(() => {
-    console.log('bonded: ', Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]));
-    console.log(
-      'transferable:',
-      Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0])
-    );
-
     let bonded = Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]);
     let transferable = Number(_formatBalance(selectedAccount.balances.availableBalance).split(' ')[0]);
     let fee = NetworkConfig[networkName].handlingFee;
@@ -1868,7 +1867,8 @@ const Staking = () => {
     _formatBalance,
     selectedAccount?.balances?.availableBalance,
     selectedAccount?.balances?.reservedBalance,
-    t
+    t,
+    displayRole,
   ]);
 
   return (
@@ -1896,18 +1896,40 @@ const Staking = () => {
                 }}
               >
                 <Balance>
-                  {t('benchmark.staking.balance')}: {walletBalance}
+                  <div>{t('benchmark.staking.balance')}:</div>
+                  <div>0.2584 KSM</div>
                 </Balance>
-                <div
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
-                >
-                  {showBondedBtn && <TinyButton title={t('benchmark.staking.bonded')} onClick={handleBondedClick} primary={false} />}
-                </div>
-                <div
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
-                >
-                  {showMaxBtn && <TinyButton title={t('benchmark.staking.max')} onClick={handleMaxClick} primary={false} />}
-                </div>
+
+                {showBondedBtn && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: 5,
+                      minWidth: 32.19,
+                    }}
+                  >
+                    <TinyButton
+                      title={t('benchmark.staking.bonded')}
+                      onClick={handleBondedClick}
+                      primary={false}
+                    />
+                  </div>
+                )}
+                {showMaxBtn && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: 5,
+                      minWidth: 32.19,
+                    }}
+                  >
+                    <TinyButton title={t('benchmark.staking.max')} onClick={handleMaxClick} primary={false} />
+                  </div>
+                )}
               </div>
 
               <Input
@@ -1917,11 +1939,13 @@ const Staking = () => {
               />
             </ContentBlockRight>
           </ContentBlockBadgeBalance>
-          {(!isEmpty(selectedAccount)) ? (
+          {!isEmpty(selectedAccount) ? (
             <BalanceContextBlock advanced={advancedOption.advanced} show={true}>
               {accountInfo}
             </BalanceContextBlock>
-          ) : (<></>)}
+          ) : (
+            <></>
+          )}
           <ArrowContainer advanced={advancedOption.advanced}>
             <GreenArrow />
           </ArrowContainer>
@@ -2251,7 +2275,7 @@ const ContentBlockFooter = styled.div<ContentBlockFooterProps>`
 `;
 
 const ContentBlockRight = styled.div`
-  flex: 1;
+  flex: 1.3;
   display: flex;
   flex-direction: column;
   justify-content: space-around;

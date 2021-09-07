@@ -14,7 +14,7 @@ import Tools from './components/Tools';
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 
-interface IChart {
+export interface IChart {
   data: any[];
   showTools?: boolean;
   secondYAxis?: boolean;
@@ -35,6 +35,71 @@ interface IChart {
     rightLabel?: string | undefined;
   };
 }
+
+const CustomTooltipLegends = ({ active, payload, label, legends }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <TooltipLayout>
+        <TooltipHeader>{`${label}`}</TooltipHeader>
+        <TooltipBody>
+          {payload.length >= 1 && (
+            <TooltipContent color="#21aca8">
+              {`${legends[0].value} : `}
+              <TooltipValue>{payload[0].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 2 && (
+            <TooltipContent color="#6e95c3">
+              {`${legends[1].value} : `}
+              <TooltipValue>{payload[1].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 3 && (
+            <TooltipContent color="#236bbe">
+              {`${legends[2].value} : `}
+              <TooltipValue>{payload[2].value}</TooltipValue>
+            </TooltipContent>
+          )}
+        </TooltipBody>
+      </TooltipLayout>
+    );
+  }
+
+  return null;
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <TooltipLayout>
+        <TooltipHeader>{`${label}`}</TooltipHeader>
+        <TooltipBody>
+          {payload.length >= 1 && (
+            <TooltipContent color="#21aca8">
+              {`${payload[0].name} : `}
+              <TooltipValue>{payload[0].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 2 && (
+            <TooltipContent color="#6e95c3">
+              {`${payload[1].name} : `}
+              <TooltipValue>{payload[1].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 3 && (
+            <TooltipContent color="#236bbe">
+              {`${payload[2].name} : `}
+              <TooltipValue>{payload[2].value}</TooltipValue>
+            </TooltipContent>
+          )}
+        </TooltipBody>
+      </TooltipLayout>
+    );
+  }
+
+  return null;
+};
+
 const Chart: React.FC<IChart> = ({
   data = [],
   showTools = false,
@@ -189,42 +254,47 @@ const Chart: React.FC<IChart> = ({
             </YAxis>
           )}
 
-          <Tooltip />
           {legendPayload.length > 0 ? (
-            <Legend
-              iconSize={16}
-              iconType="square"
-              verticalAlign="bottom"
-              payload={legendPayload}
-              // height={50}
-              wrapperStyle={{
-                width: '100%',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                fontSize: 13,
-                height: 40,
-                bottom: 16,
-              }}
-            />
+            <>
+              <Tooltip content={<CustomTooltipLegends legends={legendPayload} />} />
+              <Legend
+                iconSize={16}
+                iconType="square"
+                verticalAlign="bottom"
+                payload={legendPayload}
+                // height={50}
+                wrapperStyle={{
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  fontSize: 13,
+                  height: 40,
+                  bottom: 16,
+                }}
+              />
+            </>
           ) : (
-            <Legend
-              iconSize={16}
-              iconType="square"
-              verticalAlign="bottom"
-              // height={50}
-              wrapperStyle={{
-                width: '100%',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                fontSize: 13,
-                height: 40,
-                bottom: 16,
-              }}
-            />
+            <>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                iconSize={16}
+                iconType="square"
+                verticalAlign="bottom"
+                // height={50}
+                wrapperStyle={{
+                  width: '100%',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  fontSize: 13,
+                  height: 40,
+                  bottom: 16,
+                }}
+              />
+            </>
           )}
 
           {chartConfig?.firstDataKey && (
@@ -270,4 +340,29 @@ const MainLayout = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+`;
+
+const TooltipLayout = styled.div`
+  background-color: #18232f;
+  border-radius: 6px;
+  border: solid 1px #23beb9;
+`;
+const TooltipHeader = styled.div`
+  border-bottom: solid 1px #23beb9;
+  padding: 8px;
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+`;
+const TooltipBody = styled.div`
+  padding: 8px;
+`;
+
+const TooltipContent = styled.div`
+  font-size: 12px;
+  color: ${(props) => (props.color ? props.color : 'black')};
+`;
+
+const TooltipValue = styled.span`
+  font-weight: bold;
 `;

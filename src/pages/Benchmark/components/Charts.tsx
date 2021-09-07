@@ -72,7 +72,7 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
         break;
       }
     }
-    
+
     for (let i = 0; i < stake.length; i++) {
       if (stake[i] === undefined) {
         stake[i] = {
