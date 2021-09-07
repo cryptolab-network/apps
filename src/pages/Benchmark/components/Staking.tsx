@@ -436,6 +436,14 @@ const Staking = () => {
     }
   }, [advancedOption.advanced, t]);
 
+  const walletBalance = useMemo(() => {
+    if (selectedAccount) {
+      return _formatBalance(selectedAccount?.balances?.totalBalance);
+    } else {
+      return t('benchmark.staking.selectWallet');
+    }
+  }, [_formatBalance, selectedAccount, t]);
+
   const networkDisplayDOM = useMemo(() => {
     if (networkCapitalCodeName(networkName) === NetworkCodeName.KSM) {
       return (
@@ -1896,8 +1904,7 @@ const Staking = () => {
                 }}
               >
                 <Balance>
-                  <div>{t('benchmark.staking.balance')}:</div>
-                  <div>0.2584 KSM</div>
+                  <div>{t('benchmark.staking.balance')}: {walletBalance}</div>
                 </Balance>
 
                 {showBondedBtn && (
