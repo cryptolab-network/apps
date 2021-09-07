@@ -300,7 +300,6 @@ const ValidatorStatus = (props) => {
                     firstDataYAxis: 'left',
                     secondDataYAxis: 'right',
                   }}
-                  // legendPayload={[{ value: 'test1' }, { value: 'test2' }]}
                 />
               </ChartContainer>
               <ChartContainer>

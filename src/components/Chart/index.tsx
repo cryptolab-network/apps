@@ -40,12 +40,29 @@ interface IChart {
 const CustomTooltipLegends = ({ active, payload, label, legends }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ backgroundColor: 'white', borderRadius: 6 }}>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${label}`}</p>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${legends[0].value} : ${payload[0].value}`}</p>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${legends[1].value} : ${payload[1].value}`}</p>
-        {/* <p className="intro">{getIntroOfPage(label)}</p> */}
-      </div>
+      <TooltipLayout>
+        <TooltipHeader>{`${label}`}</TooltipHeader>
+        <TooltipBody>
+          {payload.length >= 1 && (
+            <TooltipContent color="#21aca8">
+              {`${legends[0].value} : `}
+              <TooltipValue>{payload[0].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 2 && (
+            <TooltipContent color="#6e95c3">
+              {`${legends[1].value} : `}
+              <TooltipValue>{payload[1].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 3 && (
+            <TooltipContent color="#236bbe">
+              {`${legends[2].value} : `}
+              <TooltipValue>{payload[2].value}</TooltipValue>
+            </TooltipContent>
+          )}
+        </TooltipBody>
+      </TooltipLayout>
     );
   }
 
@@ -55,12 +72,29 @@ const CustomTooltipLegends = ({ active, payload, label, legends }: any) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ backgroundColor: 'white', borderRadius: 6 }}>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${label}`}</p>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${payload[0].name} : ${payload[0].value}`}</p>
-        <p style={{ fontSize: 12, color: 'black' }}>{`${payload[1].name} : ${payload[1].value}`}</p>
-        {/* <p className="intro">{getIntroOfPage(label)}</p> */}
-      </div>
+      <TooltipLayout>
+        <TooltipHeader>{`${label}`}</TooltipHeader>
+        <TooltipBody>
+          {payload.length >= 1 && (
+            <TooltipContent color="#21aca8">
+              {`${payload[0].name} : `}
+              <TooltipValue>{payload[0].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 2 && (
+            <TooltipContent color="#6e95c3">
+              {`${payload[1].name} : `}
+              <TooltipValue>{payload[1].value}</TooltipValue>
+            </TooltipContent>
+          )}
+          {payload.length >= 3 && (
+            <TooltipContent color="#236bbe">
+              {`${payload[2].name} : `}
+              <TooltipValue>{payload[2].value}</TooltipValue>
+            </TooltipContent>
+          )}
+        </TooltipBody>
+      </TooltipLayout>
     );
   }
 
@@ -307,4 +341,28 @@ const MainLayout = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+`;
+
+const TooltipLayout = styled.div`
+  background-color: #18232f;
+  border-radius: 6px;
+
+  border: solid 1px #23beb9;
+`;
+const TooltipHeader = styled.div`
+  border-bottom: solid 1px #23beb9;
+  padding: 8px;
+  font-weight: bold;
+`;
+const TooltipBody = styled.div`
+  padding: 8px;
+`;
+
+const TooltipContent = styled.div`
+  font-size: 12px;
+  color: ${(props) => (props.color ? props.color : 'black')};
+`;
+
+const TooltipValue = styled.span`
+  font-weight: bold;
 `;
