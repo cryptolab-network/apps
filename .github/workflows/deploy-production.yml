@@ -1,12 +1,12 @@
 # This is a basic workflow to help you get started with Actions
 
-name: staging
+name: production
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push but only for the main branch
   push:
-    branches: [staging]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -19,14 +19,12 @@ jobs:
     runs-on: ubuntu-latest
 
     # Use environment variables from Environments in setting page
-    environment: staging
+    environment: production
 
     # Set env
     env:
       REACT_APP_API_VERSION: ${{ secrets.REACT_APP_API_VERSION }}
       REACT_APP_GA_TRACKING_ID: ${{ secrets.REACT_APP_GA_TRACKING_ID }}
-      REACT_APP_KUSAMA_WSS: ${{ secrets.REACT_APP_KUSAMA_WSS }}
-      REACT_APP_POLKADOT_WSS: ${{ secrets.REACT_APP_POLKADOT_WSS }}
       REACT_APP_PROXY_TARGET: ${{ secrets.REACT_APP_PROXY_TARGET }}
       REACT_APP_TOOL_DOMAIN: ${{ secrets.REACT_APP_TOOL_DOMAIN }}
 
@@ -58,13 +56,13 @@ jobs:
           aws-region: eu-central-1
       - name: Upload artifacts to S3 with AWS CLI
         run: |
-          aws s3 sync ./build s3://${{ secrets.S3_BUCKET }} --delete --exact-timestamps
+          aws s3 sync ./build s3://${{ secrets.S3_BUCKET_PROD }} --delete --exact-timestamps
       # Trigger code deploy
       - name: Create CodeDeploy Deployment
         id: deploy
         run: |
           aws deploy create-deployment \
-            --application-name cryptolab-staging \
+            --application-name cryptolab-prod \
             --deployment-group-name apps-group \
             --file-exists-behavior OVERWRITE \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
