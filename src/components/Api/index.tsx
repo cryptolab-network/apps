@@ -43,7 +43,7 @@ export interface ApiProps {
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
   const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
-    return account.genesisHash === null || account.genesisHash === networkConfig?.genesisHash;
+    return account.genesisHash === null || account.genesisHash === '' || account.genesisHash === networkConfig?.genesisHash;
   });
 
   return filtered.map((account) => {
@@ -211,7 +211,6 @@ const Api: React.FC = (props) => {
 
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
-      console.log(`api connected to ${endpoint}`);
       api.isReady
         .then(() => {
           setApiState(ApiState.READY);
@@ -220,15 +219,12 @@ const Api: React.FC = (props) => {
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);
-      console.log(`api disconnect from ${endpoint}`);
     });
     api.on('error', (error) => {
       setApiState(ApiState.ERROR);
-      console.log(error);
     });
     api.on('ready', () => {
       setApiState(ApiState.READY);
-      console.log(`api is ready for ${endpoint}`);
 
       web3Enable('CryptoLab')
         .then((injected) => {
