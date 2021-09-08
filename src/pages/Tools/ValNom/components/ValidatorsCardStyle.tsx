@@ -255,7 +255,7 @@ const ValNomContent = () => {
         }
       } catch (err) {
         console.error(err);
-        notifyError(err);
+        notifyError(String(err));
       } finally {
         toggleLoading(false);
       }
