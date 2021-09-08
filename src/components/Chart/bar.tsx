@@ -185,7 +185,7 @@ const Chart: React.FC<IChart> = ({
         >
           <CartesianGrid vertical={false} stroke="#404952" />
           <XAxis
-            tick={{ fill: 'white' }}
+            tick={{ fill: 'white', fontSize: xAxisFontSize }}
             stroke="#404952"
             dataKey={chartConfig?.xKey}
             angle={-55}

@@ -132,7 +132,6 @@ const Chart: React.FC<IChart> = ({
     leftLabel: '',
     rightLabel: '',
   });
-  const [customLegend, setCustomLegend] = useState<any>([]);
 
   useEffect(() => {
     const tempConfig: IChart['config'] = {
