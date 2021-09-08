@@ -331,7 +331,6 @@ const Staking = () => {
     strategy: BASIC_DEFAULT_STRATEGY,
     rewardDestination: null,
   });
-
   const [advancedOption, setAdvancedOption] = useState({
     toggle: false,
     advanced: false,
@@ -1099,6 +1098,15 @@ const Staking = () => {
     ];
   }, [finalFilteredTableData, networkName, t, applyAdvancedFilter, notifyWarn, _formatBalance]);
 
+  useEffect(() => {
+    const defaultValue = localStorage.getItem('supportus');
+    if (defaultValue === null || defaultValue === 'false') {
+      setAdvancedOption((prev) => ({...prev, supportus: false}));
+    } else {
+      setAdvancedOption((prev) => ({...prev, supportus: true}));
+    }
+  }, [])
+
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
       switch (optionName) {
@@ -1112,6 +1120,7 @@ const Staking = () => {
           }
           break;
         case 'supportus':
+          localStorage.setItem('supportus', checked);
           setAdvancedOption((prev) => ({ ...prev, supportus: checked }));
           break;
         default:
