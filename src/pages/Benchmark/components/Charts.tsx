@@ -195,6 +195,8 @@ const CommissionDistributionChart = () => {
           data={commissions}
           leftLabel={t('benchmark.charts.cd.validatorCount')}
           xAxisHeight={80}
+          xAxisFontSize={12}
+          legendPayload={[{ value: t('benchmark.charts.cd.validatorCount') }]}
           config={{
             xKey: 'commission',
             firstDataKey: 'count',
