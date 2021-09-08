@@ -45,6 +45,7 @@ import { useTranslation } from 'react-i18next';
 import { isMobile } from 'react-device-detect';
 import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
+import { initGA } from './utils/ga';
 
 // header
 const Header: React.FC = () => {
@@ -343,6 +344,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
 
 // main applayout, include star animation and light gradient
 const AppLayout = () => {
+  initGA();
   const { t } = useTranslation();
   const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
 

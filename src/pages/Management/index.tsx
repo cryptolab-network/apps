@@ -1,8 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import UnderConstruction from '../../components/UnderConstruction';
+import { useLocation } from 'react-router';
+import { sendPageView } from '../../utils/ga';
 
 const Management: React.FC = () => {
+  sendPageView(useLocation());
   return (
     <MainLayout>
       <UnderConstruction />
