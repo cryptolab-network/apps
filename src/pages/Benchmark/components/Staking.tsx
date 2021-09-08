@@ -360,6 +360,8 @@ const Staking = () => {
   // const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
   const [isAccountInfoLoading, setIsAccountInfoLoading] = useState(true);
 
+  const [customPageSize, setCustomPageSize] = useState(20);
+
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
   const strategyRef = useRef(StrategyType.Common);
@@ -1025,25 +1027,41 @@ const Staking = () => {
                   overFlow: 'hidden',
                 },
                 onClick: () => {
+                  /* perhape for future usage....
                   const expandedRow = rows.find((row) => row.isExpanded);
+                  console.log('row id: ', row.id);
 
                   if (expandedRow) {
-                    const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
+                  console.log('expandedRow: ', expandedRow);
+                  const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
 
-                    if (isSubItemOfRow) {
-                      const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
+                  if (isSubItemOfRow) {
+                  console.log('isSubItemOfRow: ', isSubItemOfRow);
+                  const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
 
-                      if (expandedSubItem) {
-                        const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
-                        if (!isClickedOnExpandedSubItem) {
-                          toggleRowExpanded(expandedSubItem.id, false);
-                        }
-                      }
-                    } else {
-                      toggleRowExpanded(expandedRow.id, false);
-                    }
+                  if (expandedSubItem) {
+                  console.log('expandedSubItem: ', expandedSubItem);
+                  const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
+                  if (!isClickedOnExpandedSubItem) {
+                    console.log('???1');
+                    toggleRowExpanded(expandedSubItem.id, false);
                   }
+                  }
+                  } else {
+                  console.log('???2');
+                  toggleRowExpanded(expandedRow.id, false);
+                  }
+                  }
+                  */
                   row.toggleRowExpanded();
+                  const filter = rows.filter((r) => r.isExpanded && r.id === row.id);
+                  if (filter.length === 1) {
+                    console.log('was open, close now');
+                    setCustomPageSize((prev) => prev - 1);
+                  } else {
+                    console.log('was close, open now');
+                    setCustomPageSize((prev) => prev + 1);
+                  }
                 },
               })}
               title={null}
@@ -1790,6 +1808,7 @@ const Staking = () => {
                   columns={columns}
                   data={finalFilteredTableData.tableData}
                   pagination
+                  customPageSize={customPageSize}
                 />
               ) : (
                 <ScaleLoader />
@@ -1799,7 +1818,15 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, t, filterResultInfo, apiLoading, columns, finalFilteredTableData.tableData]);
+  }, [
+    customPageSize,
+    advancedOption.advanced,
+    t,
+    filterResultInfo,
+    apiLoading,
+    columns,
+    finalFilteredTableData.tableData,
+  ]);
 
   const accountInfo = useMemo(() => {
     if (isAccountInfoLoading) {
