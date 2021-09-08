@@ -84,10 +84,12 @@ const Performance = () => {
           <PerformanceHeader />
         )}
       >
-        <ProfitChart 
-          chain={networkName}
-          accounts={accountsChainInfo}
-          rewards={accountsRewards}/>
+        <ProfitChartLayout>
+          <ProfitChart 
+            chain={networkName}
+            accounts={accountsChainInfo}
+            rewards={accountsRewards}/>
+        </ProfitChartLayout>
         <PortfolioTable
           chain={networkName}
           accounts={accountsChainInfo}
@@ -178,4 +180,8 @@ const HeaderItem = styled.div`
   color: white;
   margin: 0 20px 0 20px;
   align-item: center;
+`;
+
+const ProfitChartLayout = styled.div`
+  height: 300px;
 `;

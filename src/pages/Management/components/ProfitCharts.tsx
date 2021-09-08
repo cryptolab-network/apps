@@ -52,16 +52,12 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
     <Chart
       data={profit}
       leftLabel={`Profit (${chain})`}
+      xAxisHeight={50}
       config = {{
         xKey: 'timestamp',
         firstDataKey: 'sum',
-        secondDataKey: 'profit',
-        thirdDataKey: undefined,
         firstDataYAxis: 'left',
-        secondDataYAxis: undefined,
-        thirdDataYAxis: undefined,
         leftLabel: `Profit (${chain})`,
-        rightLabel: undefined,
       }}
     />
   );
