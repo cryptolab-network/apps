@@ -992,7 +992,14 @@ const Staking = () => {
           // 25.00%  [ 21/84 ]
           return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
         },
-        sortType: 'basic',
+        sortType: (rowA, rowB, id) => {
+          // console.log('value: ', rowA.original[id]);
+          let a = Number(rowA.original[id].rate);
+          let b = Number(rowB.original[id].rate);
+          if (a > b) return 1;
+          if (a < b) return -1;
+          return 0;
+        },
       },
       {
         Header: t('benchmark.staking.table.header.unclaimedEras'),
@@ -1101,11 +1108,11 @@ const Staking = () => {
   useEffect(() => {
     const defaultValue = localStorage.getItem('supportus');
     if (defaultValue === null || defaultValue === 'false') {
-      setAdvancedOption((prev) => ({...prev, supportus: false}));
+      setAdvancedOption((prev) => ({ ...prev, supportus: false }));
     } else {
-      setAdvancedOption((prev) => ({...prev, supportus: true}));
+      setAdvancedOption((prev) => ({ ...prev, supportus: true }));
     }
-  }, [])
+  }, []);
 
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
