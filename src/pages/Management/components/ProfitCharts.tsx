@@ -1,7 +1,7 @@
-import moment from "moment";
-import { useEffect, useState } from "react";
-import { IEraRewards, IStashRewards } from "../../../apis/StashRewards";
-import Chart from "../../../components/Chart";
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import { IEraRewards, IStashRewards } from '../../../apis/StashRewards';
+import Chart from '../../../components/Chart';
 
 interface IProfit {
   timestamp: string;
@@ -46,14 +46,14 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
       sumProfit += profit.profit;
     });
     setProfit(profitsArray);
-    console.log(profitsArray);
+    console.log('profitsArray: ', profitsArray);
   }, [chain, accounts, rewards]);
   return (
     <Chart
       data={profit}
       leftLabel={`Profit (${chain})`}
       xAxisHeight={50}
-      config = {{
+      config={{
         xKey: 'timestamp',
         firstDataKey: 'sum',
         firstDataYAxis: 'left',

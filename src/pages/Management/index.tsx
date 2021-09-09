@@ -6,6 +6,7 @@ import { useLocation } from 'react-router';
 import { sendPageView } from '../../utils/ga';
 import SwitchTab from '../../components/SwitchTab';
 import Performance from './components/Performance';
+import Notification from './components/Notification';
 
 const Management = () => {
   let { path } = useRouteMatch();
@@ -16,8 +17,8 @@ const Management = () => {
       value: '',
     },
     {
-      label: 'Events',
-      value: 'charts',
+      label: 'Notification',
+      value: 'notification',
     },
   ];
 
@@ -29,6 +30,7 @@ const Management = () => {
         <div style={{ width: '100%' }}>
           <Switch>
             <Route exact path={`${path}`} component={Performance} />
+            <Route exact path={`${path}/notification`} component={Notification} />
           </Switch>
         </div>
       </MainLayout>

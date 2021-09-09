@@ -1,17 +1,17 @@
-import styled from "styled-components";
-import CardHeader from "../../../components/Card/CardHeader";
-import PerformanceIcon from "../../../assets/images/performance-icon.svg";
-import { useTranslation } from "react-i18next";
-import { useContext, useEffect, useState } from "react";
-import { hasValues } from "../../../utils/helper";
-import { IAccountChainInfo, queryStakingInfo } from "../../../utils/account";
-import { ApiContext } from "../../../components/Api";
+import styled from 'styled-components';
+import CardHeader from '../../../components/Card/CardHeader';
+import PerformanceIcon from '../../../assets/images/performance-icon.svg';
+import { useTranslation } from 'react-i18next';
+import { useContext, useEffect, useState } from 'react';
+import { hasValues } from '../../../utils/helper';
+import { IAccountChainInfo, queryStakingInfo } from '../../../utils/account';
+import { ApiContext } from '../../../components/Api';
 import { ApiState } from '../../../components/Api';
-import { apiGetStashRewards, IStashRewards } from "../../../apis/StashRewards";
-import moment from "moment";
-import CustomScaleLoader from "../../../components/Spinner/ScaleLoader";
-import PortfolioTable from "./PortFolioTable";
-import ProfitChart from "./ProfitCharts"
+import { apiGetStashRewards, IStashRewards } from '../../../apis/StashRewards';
+import moment from 'moment';
+import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
+import PortfolioTable from './PortFolioTable';
+import ProfitChart from './ProfitCharts';
 
 const PerformanceHeader = () => {
   const { t } = useTranslation();
@@ -36,7 +36,8 @@ const Performance = () => {
   } = useContext(ApiContext);
   const [isReady, setReady] = useState<boolean>(false);
   const [accountsChainInfo, setAccountsChainInfo] = useState<IAccountChainInfo[]>([]);
-  const [accountsRewards, setAccountsRewards] = useState<(IStashRewards|null)[]>([]);
+  const [accountsRewards, setAccountsRewards] = useState<(IStashRewards | null)[]>([]);
+
   useEffect(() => {
     if (accounts.length > 0 && !isReady) {
       const arr: IAccountChainInfo[] = [];
@@ -48,29 +49,31 @@ const Performance = () => {
           const promise = queryStakingInfo(account.address, polkadotApi)
             .then((info) => {
               arr.push(info);
-            }).then(() => {
+            })
+            .then(() => {
               return apiGetStashRewards({
                 params: account.address,
                 query: {
                   start: '2020-01-01',
                   end: moment().format('YYYY-MM-DD'),
                   currency: 'USD',
-                  startBalance: 0.1
-                }
-              }).then((reward) => {
-                rewards.push(reward);
-              }).catch(() => {
-                rewards.push(null);
-              });
-            }).catch(console.error)
-          promises.push(
-            promise
-          );
+                  startBalance: 0.1,
+                },
+              })
+                .then((reward) => {
+                  rewards.push(reward);
+                })
+                .catch(() => {
+                  rewards.push(null);
+                });
+            })
+            .catch(console.error);
+          promises.push(promise);
         }
       });
       Promise.all(promises).then(() => {
         console.log(arr);
-        console.log(rewards);
+        console.log('rewards: ', rewards);
         setAccountsChainInfo(arr);
         setAccountsRewards(rewards);
         setReady(true);
@@ -79,32 +82,17 @@ const Performance = () => {
   }, [accounts, isReady, networkStatus, polkadotApi]);
   if (isReady) {
     return (
-      <CardHeader
-        Header={() => (
-          <PerformanceHeader />
-        )}
-      >
+      <CardHeader Header={() => <PerformanceHeader />}>
         <ProfitChartLayout>
-          <ProfitChart 
-            chain={networkName}
-            accounts={accountsChainInfo}
-            rewards={accountsRewards}/>
+          <ProfitChart chain={networkName} accounts={accountsChainInfo} rewards={accountsRewards} />
         </ProfitChartLayout>
-        <PortfolioTable
-          chain={networkName}
-          accounts={accountsChainInfo}
-          rewards={accountsRewards}
-        />
+        <PortfolioTable chain={networkName} accounts={accountsChainInfo} rewards={accountsRewards} />
       </CardHeader>
     );
   } else {
     return (
-      <CardHeader
-        Header={() => (
-          <PerformanceHeader />
-        )}
-      >
-      <CustomScaleLoader />
+      <CardHeader Header={() => <PerformanceHeader />}>
+        <CustomScaleLoader />
       </CardHeader>
     );
   }
@@ -184,4 +172,5 @@ const HeaderItem = styled.div`
 
 const ProfitChartLayout = styled.div`
   height: 300px;
+  width: 100%;
 `;

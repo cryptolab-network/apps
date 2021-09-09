@@ -30,14 +30,17 @@ export const nominatorOneKVAxios = Axios.create({
 });
 
 export const stashRewardsAxios = Axios.create({
-  baseURL: `${prefix}/stash/`
+  baseURL: `${prefix}/stash/`,
 });
 
 export const nominatedValidatorsAxios = Axios.create({
-  baseURL: `${prefix}/nominated/`
+  baseURL: `${prefix}/nominated/`,
 });
 
-export const subscribeNewsletterAxios =  Axios.create({
-  baseURL: `${prefix}/newsletter/`
+export const subscribeNewsletterAxios = Axios.create({
+  baseURL: `${prefix}/newsletter/`,
 });
 
+export const eventStashAxios = Axios.create({
+  baseURL: `${prefix}/events/stash/`,
+});
