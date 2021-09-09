@@ -355,7 +355,7 @@ i18n
               stakingGuide: '質押教學',
               portfolioBenchmark: '質押評估',
               portfolioManagement: '質押管理',
-              useBenchmark: '連結錢包',
+              useBenchmark: '開始評估',
             },
             newsletter: {
               subscribe: {

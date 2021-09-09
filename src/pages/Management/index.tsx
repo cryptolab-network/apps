@@ -1,6 +1,9 @@
 import React from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
+// import UnderConstruction from '../../components/UnderConstruction';
+import { useLocation } from 'react-router';
+import { sendPageView } from '../../utils/ga';
 import SwitchTab from '../../components/SwitchTab';
 import Performance from './components/Performance';
 
@@ -18,6 +21,7 @@ const Management = () => {
     },
   ];
 
+  sendPageView(useLocation());
   return (
     <ManagementLayout>
       <MainLayout>

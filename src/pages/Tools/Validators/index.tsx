@@ -293,6 +293,8 @@ const ValidatorStatus = (props) => {
                   leftLabel="Nominator Count"
                   rightLabel="Commission ( % )"
                   xAxisHeight={80}
+                  xAxisFontSize={12}
+                  legendPayload={[{ value: 'Nominators' }, { value: 'Commission (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
@@ -307,6 +309,8 @@ const ValidatorStatus = (props) => {
                   data={chartData2}
                   leftLabel="APY"
                   xAxisHeight={80}
+                  xAxisFontSize={12}
+                  legendPayload={[{ value: 'APY (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'apy',

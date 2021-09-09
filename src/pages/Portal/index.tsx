@@ -5,9 +5,11 @@ import { ReactComponent as MicroScopeIcon } from '../../assets/images/microscope
 import { ReactComponent as EyeIcon } from '../../assets/images/eye.svg';
 import { ReactComponent as BeakerIcon } from '../../assets/images/beaker.svg';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { sendPageView } from '../../utils/ga';
 
 const Portal = () => {
+  sendPageView(useLocation());
   const history = useHistory();
   const { t } = useTranslation();
   return (

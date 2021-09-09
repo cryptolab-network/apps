@@ -56,7 +56,7 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
+        // console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -67,7 +67,7 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
+        // console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -98,7 +98,7 @@ const StakeDistributionChart = () => {
         },
       });
       const c = parseNominatorStakes(networkName, NetworkConfig[networkName].decimals, nominators);
-      console.log(c);
+      // console.log(c);
       setStake(c);
     };
     parseNominators();
@@ -167,7 +167,7 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
       }
     }
   });
-  console.log(commissions);
+  // console.log(commissions);
   return commissions;
 };
 
@@ -195,6 +195,8 @@ const CommissionDistributionChart = () => {
           data={commissions}
           leftLabel={t('benchmark.charts.cd.validatorCount')}
           xAxisHeight={80}
+          xAxisFontSize={12}
+          legendPayload={[{ value: t('benchmark.charts.cd.validatorCount') }]}
           config={{
             xKey: 'commission',
             firstDataKey: 'count',

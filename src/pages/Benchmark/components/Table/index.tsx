@@ -2,12 +2,14 @@ import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
+import { useEffect } from 'react';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
   type?: tableType;
   pagination?: boolean;
+  customPageSize?: number;
 };
 
 const CustomTable: React.FC<ICOLUMN> = ({
@@ -15,6 +17,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
   data,
   type = tableType.common,
   pagination = false,
+  customPageSize = 20,
 }) => {
   const {
     getTableProps,
@@ -31,18 +34,23 @@ const CustomTable: React.FC<ICOLUMN> = ({
     gotoPage,
     nextPage,
     previousPage,
-    // setPageSize,
+    setPageSize,
     state: { pageIndex, pageSize },
   } = useTable(
     {
       columns: userColumns,
       data,
-      initialState: { pageSize: 20 },
+      initialState: { pageSize: customPageSize },
     },
     useSortBy,
     useExpanded,
     usePagination // Use the useExpanded plugin hook
   );
+
+  useEffect(() => {
+    setPageSize(customPageSize);
+  }, [customPageSize, setPageSize]);
+
   return (
     <Style>
       <div className="tableWrap">

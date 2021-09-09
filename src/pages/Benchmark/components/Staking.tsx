@@ -331,7 +331,6 @@ const Staking = () => {
     strategy: BASIC_DEFAULT_STRATEGY,
     rewardDestination: null,
   });
-
   const [advancedOption, setAdvancedOption] = useState({
     toggle: false,
     advanced: false,
@@ -359,6 +358,8 @@ const Staking = () => {
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
   // const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
   const [isAccountInfoLoading, setIsAccountInfoLoading] = useState(true);
+
+  const [customPageSize, setCustomPageSize] = useState(20);
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -991,7 +992,14 @@ const Staking = () => {
           // 25.00%  [ 21/84 ]
           return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
         },
-        sortType: 'basic',
+        sortType: (rowA, rowB, id) => {
+          // console.log('value: ', rowA.original[id]);
+          let a = Number(rowA.original[id].rate);
+          let b = Number(rowB.original[id].rate);
+          if (a > b) return 1;
+          if (a < b) return -1;
+          return 0;
+        },
       },
       {
         Header: t('benchmark.staking.table.header.unclaimedEras'),
@@ -1025,25 +1033,41 @@ const Staking = () => {
                   overFlow: 'hidden',
                 },
                 onClick: () => {
+                  /* perhape for future usage....
                   const expandedRow = rows.find((row) => row.isExpanded);
+                  console.log('row id: ', row.id);
 
                   if (expandedRow) {
-                    const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
+                  console.log('expandedRow: ', expandedRow);
+                  const isSubItemOfRow = Boolean(expandedRow && row.id.split('.')[0] === expandedRow.id);
 
-                    if (isSubItemOfRow) {
-                      const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
+                  if (isSubItemOfRow) {
+                  console.log('isSubItemOfRow: ', isSubItemOfRow);
+                  const expandedSubItem = expandedRow.subRows.find((subRow) => subRow.isExpanded);
 
-                      if (expandedSubItem) {
-                        const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
-                        if (!isClickedOnExpandedSubItem) {
-                          toggleRowExpanded(expandedSubItem.id, false);
-                        }
-                      }
-                    } else {
-                      toggleRowExpanded(expandedRow.id, false);
-                    }
+                  if (expandedSubItem) {
+                  console.log('expandedSubItem: ', expandedSubItem);
+                  const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
+                  if (!isClickedOnExpandedSubItem) {
+                    console.log('???1');
+                    toggleRowExpanded(expandedSubItem.id, false);
                   }
+                  }
+                  } else {
+                  console.log('???2');
+                  toggleRowExpanded(expandedRow.id, false);
+                  }
+                  }
+                  */
                   row.toggleRowExpanded();
+                  const filter = rows.filter((r) => r.isExpanded && r.id === row.id);
+                  if (filter.length === 1) {
+                    console.log('was open, close now');
+                    setCustomPageSize((prev) => prev - 1);
+                  } else {
+                    console.log('was close, open now');
+                    setCustomPageSize((prev) => prev + 1);
+                  }
                 },
               })}
               title={null}
@@ -1081,6 +1105,15 @@ const Staking = () => {
     ];
   }, [finalFilteredTableData, networkName, t, applyAdvancedFilter, notifyWarn, _formatBalance]);
 
+  useEffect(() => {
+    const defaultValue = localStorage.getItem('supportus');
+    if (defaultValue === null || defaultValue === 'false') {
+      setAdvancedOption((prev) => ({ ...prev, supportus: false }));
+    } else {
+      setAdvancedOption((prev) => ({ ...prev, supportus: true }));
+    }
+  }, []);
+
   const handleAdvancedOptionChange = useCallback(
     (optionName) => (checked) => {
       switch (optionName) {
@@ -1094,6 +1127,7 @@ const Staking = () => {
           }
           break;
         case 'supportus':
+          localStorage.setItem('supportus', checked);
           setAdvancedOption((prev) => ({ ...prev, supportus: checked }));
           break;
         default:
@@ -1790,6 +1824,7 @@ const Staking = () => {
                   columns={columns}
                   data={finalFilteredTableData.tableData}
                   pagination
+                  customPageSize={customPageSize}
                 />
               ) : (
                 <ScaleLoader />
@@ -1799,7 +1834,15 @@ const Staking = () => {
         </AdvancedBlockWrap>
       </>
     );
-  }, [advancedOption.advanced, t, filterResultInfo, apiLoading, columns, finalFilteredTableData.tableData]);
+  }, [
+    customPageSize,
+    advancedOption.advanced,
+    t,
+    filterResultInfo,
+    apiLoading,
+    columns,
+    finalFilteredTableData.tableData,
+  ]);
 
   const accountInfo = useMemo(() => {
     if (isAccountInfoLoading) {
@@ -1904,7 +1947,8 @@ const Staking = () => {
                 }}
               >
                 <Balance>
-                  <div>{t('benchmark.staking.balance')}: {walletBalance}</div>
+                  <div>{t('benchmark.staking.balance')}:</div>
+                  <div>{walletBalance}</div>
                 </Balance>
 
                 {showBondedBtn && (

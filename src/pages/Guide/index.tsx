@@ -2,8 +2,11 @@ import { Grid } from '@material-ui/core';
 import styled from 'styled-components';
 import GraphicalGuide from './components/GraphicalGuide';
 import TextGuide from './components/TextGuide';
+import { useLocation } from 'react-router-dom';
+import { sendPageView } from '../../utils/ga';
 
 const Guide = () => {
+  sendPageView(useLocation());
   return (
     <GuideLayout>
       <Grid container spacing={6}>
