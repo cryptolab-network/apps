@@ -1,7 +1,10 @@
 import styled from 'styled-components';
 import ValNomStatus from './components/ValidatorsCardStyle';
+import { useLocation } from 'react-router';
+import { sendPageView } from '../../../utils/ga';
 
 const ValNom = () => {
+  sendPageView(useLocation());
   return (
     <ValNomLayout>
       <MainLayout>

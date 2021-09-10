@@ -87,22 +87,30 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
 
 const StakeDistributionChart = () => {
   const { t } = useTranslation();
-  let { network: networkName } = useContext(ApiContext);
+  let { network: networkName, nominatorCache, cacheNominators } = useContext(ApiContext);
   const [stake, setStake] = useState<IStake[]>([]);
   const chain = NetworkConfig[networkName].token;
   useEffect(() => {
     const parseNominators = async () => {
-      const nominators = await apiGetAllNominators({
-        params: {
-          chain: chain,
-        },
-      });
+
+      let nominators;
+      const now = Math.floor(+new Date());
+      if (nominatorCache.nominators !== null && nominatorCache.expireTime !== null && nominatorCache.expireTime > now) {
+        nominators = nominatorCache.nominators;
+      } else {
+        nominators = await apiGetAllNominators({
+          params: {
+            chain: chain,
+          },
+        });
+        cacheNominators(nominators);
+      }
       const c = parseNominatorStakes(networkName, NetworkConfig[networkName].decimals, nominators);
       // console.log(c);
       setStake(c);
     };
     parseNominators();
-  }, [chain, networkName]);
+  }, [chain, networkName, nominatorCache, cacheNominators]);
 
   return (
     <StakeDistributionChartLayout>
@@ -173,15 +181,23 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
 
 const CommissionDistributionChart = () => {
   const { t } = useTranslation();
-  let { network: networkName } = useContext(ApiContext);
+  let { network: networkName, validatorCache, cacheValidators } = useContext(ApiContext);
   const [commissions, setCommissions] = useState<ICommission[]>([]);
   const chain = NetworkConfig[networkName].token;
   useEffect(() => {
     const parseValidators = async () => {
-      const validators = await apiGetAllValidator({
-        params: chain,
-        query: {},
-      });
+      let validators;
+      const now = Math.floor(+new Date());
+
+      if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
+        validators = validatorCache.validators;
+      } else {
+        validators = await apiGetAllValidator({
+          params: chain,
+          query: {},
+        });
+        cacheValidators(validators);
+      }
       const c = parseValidatorCommissions(networkName, validators);
       setCommissions(c);
     };

@@ -324,6 +324,8 @@ const Staking = () => {
     selectedAccount,
     refreshAccountData,
     hasWeb3Injected,
+    validatorCache,
+    cacheValidators
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -1603,6 +1605,8 @@ const Staking = () => {
    * to get the new list
    */
   useEffect(() => {
+    console.log(`validator cache`);
+    console.log(validatorCache);
     let tempId = Math.round(Math.random() * 100);
     const validatorAxiosSource = axios.CancelToken.source();
     (async () => {
@@ -1610,11 +1614,24 @@ const Staking = () => {
         try {
           console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
-          let result = await apiGetAllValidator({
-            params: apiParams.network,
-            query: { ...apiParams },
-            cancelToken: validatorAxiosSource.token,
-          });
+          let result;
+          // retrive validators from in memory cache
+          const now = Math.round(+new Date()); // second
+          console.log(now);
+          if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
+            console.log(`get cached validators`);
+            result = validatorCache.validators;
+          } else {
+            console.log(`get backend validators`);
+            // retrive validators from backend
+            result = await apiGetAllValidator({
+              params: apiParams.network,
+              query: { ...apiParams },
+              cancelToken: validatorAxiosSource.token,
+            });
+            // cache new validators
+            cacheValidators(result);
+          }
           console.log('========== API RETURN ==========', tempId);
           setApiOriginTableData(formatToStakingInfo(result, networkName));
           setApiLoading(false);
@@ -1631,7 +1648,7 @@ const Staking = () => {
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }
     };
-  }, [networkStatus, apiParams, networkName]);
+  }, [networkStatus, apiParams, networkName, validatorCache, cacheValidators]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter

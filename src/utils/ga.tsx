@@ -1,16 +1,24 @@
-import ReactGA from 'react-ga';
+import GA4React from 'ga-4-react';
 import keys from '../config/keys';
 
-export const initGA = () => {
-  console.log(`ga: ${keys.gaTrackingId}`);
-  ReactGA.initialize(keys.gaTrackingId);
+const ga4react = new GA4React(keys.gaTrackingId);
+let ga4;
+
+export const initGA = async () => {
+  try {
+    ga4 = await ga4react.initialize();
+  } catch (err) {
+    // console.error(err);
+  }
 }
 
 export const sendPageView = (location) => {
-  const path = location.pathname + location.search;
-  ReactGA.set({ page: path });
-  ReactGA.pageview(path);
-  console.log(`sendPageView: ${path}`);
-}
+  try {
+    const path = location.pathname + location.search;
+    ga4.pageview(path);  
+  } catch (err) {
+    // console.error(err);
+  }
+} 
 
 
