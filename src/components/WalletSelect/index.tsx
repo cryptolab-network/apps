@@ -188,7 +188,7 @@ const WalletSelect: React.FC = () => {
     } else {
       
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen, notifyWarn, t]);
 
   return (
     <>

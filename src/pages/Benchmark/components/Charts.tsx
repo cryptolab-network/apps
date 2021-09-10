@@ -198,7 +198,7 @@ const CommissionDistributionChart = () => {
       setCommissions(c);
     };
     parseValidators();
-  }, [chain, networkName]);
+  }, [chain, networkName, validatorCache, cacheValidators]);
   return (
     <CommissionDistributionChartLayout>
       <CDCTitle>{t('benchmark.charts.cd.title')}</CDCTitle>

@@ -8,7 +8,7 @@ import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
-import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
+// import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
 import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
@@ -250,12 +250,12 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
             <DotDiv />
             <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
           </TdDiv>
-          <TdDiv>
+          {/* <TdDiv>
             <DotDiv />
             <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
-          </TdDiv>
+          </TdDiv> */}
         </ColumnDiv>
-        <ColumnDiv>
+        {/* <ColumnDiv>
           <ThDiv>{t('app.footer.title.community')}</ThDiv>
           <TdDiv>
             <DotDiv />
@@ -265,7 +265,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
             <DotDiv />
             <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
           </TdDiv>
-        </ColumnDiv>
+        </ColumnDiv> */}
         <ColumnDiv style={{ minWidth: '85px' }}>
           <ThDiv>{t('app.footer.title.language')}</ThDiv>
           <TdDiv>
@@ -290,11 +290,11 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
                 <GithubIcon width="36px" height="36px" />
               </SocialMediaWrapper>
             </a>
-            <a href="#">
+            {/* <a href="#">
               <SocialMediaWrapper>
                 <YoutubeIcon width="36px" height="36px" />
               </SocialMediaWrapper>
-            </a>
+            </a> */}
           </TdDiv>
           <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
           <TdDiv justify_content="center">

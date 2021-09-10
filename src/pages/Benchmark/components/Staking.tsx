@@ -1464,48 +1464,43 @@ const Staking = () => {
     }
 
     let txs;
-    let txFee;
+    // let txFee;
     switch (accountChainInfo.role) {
-      case AccountRole.NONE:
+      case AccountRole.NONE: 
         txs = [
           polkadotApi.tx.staking.bond(selectedAccount.address, stakeAmount, payee),
           polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
         ];
 
-        txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
       case AccountRole.NOMINATOR_AND_CONTROLLER:
-        {
-          const extraBondAmount = stakeAmount - bonded;
-          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
-            txs = [
-              polkadotApi.tx.staking.bondExtra(extraBondAmount),
-              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
-            ];
-          } else {
-            txs = [
-              polkadotApi.tx.staking.setPayee(payee),
-              polkadotApi.tx.staking.bondExtra(extraBondAmount),
-              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
-            ];
-          }
-
-          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+        const extraBondAmount = stakeAmount - bonded;
+        if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+          txs = [
+            polkadotApi.tx.staking.bondExtra(extraBondAmount),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+          ];
+        } else {
+          txs = [
+            polkadotApi.tx.staking.setPayee(payee),
+            polkadotApi.tx.staking.bondExtra(extraBondAmount),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+          ];
         }
+
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
       case AccountRole.CONTROLLER_OF_NOMINATOR:
-        {
-          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
-            txs = [polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))];
-          } else {
-            txs = [
-              polkadotApi.tx.staking.setPayee(payee),
-              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
-            ];
-          }
-          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
+        if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+          txs = [polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))];
+        } else {
+          txs = [
+            polkadotApi.tx.staking.setPayee(payee),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+          ];
         }
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
     }
 
