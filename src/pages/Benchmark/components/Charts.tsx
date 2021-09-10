@@ -56,7 +56,6 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        // console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -67,7 +66,6 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        // console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -106,7 +104,6 @@ const StakeDistributionChart = () => {
         cacheNominators(nominators);
       }
       const c = parseNominatorStakes(networkName, NetworkConfig[networkName].decimals, nominators);
-      // console.log(c);
       setStake(c);
     };
     parseNominators();
@@ -175,7 +172,6 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
       }
     }
   });
-  // console.log(commissions);
   return commissions;
 };
 

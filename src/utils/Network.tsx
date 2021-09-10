@@ -50,44 +50,44 @@ export const chainGetWaitingCount = async (chain: string, api: ApiPromise): Prom
 };
 
 const queryActiveEra = async (api: ApiPromise) => {
-  console.time('chain :: queryActiveEra');
+  // console.time('chain :: queryActiveEra');
   try {
     const [activeEra] = await Promise.all([
       api.query.staking.activeEra(),
     ]);
-    console.timeEnd('chain :: queryActiveEra')
+    // console.timeEnd('chain :: queryActiveEra')
     
     return activeEra.unwrap().index.toNumber();
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return 0;
   }
 }
 
 const queryErasTotalStake = async (api: ApiPromise, activeEra: number) => {
-  console.time('chain :: queryErasTotalStake');
+  // console.time('chain :: queryErasTotalStake');
   try {
     const [erasTotalStake] = await Promise.all([
       api.query.staking.erasTotalStake(activeEra),
     ]);
-    console.timeEnd('chain :: queryErasTotalStake');
+    // console.timeEnd('chain :: queryErasTotalStake');
     return erasTotalStake;
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return null;
   }
 }
 
 const queryTotalIssuance = async (api: ApiPromise) => {
-  console.time('chain :: queryTotalIssuance');
+  // console.time('chain :: queryTotalIssuance');
   try {
     const [totalIssuance] = await Promise.all([
       api.query.balances.totalIssuance(),
     ]);
-    console.timeEnd('chain :: queryTotalIssuance')
+    // console.timeEnd('chain :: queryTotalIssuance')
     return totalIssuance;
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     return null;
   }
 }

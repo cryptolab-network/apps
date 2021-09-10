@@ -157,7 +157,6 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
     })
       .then((result) => {
         let message = '';
-        console.log(result);
         if (result === 0) {
           message = t('app.newsletter.subscribe.successful');
           toast.info(`${message}`, {
@@ -353,7 +352,6 @@ const AppLayout = () => {
   const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
 
   const handleDialogClose = (name) => {
-    console.log('close name: ', name);
     switch (name) {
       case 'validators':
         setVisibleOurValidatorsDialog(false);
@@ -368,7 +366,6 @@ const AppLayout = () => {
   };
 
   const handleDialogOpen = (name) => {
-    console.log('open name: ', name);
     switch (name) {
       case 'validators':
         setVisibleOurValidatorsDialog(true);

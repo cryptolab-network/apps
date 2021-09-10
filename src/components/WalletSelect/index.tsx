@@ -23,9 +23,6 @@ const WalletSelect: React.FC = () => {
     selectAccount,
     isLoading,
   } = useContext(ApiContext);
-  console.log(`accounts`);
-  console.log(accounts);
-  console.log(selectedAccount);
   const [isOpen, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLDivElement>(null);
@@ -72,7 +69,6 @@ const WalletSelect: React.FC = () => {
   }, []);
 
   const installWallet = () => {
-    console.log('in installWallet');
     window.open('https://polkadot.js.org/extension/', '_blank', 'noopener noreferrer');
   };
 
@@ -111,7 +107,6 @@ const WalletSelect: React.FC = () => {
   const accountListDOM = useMemo(() => {
     let dom: Array<any> = [];
     if (accounts.length === 0) {
-      console.log('no length');
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
@@ -126,7 +121,6 @@ const WalletSelect: React.FC = () => {
             key={`wallet-select-${idx}`}
             className="li"
             onClick={() => {
-              console.log('wallet in li: ', account);
               selectAccount(account);
               close();
             }}

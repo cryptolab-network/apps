@@ -28,7 +28,6 @@ export const getNominators = createAsyncThunk('nominators/getNominators', async 
       elements: m
     }
   } catch (err) {
-    console.log(err);
     throw Error('getNominators');
   }
 })
