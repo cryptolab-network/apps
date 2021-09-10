@@ -26,7 +26,7 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues, isEmpty } from '../../../utils/helper';
-import { apiGetAllValidator } from '../../../apis/Validator';
+import { apiGetAllValidator, apiNominate, INominateInfo } from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -45,7 +45,7 @@ import {
 } from './utils';
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
-import { ApiPromise } from '@polkadot/api';
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { balanceUnit } from '../../../utils/string';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import keys from '../../../config/keys';
@@ -56,8 +56,9 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import { INominatorInfo } from '../../../apis/Nominator';
 
-enum Strategy {
+export enum Strategy {
   LOW_RISK,
   HIGH_APY,
   DECENTRAL,
@@ -360,6 +361,7 @@ const Staking = () => {
   const [minNominatorBond, setMinNominatorBond] = useState<string>('');
   // const [extraBalanceInfoVisible, setExtraBalanceInfoVisible] = useState<boolean>(true);
   const [isAccountInfoLoading, setIsAccountInfoLoading] = useState(true);
+  const [nominateInfo, setNominateInfo] = useState<INominateInfo>();
 
   const [customPageSize, setCustomPageSize] = useState(20);
 
@@ -648,20 +650,16 @@ const Staking = () => {
     ({ events = [], status }: { events?: EventRecord[]; status: ExtrinsicStatus }) => {
       setIsAccountInfoLoading(true);
       if (status.isInvalid) {
-        console.log('Transaction invalid');
         notifyWarn(t('benchmark.staking.warnings.transactionFailed'));
       } else if (status.isReady) {
-        console.log('Transaction is ready');
         notifyInfo(t('benchmark.staking.warnings.transactionReady'));
       } else if (status.isBroadcast) {
-        console.log('Transaction has been broadcasted');
         notifyInfo(<div>{t('benchmark.staking.warnings.transactionBroadcasted')}</div>);
       } else if (status.isInBlock) {
-        console.log('Transaction is included in block');
         notifyInfo(t('benchmark.staking.warnings.transactionIsIncluded'));
       } else if (status.isFinalized) {
         const blockHash = status.asFinalized.toHex();
-        console.log(`Transaction is included in block ${blockHash}`);
+        
         notifyInfo(
           <div>
             {t('benchmark.staking.warnings.transactionIsIncludedInBlock')} {blockHash.substring(0, 9)}...
@@ -670,10 +668,8 @@ const Staking = () => {
         );
         events.forEach(({ event }) => {
           if (event.method === 'ExtrinsicSuccess') {
-            console.log('Transaction succeeded');
             notifySuccess(t('benchmark.staking.warnings.transactionSucceeded'));
           } else if (event.method === 'ExtrinsicFailed') {
-            console.log('Transaction failed');
             notifyFailed(t('benchmark.staking.warnings.transactionFailed'));
           }
         });
@@ -896,7 +892,6 @@ const Staking = () => {
   }, [finalFilteredTableData, notifyWarn, _formatBalance, networkName]);
 
   const columns = useMemo(() => {
-    console.log(`call `);
     return [
       {
         Header: (
@@ -995,7 +990,6 @@ const Staking = () => {
           return <EraInclusion rate={value.rate} activeCount={value.activeCount} total={value.total} />;
         },
         sortType: (rowA, rowB, id) => {
-          // console.log('value: ', rowA.original[id]);
           let a = Number(rowA.original[id].rate);
           let b = Number(rowB.original[id].rate);
           if (a > b) return 1;
@@ -1064,10 +1058,8 @@ const Staking = () => {
                   row.toggleRowExpanded();
                   const filter = rows.filter((r) => r.isExpanded && r.id === row.id);
                   if (filter.length === 1) {
-                    console.log('was open, close now');
                     setCustomPageSize((prev) => prev - 1);
                   } else {
-                    console.log('was close, open now');
                     setCustomPageSize((prev) => prev + 1);
                   }
                 },
@@ -1201,7 +1193,6 @@ const Staking = () => {
    * to its corresponding setting/configuration
    */
   const handleStrategyChange = (e: IStrategy) => {
-    console.log('strategy ref: ', strategyRef);
     switch (e.value) {
       case Strategy.LOW_RISK:
         setAdvancedSetting(StrategyConfig.LOW_RISK);
@@ -1262,7 +1253,6 @@ const Staking = () => {
           const bonded = accountChainInfo ? BigInt(accountChainInfo.bonded) : BigInt(0);
           const minBonded = BigInt(minNominatorBond);
           if (input > transferrable + bonded || input < minBonded) {
-            console.log(`input value should be <= transferrable and >= minBonded`);
           }
         } else {
           // not a number
@@ -1286,10 +1276,12 @@ const Staking = () => {
       IStakeAmountValidateType.BONDED,
       notifyWarn
     );
-    setInputData((prev) => ({
-      ...prev,
-      stakeAmount: Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
-    }));
+    if (accountChainInfo) {
+      setInputData((prev) => ({
+        ...prev,
+        stakeAmount: Number(_formatBalance(accountChainInfo?.bonded).split(' ')[0]),
+      }));
+    }
   }, [_formatBalance, accountChainInfo?.bonded, notifyWarn]);
 
   const handleMaxClick = useCallback(() => {
@@ -1398,10 +1390,8 @@ const Staking = () => {
    * handle nominate transaction
    */
   const handleNominate = useCallback(async () => {
-    console.log('Nominate');
 
     if (!accountChainInfo) {
-      // console.log('no account chain info');
       notifyWarn('Failed to fetch on-chain data.');
       return;
     }
@@ -1412,13 +1402,17 @@ const Staking = () => {
       : parseInt(limits.maxNominatorsCount.toString());
     const minNominatorBond = parseInt(limits.minNominatorBond.toString());
     const counterForNominators = parseInt(limits.counterForNominators.toString());
-    const stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
+    let stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
     const bonded = BigInt(accountChainInfo.bonded);
+    // handle tiny number
+    const displayBonded = Number(_formatBalance(accountChainInfo.bonded).split(' ')[0]);
+    if (inputData.stakeAmount === displayBonded) {
+      stakeAmount = bonded;
+    }
     const transferrable = BigInt(selectedAccount.balances.availableBalance);
 
     // checks
     if (counterForNominators >= maxNominatorsCount) {
-      // console.log(`not allow to nominate, because hit maxNominatorsCount ${maxNominatorsCount}`);
       notifyWarn('It reaches maximum nominators count.');
       return;
     }
@@ -1428,55 +1422,43 @@ const Staking = () => {
       accountChainInfo?.role === AccountRole.CONTROLLER_OF_VALIDATOR ||
       accountChainInfo?.role === AccountRole.NOMINATOR
     ) {
-      // console.log(`not allow to nominate, role is ${accountChainInfo.role}`);
       notifyWarn("This account's role is not allowed to nominate.");
       return;
     }
 
     if (stakeAmount < minNominatorBond) {
-      // console.log(
-      //   `not allow to nominate, the input stake amount ${stakeAmount} should be great than minNominatorBond ${minNominatorBond}`
-      // );
       notifyWarn(`The minimal nominator bond is ${_formatBalance(minNominatorBond.toString())}`);
       return;
     }
 
     if (stakeAmount > bonded + transferrable) {
-      // console.log(
-      //   `not allow to nominate, the input stake amount should be less than transferrable ${
-      //     bonded + transferrable
-      //   }`
-      // );
       notifyWarn('Not sufficient balance.');
       return;
     }
 
+    if (bonded > 0 && stakeAmount < bonded) {
+      notifyWarn('Input amount must be greater than bonded');
+      return;
+    }
+
     const selectedValidators = finalFilteredTableData.tableData.filter((v) => v.select);
-    console.log(selectedValidators);
-    console.log(selectedValidators.length);
 
     if (selectedValidators.length === 0) {
-      // console.log(`not allow to nominate, selected validators should greater than zero.`);
       notifyWarn('No selected validators.');
       return;
     }
 
     if (selectedValidators.length > NetworkConfig[networkName].maxNominateCount) {
-      // console.log(
-      //   `not allow to nominate, selected validators should be less than ${NetworkConfig[networkName].maxNominateCount}`
-      // );
       notifyWarn('Too many selected validators.');
       return;
     }
 
     if (inputData.rewardDestination === null) {
-      // console.log(`not allow to nominate, reward destination is null`);
       notifyWarn('Reward distination is null');
       return;
     }
 
     // reward destination
-    console.log(inputData.rewardDestination.value);
     let payee;
     switch (inputData.rewardDestination.value) {
       case RewardDestinationType.STAKED:
@@ -1497,29 +1479,33 @@ const Staking = () => {
     }
 
     let txs;
-    let txFee;
+    // let txFee;
     switch (accountChainInfo.role) {
-      case AccountRole.NONE:
+      case AccountRole.NONE: 
         txs = [
           polkadotApi.tx.staking.bond(selectedAccount.address, stakeAmount, payee),
           polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
         ];
 
-        txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-
-        console.log(`
-            class=${txFee.class.toString()},
-            weight=${txFee.weight.toString()},
-            partialFee=${txFee.partialFee.toHuman()}
-          `);
-
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
       case AccountRole.NOMINATOR_AND_CONTROLLER:
-        {
-          const extraBondAmount = stakeAmount - bonded;
-          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+        const extraBondAmount = stakeAmount - bonded; 
+        if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+          if (extraBondAmount === BigInt(0)) {
+            txs = [
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+            ];
+          } else {
             txs = [
               polkadotApi.tx.staking.bondExtra(extraBondAmount),
+              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+            ];
+          }
+        } else {
+          if (extraBondAmount === BigInt(0)) {
+            txs = [
+              polkadotApi.tx.staking.setPayee(payee),
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
             ];
           } else {
@@ -1529,47 +1515,77 @@ const Staking = () => {
               polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
             ];
           }
-
-          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-          console.log(`
-            class=${txFee.class.toString()},
-            weight=${txFee.weight.toString()},
-            partialFee=${txFee.partialFee.toHuman()}
-          `);
         }
+
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
       case AccountRole.CONTROLLER_OF_NOMINATOR:
-        {
-          if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
-            txs = [polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))];
-          } else {
-            txs = [
-              polkadotApi.tx.staking.setPayee(payee),
-              polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
-            ];
-          }
-          const txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
-          console.log(`
-            class=${txFee.class.toString()},
-            weight=${txFee.weight.toString()},
-            partialFee=${txFee.partialFee.toHuman()}
-          `);
+        if (inputData.rewardDestination.value === accountChainInfo.rewardDestination) {
+          txs = [polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account))];
+        } else {
+          txs = [
+            polkadotApi.tx.staking.setPayee(payee),
+            polkadotApi.tx.staking.nominate(selectedValidators.map((v) => v.account)),
+          ];
         }
+        // txFee = await polkadotApi.tx.utility.batch(txs).paymentInfo(selectedAccount.address);
         break;
     }
 
+    // store nominate info to backend
+    let strategy;
+    switch(inputData.strategy.value) {
+      case Strategy.LOW_RISK:
+        strategy = Strategy.LOW_RISK;
+        break;
+      case Strategy.HIGH_APY:
+        strategy = Strategy.HIGH_APY;
+        break;
+      case Strategy.DECENTRAL:
+        strategy = Strategy.DECENTRAL;
+        break;
+      case Strategy.ONE_KV:
+        strategy = Strategy.ONE_KV;
+        break;
+      case Strategy.CUSTOM:
+        strategy = Strategy.CUSTOM;
+        break;
+      default:
+        strategy = 9999;
+    }
+    setNominateInfo({
+      stash: selectedAccount.address,
+      validators: selectedValidators.map((v) => v.account),
+      amount: Number(stakeAmount),
+      strategy,
+      extrinsicHash: ''
+    });
+
     // finds an injector for an address
     const injector = await web3FromAddress(selectedAccount.address);
-
+    
     // ready to sign and send tx
     notifyProcessing('Trasaction is processing ');
-    polkadotApi.tx.utility
-      .batch(txs)
+
+    const submittable = polkadotApi.tx.utility.batch(txs);
+    submittable
       .signAndSend(selectedAccount.address, { signer: injector.signer }, txStatusCallback)
+      .then(() => {
+        console.log(`signed hash: ${submittable.hash}`);
+      })
       .catch((err) => {
-        console.log(err);
-        toast.dismiss();
-        notifyWarn('Transaction is cancelled');
+        const errString: string = err.toString();
+        if (errString.indexOf('1010') !== -1) {
+          toast.dismiss();
+          notifyWarn('Inability to apy some fees. Account balance too low');
+        } else if (errString.indexOf('Cancelled') !== -1) {
+          toast.dismiss();
+          notifyWarn('Transaction is cancelled');
+        } else {
+          // todo: collect error data 
+          toast.dismiss();
+          notifyWarn('Something went wrong. Please try again.');
+        }
       });
   }, [
     accountChainInfo,
@@ -1583,6 +1599,7 @@ const Staking = () => {
     txStatusCallback,
     notifyWarn,
     _formatBalance,
+    setNominateInfo
   ]);
 
   // while network status change, reset input stake amount
@@ -1610,16 +1627,14 @@ const Staking = () => {
     (async () => {
       if (networkStatus === ApiState.READY) {
         try {
-          console.log('========== API Launch ==========', tempId);
+          // console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
           let result;
           // retrive validators from in memory cache
           const now = Math.round(+new Date());
           if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
-            console.log(`get cached validators`);
             result = validatorCache.validators;
           } else {
-            console.log(`get backend validators`);
             // retrive validators from backend
             result = await apiGetAllValidator({
               params: apiParams.network,
@@ -1629,11 +1644,11 @@ const Staking = () => {
             // cache new validators
             cacheValidators(result);
           }
-          console.log('========== API RETURN ==========', tempId);
+          // console.log('========== API RETURN ==========', tempId);
           setApiOriginTableData(formatToStakingInfo(result, networkName));
           setApiLoading(false);
         } catch (error) {
-          console.log('error: ', error);
+          // console.log('error: ', error);
         }
       } else {
         setApiLoading(true);
@@ -1641,7 +1656,7 @@ const Staking = () => {
     })();
     return () => {
       if (networkStatus === ApiState.READY) {
-        console.log('========== API CANCEL ==========', tempId);
+        // console.log('========== API CANCEL ==========', tempId);
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }
     };
