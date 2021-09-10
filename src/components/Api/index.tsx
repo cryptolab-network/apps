@@ -122,6 +122,8 @@ const Api: React.FC = (props) => {
         setNetwork(target);
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);
+        setValidatorCache({} as unknown as IValidatorCache);
+        setNominatorCache({} as unknown as INominatorCache);
       }
     },
     [setNetwork, network]
