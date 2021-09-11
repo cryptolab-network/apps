@@ -278,12 +278,12 @@ const NetworkStatusTable = () => {
       toggleLoading(true);
       if (networkStatus === ApiState.READY) {
         let c = await chainGetValidatorCounts(networkName, polkadotApi);
-        setValidatorCount(c);
-        c = await chainGetNominatorCounts(networkName, polkadotApi);
-        setNominatorCount(c);
-        c = await chainGetWaitingCount(networkName, polkadotApi);
-        setWaitingCount(c);
+        let d = await chainGetNominatorCounts(networkName, polkadotApi);
+        let f = await chainGetWaitingCount(networkName, polkadotApi);
         const inflation = await calcInflation(networkName, polkadotApi);
+        setValidatorCount(c);
+        setNominatorCount(d);
+        setWaitingCount(f);
         setNetworkData([
           {
             networkName: networkName,
