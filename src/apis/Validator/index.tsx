@@ -1,5 +1,5 @@
 import { CancelToken } from 'axios';
-import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios, nominateAxios } from '../../instance/Axios';
+import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios, nominateAxios, nominatedAxios } from '../../instance/Axios';
 import { Strategy } from '../../pages/Benchmark/components/Staking';
 
 export interface IStatusChange {
@@ -118,12 +118,21 @@ export interface INominateInfo {
   validators: string[];
   amount: number;
   strategy: Strategy;
-  extrinsicHash: string;
 }
 
 export interface INominatePost {
   params: string;
   data: INominateInfo;
+}
+
+export interface INominatedInfo {
+  tag: string;
+  extrinsicHash: string;
+}
+
+export interface INominatedPost {
+  params: string;
+  data: INominatedInfo;
 }
 
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
@@ -174,8 +183,16 @@ export const apiSubscribeNewsletter = (
   });
 };
 
-export const apiNominate = ( data: INominatePost) : Promise<number> => {
+export const apiNominate = ( data: INominatePost) : Promise<string> => {
   return nominateAxios.post(data.params, data.data).then((res) => {
+    return res.data;
+  }).catch((err) => {
+    return err.response.data.code;
+  })
+}
+
+export const apiNominated = ( data: INominatedPost) : Promise<number> => {
+  return nominatedAxios.post(data.params, data.data).then((res) => {
     return 0;
   }).catch((err) => {
     return err.response.data.code;
