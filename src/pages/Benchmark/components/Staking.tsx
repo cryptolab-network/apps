@@ -325,6 +325,7 @@ const Staking = () => {
     refreshAccountData,
     hasWeb3Injected,
     validatorCache,
+    oneKValidatorCache,
     cacheValidators
   } = useContext(ApiContext);
   // state
@@ -1655,8 +1656,11 @@ const Staking = () => {
           setApiLoading(true);
           let result;
           // retrive validators from in memory cache
+          const isOneKv = (apiParams.has_joined_1kv) ? true : false;
           const now = Math.round(+new Date());
-          if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
+          if (isOneKv && oneKValidatorCache.validators !== null && oneKValidatorCache.expireTime !== null && oneKValidatorCache.expireTime > now) {
+            result = oneKValidatorCache.validators;
+          } else if (!isOneKv && validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
             result = validatorCache.validators;
           } else {
             // retrive validators from backend
@@ -1666,7 +1670,7 @@ const Staking = () => {
               cancelToken: validatorAxiosSource.token,
             });
             // cache new validators
-            cacheValidators(result);
+            cacheValidators(result, isOneKv);
           }
           // console.log('========== API RETURN ==========', tempId);
           setApiOriginTableData(formatToStakingInfo(result, networkName));
