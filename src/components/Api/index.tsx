@@ -33,6 +33,11 @@ export interface IValidatorCache {
   expireTime: number | null; // second
 }
 
+export interface IOneKValidatorCache {
+  validators: IValidator[] | null;
+  expireTime: number | null; // second
+}
+
 export interface INominatorCache {
   nominators: INominatorInfo[] | null;
   expireTime: number | null; // second
@@ -51,6 +56,7 @@ export interface ApiProps {
   isLoading: boolean;
   refreshAccountData: Function;
   validatorCache: IValidatorCache;
+  oneKValidatorCache: IOneKValidatorCache;
   cacheValidators: Function;
   nominatorCache: INominatorCache;
   cacheNominators: Function;
@@ -113,6 +119,7 @@ const Api: React.FC = (props) => {
   const [selectedAccount, setSelectedAccount] = useState({} as unknown as IAccount);
   const [isLoading, setIsLoading] = useState(true);
   const [validatorCache, setValidatorCache] = useState({} as unknown as IValidatorCache);
+  const [oneKValidatorCache, setOneKValidatorCache] = useState({} as unknown as IOneKValidatorCache);
   const [nominatorCache, setNominatorCache] = useState({} as unknown as INominatorCache);
 
   const changeNetwork = useCallback(
@@ -123,10 +130,11 @@ const Api: React.FC = (props) => {
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);
         setValidatorCache({} as unknown as IValidatorCache);
+        setOneKValidatorCache({} as unknown as IOneKValidatorCache);
         setNominatorCache({} as unknown as INominatorCache);
       }
     },
-    [setNetwork, network]
+    [setNetwork, network, setApiState, setIsLoading, setSelectedAccount, setValidatorCache, setOneKValidatorCache, setNominatorCache]
   );
 
   const selectAccount = useCallback(
@@ -137,14 +145,21 @@ const Api: React.FC = (props) => {
   );
 
   const cacheValidators = useCallback(
-    (validators: IValidator[]) => {
+    (validators: IValidator[], isOneKv: boolean) => {
       const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
-      setValidatorCache({
-        validators,
-        expireTime
-      })
+      if (isOneKv) {
+        setOneKValidatorCache({
+          validators,
+          expireTime
+        })
+      } else {
+        setValidatorCache({
+          validators,
+          expireTime
+        })
+      }
     },
-    [setValidatorCache]
+    [setValidatorCache, setOneKValidatorCache]
   );
 
   const cacheNominators = useCallback(
@@ -196,6 +211,7 @@ const Api: React.FC = (props) => {
       isLoading,
       refreshAccountData,
       validatorCache,
+      oneKValidatorCache,
       cacheValidators,
       nominatorCache,
       cacheNominators,
@@ -213,6 +229,7 @@ const Api: React.FC = (props) => {
       isLoading,
       refreshAccountData,
       validatorCache,
+      oneKValidatorCache,
       cacheValidators,
       nominatorCache,
       cacheNominators
