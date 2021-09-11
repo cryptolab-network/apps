@@ -44,6 +44,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
     total = lastEraInfo.nominators.reduce((acc, n) => {
       return (acc += n.balance.lockedBalance);
     }, 0);
+    active = lastEraInfo.exposure.total;
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
