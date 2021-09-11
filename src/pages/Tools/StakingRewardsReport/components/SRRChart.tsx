@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import Chart from '../../../../components/Chart';
@@ -23,7 +24,7 @@ interface IChartData {
 
 const mergeEraRewards = (eraRewards) => {
   return eraRewards.map((era) => {
-    era.date = moment.utc(era.timestamp).format('L');
+    era.date = dayjs(era.timestamp).format('MM/DD/YYYY');
     era.total = era.total.toFixed(2);
     return era;
   });
@@ -37,8 +38,8 @@ const SRRChart = ({ stashData, chain }) => {
     let rewardDistribution: number[] = [];
     const units: string[] = [];
     dayRewards.forEach((reward: any) => {
-      const month = moment(reward.date).month();
-      const year = moment(reward.date).year();
+      const month = dayjs(reward.date, 'MM/DD/YYYY').month();
+      const year = dayjs(reward.date, 'MM/DD/YYYY').year();
       const i = units.findIndex((element) => element === year + '/' + makeMonth(month));
       if (i < 0) {
         units.push(year + '/' + makeMonth(month));
