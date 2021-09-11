@@ -30,7 +30,7 @@ import OneKV from './pages/Tools/OneKV';
 import StakingRewardsReport from './pages/Tools/StakingRewardsReport';
 import Data from './pages/Tools/components/Data';
 import Network from './pages/Tools/components/Network';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { apiSubscribeNewsletter } from './apis/Validator';
 import Dialog from './components/Dialog';
 import {
@@ -118,6 +118,7 @@ interface IValidator {
   name: string;
   address: string;
   theme: IconTheme;
+  key: string;
 }
 
 interface ILanguage {
@@ -130,7 +131,7 @@ const languageOptions = [
   { label: 'English', value: 'en' },
   { label: '繁體中文', value: 'zh-TW' },
   { label: '简体中文', value: 'zh-CN' },
-  { label: 'Deutsch', value: 'de' },
+  // { label: 'Deutsch', value: 'de' },
 ];
 
 const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
@@ -382,7 +383,7 @@ const AppLayout = () => {
   const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
     return (
       <Validator>
-        <Identicon value={address} size={35} theme={theme} />
+        <Identicon value={address} size={35} theme={theme}/>
         <span style={{ marginLeft: 8 }}>{name}</span>
       </Validator>
     );
@@ -398,6 +399,7 @@ const AppLayout = () => {
           name={CryptolabDOTValidatorsName[item]}
           address={CryptolabDOTValidators[item]}
           theme="polkadot"
+          key={CryptolabDOTValidators[item]}
         />
       );
     });
@@ -408,6 +410,7 @@ const AppLayout = () => {
           name={CryptolabKSMValidatorsName[item]}
           address={CryptolabKSMValidators[item]}
           theme="polkadot"
+          key={CryptolabKSMValidators[item]}
         />
       );
     });
@@ -582,11 +585,13 @@ const AppLayout = () => {
           />
           {switchtDOM}
         </RouteContent>
-        <Footer
-          handleDialogOpen={(name) => {
-            handleDialogOpen(name);
-          }}
-        />
+        <HelmetProvider>
+          <Footer
+            handleDialogOpen={(name) => {
+              handleDialogOpen(name);
+            }}
+          />
+        </HelmetProvider>
       </>
     );
   }, [
