@@ -48,18 +48,18 @@ const CustomTable: React.FC<ICOLUMN> = ({
       <div className="tableWrap">
         <table {...getTableProps()}>
           <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => {
+            {headerGroups.map((headerGroup, i) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={i}>
+                {headerGroup.headers.map((column, j) => {
                   if (typeof column.Header === 'string') {
                     return (
-                      <th {...column.getSortByToggleProps()}>
+                      <th {...column.getSortByToggleProps()} key={j}>
                         {column.render('Header')}
                         <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
                       </th>
                     );
                   } else {
-                    return <th>{column.render('Header')}</th>;
+                    return <th key={j}>{column.render('Header')}</th>;
                   }
                 })}
               </tr>
@@ -69,7 +69,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {page.map((row, i) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()}>
+                <tr {...row.getRowProps()} key={i}>
                   {type === tableType.stake && !row.canExpand && (
                     <>
                       <td colSpan={7}>{row.cells[4].render('Cell')}</td>
@@ -85,6 +85,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
+                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>
@@ -99,6 +100,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
+                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>

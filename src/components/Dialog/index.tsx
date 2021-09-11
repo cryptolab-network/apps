@@ -60,6 +60,7 @@ const Dialog: React.FC<IDialogWithImage> = ({
       onRequestClose={handleDialogClose}
       style={customStyles}
       contentLabel="Example Modal"
+      ariaHideApp={false}
     >
       <DialogMainLayout padding={padding}>
         {imageDOM}

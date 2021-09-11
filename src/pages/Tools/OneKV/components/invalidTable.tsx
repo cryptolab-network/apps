@@ -52,12 +52,12 @@ const CustomTable: React.FC<ICOLUMN> = ({
       <div className="tableWrap">
         <table {...getTableProps()}>
           <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getSortByToggleProps()}>
+            {headerGroups.map((headerGroup, i) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={i}>
+                {headerGroup.headers.map((column, j) => (
+                  <th {...column.getSortByToggleProps()} key={j}>
                     {column.render('Header')}
-                    <span>
+                    <span key={j}>
                       {' '}
                       {'  '}
                       {column.isSorted ? column.isSortedDesc ? <SortingDescIcon /> : <SortingAscIcon /> : ''}
@@ -71,7 +71,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {page.map((row, i) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()}>
+                <tr {...row.getRowProps()} key={i}>
                   {type === tableType.stake && !row.canExpand && (
                     <>
                       <td colSpan={7}>{row.cells[4].render('Cell')}</td>
@@ -87,6 +87,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
+                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>
@@ -101,6 +102,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
+                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>

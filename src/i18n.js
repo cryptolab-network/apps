@@ -39,7 +39,7 @@ i18n
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     detection: lcdOptions,
-    debug: true,
+    debug: false,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
@@ -260,6 +260,7 @@ i18n
                 maxNominations: 'maximum nomination has reached.',
                 installWallet: 'Please install wallet.',
                 noAccount: "You currently don't have any accounts. Use the polkadot{.js} extension to create your first account.",
+                nominating: "Processing transaction. As such staking operations are not permitted.",
               },
               table: {
                 header: {
@@ -547,6 +548,7 @@ i18n
                 maxNominations: '已經到達最大的提名數量.',
                 installWallet: '請先安裝錢包',
                 noAccount: "您沒有任何帳戶，請先使用錢包 polkadot{.js} 來創建帳戶.",
+                nominating: "正在執行質押交易. 在此期間無法操作",
               },
               table: {
                 header: {
