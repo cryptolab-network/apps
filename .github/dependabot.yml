@@ -5,11 +5,14 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: 'yarn' # See documentation for possible values
+    directory: '/' # Location of package manifests
     schedule:
-      interval: "daily"
-      time: "02:00"
+      interval: 'daily'
+      time: '02:00'
+    target-branch: 'staging'
+    allow:
+      - dependency-name: '@polkadot/*'
     # Raise all npm pull requests with reviewers
     reviewers:
-      - "iisaint"
+      - 'iisaint'
