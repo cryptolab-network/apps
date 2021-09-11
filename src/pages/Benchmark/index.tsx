@@ -2,11 +2,13 @@ import styled from 'styled-components';
 import SwitchTab from '../../components/SwitchTab';
 import Staking from './components/Staking';
 import Charts from './components/Charts';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { Switch, Route, useRouteMatch, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
+import { sendPageView } from '../../utils/ga';
 
 const Benchmark = () => {
+  sendPageView(useLocation());
   const { t } = useTranslation();
   let { path } = useRouteMatch();
 

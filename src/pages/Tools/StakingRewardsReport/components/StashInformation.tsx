@@ -12,7 +12,6 @@ const StashInformation = ({ stashId, stashData, chain, currency }) => {
   const [firstRewardDate, setFirstRewardDate] = useState('N/A');
   const [lastRewardDate, setLastRewardDate] = useState('N/A');
   useEffect(() => {
-    console.log(stashData);
     if (stashData.eraRewards !== undefined && stashData.eraRewards !== null) {
       const totalRewards = stashData.eraRewards.reduce((acc, r) => {
         acc += r.amount;

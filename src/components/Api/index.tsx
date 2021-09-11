@@ -5,6 +5,8 @@ import { web3Enable, isWeb3Injected, web3Accounts } from '@polkadot/extension-da
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
 import { NetworkConfig } from '../../utils/constants/Network';
+import { IValidator } from '../../apis/Validator';
+import { INominatorInfo } from '../../apis/Nominator';
 
 export enum ApiState {
   DISCONNECTED,
@@ -25,6 +27,16 @@ export interface IAccount {
   balances: IBalance;
   genesisHash?: string | null;
 }
+
+export interface IValidatorCache {
+  validators: IValidator[] | null;
+  expireTime: number | null; // second
+}
+
+export interface INominatorCache {
+  nominators: INominatorInfo[] | null;
+  expireTime: number | null; // second
+}
 export interface ApiProps {
   network: string;
   changeNetwork: Function;
@@ -38,12 +50,16 @@ export interface ApiProps {
   selectAccount: Function;
   isLoading: boolean;
   refreshAccountData: Function;
+  validatorCache: IValidatorCache;
+  cacheValidators: Function;
+  nominatorCache: INominatorCache;
+  cacheNominators: Function;
 }
 
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
   const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
-    return account.genesisHash === null || account.genesisHash === networkConfig?.genesisHash;
+    return account.genesisHash === null || account.genesisHash === '' || account.genesisHash === networkConfig?.genesisHash;
   });
 
   return filtered.map((account) => {
@@ -96,6 +112,8 @@ const Api: React.FC = (props) => {
   const [accounts, setAccounts] = useState([] as unknown as IAccount[]);
   const [selectedAccount, setSelectedAccount] = useState({} as unknown as IAccount);
   const [isLoading, setIsLoading] = useState(true);
+  const [validatorCache, setValidatorCache] = useState({} as unknown as IValidatorCache);
+  const [nominatorCache, setNominatorCache] = useState({} as unknown as INominatorCache);
 
   const changeNetwork = useCallback(
     (target: string) => {
@@ -104,6 +122,8 @@ const Api: React.FC = (props) => {
         setNetwork(target);
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);
+        setValidatorCache({} as unknown as IValidatorCache);
+        setNominatorCache({} as unknown as INominatorCache);
       }
     },
     [setNetwork, network]
@@ -115,6 +135,29 @@ const Api: React.FC = (props) => {
     },
     [setSelectedAccount]
   );
+
+  const cacheValidators = useCallback(
+    (validators: IValidator[]) => {
+      const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
+      setValidatorCache({
+        validators,
+        expireTime
+      })
+    },
+    [setValidatorCache]
+  );
+
+  const cacheNominators = useCallback(
+    (nominators: INominatorInfo[]) => {
+      const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
+      setNominatorCache({
+        nominators,
+        expireTime
+      })
+    },
+    [setNominatorCache]
+  )
+
 
   const refreshAccountData = useCallback(
     (account: IAccount) => {
@@ -152,6 +195,10 @@ const Api: React.FC = (props) => {
       selectAccount,
       isLoading,
       refreshAccountData,
+      validatorCache,
+      cacheValidators,
+      nominatorCache,
+      cacheNominators,
     }),
     [
       network,
@@ -165,6 +212,10 @@ const Api: React.FC = (props) => {
       selectAccount,
       isLoading,
       refreshAccountData,
+      validatorCache,
+      cacheValidators,
+      nominatorCache,
+      cacheNominators
     ]
   );
 
@@ -211,7 +262,6 @@ const Api: React.FC = (props) => {
 
     api.on('connected', () => {
       setApiState(ApiState.CONNECTED);
-      console.log(`api connected to ${endpoint}`);
       api.isReady
         .then(() => {
           setApiState(ApiState.READY);
@@ -220,15 +270,12 @@ const Api: React.FC = (props) => {
     });
     api.on('disconnected', () => {
       setApiState(ApiState.CONNECTED);
-      console.log(`api disconnect from ${endpoint}`);
     });
     api.on('error', (error) => {
       setApiState(ApiState.ERROR);
-      console.log(error);
     });
     api.on('ready', () => {
       setApiState(ApiState.READY);
-      console.log(`api is ready for ${endpoint}`);
 
       web3Enable('CryptoLab')
         .then((injected) => {

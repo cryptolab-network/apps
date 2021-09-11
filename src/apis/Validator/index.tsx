@@ -1,5 +1,6 @@
 import { CancelToken } from 'axios';
-import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios } from '../../instance/Axios';
+import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios, nominateAxios } from '../../instance/Axios';
+import { Strategy } from '../../pages/Benchmark/components/Staking';
 
 export interface IStatusChange {
   commissionChange: number;
@@ -112,6 +113,19 @@ export interface ISubscribeNewsletter {
   email: string;
 }
 
+export interface INominateInfo {
+  stash: string;
+  validators: string[];
+  amount: number;
+  strategy: Strategy;
+  extrinsicHash: string;
+}
+
+export interface INominatePost {
+  params: string;
+  data: INominateInfo;
+}
+
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
   validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
@@ -159,3 +173,11 @@ export const apiSubscribeNewsletter = (
     return err.response.data.code;
   });
 };
+
+export const apiNominate = ( data: INominatePost) : Promise<number> => {
+  return nominateAxios.post(data.params, data.data).then((res) => {
+    return 0;
+  }).catch((err) => {
+    return err.response.data.code;
+  })
+}
