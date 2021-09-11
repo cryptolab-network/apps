@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState, useContext } from 'react';
 import StashInformation from './StashInformation';
 import { useEffect } from 'react';
 import { apiGetStashRewards, IStashRewards } from '../../../../apis/StashRewards';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Grid } from '@material-ui/core';
 import SRRTable from './SRRTable';
 // import IconButton from '../../../../components/Button/IconButton';
@@ -112,7 +112,7 @@ const SRRContent = ({ filters }) => {
 
   const { network: networkName, changeNetwork } = useContext(DataContext);
   if (filters.stashId.length > 0) {
-    if(validateAddress(filters.stashId)) {
+    if (validateAddress(filters.stashId)) {
       if (filters.stashId.startsWith('1')) {
         changeNetwork('Polkadot');
       } else {
@@ -120,7 +120,7 @@ const SRRContent = ({ filters }) => {
       }
     }
   }
-  
+
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
@@ -156,7 +156,7 @@ const SRRContent = ({ filters }) => {
         params: filters.stashId,
         query: {
           start: _filters.startDate || '2020-01-01',
-          end: _filters.endDate || moment().format('YYYY-MM-DD'),
+          end: _filters.endDate || dayjs().format('YYYY-MM-DD'),
           currency: _filters.currency || 'USD',
           startBalance: _filters.startBalance || 0.1,
         },
@@ -173,7 +173,9 @@ const SRRContent = ({ filters }) => {
         const validators = await apiGetNominatedValidators({
           params: `/stash/${s!.stash}/${chain}`,
         });
-        setValidators(validators);
+        if (validators.length > 0) {
+          setValidators(validators);
+        }
       } finally {
         setState(State.LOADED);
       }
@@ -283,7 +285,12 @@ const SRRContent = ({ filters }) => {
           {FilterOptionsLayout}
         </Dialog>
         <StashInformationLayout>
-          <StashInformation stashId={filters.stashId} stashData={stashData} chain={chain} currency={_filters.currency} />
+          <StashInformation
+            stashId={filters.stashId}
+            stashData={stashData}
+            chain={chain}
+            currency={_filters.currency}
+          />
         </StashInformationLayout>
 
         <ContentLayout>
@@ -340,7 +347,7 @@ const SRRLayout = () => {
   const [filters, setFilters] = useState<ISRRFilters>({
     stashId: '',
     startDate: '2020-01-01',
-    endDate: moment().format('YYYY-MM-DD'),
+    endDate: dayjs().format('YYYY-MM-DD'),
     currency: 'USD',
     startBalance: 0.1,
   });

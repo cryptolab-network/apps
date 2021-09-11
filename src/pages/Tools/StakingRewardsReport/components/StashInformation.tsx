@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Account from '../../../../components/Account';
@@ -25,8 +25,8 @@ const StashInformation = ({ stashId, stashData, chain, currency }) => {
       const lastRewardDate = stashData.eraRewards[0].timestamp;
       setTotalRewards(totalRewards);
       setTotalInFiat(totalInFiat);
-      setFirstRewardDate(moment(firstRewardDate).format('YYYY-MM-DD'));
-      setLastRewardDate(moment(lastRewardDate).format('YYYY-MM-DD'));
+      setFirstRewardDate(dayjs(Number(firstRewardDate)).format('YYYY-MM-DD'));
+      setLastRewardDate(dayjs(Number(lastRewardDate)).format('YYYY-MM-DD'));
     }
   }, [stashData, stashData.eraRewards]);
   return (
@@ -42,7 +42,10 @@ const StashInformation = ({ stashId, stashData, chain, currency }) => {
         <InformationTitle>{t('tools.stakingRewards.totalRewards')}</InformationTitle>
         <InformationContent>
           <div style={{ margin: '0 16px 0 0' }}>
-            <span style={{ color: '#23beb9' }}>{totalRewards.toFixed(4)} {chain}</span>&nbsp; / &nbsp;
+            <span style={{ color: '#23beb9' }}>
+              {totalRewards.toFixed(4)} {chain}
+            </span>
+            &nbsp; / &nbsp;
             {totalInFiat.toFixed(2)} {currency}
           </div>
           <div>

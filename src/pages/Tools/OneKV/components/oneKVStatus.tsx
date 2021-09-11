@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import { ReactComponent as MonitorIcon } from '../../../../assets/images/monitor.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
@@ -195,7 +195,7 @@ export const OneKVStatus = () => {
         oneKV = mergeOneKVData(oneKV, oneKVNominators);
         setValidators(oneKV.valid);
         setInvalidValidators(oneKV.invalid);
-        setlastUpdatedTime(moment(oneKV.modifiedTime * 1000).toLocaleString());
+        setlastUpdatedTime(dayjs(oneKV.modifiedTime * 1000).toLocaleString());
       } catch (err) {
         console.error(err);
       }

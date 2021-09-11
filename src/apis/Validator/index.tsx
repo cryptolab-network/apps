@@ -1,5 +1,12 @@
 import { CancelToken } from 'axios';
-import { nominatedValidatorsAxios, singleValidatorAxios, subscribeNewsletterAxios, validatorAxios, nominateAxios, nominatedAxios } from '../../instance/Axios';
+import {
+  nominatedValidatorsAxios,
+  singleValidatorAxios,
+  subscribeNewsletterAxios,
+  validatorAxios,
+  nominateAxios,
+  nominatedAxios,
+} from '../../instance/Axios';
 import { Strategy } from '../../pages/Benchmark/components/Staking';
 
 export interface IStatusChange {
@@ -153,48 +160,55 @@ export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidat
     }
   });
 export const apiGetNominatedValidators = (data: IValidatorRequest): Promise<IValidator[]> =>
-  nominatedValidatorsAxios.get(`${data.params}`, { params: data.query }).then((res) => {
+  nominatedValidatorsAxios
+    .get(`${data.params}`, { params: data.query })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.warn('in apiGetNominatedValidators, err: ', err);
+      return [];
+    });
+
+export const apiGetValidatorUnclaimedEras = (data: IValidatorRequest): Promise<number[]> =>
+  singleValidatorAxios.get(`${data.params}`).then((res) => {
     return res.data;
   });
 
-
-export const apiGetValidatorUnclaimedEras = (
-  data: IValidatorRequest,
-): Promise<number[]> => 
-singleValidatorAxios.get(`${data.params}`).then((res) => {
-  return res.data;
-});
-
-export const apiGetValidatorSlashes = (
-  data: IValidatorRequest,
-): Promise<IValidatorSlash[]> => 
-singleValidatorAxios.get(`${data.params}`).then((res) => {
-  return res.data;
-});
-
-
-export const apiSubscribeNewsletter = (
-  data: ISubscribeNewsletter
-): Promise<number> => {
-  return subscribeNewsletterAxios.post('', data).then((res) => {
-    return 0;
-  }).catch((err) => {
-    return err.response.data.code;
+export const apiGetValidatorSlashes = (data: IValidatorRequest): Promise<IValidatorSlash[]> =>
+  singleValidatorAxios.get(`${data.params}`).then((res) => {
+    return res.data;
   });
+
+export const apiSubscribeNewsletter = (data: ISubscribeNewsletter): Promise<number> => {
+  return subscribeNewsletterAxios
+    .post('', data)
+    .then((res) => {
+      return 0;
+    })
+    .catch((err) => {
+      return err.response.data.code;
+    });
 };
 
-export const apiNominate = ( data: INominatePost) : Promise<string> => {
-  return nominateAxios.post(data.params, data.data).then((res) => {
-    return res.data;
-  }).catch((err) => {
-    return err.response.data.code;
-  })
-}
+export const apiNominate = (data: INominatePost): Promise<string> => {
+  return nominateAxios
+    .post(data.params, data.data)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      return err.response.data.code;
+    });
+};
 
-export const apiNominated = ( data: INominatedPost) : Promise<number> => {
-  return nominatedAxios.post(data.params, data.data).then((res) => {
-    return 0;
-  }).catch((err) => {
-    return err.response.data.code;
-  })
-}
+export const apiNominated = (data: INominatedPost): Promise<number> => {
+  return nominatedAxios
+    .post(data.params, data.data)
+    .then((res) => {
+      return 0;
+    })
+    .catch((err) => {
+      return err.response.data.code;
+    });
+};
