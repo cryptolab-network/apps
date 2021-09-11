@@ -372,24 +372,24 @@ i18n
             },
             portal: {
               slogan: '創造穩定的質押收益',//'最大化您的質押收益',
-              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益，且無須託管您的資產。質押一次， CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
+              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益,且無須託管您的資產。質押一次, CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務,例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術,都能使用我們的服務,簡單地進行質押及其後的管理。',
               stakingGuide: {
                 title: '質押教學',
                 detail: '手把手說明如何使用我們的服務',
               },
               portfolioBenchmark: {
                 title: '質押評估',
-                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略，或是打造您自己的',
+                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略,或是打造您自己的',
               },
               portfolioManagement: {
                 title: '質押管理',
-                detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會即時通知您並採取行動',
+                detail: '穩定性是長期持有的關鍵。在情況發生變化之前,我們會即時通知您並採取行動',
               },
             },
             mobile: {
               warning: '目前不支援手持裝置',
               warningDetail: '我們正在建置中',
-              warningTools: '在此之前，請使用我們的既有網站'
+              warningTools: '在此之前,請使用我們的既有網站'
             }
           },
           tools: {
@@ -488,7 +488,7 @@ i18n
           },
           about: {
             description: '我們是 CryptoLab. Polkadot 和 Kusama 驗證節點的運營者. 我們相信區塊鏈技術將改變生活、工作、甚至思考方式。我們的目標是讓每個人都享受到區塊鏈技術帶來的美好',
-            mission: '因此，我們為各位建立以下服務',
+            mission: '因此,我們為各位建立以下服務',
             mission1: '為持幣者打造的一個直覺易用的質押服務',
             mission2: '為營運者打造的一系列驗證節點輔助工具',
           },
@@ -546,7 +546,7 @@ i18n
                 hasController: "此帳戶已經設定控制者 無法執行質押",
                 maxNominations: '已經到達最大的提名數量.',
                 installWallet: '請先安裝錢包',
-                noAccount: "您沒有任何帳戶，請先使用錢包 polkadot{.js} 來創建帳戶.",
+                noAccount: "您沒有任何帳戶,請先使用錢包 polkadot{.js} 來創建帳戶.",
               },
               table: {
                 header: {
@@ -619,6 +619,97 @@ i18n
           },
         },
       },
+      'zh-CN': {
+        translation: {
+          app: {
+            title: {
+              stakingGuide: '质押教学',
+              portfolioBenchmark: '质押评估',
+              portfolioManagement: '质押管理',
+              useBenchmark: '开始评估',
+            },
+            newsletter: {
+              subscribe: {
+                successful: '感谢您订阅我们的电子报',
+                duplicated: '您已经订阅过我们的电子报了',
+                incorrectFormat: '错误的email格式',
+                failed: '订阅失败',
+              }
+            },
+            footer: {
+              title: {
+                about: '关于我们',
+                contact: '联系我们',
+                ourValidators: '我们的验证节点',
+                technology: '技术',
+                stakingService: '质押服务',
+                toolsForValidators: '验证人工具',
+                telegramBots: 'Telegram 机器人',
+                community: '社群',
+                blog: '博客',
+                medium: 'Medium',
+                subscribeDescription: '订阅电子报来获得CryptoLab的最新消息',
+                subscribe: '订阅',
+                enterEmail: '输入您的Email地址',
+                disclaimer: '使用条款',
+                privacyPolicy: '隐私权政策',
+                general: '一般',
+                language: '多国语系',
+              }
+            },
+            portal: {
+              slogan: '创造稳定的质押收益',
+              sloganDetail: 'CryptoLab 让持币人的生活更加惬意。 我们协助您获得质押收益,且无须托管您的资产。 质押一次, CryptoLab 将为您处理剩下的事情',
+              stakingGuide: {
+                title: '质押教学',
+                detail: '手把手说明如何使用我们的服务',
+              },
+              portfolioBenchmark: {
+                title: '质押评估',
+                detail: '我们了解验证节点。 您可直接使用我们预先建立的质押策略,或是打造您自己的',
+              },
+              portfolioManagement: {
+                title: '质押管理',
+                detail: '稳定性是长期持有的关键。 在情况发生变化之前,我们会实时通知您并采取行动',
+              },
+            },
+            mobile: {
+              warning: '目前不支持手持装置',
+              warningDetail: '我们正在建置中',
+              warningTools: '在此之前,请使用我们的既有网站'
+            }
+          },
+          tools: {
+            title: {
+              valnom: '验证人/提名人状态',
+              oneKvMonitor: '1KV 提名人信息',
+              stakingRewards: '质押奖励查询',
+            },
+            valnom: {
+              title: '验证人/提名人状态',
+              detail: '提供验证人以及提名人实用的工具以便评估您的质押状态',
+              subtitle: '可依条件过滤验证人信息 也可以搜索提名人的ID来查询您提名的节点运行的状况',
+              unfavorite: '点击此图标取消关注此验证人',
+              favorite: '点击此图标以关注此验证人',
+              filters: {
+                sorting: '排序'
+              },
+              tips: {
+                tooManyUnclaimedPayouts: '过多未分配的奖励',
+                activeAmounts: '此Era提名您的质押总数',
+                totalAmounts: '所有提名您的质押总数',
+                apy: '年化报酬率',
+                averageApy: '平均年化报酬率',
+                nominatorCount: '提名人总数',
+                commission: '佣金',
+              },
+            },
+            validators: {
+              apy: '年化报酬率',
+            },
+          },
+        },
+      }  
     }
   });
 export default i18n;

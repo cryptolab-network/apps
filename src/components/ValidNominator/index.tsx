@@ -177,10 +177,10 @@ const ValidNominator: React.FC<IValidNominator> = ({
       </MainInfo>
       <SubInfo>
         <ValuePart>
-          {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
+          {t('tools.valnom.tips.nominatorCount')}:<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
         <ValuePart>
-          {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
+          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
     </ValidNominatorLayout>
