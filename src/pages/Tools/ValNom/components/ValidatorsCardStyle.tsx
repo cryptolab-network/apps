@@ -158,7 +158,7 @@ const ValidatorGrid = ({ filters, validators }) => {
     };
     return displayValidators.map((v, idx) => {
       return (
-        <div style={{ padding: 4, boxSizing: 'border-box' }}>
+        <div style={{ padding: 4, boxSizing: 'border-box' }} key={idx}>
           <ValidNominator
             address={v.id}
             name={v.identity.display}
@@ -255,7 +255,7 @@ const ValNomContent = () => {
         }
       } catch (err) {
         console.error(err);
-        notifyError(err);
+        notifyError(String(err));
       } finally {
         toggleLoading(false);
       }

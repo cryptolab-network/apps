@@ -14,12 +14,13 @@ import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.s
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
 import Chart from '../../../components/Chart';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { DataContext } from '../components/Data';
+import { sendPageView } from '../../../utils/ga';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -43,6 +44,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
     total = lastEraInfo.nominators.reduce((acc, n) => {
       return (acc += n.balance.lockedBalance);
     }, 0);
+    active = lastEraInfo.exposure.total;
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
@@ -93,6 +95,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
 };
 
 const ValidatorStatus = (props) => {
+  sendPageView(useLocation());
   const { t } = useTranslation();
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
@@ -293,6 +296,8 @@ const ValidatorStatus = (props) => {
                   leftLabel="Nominator Count"
                   rightLabel="Commission ( % )"
                   xAxisHeight={80}
+                  xAxisFontSize={12}
+                  legendPayload={[{ value: 'Nominators' }, { value: 'Commission (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
@@ -307,6 +312,8 @@ const ValidatorStatus = (props) => {
                   data={chartData2}
                   leftLabel="APY"
                   xAxisHeight={80}
+                  xAxisFontSize={12}
+                  legendPayload={[{ value: 'APY (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'apy',

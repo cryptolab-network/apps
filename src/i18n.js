@@ -39,7 +39,7 @@ i18n
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     detection: lcdOptions,
-    debug: true,
+    debug: false,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
@@ -260,6 +260,7 @@ i18n
                 maxNominations: 'maximum nomination has reached.',
                 installWallet: 'Please install wallet.',
                 noAccount: "You currently don't have any accounts. Use the polkadot{.js} extension to create your first account.",
+                nominating: "Processing transaction. As such staking operations are not permitted.",
               },
               table: {
                 header: {
@@ -339,7 +340,7 @@ i18n
               stakingGuide: '質押教學',
               portfolioBenchmark: '質押評估',
               portfolioManagement: '質押管理',
-              useBenchmark: '連結錢包',
+              useBenchmark: '開始評估',
             },
             newsletter: {
               subscribe: {
@@ -372,24 +373,24 @@ i18n
             },
             portal: {
               slogan: '創造穩定的質押收益',//'最大化您的質押收益',
-              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益，且無須託管您的資產。質押一次， CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務，例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術，都能使用我們的服務，簡單地進行質押及其後的管理。',
+              sloganDetail: 'CryptoLab 讓持幣人的生活更加愜意。我們協助您獲得質押收益,且無須託管您的資產。質押一次, CryptoLab 將為您處理剩下的事情',//'CryptoLab致力於提供NPoS類型的區塊鏈上質押及管理服務,例如Polkadot以及Kusama。我們的目標是無論您是否懂得區塊鏈技術,都能使用我們的服務,簡單地進行質押及其後的管理。',
               stakingGuide: {
                 title: '質押教學',
                 detail: '手把手說明如何使用我們的服務',
               },
               portfolioBenchmark: {
                 title: '質押評估',
-                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略，或是打造您自己的',
+                detail: '我們瞭解驗證節點。您可直接使用我們預先建立的質押策略,或是打造您自己的',
               },
               portfolioManagement: {
                 title: '質押管理',
-                detail: '穩定性是長期持有的關鍵。在情況發生變化之前，我們會即時通知您並採取行動',
+                detail: '穩定性是長期持有的關鍵。在情況發生變化之前,我們會即時通知您並採取行動',
               },
             },
             mobile: {
               warning: '目前不支援手持裝置',
               warningDetail: '我們正在建置中',
-              warningTools: '在此之前，請使用我們的既有網站'
+              warningTools: '在此之前,請使用我們的既有網站'
             }
           },
           tools: {
@@ -488,7 +489,7 @@ i18n
           },
           about: {
             description: '我們是 CryptoLab. Polkadot 和 Kusama 驗證節點的運營者. 我們相信區塊鏈技術將改變生活、工作、甚至思考方式。我們的目標是讓每個人都享受到區塊鏈技術帶來的美好',
-            mission: '因此，我們為各位建立以下服務',
+            mission: '因此,我們為各位建立以下服務',
             mission1: '為持幣者打造的一個直覺易用的質押服務',
             mission2: '為營運者打造的一系列驗證節點輔助工具',
           },
@@ -546,7 +547,8 @@ i18n
                 hasController: "此帳戶已經設定控制者 無法執行質押",
                 maxNominations: '已經到達最大的提名數量.',
                 installWallet: '請先安裝錢包',
-                noAccount: "您沒有任何帳戶，請先使用錢包 polkadot{.js} 來創建帳戶.",
+                noAccount: "您沒有任何帳戶,請先使用錢包 polkadot{.js} 來創建帳戶.",
+                nominating: "正在執行質押交易. 在此期間無法操作",
               },
               table: {
                 header: {
@@ -619,7 +621,296 @@ i18n
           },
         },
       },
+      'zh-CN':  {
+        translation: {
+        app: {
+        title: {
+        stakingGuide: '质押教学',
+        portfolioBenchmark: '质押评估',
+        portfolioManagement: '质押管理',
+        useBenchmark: '开始评估',
+        },
+        newsletter: {
+        subscribe: {
+        successful: '感谢您订阅我们的电子报',
+        duplicated: '您已经订阅过我们的电子报了',
+        incorrectFormat: '错误的email格式',
+        failed: '订阅失败',
+        }
+        },
+        footer: {
+        title: {
+        about: '关于我们',
+        contact: '联系我们',
+        ourValidators: '我们的验证节点',
+        technology: '技术',
+        stakingService: '质押服务',
+        toolsForValidators: '验证人工具',
+        telegramBots: 'Telegram 机器人',
+        community: '社群',
+        blog: '部落格',
+        medium: 'Medium',
+        subscribeDescription: '订阅电子报来获得CryptoLab的最新消息',
+        subscribe: '订阅',
+        enterEmail: '输入您的Email地址',
+        disclaimer: '使用条款',
+        privacyPolicy: '隐私权政策',
+        general: '一般',
+        language: '多国语系',
+        }
+        },
+        portal: {
+        slogan: '创造稳定的质押收益',
+        sloganDetail: 'CryptoLab 让持币人的生活更加惬意。 我们协助您获得质押收益,且无须托管您的资产。 质押一次, CryptoLab 将为您处理剩下的事情',
+        stakingGuide: {
+        title: '质押教学',
+        detail: '手把手说明如何使用我们的服务',
+        },
+        portfolioBenchmark: {
+        title: '质押评估',
+        detail: '我们了解验证节点。 您可直接使用我们预先建立的质押策略,或是打造您自己的',
+        },
+        portfolioManagement: {
+        title: '质押管理',
+        detail: '稳定性是长期持有的关键。 在情况发生变化之前,我们会即时通知您并采取行动',
+        },
+        },
+        mobile: {
+        warning: '目前不支持手持设备',
+        warningDetail: '我们正在建置中',
+        warningTools: '在此之前,请使用我们的既有网站'
+        }
+        },
+        tools: {
+        title: {
+        valnom: '验证人/提名人状态',
+        oneKvMonitor: '1KV 提名人信息',
+        stakingRewards: '质押奖励查询',
+        },
+        valnom: {
+        title: '验证人/提名人状态',
+        detail: '提供验证人以及提名人实用的工具以便评估您的质押状态',
+        subtitle: '可按条件过滤验证人信息 也可以搜索提名人的ID来查询您提名的节点运行的状况',
+        unfavorite: '点击此图标取消关注此验证人',
+        favorite: '点击此图标以关注此验证人',
+        filters: {
+          sorting: '排序'
+        },
+        tips: {
+        tooManyUnclaimedPayouts: '过多未分配的奖励',
+        activeAmounts: '此Era提名您的质押总数',
+        totalAmounts: '所有提名您的质押总数',
+        apy: '年化报酬率',
+        averageApy: '平均年化报酬率',
+        nominatorCount: '提名人总数',
+        commission: '佣金',
+        },
+        },
+        validators: {
+        apy: '年化报酬率',
+        nominatorCount: '提名人总数',
+        commission: '佣金',
+        selfStake: '本身的质押数',
+        unclaimedEras: '未分配奖励的Era数',
+        slashes: '惩罚次数',
+        activeNominators: '此Era将Stake分配给您的提名人',
+        inactiveNominators: '此Era未将Stake分配给您的提名人',
+        errors: {
+        incorrectValidator1: '不存在的验证人',
+        incorrectValidator2: '请确认您输入正确的ID',
+        }
+        },
+        oneKv: {
+        title: '1KV 提名人信息',
+        detail: '帮助运行1KV节点的人能够评估何时将会被提名',
+        seeInvalid: '查看不符合规则的节点',
+        seeValid: "查看匹配规则的节点",
+        subtitle: '提名顺序以及1KV节点的详细信息',
+        era: 'Era',
+        validValidators: '符合规则的验证人',
+        activeValidators: '验证中的验证人',
+        electedValidators: '1KV提名的验证人',
+        lastUpdateTime: '最近的数据更新时间',
+        table: {
+        header: {
+        era: 'Era',
+        dashboard: '仪表板',
+        name: '名称',
+        commission: '佣金',
+        active: '验证中',
+        oneKvNominated: '1KV提名中',
+        nominationOrder: '下次提名顺序',
+        selfStake: '本身的质押数',
+        rank: '排名',
+        inclusion: '提名率',
+        reasons: '原因',
+        }
+        },
+        optionBar: {
+        stashId: 'Polkadot/Kusama 帐户ID或名称'
+        }
+        },
+        stakingRewards: {
+        title: '质押奖励查询',
+        detail: '帮助提名人查询您的质押奖励, 也能够将您的质押纪律导出',
+        subtitle: '查询与导出您的质押奖励',
+        noRewards: "此账户没有奖励日志",
+        description: '输入您的帐户 ID以查询奖励',
+        enter: '输入您的帐户ID',
+        optionBar: {
+        title: "Polkadot/Kusama 账户 ID",
+        },
+        table: {
+        header: {
+        payoutDate: '奖励分配日期',
+        amount: '总颗数',
+        price: '当日价格',
+        total: '总价'
+        }
+        },
+        stashInformation: '帐户信息',
+        stashId: '账户 ID',
+        totalRewards: '总奖励',
+        from: '从',
+        to: '至',
+        },
+        },
+        about: {
+        description: '我们是 CryptoLab. Polkadot 和 Kusama 验证节点的运营者. 我们相信区块链技术将改变生活、工作、甚至思考方式。 我们的目标是让每个人都享受到区块链技术带来的美好',
+        mission: '因此,我们为各位建立以下服务',
+        mission1: '为持币者打造的一个直觉易用的质押服务',
+        mission2: '为运营者打造的一系列验证节点辅助工具',
+        },
+        benchmark: {
+        routes: {
+        benchmark: '评估',
+        charts: '图表'
+        },
+        charts: {
+        table: {
+        header: {
+        network: '网络',
+        validators: '验证人',
+        waiting: '等待中',
+        nominators: '提名人',
+        averageReturns: '平均报酬'
+        }
+        },
+        sd: {
+        title: '提名人资金分布',
+        nominatorCount: '提名人数量'
+        },
+        cd: {
+        title: '佣金分布',
+        validatorCount: '验证人数量'
+        }
+        },
+        staking: {
+        title: '质押',
+        strategy: {
+        lowRisk: '低风险',
+        highApy: '高收益',
+        decentralized: '分散提名',
+        onekv: 'One Thousand Validator 计划',
+        custom: '自订'
+        },
+        selectWallet: '（请选择一个钱包）',
+        warnings: {
+        transactionInvalid: '无效的交易',
+        transactionReady: '交易已经准备好',
+        transactionBroadcasted: '交易已经在链上广播',
+        transactionIsIncluded: '交易已经被包含在区块中',
+        transactionIsIncludedInBlock: '交易已经被包含在区块',
+        transactionSucceeded: '质押完成',
+        transactionFailed: '质押失败',
+        disconnectedFirst: '您已经从区块链',
+        disconnectedSecond: '网络断开, 请稍待或刷新页面',
+        fetching: '正在抓取验证人清单. 在此期间无法执行质押',
+        noFilteredValidators: '您过滤验证人条件后可选择的验证人数量为0. 请选择新的条件',
+        noSelectedValidators: '您没有选择任何验证人. 请选择至少一个',
+        fetchingStashData: '正在抓取链上的资料. 在此期间无法执行质押',
+        stashInvalid: '此账户没有执行质押相关操作的权限',
+        isValidator: "此账户的角色是验证人 无法执行质押",
+        isControllerOfValidator: "此账户的角色是验证人的控制者 无法执行质押",
+        hasController: "此账户已经设定控制者 无法执行质押",
+        maxNominations: '已经到达最大的提名数量.' ,
+        installWallet: '请先安装钱包',
+        noAccount: "您没有任何帐户,请先使用钱包 polkadot{.js} 来创建帐户." ,
+        nominating: "正在执行质押交易. 在此期间无法操作",
+        },
+        table: {
+        header: {
+        account: '帐户',
+        selfStake: '验证人自己质押的数量',
+        eraInclusion: 'Active比例',
+        unclaimedEras: '未分配收益的Era数',
+        commission: '佣金',
+        avgApy: '平均年化报酬率',
+        active: 'Active',
+        }
+        },
+        controller: {
+        enterAddress: "输入一个帐户",
+        controllerAccount: '控制人帐户',
+        account: '帐户',
+        controller: '控制人',
+        },
+        advancedSettings: '高级设置',
+        filters: {
+        minSelfStake: '最小验证人质押数',
+        maxUnclaimedEras: '最大未分配收益的Era数',
+        apy: '平均年化报酬率',
+        minEraInclusionRate: '最小Active比例',
+        hasIdentity: '有身份认证',
+        isSubIdent: '为子帐户',
+        minApy: '最小年化报酬率',
+        decentralized: '只选择一个同身份的验证者',
+        onekv: '参加1KV 计划'
+        },
+        selected: '已选择',
+        filtered: '已筛选',
+        total: '总数',
+        filterResult: '筛选结果',
+        balance: '总金额',
+        role: '角色',
+        nominees: '提名数量',
+        bonded: '绑定',
+        max: '最大',
+        transferrable: '可转账',
+        reserved: '保留',
+        redeemable: '可解除绑定',
+        strategyString: '策略',
+        calculatedApy: '预估的年化报酬率',
+        rewardDest: '收益对象',
+        nominate: '提名',
+        advanced: '进阶',
+        subtitle: '选择喜欢的策略进行评估',
+        supportUs: '支持我们',
+        displayRole: {
+        validator: '验证人',
+        controller: '控制人',
+        nominator: '提名人',
+        none: '无',
+        },
+        rewardsDestination: {
+        selectOne: '--- 选择一个 ---',
+        staked: '储存账户（增加质押数量）',
+        stash: '储存账户（不增加质押数量）',
+        controller: '控制帐户'
+        },
+        timeCircle: {
+        day: ' 天',
+        hrs: ' 小时',
+        hr: ' 小时',
+        mins: ' 分',
+        s: ' 秒'
+        }
+        }
+        },
+        },
+        },
+        
+        
     }
   });
-  console.log(i18n.language);
 export default i18n;

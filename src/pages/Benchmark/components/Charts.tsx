@@ -56,7 +56,6 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -67,7 +66,6 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
             count: 0,
           };
         }
-        console.log((nominator as any).balance.lockedBalance / Math.pow(10, decimals), xaxisTitle[i]);
         stake[i].count++;
         break;
       }
@@ -87,22 +85,29 @@ const parseNominatorStakes = (network: string, decimals: number, nominators: INo
 
 const StakeDistributionChart = () => {
   const { t } = useTranslation();
-  let { network: networkName } = useContext(ApiContext);
+  let { network: networkName, nominatorCache, cacheNominators } = useContext(ApiContext);
   const [stake, setStake] = useState<IStake[]>([]);
   const chain = NetworkConfig[networkName].token;
   useEffect(() => {
     const parseNominators = async () => {
-      const nominators = await apiGetAllNominators({
-        params: {
-          chain: chain,
-        },
-      });
+
+      let nominators;
+      const now = Math.floor(+new Date());
+      if (nominatorCache.nominators !== null && nominatorCache.expireTime !== null && nominatorCache.expireTime > now) {
+        nominators = nominatorCache.nominators;
+      } else {
+        nominators = await apiGetAllNominators({
+          params: {
+            chain: chain,
+          },
+        });
+        cacheNominators(nominators);
+      }
       const c = parseNominatorStakes(networkName, NetworkConfig[networkName].decimals, nominators);
-      console.log(c);
       setStake(c);
     };
     parseNominators();
-  }, [chain, networkName]);
+  }, [chain, networkName, nominatorCache, cacheNominators]);
 
   return (
     <StakeDistributionChartLayout>
@@ -167,26 +172,33 @@ const parseValidatorCommissions = (network: string, validators: IValidator[]): I
       }
     }
   });
-  console.log(commissions);
   return commissions;
 };
 
 const CommissionDistributionChart = () => {
   const { t } = useTranslation();
-  let { network: networkName } = useContext(ApiContext);
+  let { network: networkName, validatorCache, cacheValidators } = useContext(ApiContext);
   const [commissions, setCommissions] = useState<ICommission[]>([]);
   const chain = NetworkConfig[networkName].token;
   useEffect(() => {
     const parseValidators = async () => {
-      const validators = await apiGetAllValidator({
-        params: chain,
-        query: {},
-      });
+      let validators;
+      const now = Math.floor(+new Date());
+
+      if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
+        validators = validatorCache.validators;
+      } else {
+        validators = await apiGetAllValidator({
+          params: chain,
+          query: {},
+        });
+        cacheValidators(validators);
+      }
       const c = parseValidatorCommissions(networkName, validators);
       setCommissions(c);
     };
     parseValidators();
-  }, [chain, networkName]);
+  }, [chain, networkName, validatorCache, cacheValidators]);
   return (
     <CommissionDistributionChartLayout>
       <CDCTitle>{t('benchmark.charts.cd.title')}</CDCTitle>
@@ -195,6 +207,8 @@ const CommissionDistributionChart = () => {
           data={commissions}
           leftLabel={t('benchmark.charts.cd.validatorCount')}
           xAxisHeight={80}
+          xAxisFontSize={12}
+          legendPayload={[{ value: t('benchmark.charts.cd.validatorCount') }]}
           config={{
             xKey: 'commission',
             firstDataKey: 'count',
@@ -276,12 +290,12 @@ const NetworkStatusTable = () => {
       toggleLoading(true);
       if (networkStatus === ApiState.READY) {
         let c = await chainGetValidatorCounts(networkName, polkadotApi);
-        setValidatorCount(c);
-        c = await chainGetNominatorCounts(networkName, polkadotApi);
-        setNominatorCount(c);
-        c = await chainGetWaitingCount(networkName, polkadotApi);
-        setWaitingCount(c);
+        let d = await chainGetNominatorCounts(networkName, polkadotApi);
+        let f = await chainGetWaitingCount(networkName, polkadotApi);
         const inflation = await calcInflation(networkName, polkadotApi);
+        setValidatorCount(c);
+        setNominatorCount(d);
+        setWaitingCount(f);
         setNetworkData([
           {
             networkName: networkName,

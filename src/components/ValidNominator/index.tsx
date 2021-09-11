@@ -109,31 +109,27 @@ const ValidNominator: React.FC<IValidNominator> = ({
   }, [t, unclaimedPayouts]);
 
   const activeBanner = useMemo(() => {
-    if (parseFloat(activeAmount) > 0) {
-      return (
-        <ActiveBannerLayout>
-          <ActiveBannerIcon />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <StatusLayout
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              {Status}
-            </StatusLayout>
-            <FavoriteLayout
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <Favorite address={address} _favorite={favorite} />
-            </FavoriteLayout>
-          </div>
-        </ActiveBannerLayout>
-      );
-    } else {
-      return <div style={{ width: '100%', height: '18.38px' }}></div>;
-    }
+    return (
+      <ActiveBannerLayout>
+        {parseFloat(activeAmount) > 0 ? <ActiveBannerIcon /> : <div></div>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <StatusLayout
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {Status}
+          </StatusLayout>
+          <FavoriteLayout
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Favorite address={address} _favorite={favorite} />
+          </FavoriteLayout>
+        </div>
+      </ActiveBannerLayout>
+    );
   }, [Status, activeAmount, address, favorite]);
 
   const shortenName = shortenStashId(name);
@@ -181,10 +177,10 @@ const ValidNominator: React.FC<IValidNominator> = ({
       </MainInfo>
       <SubInfo>
         <ValuePart>
-          {t('tools.valnom.tips.nominatorCount')}：<EnhanceValue>{count}</EnhanceValue>
+          {t('tools.valnom.tips.nominatorCount')}:<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
         <ValuePart>
-          {t('tools.valnom.tips.commission')}：<EnhanceValue>{commission}%</EnhanceValue>
+          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
         </ValuePart>
       </SubInfo>
     </ValidNominatorLayout>

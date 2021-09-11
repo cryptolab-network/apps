@@ -75,7 +75,6 @@ export const connectWallet = createAsyncThunk(
       });
 
       if (!isWeb3Injected) {
-        console.log(`no extension`);
         return {
           allInjected: [],
           allAccounts: [],
@@ -86,7 +85,6 @@ export const connectWallet = createAsyncThunk(
       }
 
       if (allInjected.length === 0) {
-        console.log(`denied`);
         return {
           allInjected: [],
           allAccounts: [],
@@ -123,7 +121,7 @@ export const connectWallet = createAsyncThunk(
         selectedAccount,
       };
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw Error('connectWallet');
     }
   }
@@ -143,8 +141,6 @@ export const walletSlice = createSlice({
       };
     },
     setFilteredAccounts: (state, action: PayloadAction<IAccount[]>) => {
-      console.log(`action.payload`);
-      console.log(action.payload);
       return {
         ...state,
         filteredAccounts: [...action.payload],
