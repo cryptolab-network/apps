@@ -19,7 +19,7 @@ export const getUrls = (location: Location, subdomain: string): [string, string]
     return [staking_url, tools_url];
   }
 
-  const staking_url = `${protocol}//${domain}${(port !== '') ? ':' + port : port}`
+  const staking_url = `${protocol}//www.${domain}${(port !== '') ? ':' + port : port}`
   const tools_url = `${protocol}//${subdomain}.${domain}${(port !== '') ? ':' + port : port}`;
   return [staking_url, tools_url];
 }
