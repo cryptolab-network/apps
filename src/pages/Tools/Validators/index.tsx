@@ -45,7 +45,6 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
       return (acc += n.balance.lockedBalance);
     }, 0);
     active = lastEraInfo.exposure.own;
-    console.log(active);
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
