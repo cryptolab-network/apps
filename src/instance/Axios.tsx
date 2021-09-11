@@ -45,3 +45,7 @@ export const nominateAxios =  Axios.create({
   baseURL: `${prefix}/nominate/`
 });
 
+export const nominatedAxios = Axios.create({
+  baseURL: `${prefix}/nominated/`
+});
+
