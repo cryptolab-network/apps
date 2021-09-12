@@ -564,8 +564,10 @@ const Staking = () => {
   }, []);
 
   const queryStakingInfo = useCallback(async (address, api: ApiPromise) => {
-    const info = await api.derive.staking.account(address);
-    const ledger: Option<PolkadotStakingLedger> = await api.query.staking.ledger(address) as Option<PolkadotStakingLedger>;
+    const [info, ledger] = await Promise.all([
+      api.derive.staking.account(address),
+      api.query.staking.ledger<Option<PolkadotStakingLedger>>(address)
+    ])
 
     let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
@@ -584,25 +586,30 @@ const Staking = () => {
     let bonded;
     let validators;
     let stash;
+    let controller;
     if (info.nextSessionIds.length !== 0) {
       role = AccountRole.VALIDATOR;
       bonded = info.stakingLedger.active.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
       stash = info.stashId.toHuman();
+      controller = info.controllerId?.toHuman();
     } else if (!info.stakingLedger.active.unwrap().isZero()) {
       if (info.controllerId?.toHuman() === address) {
         role = AccountRole.NOMINATOR_AND_CONTROLLER;
         bonded = info.stakingLedger.active.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
         stash = info.stashId.toHuman();
+        controller = info.controllerId?.toHuman();
         isNominatable = true;
       } else {
         role = AccountRole.NOMINATOR;
         bonded = info.stakingLedger.active.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
         stash = info.stashId.toHuman();
+        controller = info.controllerId?.toHuman();
       }
     } else if (!ledger.isNone) {
+      controller = selectedAccount.address;
       stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
       rewardDestination = staking.rewardDestination.isStaked
@@ -636,7 +643,7 @@ const Staking = () => {
     setIsAccountInfoLoading(false);
     return {
       role,
-      controller: info.controllerId?.toHuman(),
+      controller,
       stash,
       validators,
       rewardDestination,
