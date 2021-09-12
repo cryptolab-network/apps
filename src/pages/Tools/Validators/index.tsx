@@ -163,6 +163,7 @@ const ValidatorStatus = (props) => {
           const chartData1 = validator.info.map((era) => {
             return {
               nominators: era.nominatorCount,
+              activeNominators: era.exposure.others.length,
               commission: era.commission,
               era: era.era,
             };
@@ -281,13 +282,14 @@ const ValidatorStatus = (props) => {
                   rightLabel="Commission ( % )"
                   xAxisHeight={80}
                   xAxisFontSize={12}
-                  legendPayload={[{ value: 'Nominators' }, { value: 'Commission (%)' }]}
+                  legendPayload={[{ value: 'Nominators' }, {value: 'Active Nominators'}, { value: 'Commission (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
-                    secondDataKey: 'commission',
+                    secondDataKey: 'activeNominators',
+                    thirdDataKey: 'commission',
                     firstDataYAxis: 'left',
-                    secondDataYAxis: 'right',
+                    thirdDataYAxis: 'right',
                   }}
                 />
               </ChartContainer>
