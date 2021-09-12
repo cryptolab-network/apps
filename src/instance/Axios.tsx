@@ -44,3 +44,10 @@ export const subscribeNewsletterAxios = Axios.create({
 export const eventStashAxios = Axios.create({
   baseURL: `${prefix}/events/stash/`,
 });
+export const nominateAxios = Axios.create({
+  baseURL: `${prefix}/nominate/`,
+});
+
+export const nominatedAxios = Axios.create({
+  baseURL: `${prefix}/nominated/`,
+});

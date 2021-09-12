@@ -8,7 +8,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import styled from 'styled-components';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import './FilterOptions.css';
 import DropdownCommon from '../../../../components/Dropdown/Common';
@@ -91,10 +91,10 @@ const FilterOptions = ({ startDate, endDate, currency, startBalance, onCancel, o
     value: 0,
   });
   const handleStartDateChange = useCallback((date) => {
-    setSDate(moment(date).format('YYYY-MM-DD'));
+    setSDate(dayjs(date).format('YYYY-MM-DD'));
   }, []);
   const handleEndDateChange = useCallback((date) => {
-    setEDate(moment(date).format('YYYY-MM-DD'));
+    setEDate(dayjs(date).format('YYYY-MM-DD'));
   }, []);
   const handleCurrencyChange = useCallback((e) => {
     setCurrency(e.label);

@@ -4,10 +4,12 @@ import GrantCardContent from '../components/GrantCardContent';
 import { ReactComponent as MedalIcon } from '../../../assets/images/medal.svg';
 import { ReactComponent as PeopleIcon } from '../../../assets/images/people.svg';
 import { ReactComponent as MonitorIcon } from '../../../assets/images/monitor.svg';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { sendPageView } from '../../../utils/ga';
 
 export const Portal = () => {
+  sendPageView(useLocation());
   const history = useHistory();
   const { t } = useTranslation();
   return (

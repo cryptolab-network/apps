@@ -52,7 +52,7 @@ const ValidatorGrid = ({ filters, validators }) => {
   const chain = NetworkConfig[networkName].token;
   const _formatBalance = useCallback(
     (value: any) => {
-      return balanceUnit(chain, value);
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );
@@ -158,7 +158,7 @@ const ValidatorGrid = ({ filters, validators }) => {
     };
     return displayValidators.map((v, idx) => {
       return (
-        <div style={{ padding: 4, boxSizing: 'border-box' }}>
+        <div style={{ padding: 4, boxSizing: 'border-box' }} key={idx}>
           <ValidNominator
             address={v.id}
             name={v.identity.display}

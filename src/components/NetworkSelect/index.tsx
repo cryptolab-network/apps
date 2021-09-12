@@ -124,26 +124,6 @@ const NetworkSelect: React.FC = () => {
                 layerSide="bottom"
               />
               {DisplayDropDownItem}
-              {/* <li
-                className="li first"
-                onClick={() => {
-                  console.log(`Kusama`);
-                  changeNetwork('Kusama');
-                }}
-              >
-                <KSMLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>Kusama</NetworkTitleLight>
-              </li>
-              <li
-                className="li last"
-                onClick={() => {
-                  console.log(`Polkadot`);
-                  changeNetwork('Polkadot');
-                }}
-              >
-                <DOTLogo style={{ width: 36, height: 36 }} />
-                <NetworkTitleLight>Polkadot</NetworkTitleLight>
-              </li> */}
             </motion.ul>
           )}
         </AnimatePresence>

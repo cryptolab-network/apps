@@ -24,7 +24,7 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
         disableSortBy: true,
         Cell: ({ row }) => {
           return (
-            <span>
+            <span key={row.original.stash}>
               <DashboardIcon
                 onClick={() => {
                   onClickDashboard(row.original.stash);
@@ -38,7 +38,7 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
         Header: t('tools.oneKv.table.header.name'),
         accessor: 'name',
         maxWidth: 180,
-        Cell: ({ value }) => <span>{value}</span>,
+        Cell: ({ value }) => <span key={value}>{value}</span>,
       },
       {
         Header: t('tools.oneKv.table.header.reasons'),
@@ -51,13 +51,13 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
             }
             return acc;
           }, []);
-          let components = reasons.map((reason) => {
-            return <li>{reason}</li>;
+          let components = reasons.map((reason, i) => {
+            return <li key={i}>{reason}</li>;
           });
           if (components.length === 0) {
             components = <div></div>;
           }
-          return <span style={{ textAlign: 'left' }}>{components}</span>;
+          return <span style={{ textAlign: 'left' }} key={value}>{components}</span>;
         },
       },
     ];

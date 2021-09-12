@@ -29,60 +29,57 @@ export function makeMonth(month: number): string {
   }
 }
 
+const _toFixedString = (value: string): string => {
+  const substring = value.split(' ');
+  const temp = substring[0].slice(0, -2);
+  return temp + ' ' + substring[1];
+}
+
 export const balanceUnit = (
   network: string,
   value: string | number | undefined = 0,
-  isForceUnit: boolean = false
+  isForceUnit: boolean = false,
+  toFixed: boolean
 ): string => {
+  let result;
   switch (network) {
     case 'Kusama':
-      if (BigInt(value) === BigInt(0)) return '0 KSM';
-      return formatBalance(BigInt(value), {
-        decimals: 12,
-        forceUnit: isForceUnit ? 'KSM' : undefined,
-        withUnit: 'KSM',
-      });
     case 'KSM':
       if (BigInt(value) === BigInt(0)) return '0 KSM';
-      return formatBalance(BigInt(value), {
+      result = formatBalance(BigInt(value), {
         decimals: 12,
         forceUnit: isForceUnit ? 'KSM' : undefined,
         withUnit: 'KSM',
       });
+      break;
     case 'Polkadot':
-      if (BigInt(value) === BigInt(0)) return '0 DOT';
-      return formatBalance(value, {
-        decimals: 10,
-        forceUnit: isForceUnit ? 'DOT' : undefined,
-        withUnit: 'DOT',
-      });
     case 'DOT':
       if (BigInt(value) === BigInt(0)) return '0 DOT';
-      return formatBalance(BigInt(value), {
+      result = formatBalance(BigInt(value), {
         decimals: 10,
         forceUnit: isForceUnit ? 'DOT' : undefined,
         withUnit: 'DOT',
       });
+      break;
     case 'Westend':
-      if (BigInt(value) === BigInt(0)) return '0 WND';
-      return formatBalance(BigInt(value), {
-        decimals: 12,
-        forceUnit: isForceUnit ? 'WND' : undefined,
-        withUnit: 'WND',
-      });
     case 'WND':
       if (BigInt(value) === BigInt(0)) return '0 WND';
-      return formatBalance(value, {
+      result = formatBalance(value, {
         decimals: 12,
         forceUnit: isForceUnit ? 'WND' : undefined,
         withUnit: 'WND',
       });
+      break;
     default:
       if (value === 0 || value === 0) return '0 UNIT';
-      return formatBalance(BigInt(value), {
+      result = formatBalance(BigInt(value), {
         decimals: 12,
         forceUnit: isForceUnit ? 'UNIT' : undefined,
         withUnit: 'UNIT',
       });
   }
+  if (toFixed) {
+    return _toFixedString(result);
+  }
+  return result;
 };

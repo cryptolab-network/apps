@@ -5,6 +5,8 @@ import { web3Enable, isWeb3Injected, web3Accounts } from '@polkadot/extension-da
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
 import { NetworkConfig } from '../../utils/constants/Network';
+import { IValidator } from '../../apis/Validator';
+import { INominatorInfo } from '../../apis/Nominator';
 
 export enum ApiState {
   DISCONNECTED,
@@ -25,6 +27,21 @@ export interface IAccount {
   balances: IBalance;
   genesisHash?: string | null;
 }
+
+export interface IValidatorCache {
+  validators: IValidator[] | null;
+  expireTime: number | null; // second
+}
+
+export interface IOneKValidatorCache {
+  validators: IValidator[] | null;
+  expireTime: number | null; // second
+}
+
+export interface INominatorCache {
+  nominators: INominatorInfo[] | null;
+  expireTime: number | null; // second
+}
 export interface ApiProps {
   network: string;
   changeNetwork: Function;
@@ -38,6 +55,11 @@ export interface ApiProps {
   selectAccount: Function;
   isLoading: boolean;
   refreshAccountData: Function;
+  validatorCache: IValidatorCache;
+  oneKValidatorCache: IOneKValidatorCache;
+  cacheValidators: Function;
+  nominatorCache: INominatorCache;
+  cacheNominators: Function;
 }
 
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
@@ -96,6 +118,9 @@ const Api: React.FC = (props) => {
   const [accounts, setAccounts] = useState([] as unknown as IAccount[]);
   const [selectedAccount, setSelectedAccount] = useState({} as unknown as IAccount);
   const [isLoading, setIsLoading] = useState(true);
+  const [validatorCache, setValidatorCache] = useState({} as unknown as IValidatorCache);
+  const [oneKValidatorCache, setOneKValidatorCache] = useState({} as unknown as IOneKValidatorCache);
+  const [nominatorCache, setNominatorCache] = useState({} as unknown as INominatorCache);
 
   const changeNetwork = useCallback(
     (target: string) => {
@@ -104,9 +129,12 @@ const Api: React.FC = (props) => {
         setNetwork(target);
         setIsLoading(true);
         setSelectedAccount({} as unknown as IAccount);
+        setValidatorCache({} as unknown as IValidatorCache);
+        setOneKValidatorCache({} as unknown as IOneKValidatorCache);
+        setNominatorCache({} as unknown as INominatorCache);
       }
     },
-    [setNetwork, network]
+    [setNetwork, network, setApiState, setIsLoading, setSelectedAccount, setValidatorCache, setOneKValidatorCache, setNominatorCache]
   );
 
   const selectAccount = useCallback(
@@ -115,6 +143,36 @@ const Api: React.FC = (props) => {
     },
     [setSelectedAccount]
   );
+
+  const cacheValidators = useCallback(
+    (validators: IValidator[], isOneKv: boolean) => {
+      const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
+      if (isOneKv) {
+        setOneKValidatorCache({
+          validators,
+          expireTime
+        })
+      } else {
+        setValidatorCache({
+          validators,
+          expireTime
+        })
+      }
+    },
+    [setValidatorCache, setOneKValidatorCache]
+  );
+
+  const cacheNominators = useCallback(
+    (nominators: INominatorInfo[]) => {
+      const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
+      setNominatorCache({
+        nominators,
+        expireTime
+      })
+    },
+    [setNominatorCache]
+  )
+
 
   const refreshAccountData = useCallback(
     (account: IAccount) => {
@@ -152,6 +210,11 @@ const Api: React.FC = (props) => {
       selectAccount,
       isLoading,
       refreshAccountData,
+      validatorCache,
+      oneKValidatorCache,
+      cacheValidators,
+      nominatorCache,
+      cacheNominators,
     }),
     [
       network,
@@ -165,6 +228,11 @@ const Api: React.FC = (props) => {
       selectAccount,
       isLoading,
       refreshAccountData,
+      validatorCache,
+      oneKValidatorCache,
+      cacheValidators,
+      nominatorCache,
+      cacheNominators
     ]
   );
 

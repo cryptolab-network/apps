@@ -1,7 +1,10 @@
 import styled from 'styled-components';
 import { OneKVStatus } from './components/oneKVStatus';
+import { useLocation } from 'react-router';
+import { sendPageView } from '../../../utils/ga';
 
 const OneKV = (props) => {
+  sendPageView(useLocation());
   return (
     <OneKVLayout>
       <MainLayout>

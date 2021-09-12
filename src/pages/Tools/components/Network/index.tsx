@@ -107,7 +107,6 @@ const Network: React.FC = () => {
               <li
                 className="li first"
                 onClick={() => {
-                  console.log(`Kusama`);
                   changeNetwork('Kusama');
                 }}
               >
@@ -117,7 +116,6 @@ const Network: React.FC = () => {
               <li
                 className="li last"
                 onClick={() => {
-                  console.log(`Polkadot`);
                   changeNetwork('Polkadot');
                 }}
               >

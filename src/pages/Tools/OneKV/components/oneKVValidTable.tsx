@@ -1,25 +1,31 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { ReactComponent as ActiveIcon } from '../../../../assets/images/active.svg';
 import { ReactComponent as InactiveIcon } from '../../../../assets/images/inactive.svg';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
-import styled from "styled-components";
-import moment from "moment";
-import { IOneKVValidator } from "../../../../apis/OneKV/validator";
-import Table from "../../../../components/Table";
-import { balanceUnit } from "../../../../utils/string";
+import styled from 'styled-components';
+import dayjs from 'dayjs';
+import { IOneKVValidator } from '../../../../apis/OneKV/validator';
+import Table from '../../../../components/Table';
+import { balanceUnit } from '../../../../utils/string';
 
 import { useTranslation } from 'react-i18next';
 
-const ValidatorTable = ({filter, chain, validators}) => {
+const ValidatorTable = ({ filter, chain, validators }) => {
   const { t } = useTranslation();
   const history = useHistory();
-  const onClickDashboard = useCallback((id: string) => {
-    history.push(`/validator/${id}/${chain}`);
-  }, [chain, history]);
-  const _formatBalance = useCallback((value: any) => {
-    return (<span>{balanceUnit(chain, value)}</span>);
-  }, [chain]);
+  const onClickDashboard = useCallback(
+    (id: string) => {
+      history.push(`/validator/${id}/${chain}`);
+    },
+    [chain, history]
+  );
+  const _formatBalance = useCallback(
+    (value: any) => {
+      return <span>{balanceUnit(chain, value, true, true)}</span>;
+    },
+    [chain]
+  );
   const columns = useMemo(() => {
     return [
       {
@@ -27,9 +33,16 @@ const ValidatorTable = ({filter, chain, validators}) => {
         accessor: 'dashboard',
         maxWidth: 48,
         disableSortBy: true,
-        Cell: ( {row} ) => {
-          return(<span><DashboardIcon 
-            onClick={() => {onClickDashboard(row.original.stash)}}/></span>);
+        Cell: ({ row }) => {
+          return (
+            <span>
+              <DashboardIcon
+                onClick={() => {
+                  onClickDashboard(row.original.stash);
+                }}
+              />
+            </span>
+          );
         },
       },
       {
@@ -50,9 +63,17 @@ const ValidatorTable = ({filter, chain, validators}) => {
         maxWidth: 60,
         Cell: ({ value }) => {
           if (value > 0) {
-            return (<span><ActiveIcon /></span>);
+            return (
+              <span>
+                <ActiveIcon />
+              </span>
+            );
           } else {
-            return (<span><InactiveIcon /></span>);
+            return (
+              <span>
+                <InactiveIcon />
+              </span>
+            );
           }
         },
       },
@@ -61,14 +82,19 @@ const ValidatorTable = ({filter, chain, validators}) => {
         accessor: 'elected',
         maxWidth: 100,
         Cell: ({ value, row }) => {
-          if (value  === true) {
-            return (<span><ActiveIcon /></span>);
+          if (value === true) {
+            return (
+              <span>
+                <ActiveIcon />
+              </span>
+            );
           } else {
             return (
-            <OneKVNominated>
-              <InactiveIcon />
-              <LastNominationDate>({moment(row.original.nominatedAt).format('MM/DD')})</LastNominationDate>
-            </OneKVNominated>);
+              <OneKVNominated>
+                <InactiveIcon />
+                <LastNominationDate>({dayjs(row.original.nominatedAt).format('MM/DD')})</LastNominationDate>
+              </OneKVNominated>
+            );
           }
         },
         sortType: 'basic',
@@ -78,7 +104,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
         accessor: 'nominationOrder',
         maxWidth: 60,
         Cell: ({ value }) => {
-          return (<span>{value}</span>);
+          return <span>{value}</span>;
         },
       },
       {
@@ -86,15 +112,15 @@ const ValidatorTable = ({filter, chain, validators}) => {
         accessor: 'selfStake',
         maxWidth: 150,
         Cell: ({ value }) => {
-          return (<span>{_formatBalance(value)}</span>);
-        }
+          return <span>{_formatBalance(value)}</span>;
+        },
       },
       {
         Header: t('tools.oneKv.table.header.rank'),
         accessor: 'rank',
         maxWidth: 60,
         Cell: ({ value }) => {
-          return (<span>{value}</span>);
+          return <span>{value}</span>;
         },
       },
       {
@@ -102,11 +128,11 @@ const ValidatorTable = ({filter, chain, validators}) => {
         accessor: 'inclusion',
         maxWidth: 60,
         Cell: ({ value }) => {
-          return (<span>{(value * 100).toFixed(2)}%</span>);
+          return <span>{(value * 100).toFixed(2)}%</span>;
         },
         sortType: 'basic',
       },
-    ]
+    ];
   }, [_formatBalance, onClickDashboard, t]);
   const [displayValidators, setDisplayValidators] = useState<IOneKVValidator[]>([]);
   useEffect(() => {
@@ -118,7 +144,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
       validators.forEach((v) => {
         if (v.stash.toLowerCase().includes(filter.stashId.toLowerCase())) {
           displayValidators.push(v);
-        } else if(v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
+        } else if (v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
           displayValidators.push(v);
         }
       });
@@ -127,13 +153,7 @@ const ValidatorTable = ({filter, chain, validators}) => {
       setDisplayValidators(validators);
     }
   }, [filter.stashId, validators]);
-  return (
-    <Table
-      columns={columns}
-      data={displayValidators}
-      pagination={true}
-    />
-  );
+  return <Table columns={columns} data={displayValidators} pagination={true} />;
 };
 
 export default ValidatorTable;

@@ -1,7 +1,10 @@
 import styled from 'styled-components';
 import SRRStatus from './components/SRRStatus';
+import { useLocation } from 'react-router';
+import { sendPageView } from '../../../utils/ga';
 
 const ValNom = () => {
+  sendPageView(useLocation());
   return (
     <SRRLayout>
       <MainLayout>

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
-import { formatBalance } from '@polkadot/util';
 import {
   apiGetSingleValidator,
   apiGetValidatorSlashes,
@@ -14,12 +13,13 @@ import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.s
 import Account from '../../../components/Account';
 import CardHeader from '../../../components/Card/CardHeader';
 import Chart from '../../../components/Chart';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { NominatorGrid } from './NominatorGrid';
 import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { DataContext } from '../components/Data';
+import { sendPageView } from '../../../utils/ga';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -43,12 +43,13 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
     total = lastEraInfo.nominators.reduce((acc, n) => {
       return (acc += n.balance.lockedBalance);
     }, 0);
+    active = lastEraInfo.exposure.total;
     nominatorCount = lastEraInfo.nominatorCount;
     commission = lastEraInfo.commission;
   }
   const _formatBalance = useCallback(
     (value: any) => {
-      return balanceUnit(chain, value);
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );
@@ -93,6 +94,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
 };
 
 const ValidatorStatus = (props) => {
+  sendPageView(useLocation());
   const { t } = useTranslation();
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
@@ -126,22 +128,7 @@ const ValidatorStatus = (props) => {
 
   const _formatBalance = useCallback(
     (value: any) => {
-      if (chain === 'KSM') {
-        return formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM',
-        });
-      } else if (chain === 'DOT') {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT',
-        });
-      } else {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit',
-        });
-      }
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );

@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import Table from '../../../../components/Table';
@@ -15,7 +15,9 @@ const SRRTable = ({ stashData, currency }) => {
         width: 180,
         minWidth: 180,
         maxWidth: 180,
-        Cell: ({ value }) => <span>{moment(value).format('YYYY-MM-DD')}</span>,
+        Cell: ({ value }) => {
+          return <span>{dayjs(value).format('YYYY-MM-DD')}</span>;
+        },
       },
       {
         Header: t('tools.stakingRewards.table.header.amount'),
