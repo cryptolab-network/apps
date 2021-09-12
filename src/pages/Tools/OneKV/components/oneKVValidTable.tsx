@@ -22,7 +22,7 @@ const ValidatorTable = ({ filter, chain, validators }) => {
   );
   const _formatBalance = useCallback(
     (value: any) => {
-      return <span>{balanceUnit(chain, value)}</span>;
+      return <span>{balanceUnit(chain, value, true, true)}</span>;
     },
     [chain]
   );
