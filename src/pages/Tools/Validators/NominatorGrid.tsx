@@ -13,7 +13,7 @@ export const NominatorGrid = ({
   nominators
 }) => {
   const _formatBalance = useCallback((value: any) => {
-    return balanceUnit(chain, value);
+    return balanceUnit(chain, value, true, true);
   }, [chain]);
   const { isNominatedLoaded, nominators: nominatorDetail } = useContext(DataContext);
   const [cols, setCols] = useState(8);

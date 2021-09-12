@@ -375,7 +375,7 @@ const Staking = () => {
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      return balanceUnit(networkName, value, true);
+      return balanceUnit(networkName, value, true, false);
     },
     [networkName]
   );

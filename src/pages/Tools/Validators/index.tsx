@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
-import { formatBalance } from '@polkadot/util';
 import {
   apiGetSingleValidator,
   apiGetValidatorSlashes,
@@ -50,7 +49,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
   }
   const _formatBalance = useCallback(
     (value: any) => {
-      return balanceUnit(chain, value);
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );
@@ -129,22 +128,7 @@ const ValidatorStatus = (props) => {
 
   const _formatBalance = useCallback(
     (value: any) => {
-      if (chain === 'KSM') {
-        return formatBalance(BigInt(value), {
-          decimals: 12,
-          withUnit: 'KSM',
-        });
-      } else if (chain === 'DOT') {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'DOT',
-        });
-      } else {
-        return formatBalance(BigInt(value), {
-          decimals: 10,
-          withUnit: 'Unit',
-        });
-      }
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );
