@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
+import type { Option } from '@polkadot/types';
+import type { StakingLedger as PolkadotStakingLedger } from  '@polkadot/types/interfaces/staking';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -56,6 +58,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import { StakingLedger } from '../../../apis/OneKV/validator';
 
 export enum Strategy {
   LOW_RISK,
@@ -561,10 +564,8 @@ const Staking = () => {
   }, []);
 
   const queryStakingInfo = useCallback(async (address, api: ApiPromise) => {
-    const [info, ledger] = await Promise.all([
-      api.derive.staking.account(address),
-      api.query.staking.ledger(address),
-    ]);
+    const info = await api.derive.staking.account(address);
+    const ledger: Option<PolkadotStakingLedger> = await api.query.staking.ledger(address) as Option<PolkadotStakingLedger>;
 
     let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
