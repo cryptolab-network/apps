@@ -609,7 +609,7 @@ const Staking = () => {
         controller = info.controllerId?.toHuman();
       }
     } else if (!ledger.isNone) {
-      controller = selectedAccount.address;
+      controller = address;
       stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
       rewardDestination = staking.rewardDestination.isStaked
@@ -1696,7 +1696,7 @@ const Staking = () => {
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }
     };
-  }, [networkStatus, apiParams, networkName, validatorCache, cacheValidators]);
+  }, [networkStatus, apiParams, networkName, validatorCache, cacheValidators, oneKValidatorCache.expireTime, oneKValidatorCache.validators]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
