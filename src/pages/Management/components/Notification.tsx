@@ -8,7 +8,8 @@ import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon
 import DashboardItem from './DashboardItem';
 import Tooltip from '../../../components/Tooltip';
 import Table from './Table';
-import { ApiContext } from '../../../components/Api';
+import { ApiContext, ApiState } from '../../../components/Api';
+import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { apiGetNotificationEvents } from '../../../apis/Events';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import Identicon from '@polkadot/react-identicon';
@@ -19,78 +20,6 @@ const FilterType = {
   INACTIVE: 'inactive',
   SLASH: 'slash',
 };
-
-const columns = [
-  {
-    Header: 'Event type',
-    accessor: 'type',
-    disableSortBy: true,
-    Cell: ({ row }) => {
-      if (row.original.type === FilterType.COMMISSION) {
-        return <DescriptionStyle>Commission change</DescriptionStyle>;
-      } else if (row.original.type === FilterType.INACTIVE) {
-        return <DescriptionStyle>All inactive</DescriptionStyle>;
-      } else {
-        return <DescriptionStyle>slash</DescriptionStyle>;
-      }
-    },
-  },
-  {
-    Header: 'Description',
-    accessor: 'description',
-    disableSortBy: true,
-    Cell: ({ row }) => {
-      console.log('row: ', row);
-      if (row.original.type === FilterType.COMMISSION) {
-        return (
-          <DescriptionStyle>
-            <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-              Validator
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-start',
-                  alignItems: 'center',
-                  marginLeft: 8,
-                  marginRight: 8,
-                }}
-              >
-                <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
-              </div>
-              {row.original.descriptionAddress.substring(0, 8)}...
-            </div>
-            <div>
-              change commission from {row.original.descriptionValue.split('#')[0]} to{' '}
-              {row.original.descriptionValue.split('#')[1]}
-            </div>
-          </DescriptionStyle>
-        );
-      } else if (row.original.type === FilterType.INACTIVE) {
-        return null;
-      } else {
-        return null;
-      }
-    },
-  },
-  {
-    Header: 'Era',
-    accessor: 'era',
-    disableSortBy: true,
-  },
-  {
-    Header: 'Affected account',
-    accessor: 'account',
-    disableSortBy: true,
-    Cell: ({ row }) => {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-          <Identicon value={row.original.affectedAccount} size={32} theme={'polkadot'} />{' '}
-          <span style={{ marginLeft: 8 }}>{row.original.affectedAccount.substring(0, 12)}...</span>
-        </div>
-      );
-    },
-  },
-];
 
 const Notification: React.FC = () => {
   // context
@@ -127,109 +56,130 @@ const Notification: React.FC = () => {
     visible: false,
     type: FilterType.ALL,
   });
+  const [isFetch, setIsFetch] = useState(true);
 
   useEffect(() => {
-    console.log('accounts: ', accounts);
-    (async () => {
-      let totalCount = 0;
-      let commissionCount = 0;
-      let inactiveCount = 0;
-      let slashCount = 0;
-      let tableList: any[] = [];
-      for (let idx = 0; idx < accounts.length; idx++) {
-        // let result = await apiGetNotificationEvents({
-        //   params: {
-        //     id: accounts[idx].address,
-        //     chain: networkCapitalCodeName(networkName),
-        //   },
-        // });
-        // TODO: remove mock data below
-        let result = {
-          commissions: [
-            {
-              commissionFrom: 1,
-              commissionTo: 2,
-              address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-              era: 123,
+    if (networkStatus === ApiState.READY) {
+      console.log('accounts: ', accounts);
+      (async () => {
+        let totalCount = 0;
+        let commissionCount = 0;
+        let inactiveCount = 0;
+        let slashCount = 0;
+        let tableList: any[] = [];
+        for (let idx = 0; idx < accounts.length; idx++) {
+          let result = await apiGetNotificationEvents({
+            params: {
+              id: accounts[idx].address,
+              chain: networkCapitalCodeName(networkName),
             },
-            {
-              commissionFrom: 2,
-              commissionTo: 3,
-              address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-              era: 234,
-            },
-          ],
-          slashes: [
-            {
-              era: 123,
-              validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-              total: 5,
-            },
-          ],
-          inactives: [0, 234],
-        };
-        result.commissions.forEach((i) => {
-          tableList.push({
-            type: FilterType.COMMISSION,
-            descriptionAddress: i.address,
-            descriptionValue: i.commissionFrom + '#' + i.commissionTo,
-            era: i.era,
-            affectedAccount: accounts[idx].address,
           });
-        });
-        result.slashes.forEach((i) => {
-          tableList.push({
-            type: FilterType.SLASH,
-            descriptionAddress: i.validator,
-            descriptionValue: '',
-            era: i.era,
-            affectedAccount: accounts[idx].address,
+          // TODO: remove mock data below
+          // let result = {
+          //   commissions: [
+          //     {
+          //       commissionFrom: 1,
+          //       commissionTo: 2,
+          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       era: 123,
+          //     },
+          //     {
+          //       commissionFrom: 2,
+          //       commissionTo: 3,
+          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       era: 234,
+          //     },
+          //   ],
+          //   slashes: [
+          //     {
+          //       era: 123,
+          //       validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       total: 5,
+          //     },
+          //   ],
+          //   inactives: [0, 234],
+          // };
+          result.commissions.forEach((i) => {
+            tableList.push({
+              type: FilterType.COMMISSION,
+              descriptionAddress: i.address,
+              descriptionValue: i.commissionFrom + '#' + i.commissionTo,
+              era: i.era,
+              affectedAccount: accounts[idx].address,
+            });
           });
-        });
-        result.inactives.forEach((i) => {
-          tableList.push({
-            type: FilterType.INACTIVE,
-            descriptionAddress: '',
-            descriptionValue: '',
-            era: i,
-            affectedAccount: accounts[idx].address,
+          result.slashes.forEach((i) => {
+            tableList.push({
+              type: FilterType.SLASH,
+              descriptionAddress: i.validator,
+              descriptionValue: i.total,
+              era: i.era,
+              affectedAccount: accounts[idx].address,
+            });
           });
-        });
+          result.inactives.forEach((i) => {
+            tableList.push({
+              type: FilterType.INACTIVE,
+              descriptionAddress: '',
+              descriptionValue: '',
+              era: i,
+              affectedAccount: accounts[idx].address,
+            });
+          });
 
-        commissionCount += result.commissions.length;
-        inactiveCount += result.commissions.length;
-        slashCount += result.commissions.length;
+          commissionCount += result.commissions.length;
+          inactiveCount += result.commissions.length;
+          slashCount += result.commissions.length;
+        }
+        totalCount = commissionCount + inactiveCount + slashCount;
+        setOverview([
+          {
+            value: totalCount,
+            title: 'total events',
+            subtitle: 'Past 7 days',
+            danger: false,
+          },
+          {
+            value: commissionCount,
+            title: 'Commission Change events',
+            subtitle: 'Past 7 days',
+            danger: false,
+          },
+          {
+            value: inactiveCount,
+            title: 'All inactive events',
+            subtitle: 'Past 7 days',
+            danger: false,
+          },
+          {
+            value: slashCount,
+            title: 'Slash events',
+            subtitle: 'Past 7 days',
+            danger: true,
+          },
+        ]);
+        setNotifyHistory(tableList);
+        setIsFetch(false);
+      })();
+    }
+  }, [accounts, networkName, networkStatus]);
+
+  const filteredNotifyList = useMemo(() => {
+    let list = [...notifyHistory];
+    list.sort((a: any, b: any) => {
+      if (a.era > b.era) {
+        return -1;
+      } else if (a.era < b.era) {
+        return 1;
+      } else {
+        return 0;
       }
-      totalCount = commissionCount + inactiveCount + slashCount;
-      setOverview([
-        {
-          value: totalCount,
-          title: 'total events',
-          subtitle: 'Past 7 days',
-          danger: false,
-        },
-        {
-          value: commissionCount,
-          title: 'Commission Change events',
-          subtitle: 'Past 7 days',
-          danger: false,
-        },
-        {
-          value: inactiveCount,
-          title: 'All inactive events',
-          subtitle: 'Past 7 days',
-          danger: false,
-        },
-        {
-          value: slashCount,
-          title: 'Slash events',
-          subtitle: 'Past 7 days',
-          danger: true,
-        },
-      ]);
-      setNotifyHistory(tableList);
-    })();
-  }, [accounts, networkName]);
+    });
+    if (filterInfo.type !== FilterType.ALL) {
+      return list.filter((item) => item.type === filterInfo.type);
+    }
+    return list;
+  }, [filterInfo.type, notifyHistory]);
 
   const filterSelect = useCallback((clickItem) => {
     setFilterInfo({ visible: false, type: clickItem });
@@ -238,6 +188,138 @@ const Notification: React.FC = () => {
   const filterToggle = useCallback((visible) => {
     setFilterInfo((prev) => ({ ...prev, visible: visible }));
   }, []);
+
+  const columns = useMemo(() => {
+    return [
+      {
+        Header: 'Event type',
+        accessor: 'type',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          if (row.original.type === FilterType.COMMISSION) {
+            return <DescriptionStyle>Commission change</DescriptionStyle>;
+          } else if (row.original.type === FilterType.INACTIVE) {
+            return <DescriptionStyle>All inactive</DescriptionStyle>;
+          } else {
+            return <DescriptionStyle>slash</DescriptionStyle>;
+          }
+        },
+      },
+      {
+        Header: 'Description',
+        accessor: 'description',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          if (row.original.type === FilterType.COMMISSION) {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  Validator
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>
+                  change commission from {row.original.descriptionValue.split('#')[0]} to{' '}
+                  {row.original.descriptionValue.split('#')[1]}
+                </div>
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.INACTIVE) {
+            return (
+              <DescriptionStyle>All the validators are inactive in era {row.original.era}</DescriptionStyle>
+            );
+          } else {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  Validator
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>
+                  is slashed by <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
+                  <span> {networkCapitalCodeName(networkName)}</span>
+                </div>
+              </DescriptionStyle>
+            );
+          }
+        },
+      },
+      {
+        Header: 'Era',
+        accessor: 'era',
+        disableSortBy: true,
+      },
+      {
+        Header: 'Affected account',
+        accessor: 'account',
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+              }}
+            >
+              <Identicon value={row.original.affectedAccount} size={32} theme={'polkadot'} />{' '}
+              <span
+                style={{
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  marginLeft: 8,
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {row.original.affectedAccount}
+              </span>
+            </div>
+          );
+        },
+      },
+    ];
+  }, [networkName]);
 
   const alertsMethod = useMemo(() => {
     return [
@@ -257,11 +339,6 @@ const Notification: React.FC = () => {
     let setUpAlerts: any[] = [];
 
     overview.forEach((i, idx) => {
-      console.log('overview idx: ', idx);
-      console.log(i.value);
-      console.log(i.danger);
-      console.log(i.title);
-      console.log(i.subtitle);
       if (idx === 0) {
         overViewContent.push(<InvisibleSpace />);
       }
@@ -327,17 +404,17 @@ const Notification: React.FC = () => {
           commission change
         </FilterOption>
         <FilterOption
-          selected={filterInfo.type === FilterType.INACTIVE ? true : false}
+          selected={filterInfo.type === FilterType.SLASH ? true : false}
           onClick={() => {
-            filterSelect(FilterType.INACTIVE);
+            filterSelect(FilterType.SLASH);
           }}
         >
           slash
         </FilterOption>
         <FilterOption
-          selected={filterInfo.type === FilterType.SLASH ? true : false}
+          selected={filterInfo.type === FilterType.INACTIVE ? true : false}
           onClick={() => {
-            filterSelect(FilterType.SLASH);
+            filterSelect(FilterType.INACTIVE);
           }}
         >
           all inactive
@@ -359,16 +436,22 @@ const Notification: React.FC = () => {
               </Filter>
             </Tooltip>
           </Header>
-          <Table columns={columns} data={notifyHistory} pagination={true} />
+          <Table columns={columns} data={filteredNotifyList} pagination={true} />
         </TablePanel>
       </TableLayout>
     );
-  }, [filterDOM, filterInfo.visible, filterToggle, notifyHistory]);
+  }, [columns, filterDOM, filterInfo.visible, filterToggle, filteredNotifyList]);
 
   return (
     <MainLayout>
-      {dashBoardDOM}
-      {tableDOM}
+      {isFetch ? (
+        <ScaleLoader />
+      ) : (
+        <>
+          {dashBoardDOM}
+          {tableDOM}
+        </>
+      )}
     </MainLayout>
   );
 };
