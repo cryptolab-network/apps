@@ -88,6 +88,8 @@ const Chart: React.FC<IChart> = ({
   xAxisHeight = 30,
   xAxisFontSize = 15,
   legendPayload = [],
+  yAxisLDomain = [],
+  yAxisRDomain = [],
   config = {
     xKey: undefined,
     firstDataKey: undefined,
@@ -197,7 +199,14 @@ const Chart: React.FC<IChart> = ({
           {((chartConfig?.firstDataKey && chartConfig?.firstDataYAxis === 'left') ||
             (chartConfig?.secondDataKey && chartConfig?.secondDataYAxis === 'left') ||
             (chartConfig?.thirdDataKey && chartConfig?.thirdDataYAxis === 'left')) && (
-            <YAxis tick={{ fill: 'white' }} yAxisId="left" axisLine={false} tickSize={0} tickMargin={5}>
+            <YAxis
+              tick={{ fill: 'white' }}
+              yAxisId="left"
+              axisLine={false}
+              tickSize={0}
+              tickMargin={5}
+              domain={yAxisLDomain.length === 2 ? yAxisLDomain : [0, 'auto']}
+            >
               <Label
                 value={chartConfig.leftLabel}
                 position="insideLeft"
@@ -219,6 +228,7 @@ const Chart: React.FC<IChart> = ({
               axisLine={false}
               tickSize={0}
               tickMargin={5}
+              domain={yAxisRDomain.length === 2 ? yAxisRDomain : [0, 'auto']}
             >
               <Label
                 value={chartConfig.rightLabel}
