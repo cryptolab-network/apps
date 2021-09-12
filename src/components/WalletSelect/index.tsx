@@ -99,7 +99,7 @@ const WalletSelect: React.FC = () => {
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      return balanceUnit(network, value, true);
+      return balanceUnit(network, value, true, false);
     },
     [network]
   );

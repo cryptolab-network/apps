@@ -52,7 +52,7 @@ const ValidatorGrid = ({ filters, validators }) => {
   const chain = NetworkConfig[networkName].token;
   const _formatBalance = useCallback(
     (value: any) => {
-      return balanceUnit(chain, value);
+      return balanceUnit(chain, value, true, true);
     },
     [chain]
   );

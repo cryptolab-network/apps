@@ -90,10 +90,13 @@ const StakeDistributionChart = () => {
   const chain = NetworkConfig[networkName].token;
   useEffect(() => {
     const parseNominators = async () => {
-
       let nominators;
       const now = Math.floor(+new Date());
-      if (nominatorCache.nominators !== null && nominatorCache.expireTime !== null && nominatorCache.expireTime > now) {
+      if (
+        nominatorCache.nominators !== null &&
+        nominatorCache.expireTime !== null &&
+        nominatorCache.expireTime > now
+      ) {
         nominators = nominatorCache.nominators;
       } else {
         nominators = await apiGetAllNominators({
@@ -185,7 +188,11 @@ const CommissionDistributionChart = () => {
       let validators;
       const now = Math.floor(+new Date());
 
-      if (validatorCache.validators !== null && validatorCache.expireTime !== null && validatorCache.expireTime > now) {
+      if (
+        validatorCache.validators !== null &&
+        validatorCache.expireTime !== null &&
+        validatorCache.expireTime > now
+      ) {
         validators = validatorCache.validators;
       } else {
         validators = await apiGetAllValidator({

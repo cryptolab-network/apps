@@ -349,9 +349,9 @@ export const lowRiskStrategy = (
     let minSelfStakeFlag = false;
     if (
       (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
-        Number(balanceUnit(networkName, validator.selfStake).split(' ')[0]) < KSM_MIN_SELF_STAKE) ||
+        Number(balanceUnit(networkName, validator.selfStake, true, false).split(' ')[0]) < KSM_MIN_SELF_STAKE) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
-        Number(balanceUnit(networkName, validator.selfStake).split(' ')[0]) < DOT_MIN_SELF_STAKE)
+        Number(balanceUnit(networkName, validator.selfStake, true, false).split(' ')[0]) < DOT_MIN_SELF_STAKE)
     ) {
       minSelfStakeFlag = true;
     }
@@ -536,7 +536,7 @@ export const advancedConditionFilter = (
       // min self stake
       if (
         filtered.minSelfStake &&
-        Number(balanceUnit(networkName, data.selfStake, true).split(' ')[0]) < Number(filtered.minSelfStake)
+        Number(balanceUnit(networkName, data.selfStake, true, false).split(' ')[0]) < Number(filtered.minSelfStake)
       ) {
         return false;
       }

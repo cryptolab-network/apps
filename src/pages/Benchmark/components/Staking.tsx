@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
+import type { Option } from '@polkadot/types';
+import type { StakingLedger as PolkadotStakingLedger } from  '@polkadot/types/interfaces/staking';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -56,6 +58,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+
 
 export enum Strategy {
   LOW_RISK,
@@ -372,7 +375,7 @@ const Staking = () => {
 
   const _formatBalance = useCallback(
     (value: string = '0') => {
-      return balanceUnit(networkName, value, true);
+      return balanceUnit(networkName, value, true, false);
     },
     [networkName]
   );
@@ -563,8 +566,8 @@ const Staking = () => {
   const queryStakingInfo = useCallback(async (address, api: ApiPromise) => {
     const [info, ledger] = await Promise.all([
       api.derive.staking.account(address),
-      api.query.staking.ledger(address),
-    ]);
+      api.query.staking.ledger<Option<PolkadotStakingLedger>>(address)
+    ])
 
     let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
@@ -583,25 +586,30 @@ const Staking = () => {
     let bonded;
     let validators;
     let stash;
+    let controller;
     if (info.nextSessionIds.length !== 0) {
       role = AccountRole.VALIDATOR;
       bonded = info.stakingLedger.active.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
       stash = info.stashId.toHuman();
+      controller = info.controllerId?.toHuman();
     } else if (!info.stakingLedger.active.unwrap().isZero()) {
       if (info.controllerId?.toHuman() === address) {
         role = AccountRole.NOMINATOR_AND_CONTROLLER;
         bonded = info.stakingLedger.active.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
         stash = info.stashId.toHuman();
+        controller = info.controllerId?.toHuman();
         isNominatable = true;
       } else {
         role = AccountRole.NOMINATOR;
         bonded = info.stakingLedger.active.unwrap().toHex();
         validators = info.nominators.map((n) => n.toHuman());
         stash = info.stashId.toHuman();
+        controller = info.controllerId?.toHuman();
       }
     } else if (!ledger.isNone) {
+      controller = address;
       stash = ledger.unwrap().stash.toHuman();
       const staking = await api.derive.staking.account(stash);
       rewardDestination = staking.rewardDestination.isStaked
@@ -635,7 +643,7 @@ const Staking = () => {
     setIsAccountInfoLoading(false);
     return {
       role,
-      controller: info.controllerId?.toHuman(),
+      controller,
       stash,
       validators,
       rewardDestination,
@@ -1688,7 +1696,7 @@ const Staking = () => {
         validatorAxiosSource.cancel(`apiGetAllValidator req CANCEL ${tempId}`);
       }
     };
-  }, [networkStatus, apiParams, networkName, validatorCache, cacheValidators]);
+  }, [networkStatus, apiParams, networkName, validatorCache, cacheValidators, oneKValidatorCache.expireTime, oneKValidatorCache.validators]);
 
   /**
    * user changing the advanced setting mannually, we set the new api query parameter
