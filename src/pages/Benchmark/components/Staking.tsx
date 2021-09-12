@@ -58,7 +58,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
-import { StakingLedger } from '../../../apis/OneKV/validator';
+
 
 export enum Strategy {
   LOW_RISK,
