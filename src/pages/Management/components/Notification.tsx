@@ -5,8 +5,12 @@ import { ReactComponent as TinyPlain } from '../../../assets/images/tiny-paper-p
 import { ReactComponent as TelegramLogo } from '../../../assets/images/telegram-logo.svg';
 import { ReactComponent as EmailLogo } from '../../../assets/images/mail-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
+import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
 import DashboardItem from './DashboardItem';
 import Tooltip from '../../../components/Tooltip';
+import Dialog from '../../../components/Dialog';
+import Input from '../../../components/Input';
+import Button from '../../../components/Button';
 import Table from './Table';
 import { ApiContext, ApiState } from '../../../components/Api';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
@@ -57,6 +61,8 @@ const Notification: React.FC = () => {
     type: FilterType.ALL,
   });
   const [isFetch, setIsFetch] = useState(true);
+  const [isTgBotShow, setIsTgBotShow] = useState(false);
+  const [isEmailSubscribeShow, setIsEmailSubscribeShow] = useState(false);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -128,8 +134,8 @@ const Notification: React.FC = () => {
           });
 
           commissionCount += result.commissions.length;
-          inactiveCount += result.commissions.length;
-          slashCount += result.commissions.length;
+          inactiveCount += result.inactives.length;
+          slashCount += result.slashes.length;
         }
         totalCount = commissionCount + inactiveCount + slashCount;
         setOverview([
@@ -188,6 +194,28 @@ const Notification: React.FC = () => {
   const filterToggle = useCallback((visible) => {
     setFilterInfo((prev) => ({ ...prev, visible: visible }));
   }, []);
+
+  const handleDialogClose = (name) => {
+    switch (name) {
+      case 'tgBot':
+        setIsTgBotShow(false);
+        break;
+      case 'emailSubscribe':
+        setIsEmailSubscribeShow(false);
+        break;
+    }
+  };
+
+  const handleDialogOpen = (idx) => {
+    switch (idx) {
+      case 0:
+        setIsTgBotShow(true);
+        break;
+      case 1:
+        setIsEmailSubscribeShow(true);
+        break;
+    }
+  };
 
   const columns = useMemo(() => {
     return [
@@ -360,7 +388,16 @@ const Notification: React.FC = () => {
       if (idx > 0) {
         setUpAlerts.push(<Space />);
       }
-      setUpAlerts.push(<DashboardItem MainIcon={i.icon} title={i.title} clickable={true} />);
+      setUpAlerts.push(
+        <DashboardItem
+          MainIcon={i.icon}
+          title={i.title}
+          clickable={true}
+          onClick={() => {
+            handleDialogOpen(idx);
+          }}
+        />
+      );
       if (idx === alertsMethod.length - 1) {
         setUpAlerts.push(<InvisibleSpace />);
       }
@@ -368,6 +405,42 @@ const Notification: React.FC = () => {
 
     return (
       <Dashboard>
+        <Dialog
+          image={<Qrcode />}
+          title="Subscribe our telegram alert"
+          isOpen={isTgBotShow}
+          handleDialogClose={() => {
+            handleDialogClose('tgBot');
+          }}
+        ></Dialog>
+        <Dialog
+          title="Subscribe our email alert"
+          isOpen={isEmailSubscribeShow}
+          handleDialogClose={() => {
+            handleDialogClose('emailSubscribe');
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Input placeholder="input your email address" style={{ textAlign: 'center' }} />
+            <div style={{ marginTop: 40 }}>
+              <Button
+                disabled={false}
+                title="Subscribe"
+                onClick={() => {
+                  console.log('onclick subscribe');
+                }}
+                style={{ width: 220 }}
+              />
+            </div>
+          </div>
+        </Dialog>
         <Overview>
           <DashboardTitle>
             <TinyChart /> Overview
@@ -382,7 +455,7 @@ const Notification: React.FC = () => {
         </Alerts>
       </Dashboard>
     );
-  }, [alertsMethod, overview]);
+  }, [alertsMethod, isEmailSubscribeShow, isTgBotShow, overview]);
 
   const filterDOM = useMemo(() => {
     return (

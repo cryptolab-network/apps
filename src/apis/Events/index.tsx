@@ -23,6 +23,16 @@ interface IEventInfo {
 }
 
 export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo> =>
-  eventStashAxios.get(`${data.params.id}/${data.params.chain}`).then((res) => {
-    return res.data;
-  });
+  eventStashAxios
+    .get(`${data.params.id}/${data.params.chain}`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.warn('in apiGetNotificationEvents, err: ', err);
+      return {
+        commissions: [],
+        inactives: [],
+        slashes: [],
+      };
+    });

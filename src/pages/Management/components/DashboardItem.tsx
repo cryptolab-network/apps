@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import styled from 'styled-components';
 
-const DashboardItem = ({ mainValue, mainValueDanger, MainIcon, title, subtitle, clickable }) => {
+const DashboardItem = ({ mainValue, mainValueDanger, MainIcon, title, subtitle, clickable, onClick }) => {
   const mainDOM = useMemo(() => {
     if (typeof mainValue === 'number' && mainValue >= 0) {
       if (mainValueDanger) {
@@ -20,14 +20,7 @@ const DashboardItem = ({ mainValue, mainValueDanger, MainIcon, title, subtitle, 
   }, [MainIcon, mainValue, mainValueDanger]);
 
   return (
-    <MainLayout
-      clickable={clickable}
-      onClick={() => {
-        if (clickable) {
-          console.log('click');
-        }
-      }}
-    >
+    <MainLayout clickable={clickable} onClick={onClick}>
       {mainDOM}
       <Title>{title}</Title>
       <SubTitle>{subtitle}</SubTitle>
@@ -42,6 +35,7 @@ DashboardItem.propTypes = {
   title: PropTypes.string,
   subtitle: PropTypes.string,
   clickable: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 DashboardItem.defaultProps = {
   mainValue: undefined,
