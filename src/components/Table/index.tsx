@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../utils/status/Table';
@@ -30,12 +31,12 @@ const CustomTable: React.FC<ICOLUMN> = ({
     // The rest of these things are super handy, too ;)
     canPreviousPage,
     canNextPage,
-    // pageOptions,
+    pageOptions,
     pageCount,
     gotoPage,
     nextPage,
     previousPage,
-    // setPageSize,
+    setPageSize,
     state: { pageIndex, pageSize },
   } = useTable(
     {
@@ -47,6 +48,11 @@ const CustomTable: React.FC<ICOLUMN> = ({
     useExpanded,
     usePagination // Use the useExpanded plugin hook,
   );
+
+  useEffect(() => {
+    setPageSize(pgSize);
+  }, [pgSize, setPageSize]);
+
   return (
     <Style>
       <div className="tableWrap">
@@ -115,19 +121,12 @@ const CustomTable: React.FC<ICOLUMN> = ({
         </table>
         <br />
       </div>
-      <div
-        style={{
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {pagination ? (
           <Pagination
             canPreviousPage={canPreviousPage}
             canNextPage={canNextPage}
+            pageOptions={pageOptions}
             pageCount={pageCount}
             gotoPage={gotoPage}
             nextPage={nextPage}
@@ -151,10 +150,8 @@ const Style = styled.div`
   .tableWrap {
     display: block;
     width: 100%;
-    height: 55vh;
     overflow-x: hidden;
     overflow-y: scroll;
-    margin: 20px 0 0 0;
   }
 
   table {
