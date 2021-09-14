@@ -110,7 +110,7 @@ enum State {
 const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
 
-  const { network: networkName, changeNetwork } = useContext(DataContext);
+  const { changeNetwork } = useContext(DataContext);
   if (filters.stashId.length > 0) {
     if (validateAddress(filters.stashId)) {
       if (filters.stashId.startsWith('1')) {
@@ -120,7 +120,7 @@ const SRRContent = ({ filters }) => {
       }
     }
   }
-
+  const { network: networkName } = useContext(DataContext);
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
