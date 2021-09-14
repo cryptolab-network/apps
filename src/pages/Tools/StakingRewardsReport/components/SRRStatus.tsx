@@ -121,7 +121,6 @@ const SRRContent = ({ filters }) => {
     }
   }
   const { network: networkName } = useContext(DataContext);
-  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
   const [stashData, setStashData] = useState<IStashRewards>({
@@ -141,6 +140,11 @@ const SRRContent = ({ filters }) => {
       progress: undefined,
     });
   }, []);
+
+  const chain = useCallback(() => {
+    return networkName === 'Polkadot' ? 'DOT' : 'KSM';
+  }, [networkName]);
+
   useEffect(() => {
     setState(State.EMPTY);
     setStashData({
@@ -171,7 +175,7 @@ const SRRContent = ({ filters }) => {
       try {
         setState(State.LOADING_VALIDATORS);
         const validators = await apiGetNominatedValidators({
-          params: `/stash/${s!.stash}/${chain}`,
+          params: `/stash/${s!.stash}/${chain()}`,
         });
         if (validators.length > 0) {
           setValidators(validators);
@@ -319,11 +323,11 @@ const SRRContent = ({ filters }) => {
           </ContentItem>
           <ContentItem>
             <SRRChartLayout>
-              <SRRChart stashData={stashData} chain={chain} />
+              <SRRChart stashData={stashData} chain={chain()} />
             </SRRChartLayout>
           </ContentItem>
         </ContentLayout>
-        <ValidatorComponents chain={chain} validators={validators} />
+        <ValidatorComponents chain={chain()} validators={validators} />
       </>
     );
   } else if (state === State.LOADING) {
