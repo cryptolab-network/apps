@@ -104,7 +104,7 @@ const ValidatorStatus = (props) => {
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
-      commissionChange: 0,
+      commission: 0,
     },
     identity: {
       display: '',
