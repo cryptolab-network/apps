@@ -5,6 +5,8 @@ import { ReactComponent as FavoriteIcon } from '../../assets/images/favorite-sel
 import { ReactComponent as FavoriteUnselectedIcon } from '../../assets/images/favorite-unselected.svg';
 import { ReactComponent as UnclaimedPayoutsIcon } from '../../assets/images/unclaimed-payouts.svg';
 import { ReactComponent as ActiveBannerIcon } from '../../assets/images/active-banner.svg';
+import { ReactComponent as CommissionUpIcon } from '../../assets/images/commission_up.svg';
+import { ReactComponent as CommissionDownIcon } from '../../assets/images/commission_down.svg';
 import '../../css/ToolTip.css';
 import { shortenStashId } from '../../utils/string';
 import { useMemo, useState } from 'react';
@@ -132,6 +134,30 @@ const ValidNominator: React.FC<IValidNominator> = ({
     );
   }, [Status, activeAmount, address, favorite]);
 
+  const Commission = useMemo(() => {
+    if (statusChange.commission === 1) {
+      return (
+        <ValuePart>
+            {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+            <CommissionUpIcon />
+        </ValuePart>
+      );
+    }
+    if (statusChange.commission === 2) {
+      return (
+        <ValuePart>
+            {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+            <CommissionDownIcon />
+        </ValuePart>
+      );
+    }
+    return (
+      <ValuePart>
+          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+      </ValuePart>
+    );
+  }, [commission, statusChange.commission, t]);
+
   const shortenName = shortenStashId(name);
   return (
     <ValidNominatorLayout onClick={onClick}>
@@ -179,9 +205,7 @@ const ValidNominator: React.FC<IValidNominator> = ({
         <ValuePart>
           {t('tools.valnom.tips.nominatorCount')}:<EnhanceValue>{count}</EnhanceValue>
         </ValuePart>
-        <ValuePart>
-          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
-        </ValuePart>
+        {Commission}
       </SubInfo>
     </ValidNominatorLayout>
   );
