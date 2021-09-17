@@ -1744,22 +1744,22 @@
     eventemitter3 "^4.0.7"
     rxjs "^7.3.0"
 
-"@polkadot/extension-dapp@^0.38.7":
-  version "0.38.8"
-  resolved "https://registry.yarnpkg.com/@polkadot/extension-dapp/-/extension-dapp-0.38.8.tgz#a1073f647d23cce37b2b73df72f32444a7ab828f"
-  integrity sha512-I39aeUDmA28DXXSFS521jiyLjinQIaGkOaH+kDYqridKbEmeO/CT3Rebb9Z6zhBa9aMRau8w4UypHXOTaDAtgQ==
+"@polkadot/extension-dapp@^0.40.2":
+  version "0.40.2"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-dapp/-/extension-dapp-0.40.2.tgz#66f84a8d351a1f072d0a6979fddd36004b404ed8"
+  integrity sha512-M9OrUihcfHE/g/FE5Z3Y2ZC2lVu39CVVtv/+dfbg9cqMBFohZBUHbCZJIkeHTaMEzLGbcVza2VN9keBovKZwzA==
   dependencies:
-    "@babel/runtime" "^7.14.6"
-    "@polkadot/extension-inject" "^0.38.8"
-    "@polkadot/util" "^6.11.1"
-    "@polkadot/util-crypto" "^6.11.1"
+    "@babel/runtime" "^7.15.4"
+    "@polkadot/extension-inject" "^0.40.2"
+    "@polkadot/util" "^7.3.1"
+    "@polkadot/util-crypto" "^7.3.1"
 
-"@polkadot/extension-inject@^0.38.8":
-  version "0.38.8"
-  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.38.8.tgz#0d3b3819eadc48f18d58d409d1c71c146e0f504b"
-  integrity sha512-TMkifhCvnDYFxpGgZSwn5XIxCPVjozb7506rHWUP+lCeXq2hjTMKoEYKAUFXo2xnQPJTyqO3/8XPPkKAfPJe/w==
+"@polkadot/extension-inject@^0.40.2":
+  version "0.40.2"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.40.2.tgz#6224022465ccaf67b68dd5f9a187bdf3b769660a"
+  integrity sha512-v83p90OcEE037Soht4Ye7CYgdrW3GELPC+sbaxxl4mN/jtKVG27Oi60bS9fAQqFWmxCcP861NCdkmxnmyPdcoQ==
   dependencies:
-    "@babel/runtime" "^7.14.6"
+    "@babel/runtime" "^7.15.4"
 
 "@polkadot/keyring@^6.10.1":
   version "6.11.1"
@@ -1874,7 +1874,7 @@
     "@babel/runtime" "^7.14.6"
     color "^3.1.3"
 
-"@polkadot/util-crypto@6.11.1", "@polkadot/util-crypto@^6.10.1", "@polkadot/util-crypto@^6.11.1":
+"@polkadot/util-crypto@6.11.1", "@polkadot/util-crypto@^6.10.1":
   version "6.11.1"
   resolved "https://registry.yarnpkg.com/@polkadot/util-crypto/-/util-crypto-6.11.1.tgz#7a36acf5c8bf52541609ec0b0b2a69af295d652e"
   integrity sha512-fWA1Nz17FxWJslweZS4l0Uo30WXb5mYV1KEACVzM+BSZAvG5eoiOAYX6VYZjyw6/7u53XKrWQlD83iPsg3KvZw==
@@ -1919,7 +1919,7 @@
     tweetnacl "^1.0.3"
     xxhashjs "^0.2.2"
 
-"@polkadot/util@6.11.1", "@polkadot/util@^6.10.1", "@polkadot/util@^6.11.1":
+"@polkadot/util@6.11.1", "@polkadot/util@^6.10.1":
   version "6.11.1"
   resolved "https://registry.yarnpkg.com/@polkadot/util/-/util-6.11.1.tgz#8950b038ba3e6ebfc0a7ff47feeb972e81b2626c"
   integrity sha512-TEdCetr9rsdUfJZqQgX/vxLuV4XU8KMoKBMJdx+JuQ5EWemIdQkEtMBdL8k8udNGbgSNiYFA6rPppATeIxAScg==
