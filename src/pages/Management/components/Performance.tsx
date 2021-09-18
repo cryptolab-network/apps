@@ -72,8 +72,6 @@ const Performance = () => {
         }
       });
       Promise.all(promises).then(() => {
-        console.log(arr);
-        console.log('rewards: ', rewards);
         setAccountsChainInfo(arr);
         setAccountsRewards(rewards);
         setReady(true);
@@ -101,7 +99,7 @@ const Performance = () => {
 export default Performance;
 
 const HeaderLayout = styled.div`
-  width: 80vw;
+  width: 1100px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -172,5 +170,5 @@ const HeaderItem = styled.div`
 
 const ProfitChartLayout = styled.div`
   height: 300px;
-  width: 100%;
+  width: 1100px;
 `;

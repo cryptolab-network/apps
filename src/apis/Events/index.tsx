@@ -19,10 +19,20 @@ interface IEventInfo {
     validator: string;
     total: number;
   }[];
-  inactives: number[];
+  inactive: number[];
+  stalePayouts: {
+    address: string;
+    era: number;
+    unclaimedPayoutEras: number[];
+  }[];
+  payouts: {
+    era: number;
+    amount: number;
+    address: string;
+  }[];
 }
 
-export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo> =>
+export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo | undefined> =>
   eventStashAxios
     .get(`${data.params.id}/${data.params.chain}`)
     .then((res) => {
@@ -30,9 +40,5 @@ export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo
     })
     .catch((err) => {
       console.warn('in apiGetNotificationEvents, err: ', err);
-      return {
-        commissions: [],
-        inactives: [],
-        slashes: [],
-      };
+      return undefined;
     });

@@ -17,6 +17,7 @@ import ScaleLoader from '../../../components/Spinner/ScaleLoader';
 import { apiGetNotificationEvents } from '../../../apis/Events';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import Identicon from '@polkadot/react-identicon';
+import { useTranslation } from 'react-i18next';
 
 const FilterType = {
   ALL: 'all',
@@ -26,32 +27,33 @@ const FilterType = {
 };
 
 const Notification: React.FC = () => {
+  const { t } = useTranslation();
   // context
   let { network: networkName, apiState: networkStatus, accounts } = useContext(ApiContext);
 
   const [overview, setOverview] = useState<any[]>([
     {
       value: 0,
-      title: 'total events',
-      subtitle: 'Past 7 days',
+      title: t('Management.routes.notification.overview.event.total.title'),
+      subtitle: t('Management.routes.notification.overview.event.total.subtitle'),
       danger: false,
     },
     {
       value: 0,
-      title: 'Commission Change events',
-      subtitle: 'Past 7 days',
+      title: t('Management.routes.notification.overview.event.commission.title'),
+      subtitle: t('Management.routes.notification.overview.event.commission.subtitle'),
       danger: false,
     },
     {
       value: 0,
-      title: 'All inactive events',
-      subtitle: 'Past 7 days',
+      title: t('Management.routes.notification.overview.event.inactive.title'),
+      subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
       danger: false,
     },
     {
       value: 0,
-      title: 'Slash events',
-      subtitle: 'Past 7 days',
+      title: t('Management.routes.notification.overview.event.slash.title'),
+      subtitle: t('Management.routes.notification.overview.event.slash.subtitle'),
       danger: true,
     },
   ]);
@@ -74,93 +76,94 @@ const Notification: React.FC = () => {
         let slashCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          let result = await apiGetNotificationEvents({
-            params: {
-              id: accounts[idx].address,
-              chain: networkCapitalCodeName(networkName),
-            },
-          });
+          // let result = await apiGetNotificationEvents({
+          //   params: {
+          //     id: accounts[idx].address,
+          //     chain: networkCapitalCodeName(networkName),
+          //   },
+          // });
           // TODO: remove mock data below
-          // let result = {
-          //   commissions: [
-          //     {
-          //       commissionFrom: 1,
-          //       commissionTo: 2,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 123,
-          //     },
-          //     {
-          //       commissionFrom: 2,
-          //       commissionTo: 3,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 234,
-          //     },
-          //   ],
-          //   slashes: [
-          //     {
-          //       era: 123,
-          //       validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       total: 5,
-          //     },
-          //   ],
-          //   inactives: [0, 234],
-          // };
-          result.commissions.forEach((i) => {
-            tableList.push({
-              type: FilterType.COMMISSION,
-              descriptionAddress: i.address,
-              descriptionValue: i.commissionFrom + '#' + i.commissionTo,
-              era: i.era,
-              affectedAccount: accounts[idx].address,
+          let result = {
+            commissions: [
+              {
+                commissionFrom: 1,
+                commissionTo: 2,
+                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                era: 123,
+              },
+              {
+                commissionFrom: 2,
+                commissionTo: 3,
+                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                era: 234,
+              },
+            ],
+            slashes: [
+              {
+                era: 123,
+                validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                total: 5,
+              },
+            ],
+            inactive: [0, 234],
+          };
+          if (result) {
+            result.commissions.forEach((i) => {
+              tableList.push({
+                type: FilterType.COMMISSION,
+                descriptionAddress: i.address,
+                descriptionValue: i.commissionFrom + '#' + i.commissionTo,
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
             });
-          });
-          result.slashes.forEach((i) => {
-            tableList.push({
-              type: FilterType.SLASH,
-              descriptionAddress: i.validator,
-              descriptionValue: i.total,
-              era: i.era,
-              affectedAccount: accounts[idx].address,
+            result.slashes.forEach((i) => {
+              tableList.push({
+                type: FilterType.SLASH,
+                descriptionAddress: i.validator,
+                descriptionValue: i.total,
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
             });
-          });
-          result.inactives.forEach((i) => {
-            tableList.push({
-              type: FilterType.INACTIVE,
-              descriptionAddress: '',
-              descriptionValue: '',
-              era: i,
-              affectedAccount: accounts[idx].address,
+            result.inactive.forEach((i) => {
+              tableList.push({
+                type: FilterType.INACTIVE,
+                descriptionAddress: '',
+                descriptionValue: '',
+                era: i,
+                affectedAccount: accounts[idx].address,
+              });
             });
-          });
-
-          commissionCount += result.commissions.length;
-          inactiveCount += result.inactives.length;
-          slashCount += result.slashes.length;
+            commissionCount += result.commissions.length;
+            inactiveCount += result.inactive.length;
+            slashCount += result.slashes.length;
+          }
         }
         totalCount = commissionCount + inactiveCount + slashCount;
         setOverview([
           {
             value: totalCount,
-            title: 'total events',
-            subtitle: 'Past 7 days',
+            title: t('Management.routes.notification.overview.event.total.title'),
+            subtitle: t('Management.routes.notification.overview.event.total.subtitle'),
             danger: false,
           },
           {
             value: commissionCount,
-            title: 'Commission Change events',
-            subtitle: 'Past 7 days',
+            title: t('Management.routes.notification.overview.event.commission.title'),
+            subtitle: t('Management.routes.notification.overview.event.commission.subtitle'),
             danger: false,
           },
           {
             value: inactiveCount,
-            title: 'All inactive events',
-            subtitle: 'Past 7 days',
+            title: t('Management.routes.notification.overview.event.inactive.title'),
+            subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
             danger: false,
           },
           {
             value: slashCount,
-            title: 'Slash events',
-            subtitle: 'Past 7 days',
+            title: t('Management.routes.notification.overview.event.slash.title'),
+            subtitle: t('Management.routes.notification.overview.event.slash.subtitle'),
             danger: true,
           },
         ]);
@@ -168,7 +171,7 @@ const Notification: React.FC = () => {
         setIsFetch(false);
       })();
     }
-  }, [accounts, networkName, networkStatus]);
+  }, [accounts, networkName, networkStatus, t]);
 
   const filteredNotifyList = useMemo(() => {
     let list = [...notifyHistory];
@@ -220,7 +223,7 @@ const Notification: React.FC = () => {
   const columns = useMemo(() => {
     return [
       {
-        Header: 'Event type',
+        Header: t('Management.routes.notification.notification.table.column.type'),
         accessor: 'type',
         disableSortBy: true,
         Cell: ({ row }) => {
@@ -234,7 +237,7 @@ const Notification: React.FC = () => {
         },
       },
       {
-        Header: 'Description',
+        Header: t('Management.routes.notification.notification.table.column.description'),
         accessor: 'description',
         disableSortBy: true,
         Cell: ({ row }) => {
@@ -312,12 +315,12 @@ const Notification: React.FC = () => {
         },
       },
       {
-        Header: 'Era',
+        Header: t('Management.routes.notification.notification.table.column.era'),
         accessor: 'era',
         disableSortBy: true,
       },
       {
-        Header: 'Affected account',
+        Header: t('Management.routes.notification.notification.table.column.affectedAccount'),
         accessor: 'account',
         disableSortBy: true,
         Cell: ({ row }) => {
@@ -347,18 +350,18 @@ const Notification: React.FC = () => {
         },
       },
     ];
-  }, [networkName]);
+  }, [networkName, t]);
 
   const alertsMethod = useMemo(() => {
     return [
       {
         icon: TelegramLogo,
-        title: 'Receive alerts by Telegram',
+        title: t('Management.routes.notification.alerts.telegram.title'),
       },
-      {
-        icon: EmailLogo,
-        title: 'Receive alerts by Email',
-      },
+      // {
+      //   icon: EmailLogo,
+      //   title: 'Receive alerts by Email',
+      // },
     ];
   }, []);
 
@@ -407,7 +410,7 @@ const Notification: React.FC = () => {
       <Dashboard>
         <Dialog
           image={<Qrcode />}
-          title="Subscribe our telegram alert"
+          title={t('Management.routes.notification.alerts.telegram.dialog.title')}
           isOpen={isTgBotShow}
           handleDialogClose={() => {
             handleDialogClose('tgBot');
@@ -443,19 +446,19 @@ const Notification: React.FC = () => {
         </Dialog>
         <Overview>
           <DashboardTitle>
-            <TinyChart /> Overview
+            <TinyChart /> {t('Management.routes.notification.overview.title')}
           </DashboardTitle>
           <OverviewPanel>{overViewContent}</OverviewPanel>
         </Overview>
         <Alerts>
           <DashboardTitle>
-            <TinyPlain /> Set up alerts
+            <TinyPlain /> {t('Management.routes.notification.alerts.title')}
           </DashboardTitle>
           <OverviewPanel>{setUpAlerts}</OverviewPanel>
         </Alerts>
       </Dashboard>
     );
-  }, [alertsMethod, isEmailSubscribeShow, isTgBotShow, overview]);
+  }, [alertsMethod, isEmailSubscribeShow, isTgBotShow, overview, t]);
 
   const filterDOM = useMemo(() => {
     return (
@@ -466,7 +469,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.ALL);
           }}
         >
-          all event
+          {t('Management.routes.notification.filter.all')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.COMMISSION ? true : false}
@@ -474,7 +477,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.COMMISSION);
           }}
         >
-          commission change
+          {t('Management.routes.notification.filter.commission')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.SLASH ? true : false}
@@ -482,7 +485,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.SLASH);
           }}
         >
-          slash
+          {t('Management.routes.notification.filter.slash')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.INACTIVE ? true : false}
@@ -490,22 +493,24 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.INACTIVE);
           }}
         >
-          all inactive
+          {t('Management.routes.notification.filter.inactive')}
         </FilterOption>
       </FilterTooltip>
     );
-  }, [filterInfo.type, filterSelect]);
+  }, [filterInfo.type, filterSelect, t]);
 
   const tableDOM = useMemo(() => {
     return (
       <TableLayout>
         <TablePanel>
           <Header>
-            <Title>Nofitications</Title>
+            <Title>{t('Management.routes.notification.title')}</Title>
             <Tooltip content={filterDOM} visible={filterInfo.visible} tooltipToggle={filterToggle}>
               <Filter>
                 <OptionIcon />
-                <span style={{ marginLeft: 8 }}>Search events</span>
+                <span style={{ marginLeft: 8 }}>
+                  {t('Management.routes.notification.notification.filterTitle')}
+                </span>
               </Filter>
             </Tooltip>
           </Header>
@@ -513,7 +518,7 @@ const Notification: React.FC = () => {
         </TablePanel>
       </TableLayout>
     );
-  }, [columns, filterDOM, filterInfo.visible, filterToggle, filteredNotifyList]);
+  }, [columns, filterDOM, filterInfo.visible, filterToggle, filteredNotifyList, t]);
 
   return (
     <MainLayout>

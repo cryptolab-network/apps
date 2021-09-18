@@ -47,17 +47,25 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
     });
     setProfit(profitsArray);
     console.log('profitsArray: ', profitsArray);
-  }, [chain, accounts, rewards]);
+  }, [chain, rewards]);
   return (
     <Chart
       data={profit}
       leftLabel={`Profit (${chain})`}
       xAxisHeight={50}
+      xAxisFontSize={12}
+      yAxisLabelLeftOffset={-10}
+      yAxisLabelRightOffset={-10}
       config={{
         xKey: 'timestamp',
         firstDataKey: 'sum',
         firstDataYAxis: 'left',
         leftLabel: `Profit (${chain})`,
+        rightLabel: `Sum (${chain})`,
+        secondDataKey: 'profit',
+        secondDataYAxis: 'right',
+        marginLeft: 20,
+        marginRight: 20,
       }}
     />
   );
