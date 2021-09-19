@@ -1,4 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
+import { Option } from "@polkadot/types";
+import { StakingLedger } from "@polkadot/types/interfaces/staking";
 
 export enum AccountRole {
   VALIDATOR,
@@ -33,7 +35,7 @@ export enum RewardDestinationType {
 export const queryStakingInfo = async (address, api: ApiPromise) => {
   const [info, ledger] = await Promise.all([
     api.derive.staking.account(address),
-    api.query.staking.ledger(address),
+    api.query.staking.ledger<Option<StakingLedger>>(address),
   ]);
 
   const rewardDestination = info.rewardDestination.isStaked
