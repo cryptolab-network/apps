@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { ReactComponent as TinyChart } from '../../../assets/images/tiny-chart.svg';
 import { ReactComponent as TinyPlain } from '../../../assets/images/tiny-paper-plain.svg';
 import { ReactComponent as TelegramLogo } from '../../../assets/images/telegram-logo.svg';
-import { ReactComponent as EmailLogo } from '../../../assets/images/mail-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
 import DashboardItem from './DashboardItem';
@@ -392,12 +391,8 @@ const Notification: React.FC = () => {
         icon: TelegramLogo,
         title: t('Management.routes.notification.alerts.telegram.title'),
       },
-      // {
-      //   icon: EmailLogo,
-      //   title: 'Receive alerts by Email',
-      // },
     ];
-  }, []);
+  }, [t]);
 
   const dashBoardDOM = useMemo(() => {
     let overViewContent: any[] = [];

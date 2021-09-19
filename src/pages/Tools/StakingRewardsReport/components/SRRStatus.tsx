@@ -132,7 +132,8 @@ const SRRContent = ({ filters }) => {
             setStashData({
               stash: '',
               eraRewards: [],
-            })
+              totalInFiat: 0,
+            });
           }
         } else {
           if (networkName !== 'Kusama') {
@@ -142,7 +143,8 @@ const SRRContent = ({ filters }) => {
             setStashData({
               stash: '',
               eraRewards: [],
-            })
+              totalInFiat: 0,
+            });
           }
         }
       }
@@ -220,7 +222,7 @@ const SRRContent = ({ filters }) => {
     _filters.stashId.length,
     filters.stashId.length,
     filters,
-    setStashData
+    setStashData,
   ]);
 
   // const [showFilters, toggleFilters] = useState(false);

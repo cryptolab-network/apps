@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
-import PerformanceIcon from '../../../assets/images/performance-icon.svg';
 import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useState } from 'react';
 import { hasValues } from '../../../utils/helper';
@@ -27,13 +26,7 @@ const PerformanceHeader = () => {
   );
 };
 const Performance = () => {
-  let {
-    network: networkName,
-    api: polkadotApi,
-    apiState: networkStatus,
-    accounts,
-    refreshAccountData,
-  } = useContext(ApiContext);
+  let { network: networkName, api: polkadotApi, apiState: networkStatus, accounts } = useContext(ApiContext);
   const [isReady, setReady] = useState<boolean>(false);
   const [accountsChainInfo, setAccountsChainInfo] = useState<IAccountChainInfo[]>([]);
   const [accountsRewards, setAccountsRewards] = useState<(IStashRewards | null)[]>([]);
@@ -45,7 +38,6 @@ const Performance = () => {
       const promises: Promise<any>[] = [];
       accounts.forEach((account) => {
         if (hasValues(account) === true && networkStatus === ApiState.READY) {
-          //setAccountChainInfo((prev) => ({ ...prev, isReady: false }));
           const promise = queryStakingInfo(account.address, polkadotApi)
             .then((info) => {
               arr.push(info);
@@ -110,12 +102,6 @@ const HeaderLeft = styled.div`
   justify-content: flex-start;
 `;
 
-const HeaderRight = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-`;
-
 const HeaderTitle = styled.div`
   color: white;
   display: flex;
@@ -142,30 +128,6 @@ const Subtitle = styled.div`
   font-stretch: normal;
   font-style: normal;
   line-height: 1.55;
-`;
-
-const OptionBar = styled.div`
-  width: 100%;
-  height: 62px;
-  padding: 12px 0px 0px 13.8px;
-  border-radius: 6px;
-  background-color: #2f3842;
-`;
-
-const HeaderItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  font-family: Montserrat;
-  font-size: 12px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.42;
-  letter-spacing: normal;
-  text-align: left;
-  color: white;
-  margin: 0 20px 0 20px;
-  align-item: center;
 `;
 
 const ProfitChartLayout = styled.div`
