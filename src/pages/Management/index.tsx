@@ -7,17 +7,19 @@ import { sendPageView } from '../../utils/ga';
 import SwitchTab from '../../components/SwitchTab';
 import Performance from './components/Performance';
 import Notification from './components/Notification';
+import { useTranslation } from 'react-i18next';
 
 const Management = () => {
+  const { t } = useTranslation();
   let { path } = useRouteMatch();
 
   const tabs = [
     {
-      label: 'Performance',
+      label: t('Management.routes.performance.title'),
       value: '',
     },
     {
-      label: 'Notification',
+      label: t('Management.routes.notification.title'),
       value: 'notification',
     },
   ];

@@ -76,37 +76,37 @@ const Notification: React.FC = () => {
         let slashCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          // let result = await apiGetNotificationEvents({
-          //   params: {
-          //     id: accounts[idx].address,
-          //     chain: networkCapitalCodeName(networkName),
-          //   },
-          // });
+          let result = await apiGetNotificationEvents({
+            params: {
+              id: accounts[idx].address,
+              chain: networkCapitalCodeName(networkName),
+            },
+          });
           // TODO: remove mock data below
-          let result = {
-            commissions: [
-              {
-                commissionFrom: 1,
-                commissionTo: 2,
-                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-                era: 123,
-              },
-              {
-                commissionFrom: 2,
-                commissionTo: 3,
-                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-                era: 234,
-              },
-            ],
-            slashes: [
-              {
-                era: 123,
-                validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-                total: 5,
-              },
-            ],
-            inactive: [0, 234],
-          };
+          // let result = {
+          //   commissions: [
+          //     {
+          //       commissionFrom: 1,
+          //       commissionTo: 2,
+          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       era: 123,
+          //     },
+          //     {
+          //       commissionFrom: 2,
+          //       commissionTo: 3,
+          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       era: 234,
+          //     },
+          //   ],
+          //   slashes: [
+          //     {
+          //       era: 123,
+          //       validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+          //       total: 5,
+          //     },
+          //   ],
+          //   inactive: [0, 234],
+          // };
           if (result) {
             result.commissions.forEach((i) => {
               tableList.push({
@@ -228,11 +228,23 @@ const Notification: React.FC = () => {
         disableSortBy: true,
         Cell: ({ row }) => {
           if (row.original.type === FilterType.COMMISSION) {
-            return <DescriptionStyle>Commission change</DescriptionStyle>;
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.commission.title')}
+              </DescriptionStyle>
+            );
           } else if (row.original.type === FilterType.INACTIVE) {
-            return <DescriptionStyle>All inactive</DescriptionStyle>;
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.inactive.title')}
+              </DescriptionStyle>
+            );
           } else {
-            return <DescriptionStyle>slash</DescriptionStyle>;
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.slash.title')}
+              </DescriptionStyle>
+            );
           }
         },
       },
@@ -245,7 +257,15 @@ const Notification: React.FC = () => {
             return (
               <DescriptionStyle>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                  Validator
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.commission.validator')}
+                  </span>
+
                   <div
                     style={{
                       display: 'flex',
@@ -269,20 +289,33 @@ const Notification: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  change commission from {row.original.descriptionValue.split('#')[0]} to{' '}
+                  {t('Management.routes.notification.notification.table.data.commission.action')}{' '}
+                  {row.original.descriptionValue.split('#')[0]}{' '}
+                  {t('Management.routes.notification.notification.table.data.commission.to')}{' '}
                   {row.original.descriptionValue.split('#')[1]}
                 </div>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.INACTIVE) {
             return (
-              <DescriptionStyle>All the validators are inactive in era {row.original.era}</DescriptionStyle>
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.inactive.description')}{' '}
+                {row.original.era}
+              </DescriptionStyle>
             );
           } else {
             return (
               <DescriptionStyle>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                  Validator
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.slash.validator')}
+                  </span>
+
                   <div
                     style={{
                       display: 'flex',
@@ -306,7 +339,8 @@ const Notification: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  is slashed by <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
+                  {t('Management.routes.notification.notification.table.data.slash.action')}{' '}
+                  <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
                   <span> {networkCapitalCodeName(networkName)}</span>
                 </div>
               </DescriptionStyle>
@@ -469,7 +503,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.ALL);
           }}
         >
-          {t('Management.routes.notification.filter.all')}
+          {t('Management.routes.notification.notification.filter.all')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.COMMISSION ? true : false}
@@ -477,7 +511,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.COMMISSION);
           }}
         >
-          {t('Management.routes.notification.filter.commission')}
+          {t('Management.routes.notification.notification.filter.commission')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.SLASH ? true : false}
@@ -485,7 +519,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.SLASH);
           }}
         >
-          {t('Management.routes.notification.filter.slash')}
+          {t('Management.routes.notification.notification.filter.slash')}
         </FilterOption>
         <FilterOption
           selected={filterInfo.type === FilterType.INACTIVE ? true : false}
@@ -493,7 +527,7 @@ const Notification: React.FC = () => {
             filterSelect(FilterType.INACTIVE);
           }}
         >
-          {t('Management.routes.notification.filter.inactive')}
+          {t('Management.routes.notification.notification.filter.inactive')}
         </FilterOption>
       </FilterTooltip>
     );
