@@ -104,7 +104,7 @@ const ValidatorStatus = (props) => {
   const [validator, setValidator] = useState<IValidatorHistory>({
     id: '',
     statusChange: {
-      commissionChange: 0,
+      commission: 0,
     },
     identity: {
       display: '',
@@ -163,6 +163,7 @@ const ValidatorStatus = (props) => {
           const chartData1 = validator.info.map((era) => {
             return {
               nominators: era.nominatorCount,
+              activeNominators: era.exposure.others.length,
               commission: era.commission,
               era: era.era,
             };
@@ -281,13 +282,15 @@ const ValidatorStatus = (props) => {
                   rightLabel="Commission ( % )"
                   xAxisHeight={80}
                   xAxisFontSize={12}
-                  legendPayload={[{ value: 'Nominators' }, { value: 'Commission (%)' }]}
+                  yAxisRDomain={[0, 100]}
+                  legendPayload={[{ value: 'Nominators' }, {value: 'Active Nominators'}, { value: 'Commission (%)' }]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
-                    secondDataKey: 'commission',
+                    secondDataKey: 'activeNominators',
+                    thirdDataKey: 'commission',
                     firstDataYAxis: 'left',
-                    secondDataYAxis: 'right',
+                    thirdDataYAxis: 'right',
                   }}
                 />
               </ChartContainer>
@@ -297,6 +300,7 @@ const ValidatorStatus = (props) => {
                   leftLabel="APY"
                   xAxisHeight={80}
                   xAxisFontSize={12}
+                  yAxisLDomain={[0, 25]}
                   legendPayload={[{ value: 'APY (%)' }]}
                   config={{
                     xKey: 'era',

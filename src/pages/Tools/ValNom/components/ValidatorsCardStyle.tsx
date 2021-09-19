@@ -104,7 +104,7 @@ const ValidatorGrid = ({ filters, validators }) => {
       if (filters.status === true) {
         const statusChangedValidators = validators.reduce(
           (acc: Array<IValidator>, v: IValidator, idx: number) => {
-            if (v.statusChange.commissionChange !== 0) {
+            if (v.statusChange.commission !== 0) {
               acc.push(v);
               validators.splice(idx, 1);
             }

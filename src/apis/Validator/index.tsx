@@ -10,7 +10,7 @@ import {
 import { Strategy } from '../../pages/Benchmark/components/Staking';
 
 export interface IStatusChange {
-  commissionChange: number;
+  commission: number;
 }
 
 export interface IIdentity {

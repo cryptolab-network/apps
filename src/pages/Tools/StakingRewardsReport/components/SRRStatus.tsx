@@ -109,19 +109,8 @@ enum State {
 
 const SRRContent = ({ filters }) => {
   const { t } = useTranslation();
-
   const { network: networkName, changeNetwork } = useContext(DataContext);
-  if (filters.stashId.length > 0) {
-    if (validateAddress(filters.stashId)) {
-      if (filters.stashId.startsWith('1')) {
-        changeNetwork('Polkadot');
-      } else {
-        changeNetwork('Kusama');
-      }
-    }
-  }
-
-  const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
+  const [chain, setChain] = useState<string>();
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [state, setState] = useState<State>(State.EMPTY);
   const [stashData, setStashData] = useState<IStashRewards>({
@@ -131,6 +120,35 @@ const SRRContent = ({ filters }) => {
   });
   const [_filters, setFilters] = useState<ISRRFilters>(filters);
   const [filterDialogVisible, setFilterDialogVisible] = useState(false);
+
+  useEffect(() => {
+    if (filters.stashId.length > 0) {
+      if (validateAddress(filters.stashId)) {
+        if (filters.stashId.startsWith('1')) {
+          if (networkName !== 'Polkadot') {
+            changeNetwork('Polkadot');
+            setValidators([]);
+            setState(State.EMPTY);
+            setStashData({
+              stash: '',
+              eraRewards: [],
+            })
+          }
+        } else {
+          if (networkName !== 'Kusama') {
+            changeNetwork('Kusama');
+            setValidators([]);
+            setState(State.EMPTY);
+            setStashData({
+              stash: '',
+              eraRewards: [],
+            })
+          }
+        }
+      }
+    }
+  }, [filters.stashId.length, filters.stashId, changeNetwork, networkName]);
+
   const notifyWarn = useCallback((msg: string) => {
     toast.warn(`${msg}`, {
       position: 'top-right',
@@ -142,6 +160,11 @@ const SRRContent = ({ filters }) => {
       progress: undefined,
     });
   }, []);
+
+  useEffect(() => {
+    networkName === 'Polkadot' ? setChain('DOT') : setChain('KSM');
+  }, [networkName, setChain]);
+
   useEffect(() => {
     setState(State.EMPTY);
     setStashData({
@@ -197,6 +220,7 @@ const SRRContent = ({ filters }) => {
     _filters.stashId.length,
     filters.stashId.length,
     filters,
+    setStashData
   ]);
 
   // const [showFilters, toggleFilters] = useState(false);
