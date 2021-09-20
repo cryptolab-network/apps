@@ -116,6 +116,7 @@ const SRRContent = ({ filters }) => {
   const [stashData, setStashData] = useState<IStashRewards>({
     stash: '',
     eraRewards: [],
+    totalInFiat: 0,
   });
   const [_filters, setFilters] = useState<ISRRFilters>(filters);
   const [filterDialogVisible, setFilterDialogVisible] = useState(false);
@@ -131,7 +132,8 @@ const SRRContent = ({ filters }) => {
             setStashData({
               stash: '',
               eraRewards: [],
-            })
+              totalInFiat: 0,
+            });
           }
         } else {
           if (networkName !== 'Kusama') {
@@ -141,7 +143,8 @@ const SRRContent = ({ filters }) => {
             setStashData({
               stash: '',
               eraRewards: [],
-            })
+              totalInFiat: 0,
+            });
           }
         }
       }
@@ -169,6 +172,7 @@ const SRRContent = ({ filters }) => {
     setStashData({
       stash: '',
       eraRewards: [],
+      totalInFiat: 0,
     });
     async function getStashRewards() {
       if (!validateAddress(filters.stashId)) {
@@ -218,7 +222,7 @@ const SRRContent = ({ filters }) => {
     _filters.stashId.length,
     filters.stashId.length,
     filters,
-    setStashData
+    setStashData,
   ]);
 
   // const [showFilters, toggleFilters] = useState(false);

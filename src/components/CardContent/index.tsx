@@ -60,7 +60,7 @@ const CardContentLayout = styled.div`
 const HalfUp = styled.div`
   flex: 1;
   width: 100%;
-  height 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -93,7 +93,7 @@ const TitleLayout = styled.div`
 const HalfDown = styled.div`
   flex: 1;
   width: 100%;
-  height 100%;
+  height: 100%;
 `;
 
 const DetailLayout = styled.div`

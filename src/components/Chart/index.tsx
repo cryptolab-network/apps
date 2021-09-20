@@ -25,6 +25,8 @@ export interface IChart {
   legendPayload?: any[];
   yAxisLDomain?: number[];
   yAxisRDomain?: number[];
+  yAxisLabelLeftOffset?: number;
+  yAxisLabelRightOffset?: number;
   config?: {
     xKey: string | undefined;
     firstDataKey: string | undefined;
@@ -35,6 +37,10 @@ export interface IChart {
     thirdDataYAxis?: string | undefined;
     leftLabel?: string | undefined;
     rightLabel?: string | undefined;
+    marginLeft?: number | undefined;
+    marginRight?: number | undefined;
+    marginTop?: number | undefined;
+    marginBottom?: number | undefined;
   };
 }
 
@@ -113,6 +119,8 @@ const Chart: React.FC<IChart> = ({
   legendPayload = [],
   yAxisLDomain = [],
   yAxisRDomain = [],
+  yAxisLabelLeftOffset = 5,
+  yAxisLabelRightOffset = 5,
   config = {
     xKey: undefined,
     firstDataKey: undefined,
@@ -123,6 +131,10 @@ const Chart: React.FC<IChart> = ({
     thirdDataYAxis: undefined,
     leftLabel: undefined,
     rightLabel: undefined,
+    marginLeft: undefined,
+    marginRight: undefined,
+    marginTop: undefined,
+    marginBottom: undefined,
   },
 }) => {
   const [chartConfig, setChartConfig] = useState<IChart['config']>({
@@ -135,6 +147,10 @@ const Chart: React.FC<IChart> = ({
     thirdDataYAxis: 'right',
     leftLabel: '',
     rightLabel: '',
+    marginLeft: undefined,
+    marginRight: undefined,
+    marginTop: undefined,
+    marginBottom: undefined,
   });
 
   useEffect(() => {
@@ -148,6 +164,10 @@ const Chart: React.FC<IChart> = ({
       thirdDataYAxis: config.thirdDataYAxis ? config.thirdDataYAxis : 'right',
       leftLabel: config.leftLabel ? config.leftLabel : leftLabel,
       rightLabel: config.rightLabel ? config.rightLabel : rightLabel,
+      marginLeft: config.marginLeft ? config.marginLeft : 0,
+      marginRight: config.marginRight ? config.marginRight : 0,
+      marginTop: config.marginTop ? config.marginTop : 0,
+      marginBottom: config.marginBottom ? config.marginBottom : 0,
     };
     if (data.length) {
       Object.keys(data[0]).forEach((key, idx) => {
@@ -174,6 +194,10 @@ const Chart: React.FC<IChart> = ({
     config.thirdDataKey,
     config.thirdDataYAxis,
     config.xKey,
+    config.marginBottom,
+    config.marginTop,
+    config.marginLeft,
+    config.marginRight,
     data,
     leftLabel,
     rightLabel,
@@ -202,10 +226,10 @@ const Chart: React.FC<IChart> = ({
         <LineChart
           data={data}
           margin={{
-            top: 0,
-            right: 0,
-            left: 0,
-            bottom: 0,
+            top: chartConfig?.marginTop || 0,
+            right: chartConfig?.marginRight || 0,
+            left: chartConfig?.marginLeft || 0,
+            bottom: chartConfig?.marginBottom || 0,
           }}
         >
           <CartesianGrid vertical={false} stroke="#404952" />
@@ -237,6 +261,7 @@ const Chart: React.FC<IChart> = ({
                 fontSize={13}
                 fontWeight={500}
                 fill="#535a62"
+                offset={yAxisLabelLeftOffset}
                 style={{ textAnchor: 'middle' }}
               />
             </YAxis>
@@ -260,6 +285,7 @@ const Chart: React.FC<IChart> = ({
                 fontSize={13}
                 fontWeight={500}
                 fill="#535a62"
+                offset={yAxisLabelRightOffset}
                 style={{ textAnchor: 'middle' }}
               />
             </YAxis>
