@@ -11,9 +11,7 @@ import StashInformation from './StashInformation';
 import { useEffect } from 'react';
 import { apiGetStashRewards, IStashRewards } from '../../../../apis/StashRewards';
 import dayjs from 'dayjs';
-import { Grid } from '@material-ui/core';
 import SRRTable from './SRRTable';
-// import IconButton from '../../../../components/Button/IconButton';
 import { apiGetNominatedValidators, IStatusChange, IValidator } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import ValidNominator from '../../../../components/ValidNominator';
@@ -25,10 +23,8 @@ import { balanceUnit, validateAddress } from '../../../../utils/string';
 import { DataContext } from '../../components/Data';
 import Dialog from '../../../../components/Dialog';
 import { toast } from 'react-toastify';
-
 import { useTranslation } from 'react-i18next';
 import SRRChart from './SRRChart';
-// import Button from '../../../../components/Button';
 
 interface ISRRFilters {
   stashId: string;
@@ -69,30 +65,28 @@ const ValidatorComponents = ({ chain, validators }) => {
         idx: any
       ) => {
         return (
-          <Grid item xs={6} sm={4} md={3} lg={3} xl={2}>
-            <ValidNominator
-              address={v.id}
-              name={v.identity.display}
-              activeAmount={_formatBalance(v.info.exposure.total)}
-              totalAmount={_formatBalance(v.info.total)}
-              apy={(v.averageApy * 100).toFixed(2)}
-              commission={v.info.commission}
-              count={v.info.nominatorCount}
-              statusChange={v.statusChange}
-              unclaimedPayouts={v.info.unclaimedEras.length}
-              favorite={v.favorite}
-              onClick={() => openValidatorStatus(v.id)}
-            ></ValidNominator>
-          </Grid>
+          <ValidNominator
+            address={v.id}
+            name={v.identity.display}
+            activeAmount={_formatBalance(v.info.exposure.total)}
+            totalAmount={_formatBalance(v.info.total)}
+            apy={(v.averageApy * 100).toFixed(2)}
+            commission={v.info.commission}
+            count={v.info.nominatorCount}
+            statusChange={v.statusChange}
+            unclaimedPayouts={v.info.unclaimedEras.length}
+            favorite={v.favorite}
+            onClick={() => openValidatorStatus(v.id)}
+          ></ValidNominator>
         );
       }
     );
   }, [_formatBalance, chain, history, validators]);
   if (validatorComponents.length > 0) {
     return (
-      <Grid container spacing={3} style={{ justifyContent: 'space-between' }}>
+      <div style={{ padding: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {validatorComponents}
-      </Grid>
+      </div>
     );
   } else {
     return <div></div>;
