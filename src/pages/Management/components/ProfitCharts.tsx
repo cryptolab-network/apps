@@ -51,17 +51,18 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
   return (
     <Chart
       data={profit}
-      leftLabel={`Profit (${chain})`}
+      leftLabel={`Sum (${chain})`}
       xAxisHeight={50}
       xAxisFontSize={12}
       yAxisLabelLeftOffset={-10}
       yAxisLabelRightOffset={-10}
+      legendPayload={[{ value: 'Total Revenue' }, {value: 'Daily Revenue'}]}
       config={{
         xKey: 'timestamp',
         firstDataKey: 'sum',
         firstDataYAxis: 'left',
-        leftLabel: `Profit (${chain})`,
-        rightLabel: `Sum (${chain})`,
+        leftLabel: `Sum (${chain})`,
+        rightLabel: `Daily (${chain})`,
         secondDataKey: 'profit',
         secondDataYAxis: 'right',
         marginLeft: 20,
