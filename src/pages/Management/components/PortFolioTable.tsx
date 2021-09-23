@@ -66,12 +66,13 @@ const PortfolioTable = ({chain, accounts, rewards}) => {
           return acc;
         }, 0.0);
         const duration = moment(reward.eraRewards[0].timestamp).diff(moment(reward.eraRewards[reward.eraRewards.length - 1].timestamp), 'days');
+        const staked = (parseInt(account[0].bonded, 16) / Math.pow(10, NetworkConfig[chain].decimals)).toFixed(4);
         console.log(`duration: ${duration} days`);
         acc.push({
           stash: reward.stash,
-          staked: (parseInt(account[0].bonded, 16) / Math.pow(10, NetworkConfig[chain].decimals)).toFixed(4),
+          staked: staked,
           profit: profit.toFixed(4),
-          apy: ((profit / duration) * 100).toFixed(2),
+          apy: ((profit / parseFloat(staked)) * (365 / duration) * 100).toFixed(2),
           totalInFiat: reward.totalInFiat.toFixed(2),
           fromDate: moment(reward.eraRewards[reward.eraRewards.length - 1].timestamp).format('YYYY-MM-DD'),
           toDate: moment(reward.eraRewards[0].timestamp).format('YYYY-MM-DD'),
