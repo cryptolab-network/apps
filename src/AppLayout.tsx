@@ -533,6 +533,20 @@ const AppLayout = () => {
         <Route path="/guide" component={Guide} />
         <Route path="/benchmark" component={Benchmark} />
         <Route path="/management" component={Management} />
+        <Route path="/tools/*" component={() => {
+          console.log(window.location);
+          if (window.location.pathname.indexOf('validatorStatus')) {
+            // redirect to new site
+            const stash = window.location.search.match(/=(.*)&/);
+            const network = window.location.search.match(/coin=(.*)/);
+            if (stash !== null && network !== null) {
+              window.location.href = `https://tools.cryptolab.network/validator/${stash[1]}/${network[1]}`; 
+              return null;
+            }
+          } 
+          window.location.href = 'https://tools.cryptolab.network'; 
+          return null;
+        }} />
       </Switch>
     );
   }, [isToolsSite]);
