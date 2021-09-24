@@ -27,6 +27,7 @@ export interface IChart {
   yAxisRDomain?: number[];
   yAxisLabelLeftOffset?: number;
   yAxisLabelRightOffset?: number;
+  strokeWidth?: number;
   config?: {
     xKey: string | undefined;
     firstDataKey: string | undefined;
@@ -121,6 +122,7 @@ const Chart: React.FC<IChart> = ({
   yAxisRDomain = [],
   yAxisLabelLeftOffset = 5,
   yAxisLabelRightOffset = 5,
+  strokeWidth = 2,
   config = {
     xKey: undefined,
     firstDataKey: undefined,
@@ -340,7 +342,7 @@ const Chart: React.FC<IChart> = ({
               type="linear"
               dataKey={chartConfig?.firstDataKey}
               stroke="#21aca8"
-              strokeWidth={5}
+              strokeWidth={strokeWidth}
               dot={false}
             />
           )}
@@ -350,7 +352,7 @@ const Chart: React.FC<IChart> = ({
               type="linear"
               dataKey={chartConfig?.secondDataKey}
               stroke="#6e95c3"
-              strokeWidth={5}
+              strokeWidth={strokeWidth}
               dot={false}
             />
           )}
@@ -360,7 +362,7 @@ const Chart: React.FC<IChart> = ({
               type="linear"
               dataKey={chartConfig?.thirdDataKey}
               stroke="#236bbe"
-              strokeWidth={5}
+              strokeWidth={strokeWidth}
               dot={false}
             />
           )}
