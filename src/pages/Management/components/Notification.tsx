@@ -85,7 +85,7 @@ const Notification: React.FC = () => {
           // let result = {
           //   commissions: [
           //     {
-          //       commissionFrom: 1,
+          //       commissionFrom: 0,
           //       commissionTo: 2,
           //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
           //       era: 123,
@@ -107,14 +107,20 @@ const Notification: React.FC = () => {
           //   inactive: [0, 234],
           // };
           if (result) {
+            // filter commission from 0's validator, it means it's just initiate
+            result.commissions = result.commissions.filter((item) => {
+              return item.commissionFrom > 0 ? true : false;
+            });
             result.commissions.forEach((i) => {
-              tableList.push({
-                type: FilterType.COMMISSION,
-                descriptionAddress: i.address,
-                descriptionValue: i.commissionFrom + '#' + i.commissionTo,
-                era: i.era,
-                affectedAccount: accounts[idx].address,
-              });
+              if (i.commissionFrom > 0) {
+                tableList.push({
+                  type: FilterType.COMMISSION,
+                  descriptionAddress: i.address,
+                  descriptionValue: i.commissionFrom + '#' + i.commissionTo,
+                  era: i.era,
+                  affectedAccount: accounts[idx].address,
+                });
+              }
             });
             result.slashes.forEach((i) => {
               tableList.push({
