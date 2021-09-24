@@ -69,7 +69,7 @@ const Notification: React.FC = () => {
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
-      console.log('accounts: ', accounts);
+      // console.log('accounts: ', accounts);
       (async () => {
         let totalCount = 0;
         let commissionCount = 0;
@@ -474,7 +474,7 @@ const Notification: React.FC = () => {
                 disabled={false}
                 title="Subscribe"
                 onClick={() => {
-                  console.log('onclick subscribe');
+                  // console.log('onclick subscribe');
                 }}
                 style={{ width: 220 }}
               />

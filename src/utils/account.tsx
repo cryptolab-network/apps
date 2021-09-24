@@ -1,6 +1,6 @@
-import { ApiPromise } from "@polkadot/api";
-import { Option } from "@polkadot/types";
-import { StakingLedger } from "@polkadot/types/interfaces/staking";
+import { ApiPromise } from '@polkadot/api';
+import { Option } from '@polkadot/types';
+import { StakingLedger } from '@polkadot/types/interfaces/staking';
 
 export enum AccountRole {
   VALIDATOR,
@@ -56,19 +56,19 @@ export const queryStakingInfo = async (address, api: ApiPromise) => {
     role = AccountRole.VALIDATOR;
     bonded = info.stakingLedger.total.unwrap().toHex();
     validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = VALIDATOR`);
+    // console.log(`role = VALIDATOR`);
   } else if (!info.stakingLedger.total.unwrap().isZero()) {
     if (info.controllerId?.toHuman() === address) {
       role = AccountRole.NOMINATOR_AND_CONTROLLER;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR_AND_CONTROLLER`);
+      // console.log(`role = NOMINATOR_AND_CONTROLLER`);
       isNominatable = true;
     } else {
       role = AccountRole.NOMINATOR;
       bonded = info.stakingLedger.total.unwrap().toHex();
       validators = info.nominators.map((n) => n.toHuman());
-      console.log(`role = NOMINATOR`);
+      // console.log(`role = NOMINATOR`);
     }
   } else if (!ledger.isNone) {
     const stash = ledger.unwrap().stash.toHuman();
@@ -77,19 +77,19 @@ export const queryStakingInfo = async (address, api: ApiPromise) => {
       role = AccountRole.CONTROLLER_OF_VALIDATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
       validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_VALIDATOR`);
+      // console.log(`role = CONTROLLER_OF_VALIDATOR`);
     } else {
       role = AccountRole.CONTROLLER_OF_NOMINATOR;
       bonded = staking.stakingLedger.total.unwrap().toHex();
       validators = staking.nominators.map((n) => n.toHuman());
-      console.log(`role = CONTROLLER_OF_NOMINATOR`);
+      // console.log(`role = CONTROLLER_OF_NOMINATOR`);
       isNominatable = true;
     }
   } else {
     role = AccountRole.NONE;
     bonded = info.stakingLedger.total.unwrap().toHex();
     validators = info.nominators.map((n) => n.toHuman());
-    console.log(`role = NONE`);
+    // console.log(`role = NONE`);
     isNominatable = true;
   }
 
@@ -106,4 +106,3 @@ export const queryStakingInfo = async (address, api: ApiPromise) => {
     address: address,
   };
 };
-

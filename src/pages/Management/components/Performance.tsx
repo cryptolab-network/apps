@@ -56,7 +56,11 @@ const Performance = () => {
                   rewards.push(reward);
                 })
                 .catch(() => {
-                  rewards.push(null);
+                  rewards.push({
+                    stash: account.address,
+                    eraRewards: [],
+                    totalInFiat: 0,
+                  });
                 });
             })
             .catch(console.error);

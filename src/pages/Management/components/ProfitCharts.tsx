@@ -46,7 +46,7 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
       sumProfit += profit.profit;
     });
     setProfit(profitsArray);
-    console.log('profitsArray: ', profitsArray);
+    // console.log('profitsArray: ', profitsArray);
   }, [chain, rewards]);
   return (
     <Chart
@@ -56,7 +56,7 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
       xAxisFontSize={12}
       yAxisLabelLeftOffset={-10}
       yAxisLabelRightOffset={-10}
-      legendPayload={[{ value: 'Total Revenue' }, {value: 'Daily Revenue'}]}
+      legendPayload={[{ value: 'Total Revenue' }, { value: 'Daily Revenue' }]}
       config={{
         xKey: 'timestamp',
         firstDataKey: 'sum',
