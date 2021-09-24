@@ -4,7 +4,8 @@ import { ReactComponent as TinyChart } from '../../../assets/images/tiny-chart.s
 import { ReactComponent as TinyPlain } from '../../../assets/images/tiny-paper-plain.svg';
 import { ReactComponent as TelegramLogo } from '../../../assets/images/telegram-logo.svg';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
-import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
+// import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
+import QRCode from 'react-qr-code';
 import DashboardItem from './DashboardItem';
 import Tooltip from '../../../components/Tooltip';
 import Dialog from '../../../components/Dialog';
@@ -17,6 +18,7 @@ import { apiGetNotificationEvents } from '../../../apis/Events';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import Identicon from '@polkadot/react-identicon';
 import { useTranslation } from 'react-i18next';
+import keys from '../../../config/keys';
 
 const FilterType = {
   ALL: 'all',
@@ -444,7 +446,7 @@ const Notification: React.FC = () => {
     return (
       <Dashboard>
         <Dialog
-          image={<Qrcode />}
+          image={<QRCode level="L" size={256} value={keys.tgBotUrl} bgColor="#18232f" fgColor="#23beb9" />}
           title={t('Management.routes.notification.alerts.telegram.dialog.title')}
           isOpen={isTgBotShow}
           handleDialogClose={() => {
