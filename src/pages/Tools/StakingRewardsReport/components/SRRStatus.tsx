@@ -196,6 +196,8 @@ const SRRContent = ({ filters }) => {
         });
         if (validators.length > 0) {
           setValidators(validators);
+        } else {
+          setValidators([]);
         }
       } finally {
         setState(State.LOADED);
