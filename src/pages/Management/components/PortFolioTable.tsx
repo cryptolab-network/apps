@@ -108,6 +108,17 @@ const PortfolioTable = ({ chain, accounts, rewards }) => {
       }
       return acc;
     }, []);
+    tableData.sort((a, b) => {
+      const compareA = Number(a);
+      const compareB = Number(b);
+      if (compareA > compareB) {
+        return -1;
+      } else if (compareA < compareB) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
     setTableData(tableData);
   }, [accounts, chain, rewards]);
   return <Table columns={columns} data={data} />;

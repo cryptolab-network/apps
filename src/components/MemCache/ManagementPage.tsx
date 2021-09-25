@@ -31,7 +31,6 @@ const ManagementPageCache: React.FC = (props) => {
   );
 
   const cacheStashRewards = useCallback((stashRewards: (IStashRewards | null)[]) => {
-    console.log(`data has expired, let's update them.`);
     const expireTime = dayjs().add(10, 'minute');
     setStashRewardsCache({
       data: stashRewards,
@@ -40,7 +39,6 @@ const ManagementPageCache: React.FC = (props) => {
   }, []);
 
   const cacheAccountChainInfo = useCallback((accountChainInfo: IAccountChainInfo[]) => {
-    console.log(`data has expired, let's update them.`);
     const expireTime = dayjs().add(10, 'minute');
     setAccountChainInfo({
       data: accountChainInfo,
