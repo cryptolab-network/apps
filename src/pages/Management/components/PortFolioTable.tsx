@@ -109,8 +109,8 @@ const PortfolioTable = ({ chain, accounts, rewards }) => {
       return acc;
     }, []);
     tableData.sort((a, b) => {
-      const compareA = Number(a);
-      const compareB = Number(b);
+      const compareA = Number(a.staked);
+      const compareB = Number(b.staked);
       if (compareA > compareB) {
         return -1;
       } else if (compareA < compareB) {
