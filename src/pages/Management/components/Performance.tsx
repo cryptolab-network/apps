@@ -6,11 +6,13 @@ import { hasValues } from '../../../utils/helper';
 import { IAccountChainInfo, queryStakingInfo } from '../../../utils/account';
 import { ApiContext } from '../../../components/Api';
 import { ApiState } from '../../../components/Api';
+import { ManagementPageCacheContext } from '../../../components/MemCache/ManagementPage';
 import { apiGetStashRewards, IStashRewards } from '../../../apis/StashRewards';
 import moment from 'moment';
 import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
 import PortfolioTable from './PortFolioTable';
 import ProfitChart from './ProfitCharts';
+import dayjs from 'dayjs';
 
 const PerformanceHeader = () => {
   const { t } = useTranslation();
@@ -27,12 +29,31 @@ const PerformanceHeader = () => {
 };
 const Performance = () => {
   let { network: networkName, api: polkadotApi, apiState: networkStatus, accounts } = useContext(ApiContext);
+  let { stashRewardsCache, cacheStashRewards, accountChainInfo, cacheAccountChainInfo } =
+    useContext(ManagementPageCacheContext);
   const [isReady, setReady] = useState<boolean>(false);
   const [accountsChainInfo, setAccountsChainInfo] = useState<IAccountChainInfo[]>([]);
   const [accountsRewards, setAccountsRewards] = useState<(IStashRewards | null)[]>([]);
 
   useEffect(() => {
-    if (accounts.length > 0 && !isReady) {
+    if (
+      stashRewardsCache &&
+      stashRewardsCache.data &&
+      stashRewardsCache.data.length > 0 &&
+      stashRewardsCache.expireTime &&
+      stashRewardsCache.expireTime.isAfter(dayjs(), 'minute') &&
+      accountChainInfo &&
+      accountChainInfo.data &&
+      accountChainInfo.data.length > 0 &&
+      accountChainInfo.expireTime &&
+      accountChainInfo.expireTime.isAfter(dayjs(), 'minute')
+    ) {
+      // data hasn't expired
+      setAccountsChainInfo(accountChainInfo.data);
+      setAccountsRewards(stashRewardsCache.data);
+      setReady(true);
+    } else if (accounts.length > 0 && !isReady) {
+      // data hasn expired
       const arr: IAccountChainInfo[] = [];
       const rewards: (IStashRewards | null)[] = [];
       const promises: Promise<any>[] = [];
@@ -71,9 +92,20 @@ const Performance = () => {
         setAccountsChainInfo(arr);
         setAccountsRewards(rewards);
         setReady(true);
+        cacheStashRewards(rewards);
+        cacheAccountChainInfo(arr);
       });
     }
-  }, [accounts, isReady, networkStatus, polkadotApi]);
+  }, [
+    accountChainInfo,
+    accounts,
+    cacheAccountChainInfo,
+    cacheStashRewards,
+    isReady,
+    networkStatus,
+    polkadotApi,
+    stashRewardsCache,
+  ]);
   if (isReady) {
     return (
       <CardHeader Header={() => <PerformanceHeader />}>

@@ -383,7 +383,7 @@ const AppLayout = () => {
   const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
     return (
       <Validator>
-        <Identicon value={address} size={35} theme={theme}/>
+        <Identicon value={address} size={35} theme={theme} />
         <span style={{ marginLeft: 8 }}>{name}</span>
       </Validator>
     );

@@ -8,6 +8,7 @@ import SwitchTab from '../../components/SwitchTab';
 import Performance from './components/Performance';
 import Notification from './components/Notification';
 import { useTranslation } from 'react-i18next';
+import MManagementPageCache from '../../components/MemCache/ManagementPage';
 
 const Management = () => {
   const { t } = useTranslation();
@@ -26,17 +27,19 @@ const Management = () => {
 
   sendPageView(useLocation());
   return (
-    <ManagementLayout>
-      <MainLayout>
-        <SwitchTab tabs={tabs} />
-        <div style={{ width: '100%' }}>
-          <Switch>
-            <Route exact path={`${path}`} component={Performance} />
-            <Route exact path={`${path}/notification`} component={Notification} />
-          </Switch>
-        </div>
-      </MainLayout>
-    </ManagementLayout>
+    <MManagementPageCache>
+      <ManagementLayout>
+        <MainLayout>
+          <SwitchTab tabs={tabs} />
+          <div style={{ width: '100%' }}>
+            <Switch>
+              <Route exact path={`${path}`} component={Performance} />
+              <Route exact path={`${path}/notification`} component={Notification} />
+            </Switch>
+          </div>
+        </MainLayout>
+      </ManagementLayout>
+    </MManagementPageCache>
   );
 };
 
