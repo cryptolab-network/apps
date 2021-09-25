@@ -19,6 +19,7 @@ import { networkCapitalCodeName } from '../../../utils/parser';
 import Identicon from '@polkadot/react-identicon';
 import { useTranslation } from 'react-i18next';
 import keys from '../../../config/keys';
+import DropdownCommon from '../../../components/Dropdown/Common';
 
 const FilterType = {
   ALL: 'all',
@@ -26,6 +27,8 @@ const FilterType = {
   INACTIVE: 'inactive',
   SLASH: 'slash',
 };
+
+const ALL_ACCOUNT = 'ALL';
 
 const Notification: React.FC = () => {
   const { t } = useTranslation();
@@ -66,6 +69,18 @@ const Notification: React.FC = () => {
   const [isFetch, setIsFetch] = useState(true);
   const [isTgBotShow, setIsTgBotShow] = useState(false);
   const [isEmailSubscribeShow, setIsEmailSubscribeShow] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState({ label: ALL_ACCOUNT, value: ALL_ACCOUNT });
+
+  const options = useMemo(() => {
+    let list = [{ label: ALL_ACCOUNT, value: ALL_ACCOUNT }];
+    const accountList = accounts.map((account) => {
+      return {
+        label: account.name || account.address,
+        value: account.address,
+      };
+    });
+    return list.concat(accountList);
+  }, [accounts]);
 
   useEffect(() => {
     if (networkStatus === ApiState.READY) {
@@ -192,10 +207,13 @@ const Notification: React.FC = () => {
       }
     });
     if (filterInfo.type !== FilterType.ALL) {
-      return list.filter((item) => item.type === filterInfo.type);
+      list = list.filter((item) => item.type === filterInfo.type);
+    }
+    if (selectedAccount.value !== ALL_ACCOUNT) {
+      list = list.filter((item) => item.affectedAccount === selectedAccount.value);
     }
     return list;
-  }, [filterInfo.type, notifyHistory]);
+  }, [filterInfo.type, selectedAccount, notifyHistory]);
 
   const filterSelect = useCallback((clickItem) => {
     setFilterInfo({ visible: false, type: clickItem });
@@ -225,6 +243,10 @@ const Notification: React.FC = () => {
         setIsEmailSubscribeShow(true);
         break;
     }
+  };
+
+  const handleFilterChange = (e) => {
+    setSelectedAccount(e);
   };
 
   const columns = useMemo(() => {
@@ -532,9 +554,19 @@ const Notification: React.FC = () => {
         >
           {t('Management.routes.notification.notification.filter.inactive')}
         </FilterOption>
+        <FilterTitle>{t('Management.routes.notification.notification.filter.account')}</FilterTitle>
+        <div style={{ minWidth: 180, maxWidth: 250 }}>
+          <DropdownCommon
+            style={{ flex: 1, width: '100%' }}
+            options={options}
+            value={selectedAccount}
+            onChange={handleFilterChange}
+            theme="dark"
+          />
+        </div>
       </FilterTooltip>
     );
-  }, [filterInfo.type, filterSelect, t]);
+  }, [filterInfo.type, filterSelect, t, options, selectedAccount]);
 
   const tableDOM = useMemo(() => {
     return (
@@ -719,6 +751,19 @@ const FilterOption = styled.div<IFilterOption>`
   font-weight: 500;
   text-align: left;
   color: ${(props) => (props.selected ? '#23beb9' : 'white')};
+  cursor: pointer;
+`;
+
+const FilterTitle = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 26px;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  color: white;
   cursor: pointer;
 `;
 

@@ -407,6 +407,7 @@ i18n
                     commission: 'commission change',
                     slash: 'slash',
                     inactive: 'all inactive',
+                    account: 'search account',
                   },
                   table: {
                     column: {
@@ -790,6 +791,7 @@ i18n
                     commission: '佣金變更通知',
                     slash: '罰款通知',
                     inactive: '離線通知',
+                    account: '搜尋帳號',
                   },
                   table: {
                     column: {
@@ -1157,6 +1159,7 @@ i18n
                     commission: '佣金变更通知',
                     slash: '罚款通知',
                     inactive: '离线通知',
+                    account: '搜寻帐号',
                   },
                   table: {
                     column: {
