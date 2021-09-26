@@ -26,6 +26,7 @@ const FilterType = {
   COMMISSION: 'commission',
   INACTIVE: 'inactive',
   SLASH: 'slash',
+  PAYOUT: 'payout',
 };
 
 const ALL_ACCOUNT = 'ALL';
@@ -52,6 +53,12 @@ const Notification: React.FC = () => {
       value: 0,
       title: t('Management.routes.notification.overview.event.inactive.title'),
       subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
+      danger: false,
+    },
+    {
+      value: 0,
+      title: t('Management.routes.notification.overview.event.payout.title'),
+      subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
       danger: false,
     },
     {
@@ -90,39 +97,47 @@ const Notification: React.FC = () => {
         let commissionCount = 0;
         let inactiveCount = 0;
         let slashCount = 0;
+        let payoutCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          let result = await apiGetNotificationEvents({
-            params: {
-              id: accounts[idx].address,
-              chain: networkCapitalCodeName(networkName),
-            },
-          });
+          // let result = await apiGetNotificationEvents({
+          //   params: {
+          //     id: accounts[idx].address,
+          //     chain: networkCapitalCodeName(networkName),
+          //   },
+          // });
           // TODO: remove mock data below
-          // let result = {
-          //   commissions: [
-          //     {
-          //       commissionFrom: 0,
-          //       commissionTo: 2,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 123,
-          //     },
-          //     {
-          //       commissionFrom: 2,
-          //       commissionTo: 3,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 234,
-          //     },
-          //   ],
-          //   slashes: [
-          //     {
-          //       era: 123,
-          //       validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       total: 5,
-          //     },
-          //   ],
-          //   inactive: [0, 234],
-          // };
+          let result = {
+            commissions: [
+              {
+                commissionFrom: 0,
+                commissionTo: 2,
+                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                era: 123,
+              },
+              {
+                commissionFrom: 2,
+                commissionTo: 3,
+                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                era: 234,
+              },
+            ],
+            slashes: [
+              {
+                era: 123,
+                validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+                total: 5,
+              },
+            ],
+            payouts: [
+              {
+                era: 168,
+                amount: 1.1,
+                address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
+              },
+            ],
+            inactive: [0, 234],
+          };
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
             result.commissions = result.commissions.filter((item) => {
@@ -157,9 +172,20 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
+            result.payouts.forEach((i) => {
+              tableList.push({
+                type: FilterType.PAYOUT,
+                descriptionAddress: i.address,
+                descriptionValue: i.amount,
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
+            });
+
             commissionCount += result.commissions.length;
             inactiveCount += result.inactive.length;
             slashCount += result.slashes.length;
+            payoutCount += result.payouts.length;
           }
         }
         totalCount = commissionCount + inactiveCount + slashCount;
@@ -180,6 +206,12 @@ const Notification: React.FC = () => {
             value: inactiveCount,
             title: t('Management.routes.notification.overview.event.inactive.title'),
             subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
+            danger: false,
+          },
+          {
+            value: payoutCount,
+            title: t('Management.routes.notification.overview.event.payout.title'),
+            subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
             danger: false,
           },
           {
@@ -268,10 +300,16 @@ const Notification: React.FC = () => {
                 {t('Management.routes.notification.notification.table.data.inactive.title')}
               </DescriptionStyle>
             );
-          } else {
+          } else if (row.original.type === FilterType.SLASH) {
             return (
               <DescriptionStyle>
                 {t('Management.routes.notification.notification.table.data.slash.title')}
+              </DescriptionStyle>
+            );
+          } else {
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.payout.title')}
               </DescriptionStyle>
             );
           }
@@ -332,7 +370,7 @@ const Notification: React.FC = () => {
                 {row.original.era}
               </DescriptionStyle>
             );
-          } else {
+          } else if (row.original.type === FilterType.SLASH) {
             return (
               <DescriptionStyle>
                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -369,6 +407,48 @@ const Notification: React.FC = () => {
                 </div>
                 <div>
                   {t('Management.routes.notification.notification.table.data.slash.action')}{' '}
+                  <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
+                  <span> {networkCapitalCodeName(networkName)}</span>
+                </div>
+              </DescriptionStyle>
+            );
+          } else {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.payout.validator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>
+                  {t('Management.routes.notification.notification.table.data.payout.action')}{' '}
                   <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
                   <span> {networkCapitalCodeName(networkName)}</span>
                 </div>
@@ -554,6 +634,14 @@ const Notification: React.FC = () => {
         >
           {t('Management.routes.notification.notification.filter.inactive')}
         </FilterOption>
+        <FilterOption
+          selected={filterInfo.type === FilterType.PAYOUT ? true : false}
+          onClick={() => {
+            filterSelect(FilterType.PAYOUT);
+          }}
+        >
+          {t('Management.routes.notification.notification.filter.payout')}
+        </FilterOption>
         <FilterTitle>{t('Management.routes.notification.notification.filter.account')}</FilterTitle>
         <div style={{ minWidth: 180, maxWidth: 250 }}>
           <DropdownCommon
@@ -642,7 +730,7 @@ const DashboardTitle = styled.div`
 `;
 
 const Overview = styled.div`
-  flex: 2;
+  flex: 4;
   box-sizing: border-box;
   padding: 7px;
   display: flex;

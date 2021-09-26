@@ -387,6 +387,10 @@ i18n
                       title: 'Slash events',
                       subtitle: 'Past 7 days',
                     },
+                    payout: {
+                      title: 'Payout events',
+                      subtitle: 'Past 7 days',
+                    },
                   },
                 },
                 alerts: {
@@ -407,6 +411,7 @@ i18n
                     commission: 'commission change',
                     slash: 'slash',
                     inactive: 'all inactive',
+                    payout: 'payout',
                     account: 'search account',
                   },
                   table: {
@@ -431,6 +436,11 @@ i18n
                         title: 'Slash',
                         validator: 'Validator',
                         action: 'is slashed by',
+                      },
+                      payout: {
+                        title: 'Payout',
+                        validator: 'Validator',
+                        action: 'give a payout of',
                       },
                     },
                   },
@@ -771,6 +781,10 @@ i18n
                       title: '罰款通知數',
                       subtitle: '過去 7 天',
                     },
+                    payout: {
+                      title: '支付獎勵通知數',
+                      subtitle: '過去 7 天',
+                    },
                   },
                 },
                 alerts: {
@@ -791,6 +805,7 @@ i18n
                     commission: '佣金變更通知',
                     slash: '罰款通知',
                     inactive: '離線通知',
+                    payout: '支付獎勵通知',
                     account: '搜尋帳號',
                   },
                   table: {
@@ -815,6 +830,11 @@ i18n
                         title: '罰款',
                         validator: '驗證節點',
                         action: '被罰款',
+                      },
+                      payout: {
+                        title: '支付獎勵',
+                        validator: '驗證節點',
+                        action: '支付獎勵',
                       },
                     },
                   },
@@ -1139,6 +1159,10 @@ i18n
                       title: '罚款通知数',
                       subtitle: '过去 7 天',
                     },
+                    payout: {
+                      title: '支付奖励通知数',
+                      subtitle: '过去 7 天',
+                    },
                   },
                 },
                 alerts: {
@@ -1159,6 +1183,7 @@ i18n
                     commission: '佣金变更通知',
                     slash: '罚款通知',
                     inactive: '离线通知',
+                    payout: '支付奖励通知',
                     account: '搜寻帐号',
                   },
                   table: {
@@ -1183,6 +1208,11 @@ i18n
                         title: '罚款',
                         validator: '验证节点',
                         action: '被罚款',
+                      },
+                      payout: {
+                        title: '支付奖励',
+                        validator: '验证节点',
+                        action: '支付奖励',
                       },
                     },
                   },
