@@ -30,6 +30,16 @@ interface IEventInfo {
     amount: number;
     address: string;
   }[];
+  kicks: {
+    era: number;
+    address: string;
+    nominator: string;
+  }[];
+  overSubscribes: {
+    era: number;
+    address: string;
+    nominator: string;
+  }[];
 }
 
 export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo | undefined> =>

@@ -20,6 +20,8 @@ import Identicon from '@polkadot/react-identicon';
 import { useTranslation } from 'react-i18next';
 import keys from '../../../config/keys';
 import DropdownCommon from '../../../components/Dropdown/Common';
+import Account from '../../../components/Account';
+import { getAccountName } from '../../../utils/account';
 
 const FilterType = {
   ALL: 'all',
@@ -27,6 +29,8 @@ const FilterType = {
   INACTIVE: 'inactive',
   SLASH: 'slash',
   PAYOUT: 'payout',
+  KICKS: 'kicks',
+  OVERSUBSCRIBES: 'overSubscribes',
 };
 
 const ALL_ACCOUNT = 'ALL';
@@ -59,6 +63,18 @@ const Notification: React.FC = () => {
       value: 0,
       title: t('Management.routes.notification.overview.event.payout.title'),
       subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
+      danger: false,
+    },
+    {
+      value: 0,
+      title: t('Management.routes.notification.overview.event.kicks.title'),
+      subtitle: t('Management.routes.notification.overview.event.kicks.subtitle'),
+      danger: false,
+    },
+    {
+      value: 0,
+      title: t('Management.routes.notification.overview.event.overSubscribes.title'),
+      subtitle: t('Management.routes.notification.overview.event.overSubscribes.subtitle'),
       danger: false,
     },
     {
@@ -98,14 +114,69 @@ const Notification: React.FC = () => {
         let inactiveCount = 0;
         let slashCount = 0;
         let payoutCount = 0;
+        let kicksCount = 0;
+        let overSubscribesCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          let result = await apiGetNotificationEvents({
-            params: {
-              id: accounts[idx].address,
-              chain: networkCapitalCodeName(networkName),
-            },
-          });
+          // let result = await apiGetNotificationEvents({
+          //   params: {
+          //     id: accounts[idx].address,
+          //     chain: networkCapitalCodeName(networkName),
+          //   },
+          // });
+
+          // TODO: remove mock data below
+          let result = {
+            commissions: [
+              {
+                commissionFrom: 0,
+                commissionTo: 2,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 123,
+              },
+              {
+                commissionFrom: 2,
+                commissionTo: 3,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 234,
+              },
+            ],
+            slashes: [
+              {
+                era: 123,
+                validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                total: 5,
+              },
+            ],
+            payouts: [
+              {
+                era: 168,
+                amount: 1.1,
+                address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+              },
+            ],
+            inactive: [0, 234],
+            overSubscribes: [
+              {
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 2796,
+              },
+              {
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 2797,
+              },
+            ],
+            kicks: [
+              {
+                era: 0,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+              },
+            ],
+          };
+
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
             result.commissions = result.commissions.filter((item) => {
@@ -149,14 +220,35 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
+            result.kicks.forEach((i) => {
+              tableList.push({
+                type: FilterType.KICKS,
+                descriptionAddress: i.address,
+                descriptionValue: '',
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
+            });
+            result.overSubscribes.forEach((i) => {
+              tableList.push({
+                type: FilterType.OVERSUBSCRIBES,
+                descriptionAddress: i.address,
+                descriptionValue: '',
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
+            });
 
             commissionCount += result.commissions.length;
             inactiveCount += result.inactive.length;
             slashCount += result.slashes.length;
             payoutCount += result.payouts.length;
+            kicksCount += result.kicks.length;
+            overSubscribesCount += result.overSubscribes.length;
           }
         }
-        totalCount = commissionCount + inactiveCount + slashCount;
+        totalCount =
+          commissionCount + inactiveCount + slashCount + payoutCount + kicksCount + overSubscribesCount;
         setOverview([
           {
             value: totalCount,
@@ -180,6 +272,18 @@ const Notification: React.FC = () => {
             value: payoutCount,
             title: t('Management.routes.notification.overview.event.payout.title'),
             subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
+            danger: false,
+          },
+          {
+            value: kicksCount,
+            title: t('Management.routes.notification.overview.event.kicks.title'),
+            subtitle: t('Management.routes.notification.overview.event.kicks.subtitle'),
+            danger: false,
+          },
+          {
+            value: overSubscribesCount,
+            title: t('Management.routes.notification.overview.event.overSubscribes.title'),
+            subtitle: t('Management.routes.notification.overview.event.overSubscribes.subtitle'),
             danger: false,
           },
           {
@@ -274,7 +378,19 @@ const Notification: React.FC = () => {
                 {t('Management.routes.notification.notification.table.data.slash.title')}
               </DescriptionStyle>
             );
-          } else {
+          } else if (row.original.type === FilterType.KICKS) {
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.kick.title')}
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.OVERSUBSCRIBES) {
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.overSubscribes.title')}
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.PAYOUT) {
             return (
               <DescriptionStyle>
                 {t('Management.routes.notification.notification.table.data.payout.title')}
@@ -380,10 +496,10 @@ const Notification: React.FC = () => {
                 </div>
               </DescriptionStyle>
             );
-          } else {
+          } else if (row.original.type === FilterType.PAYOUT) {
             return (
               <DescriptionStyle>
-                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                   <span
                     style={{
                       display: 'inline-block',
@@ -414,12 +530,120 @@ const Notification: React.FC = () => {
                   >
                     {row.original.descriptionAddress}
                   </span>
-                </div>
+                </div> */}
                 <div>
                   {t('Management.routes.notification.notification.table.data.payout.action')}{' '}
                   <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
                   <span> {networkCapitalCodeName(networkName)}</span>
                 </div>
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.KICKS) {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.kick.validator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>{t('Management.routes.notification.notification.table.data.kick.action')}</div>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.kick.nominator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.affectedAccount} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.affectedAccount}
+                  </span>
+                </div>
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.OVERSUBSCRIBES) {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.overSubscribes.validator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>{t('Management.routes.notification.notification.table.data.overSubscribes.action')}</div>
               </DescriptionStyle>
             );
           }
@@ -436,32 +660,19 @@ const Notification: React.FC = () => {
         disableSortBy: true,
         Cell: ({ row }) => {
           return (
-            <div
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-              }}
-            >
-              <Identicon value={row.original.affectedAccount} size={32} theme={'polkadot'} />{' '}
-              <span
-                style={{
-                  display: 'inline-block',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  marginLeft: 8,
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {row.original.affectedAccount}
-              </span>
-            </div>
+            <span>
+              {
+                <Account
+                  address={row.original.affectedAccount}
+                  display={getAccountName(row.original.affectedAccount, accounts)}
+                />
+              }
+            </span>
           );
         },
       },
     ];
-  }, [networkName, t]);
+  }, [accounts, networkName, t]);
 
   const alertsMethod = useMemo(() => {
     return [
@@ -610,6 +821,24 @@ const Notification: React.FC = () => {
         >
           {t('Management.routes.notification.notification.filter.payout')}
         </FilterOption>
+
+        <FilterOption
+          selected={filterInfo.type === FilterType.KICKS ? true : false}
+          onClick={() => {
+            filterSelect(FilterType.KICKS);
+          }}
+        >
+          {t('Management.routes.notification.notification.filter.kick')}
+        </FilterOption>
+        <FilterOption
+          selected={filterInfo.type === FilterType.OVERSUBSCRIBES ? true : false}
+          onClick={() => {
+            filterSelect(FilterType.OVERSUBSCRIBES);
+          }}
+        >
+          {t('Management.routes.notification.notification.filter.overSubscribes')}
+        </FilterOption>
+
         <FilterTitle>{t('Management.routes.notification.notification.filter.account')}</FilterTitle>
         <div style={{ minWidth: 180, maxWidth: 250 }}>
           <DropdownCommon

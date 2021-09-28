@@ -391,6 +391,14 @@ i18n
                       title: 'Payout events',
                       subtitle: 'Past 7 days',
                     },
+                    kicks: {
+                      title: 'Kicks events',
+                      subtitle: 'Past 7 days',
+                    },
+                    overSubscribes: {
+                      title: 'Over subscribes events',
+                      subtitle: 'Past 7 days',
+                    },
                   },
                 },
                 alerts: {
@@ -412,6 +420,8 @@ i18n
                     slash: 'slash',
                     inactive: 'all inactive',
                     payout: 'payout',
+                    kick: 'kick',
+                    overSubscribes: 'over subscribe',
                     account: 'search account',
                   },
                   table: {
@@ -441,6 +451,17 @@ i18n
                         title: 'Payout',
                         validator: 'Validator',
                         action: 'give a payout of',
+                      },
+                      kick: {
+                        title: 'Kick',
+                        validator: 'Validator',
+                        action: 'kick nominator',
+                        nominator: 'nominator',
+                      },
+                      overSubscribes: {
+                        title: 'Over subscribe',
+                        validator: 'Validator',
+                        action: 'has been over subscribed',
                       },
                     },
                   },

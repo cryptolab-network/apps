@@ -4,9 +4,10 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IEraRewards, IStashRewards } from '../../../apis/StashRewards';
 import Account from '../../../components/Account';
-import { ApiContext, IAccount } from '../../../components/Api';
+import { ApiContext } from '../../../components/Api';
 import Table from '../../../components/Table';
 import { NetworkConfig } from '../../../utils/constants/Network';
+import { getAccountName } from '../../../utils/account';
 
 interface TableContent {
   stash: string;
@@ -17,14 +18,6 @@ interface TableContent {
   fromDate: string;
   toDate: string;
 }
-
-const getAccountName = (address: string, accounts: IAccount[]) => {
-  let name = accounts.filter((account) => account.address === address)[0].name;
-  if (name) {
-    return name;
-  }
-  return address;
-};
 
 const PortfolioTable = ({ chain, accounts, rewards }) => {
   const { accounts: walletAccounts } = useContext(ApiContext);

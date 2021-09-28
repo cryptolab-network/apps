@@ -1,6 +1,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { Option } from '@polkadot/types';
 import { StakingLedger } from '@polkadot/types/interfaces/staking';
+import { IAccount } from '../components/Api';
 
 export enum AccountRole {
   VALIDATOR,
@@ -105,4 +106,12 @@ export const queryStakingInfo = async (address, api: ApiPromise) => {
     isReady: true,
     address: address,
   };
+};
+
+export const getAccountName = (address: string, accounts: IAccount[]) => {
+  let name = accounts.filter((account) => account.address === address)[0].name;
+  if (name) {
+    return name;
+  }
+  return address;
 };
