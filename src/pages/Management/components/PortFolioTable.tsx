@@ -7,7 +7,6 @@ import Account from '../../../components/Account';
 import { ApiContext, IAccount } from '../../../components/Api';
 import Table from '../../../components/Table';
 import { NetworkConfig } from '../../../utils/constants/Network';
-import { shortenStashId } from '../../../utils/string';
 
 interface TableContent {
   stash: string;
@@ -78,7 +77,7 @@ const PortfolioTable = ({ chain, accounts, rewards }) => {
         Cell: ({ value, row }) => <span>{value} % </span>,
       },
     ];
-  }, [chain, t]);
+  }, [chain, t, walletAccounts]);
   useEffect(() => {
     const tableData = rewards.reduce((acc, reward: IStashRewards | null) => {
       if (reward !== null && reward.eraRewards.length === 0) {
