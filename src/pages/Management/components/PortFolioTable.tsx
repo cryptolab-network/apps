@@ -1,9 +1,10 @@
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IEraRewards, IStashRewards } from '../../../apis/StashRewards';
 import Account from '../../../components/Account';
+import { ApiContext, IAccount } from '../../../components/Api';
 import Table from '../../../components/Table';
 import { NetworkConfig } from '../../../utils/constants/Network';
 import { shortenStashId } from '../../../utils/string';
@@ -18,7 +19,16 @@ interface TableContent {
   toDate: string;
 }
 
+const getAccountName = (address: string, accounts: IAccount[]) => {
+  let name = accounts.filter((account) => account.address === address)[0].name;
+  if (name) {
+    return name;
+  }
+  return address;
+};
+
 const PortfolioTable = ({ chain, accounts, rewards }) => {
+  const { accounts: walletAccounts } = useContext(ApiContext);
   const { t } = useTranslation();
   const [data, setTableData] = useState<TableContent[]>([]);
   const columns = useMemo(() => {
@@ -27,7 +37,9 @@ const PortfolioTable = ({ chain, accounts, rewards }) => {
         Header: t('pm.table.header.stash'),
         accessor: 'stash',
         maxWidth: 180,
-        Cell: ({ value }) => <span>{<Account address={value} display={shortenStashId(value)} />}</span>,
+        Cell: ({ value }) => (
+          <span>{<Account address={value} display={getAccountName(value, walletAccounts)} />}</span>
+        ),
       },
       {
         Header: t('pm.table.header.staked'),

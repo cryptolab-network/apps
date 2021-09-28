@@ -13,6 +13,7 @@ import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
 import PortfolioTable from './PortFolioTable';
 import ProfitChart from './ProfitCharts';
 import dayjs from 'dayjs';
+import Empty from '../../../components/Empty';
 
 const PerformanceHeader = () => {
   const { t } = useTranslation();
@@ -28,7 +29,13 @@ const PerformanceHeader = () => {
   );
 };
 const Performance = () => {
-  let { network: networkName, api: polkadotApi, apiState: networkStatus, accounts } = useContext(ApiContext);
+  let {
+    network: networkName,
+    api: polkadotApi,
+    apiState: networkStatus,
+    accounts,
+    hasWeb3Injected,
+  } = useContext(ApiContext);
   let { stashRewardsCache, cacheStashRewards, accountChainInfo, cacheAccountChainInfo } =
     useContext(ManagementPageCacheContext);
   const [isReady, setReady] = useState<boolean>(false);
@@ -106,7 +113,13 @@ const Performance = () => {
     polkadotApi,
     stashRewardsCache,
   ]);
-  if (isReady) {
+  if (!hasWeb3Injected) {
+    return (
+      <CardHeader Header={() => <PerformanceHeader />}>
+        <Empty />
+      </CardHeader>
+    );
+  } else if (isReady) {
     return (
       <CardHeader Header={() => <PerformanceHeader />}>
         <ProfitChartLayout>

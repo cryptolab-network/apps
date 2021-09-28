@@ -106,38 +106,6 @@ const Notification: React.FC = () => {
               chain: networkCapitalCodeName(networkName),
             },
           });
-          // TODO: remove mock data below
-          // let result = {
-          //   commissions: [
-          //     {
-          //       commissionFrom: 0,
-          //       commissionTo: 2,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 123,
-          //     },
-          //     {
-          //       commissionFrom: 2,
-          //       commissionTo: 3,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       era: 234,
-          //     },
-          //   ],
-          //   slashes: [
-          //     {
-          //       era: 123,
-          //       validator: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //       total: 5,
-          //     },
-          //   ],
-          //   payouts: [
-          //     {
-          //       era: 168,
-          //       amount: 1.1,
-          //       address: 'H4EeouHL5LawTqq2itu6auF62hDRX2LEBYk1TxS6QMrn9Hg',
-          //     },
-          //   ],
-          //   inactive: [0, 234],
-          // };
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
             result.commissions = result.commissions.filter((item) => {
