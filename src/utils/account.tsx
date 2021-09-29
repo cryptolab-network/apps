@@ -108,10 +108,12 @@ export const queryStakingInfo = async (address, api: ApiPromise) => {
   };
 };
 
-export const getAccountName = (address: string, accounts: IAccount[]) => {
-  let name = accounts.filter((account) => account.address === address)[0].name;
-  if (name) {
-    return name;
+export const getAccountName = (address: string = '', accounts: IAccount[]): string => {
+  let nameMap = accounts.filter((account) => account.address === address);
+
+  if (nameMap && nameMap.length > 0) {
+    return nameMap[0].name || '';
   }
+
   return address;
 };

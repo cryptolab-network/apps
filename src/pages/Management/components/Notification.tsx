@@ -12,9 +12,9 @@ import Dialog from '../../../components/Dialog';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
 import Table from './Table';
-import { ApiContext, ApiState } from '../../../components/Api';
+import { api, ApiContext, ApiState } from '../../../components/Api';
 import ScaleLoader from '../../../components/Spinner/ScaleLoader';
-import { apiGetNotificationEvents } from '../../../apis/Events';
+import { apiGetNotificationEvents, IEventQuery } from '../../../apis/Events';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import Identicon from '@polkadot/react-identicon';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,9 @@ import keys from '../../../config/keys';
 import DropdownCommon from '../../../components/Dropdown/Common';
 import Account from '../../../components/Account';
 import { getAccountName } from '../../../utils/account';
+import { queryActiveEra } from '../../../utils/Network';
+import { NetworkNameLowerCase } from '../../../utils/constants/Network';
+import Empty from '../../../components/Empty';
 
 const FilterType = {
   ALL: 'all',
@@ -31,6 +34,13 @@ const FilterType = {
   PAYOUT: 'payout',
   KICKS: 'kicks',
   OVERSUBSCRIBES: 'overSubscribes',
+  STALEPAYOUTS: 'stalePayouts',
+  CHILLS: 'chills',
+};
+
+const EVENT_7D_ERA = {
+  KSM: 28,
+  DOT: 7,
 };
 
 const ALL_ACCOUNT = 'ALL';
@@ -38,7 +48,7 @@ const ALL_ACCOUNT = 'ALL';
 const Notification: React.FC = () => {
   const { t } = useTranslation();
   // context
-  let { network: networkName, apiState: networkStatus, accounts } = useContext(ApiContext);
+  let { network: networkName, apiState: networkStatus, accounts, hasWeb3Injected } = useContext(ApiContext);
 
   const [overview, setOverview] = useState<any[]>([
     {
@@ -59,12 +69,12 @@ const Notification: React.FC = () => {
       subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
       danger: false,
     },
-    {
-      value: 0,
-      title: t('Management.routes.notification.overview.event.payout.title'),
-      subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
-      danger: false,
-    },
+    // {
+    //   value: 0,
+    //   title: t('Management.routes.notification.overview.event.payout.title'),
+    //   subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
+    //   danger: false,
+    // },
     {
       value: 0,
       title: t('Management.routes.notification.overview.event.kicks.title'),
@@ -93,6 +103,7 @@ const Notification: React.FC = () => {
   const [isTgBotShow, setIsTgBotShow] = useState(false);
   const [isEmailSubscribeShow, setIsEmailSubscribeShow] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState({ label: ALL_ACCOUNT, value: ALL_ACCOUNT });
+  const [query, setQuery] = useState<IEventQuery | undefined>(undefined);
 
   const options = useMemo(() => {
     let list = [{ label: ALL_ACCOUNT, value: ALL_ACCOUNT }];
@@ -106,8 +117,25 @@ const Notification: React.FC = () => {
   }, [accounts]);
 
   useEffect(() => {
-    if (networkStatus === ApiState.READY) {
-      // console.log('accounts: ', accounts);
+    (async () => {
+      if (networkStatus === ApiState.READY) {
+        const activeEra = await queryActiveEra(api);
+        let queryObj = {
+          from_era:
+            networkName.toLowerCase() === NetworkNameLowerCase.KSM
+              ? activeEra - EVENT_7D_ERA.KSM
+              : activeEra - EVENT_7D_ERA.DOT,
+          to_era: activeEra,
+        };
+        setQuery(queryObj);
+      } else {
+        setQuery(undefined);
+      }
+    })();
+  }, [networkName, networkStatus]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY && query && accounts && accounts.length > 0) {
       (async () => {
         let totalCount = 0;
         let commissionCount = 0;
@@ -116,66 +144,84 @@ const Notification: React.FC = () => {
         let payoutCount = 0;
         let kicksCount = 0;
         let overSubscribesCount = 0;
+        let chillCount = 0;
+        let stalePayoutCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          // let result = await apiGetNotificationEvents({
-          //   params: {
-          //     id: accounts[idx].address,
-          //     chain: networkCapitalCodeName(networkName),
-          //   },
-          // });
+          let result = await apiGetNotificationEvents(
+            {
+              params: {
+                id: accounts[idx].address,
+                chain: networkCapitalCodeName(networkName),
+              },
+            },
+            query
+          );
 
-          // TODO: remove mock data below
-          let result = {
-            commissions: [
-              {
-                commissionFrom: 0,
-                commissionTo: 2,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 123,
-              },
-              {
-                commissionFrom: 2,
-                commissionTo: 3,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 234,
-              },
-            ],
-            slashes: [
-              {
-                era: 123,
-                validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                total: 5,
-              },
-            ],
-            payouts: [
-              {
-                era: 168,
-                amount: 1.1,
-                address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-              },
-            ],
-            inactive: [0, 234],
-            overSubscribes: [
-              {
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 2796,
-              },
-              {
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 2797,
-              },
-            ],
-            kicks: [
-              {
-                era: 0,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-              },
-            ],
-          };
+          // mock data below for test convenient
+          // let result = {
+          //   commissions: [
+          //     {
+          //       commissionFrom: 0,
+          //       commissionTo: 2,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 123,
+          //     },
+          //     {
+          //       commissionFrom: 2,
+          //       commissionTo: 3,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 234,
+          //     },
+          //   ],
+          //   slashes: [
+          //     {
+          //       era: 123,
+          //       validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       total: 5,
+          //     },
+          //   ],
+          //   payouts: [
+          //     {
+          //       era: 168,
+          //       amount: 1.1,
+          //       address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //     },
+          //   ],
+          //   inactive: [0, 234],
+          //   overSubscribes: [
+          //     {
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 2796,
+          //     },
+          //     {
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 2797,
+          //     },
+          //   ],
+          //   kicks: [
+          //     {
+          //       era: 0,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //     },
+          //   ],
+          //   stalePayouts: [
+          //     {
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 0,
+          //       unclaimedPayoutEras: [0, 1, 2, 5],
+          //     },
+          //   ],
+          //   chills: [
+          //     {
+          //       era: 0,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //     },
+          //   ],
+          // };
 
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
@@ -238,6 +284,24 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
+            result.stalePayouts.forEach((i) => {
+              tableList.push({
+                type: FilterType.STALEPAYOUTS,
+                descriptionAddress: i.address,
+                descriptionValue: i.unclaimedPayoutEras.length,
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
+            });
+            result.chills.forEach((i) => {
+              tableList.push({
+                type: FilterType.CHILLS,
+                descriptionAddress: i.address,
+                descriptionValue: '',
+                era: i.era,
+                affectedAccount: accounts[idx].address,
+              });
+            });
 
             commissionCount += result.commissions.length;
             inactiveCount += result.inactive.length;
@@ -245,10 +309,19 @@ const Notification: React.FC = () => {
             payoutCount += result.payouts.length;
             kicksCount += result.kicks.length;
             overSubscribesCount += result.overSubscribes.length;
+            chillCount += result.chills.length;
+            stalePayoutCount += result.stalePayouts.length;
           }
         }
         totalCount =
-          commissionCount + inactiveCount + slashCount + payoutCount + kicksCount + overSubscribesCount;
+          commissionCount +
+          inactiveCount +
+          slashCount +
+          payoutCount +
+          kicksCount +
+          overSubscribesCount +
+          chillCount +
+          stalePayoutCount;
         setOverview([
           {
             value: totalCount,
@@ -266,12 +339,6 @@ const Notification: React.FC = () => {
             value: inactiveCount,
             title: t('Management.routes.notification.overview.event.inactive.title'),
             subtitle: t('Management.routes.notification.overview.event.inactive.subtitle'),
-            danger: false,
-          },
-          {
-            value: payoutCount,
-            title: t('Management.routes.notification.overview.event.payout.title'),
-            subtitle: t('Management.routes.notification.overview.event.payout.subtitle'),
             danger: false,
           },
           {
@@ -297,7 +364,7 @@ const Notification: React.FC = () => {
         setIsFetch(false);
       })();
     }
-  }, [accounts, networkName, networkStatus, t]);
+  }, [accounts, networkName, networkStatus, t, query]);
 
   const filteredNotifyList = useMemo(() => {
     let list = [...notifyHistory];
@@ -394,6 +461,18 @@ const Notification: React.FC = () => {
             return (
               <DescriptionStyle>
                 {t('Management.routes.notification.notification.table.data.payout.title')}
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.STALEPAYOUTS) {
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.stalePayout.title')}
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.CHILLS) {
+            return (
+              <DescriptionStyle>
+                {t('Management.routes.notification.notification.table.data.chill.title')}
               </DescriptionStyle>
             );
           }
@@ -499,38 +578,6 @@ const Notification: React.FC = () => {
           } else if (row.original.type === FilterType.PAYOUT) {
             return (
               <DescriptionStyle>
-                {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {t('Management.routes.notification.notification.table.data.payout.validator')}
-                  </span>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'flex-start',
-                      alignItems: 'center',
-                      marginLeft: 8,
-                      marginRight: 8,
-                    }}
-                  >
-                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
-                  </div>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {row.original.descriptionAddress}
-                  </span>
-                </div> */}
                 <div>
                   {t('Management.routes.notification.notification.table.data.payout.action')}{' '}
                   <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
@@ -646,6 +693,93 @@ const Notification: React.FC = () => {
                 <div>{t('Management.routes.notification.notification.table.data.overSubscribes.action')}</div>
               </DescriptionStyle>
             );
+          } else if (row.original.type === FilterType.STALEPAYOUTS) {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.stalePayout.validator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    {t('Management.routes.notification.notification.table.data.stalePayout.description')}{' '}
+                  </span>
+                  <span style={{ color: '#23beb9' }}>{row.original.descriptionValue}</span>
+                  <span>
+                    {' '}
+                    {t('Management.routes.notification.notification.table.data.stalePayout.action')}
+                  </span>
+                </div>
+              </DescriptionStyle>
+            );
+          } else if (row.original.type === FilterType.CHILLS) {
+            return (
+              <DescriptionStyle>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('Management.routes.notification.notification.table.data.chill.validator')}
+                  </span>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Identicon value={row.original.descriptionAddress} size={32} theme={'polkadot'} />
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {row.original.descriptionAddress}
+                  </span>
+                </div>
+                <div>
+                  <span>{t('Management.routes.notification.notification.table.data.chill.action')}</span>
+                </div>
+              </DescriptionStyle>
+            );
           }
         },
       },
@@ -689,13 +823,19 @@ const Notification: React.FC = () => {
 
     overview.forEach((i, idx) => {
       if (idx === 0) {
-        overViewContent.push(<InvisibleSpace />);
+        overViewContent.push(<InvisibleSpace key={`dashboard-invisible-${idx}`} />);
       }
       if (idx > 0) {
-        overViewContent.push(<Space />);
+        overViewContent.push(<Space key={`dashboard-space-${idx}`} />);
       }
       overViewContent.push(
-        <DashboardItem mainValue={i.value} mainValueDanger={i.danger} title={i.title} subtitle={i.subtitle} />
+        <DashboardItem
+          key={`dashboard-item-${idx}`}
+          mainValue={i.value}
+          mainValueDanger={i.danger}
+          title={i.title}
+          subtitle={i.subtitle}
+        />
       );
       if (idx === overview.length - 1) {
         overViewContent.push(<InvisibleSpace />);
@@ -704,13 +844,14 @@ const Notification: React.FC = () => {
 
     alertsMethod.forEach((i, idx) => {
       if (idx === 0) {
-        setUpAlerts.push(<InvisibleSpace />);
+        setUpAlerts.push(<InvisibleSpace key={`alerts-invisible-${idx}`} />);
       }
       if (idx > 0) {
-        setUpAlerts.push(<Space />);
+        setUpAlerts.push(<Space key={`alerts-space-${idx}`} />);
       }
       setUpAlerts.push(
         <DashboardItem
+          key={`alerts-item-${idx}`}
           MainIcon={i.icon}
           title={i.title}
           clickable={true}
@@ -838,7 +979,22 @@ const Notification: React.FC = () => {
         >
           {t('Management.routes.notification.notification.filter.overSubscribes')}
         </FilterOption>
-
+        <FilterOption
+          selected={filterInfo.type === FilterType.STALEPAYOUTS ? true : false}
+          onClick={() => {
+            filterSelect(FilterType.STALEPAYOUTS);
+          }}
+        >
+          {t('Management.routes.notification.notification.filter.stalePayout')}
+        </FilterOption>
+        <FilterOption
+          selected={filterInfo.type === FilterType.CHILLS ? true : false}
+          onClick={() => {
+            filterSelect(FilterType.CHILLS);
+          }}
+        >
+          {t('Management.routes.notification.notification.filter.chill')}
+        </FilterOption>
         <FilterTitle>{t('Management.routes.notification.notification.filter.account')}</FilterTitle>
         <div style={{ minWidth: 180, maxWidth: 250 }}>
           <DropdownCommon
@@ -876,7 +1032,9 @@ const Notification: React.FC = () => {
 
   return (
     <MainLayout>
-      {isFetch ? (
+      {!hasWeb3Injected ? (
+        <Empty />
+      ) : isFetch ? (
         <ScaleLoader />
       ) : (
         <>
@@ -927,7 +1085,7 @@ const DashboardTitle = styled.div`
 `;
 
 const Overview = styled.div`
-  flex: 4;
+  flex: 5;
   box-sizing: border-box;
   padding: 7px;
   display: flex;

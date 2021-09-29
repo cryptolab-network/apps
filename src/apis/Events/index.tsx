@@ -25,6 +25,10 @@ interface IEventInfo {
     era: number;
     unclaimedPayoutEras: number[];
   }[];
+  chills: {
+    era: number;
+    address: string;
+  }[];
   payouts: {
     era: number;
     amount: number;
@@ -39,12 +43,21 @@ interface IEventInfo {
     era: number;
     address: string;
     nominator: string;
+    amount: string;
   }[];
 }
 
-export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo | undefined> =>
-  eventStashAxios
-    .get(`${data.params.id}/${data.params.chain}`)
+export interface IEventQuery {
+  from_era: number;
+  to_era: number;
+}
+
+export const apiGetNotificationEvents = (
+  data: IEventParams,
+  query: IEventQuery | undefined
+): Promise<IEventInfo | undefined> => {
+  return eventStashAxios
+    .get(`${data.params.id}/${data.params.chain}`, { params: query })
     .then((res) => {
       return res.data;
     })
@@ -52,3 +65,4 @@ export const apiGetNotificationEvents = (data: IEventParams): Promise<IEventInfo
       console.warn('in apiGetNotificationEvents, err: ', err);
       return undefined;
     });
+};

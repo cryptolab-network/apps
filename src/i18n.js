@@ -387,10 +387,10 @@ i18n
                       title: 'Slash events',
                       subtitle: 'Past 7 days',
                     },
-                    payout: {
-                      title: 'Payout events',
-                      subtitle: 'Past 7 days',
-                    },
+                    // payout: {
+                    //   title: 'Payout events',
+                    //   subtitle: 'Past 7 days',
+                    // },
                     kicks: {
                       title: 'Kicks events',
                       subtitle: 'Past 7 days',
@@ -422,6 +422,8 @@ i18n
                     payout: 'payout',
                     kick: 'kick',
                     overSubscribes: 'over subscribe',
+                    stalePayout: 'stale payout',
+                    chill: 'chill',
                     account: 'search account',
                   },
                   table: {
@@ -462,6 +464,17 @@ i18n
                         title: 'Over subscribe',
                         validator: 'Validator',
                         action: 'has been over subscribed',
+                      },
+                      stalePayout: {
+                        title: 'Stale payout',
+                        validator: 'Validator',
+                        description: 'has',
+                        action: 'era without payout',
+                      },
+                      chill: {
+                        title: 'Chill',
+                        validator: 'Validator',
+                        action: 'has suspended',
                       },
                     },
                   },
@@ -802,8 +815,16 @@ i18n
                       title: '罰款通知數',
                       subtitle: '過去 7 天',
                     },
-                    payout: {
-                      title: '支付獎勵通知數',
+                    // payout: {
+                    //   title: '支付獎勵通知數',
+                    //   subtitle: '過去 7 天',
+                    // },
+                    kicks: {
+                      title: '移除提名人通知數',
+                      subtitle: '過去 7 天',
+                    },
+                    overSubscribes: {
+                      title: '超額訂閱通知數',
                       subtitle: '過去 7 天',
                     },
                   },
@@ -827,6 +848,10 @@ i18n
                     slash: '罰款通知',
                     inactive: '離線通知',
                     payout: '支付獎勵通知',
+                    kick: '移除提名人通知',
+                    overSubscribes: '超額訂閱通知',
+                    stalePayout: '未支付獎勵通知',
+                    chill: '暫停運作通知',
                     account: '搜尋帳號',
                   },
                   table: {
@@ -856,6 +881,28 @@ i18n
                         title: '支付獎勵',
                         validator: '驗證節點',
                         action: '支付獎勵',
+                      },
+                      kick: {
+                        title: '移除提名人',
+                        validator: '驗證節點',
+                        action: '移除提名人',
+                        nominator: '提名人',
+                      },
+                      overSubscribes: {
+                        title: '超額訂閱',
+                        validator: '驗證節點',
+                        action: '已經被超超額訂閱',
+                      },
+                      stalePayout: {
+                        title: '未支付獎勵',
+                        validator: '驗證節點',
+                        description: '已經有',
+                        action: 'era 沒有支付獎勵',
+                      },
+                      chill: {
+                        title: '暫停運作',
+                        validator: '驗證節點',
+                        action: '暫停運作',
                       },
                     },
                   },
@@ -1180,8 +1227,16 @@ i18n
                       title: '罚款通知数',
                       subtitle: '过去 7 天',
                     },
-                    payout: {
-                      title: '支付奖励通知数',
+                    // payout: {
+                    //   title: '支付奖励通知数',
+                    //   subtitle: '过去 7 天',
+                    // },
+                    kicks: {
+                      title: '移除提名人通知数',
+                      subtitle: '过去 7 天',
+                    },
+                    overSubscribes: {
+                      title: '超额订阅通知数',
                       subtitle: '过去 7 天',
                     },
                   },
@@ -1205,6 +1260,10 @@ i18n
                     slash: '罚款通知',
                     inactive: '离线通知',
                     payout: '支付奖励通知',
+                    kick: '移除提名人通知',
+                    overSubscribes: '超额订阅通知',
+                    stalePayout: '未支付奖励通知',
+                    chill: '暂停运作通知',
                     account: '搜寻帐号',
                   },
                   table: {
@@ -1234,6 +1293,28 @@ i18n
                         title: '支付奖励',
                         validator: '验证节点',
                         action: '支付奖励',
+                      },
+                      kick: {
+                        title: '移除提名人',
+                        validator: '验证节点',
+                        action: '移除提名人',
+                        nominator: '提名人',
+                      },
+                      overSubscribes: {
+                        title: '超额订阅',
+                        validator: '验证节点',
+                        action: '已经被超超额订阅',
+                      },
+                      stalePayout: {
+                        title: '未支付奖励',
+                        validator: '验证节点',
+                        description: '已经有',
+                        action: 'era 没有支付奖励',
+                      },
+                      chill: {
+                        title: '暂停运作',
+                        validator: '验证节点',
+                        action: '暂停运作',
                       },
                     },
                   },
