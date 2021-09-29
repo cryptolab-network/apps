@@ -25,6 +25,8 @@ import { getAccountName } from '../../../utils/account';
 import { queryActiveEra } from '../../../utils/Network';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
 import Empty from '../../../components/Empty';
+import { NetworkConfig } from '../../../utils/constants/Network';
+import bignumberjs from 'bignumber.js';
 
 const FilterType = {
   ALL: 'all',
@@ -178,7 +180,7 @@ const Notification: React.FC = () => {
           //     {
           //       era: 123,
           //       validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       total: 5,
+          //       total: 500000000000,
           //     },
           //   ],
           //   payouts: [
@@ -194,11 +196,13 @@ const Notification: React.FC = () => {
           //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
           //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
           //       era: 2796,
+          //       amount: '50000000000000',
           //     },
           //     {
           //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
           //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
           //       era: 2797,
+          //       amount: '150000000000000',
           //     },
           //   ],
           //   kicks: [
@@ -243,7 +247,7 @@ const Notification: React.FC = () => {
               tableList.push({
                 type: FilterType.SLASH,
                 descriptionAddress: i.validator,
-                descriptionValue: i.total,
+                descriptionValue: i.total / Math.pow(10, NetworkConfig[networkName].decimals),
                 era: i.era,
                 affectedAccount: accounts[idx].address,
               });
@@ -279,7 +283,9 @@ const Notification: React.FC = () => {
               tableList.push({
                 type: FilterType.OVERSUBSCRIBES,
                 descriptionAddress: i.address,
-                descriptionValue: '',
+                descriptionValue: new bignumberjs(i.amount)
+                  .dividedBy(Math.pow(10, NetworkConfig[networkName].decimals))
+                  .toString(),
                 era: i.era,
                 affectedAccount: accounts[idx].address,
               });
@@ -690,7 +696,13 @@ const Notification: React.FC = () => {
                     {row.original.descriptionAddress}
                   </span>
                 </div>
-                <div>{t('Management.routes.notification.notification.table.data.overSubscribes.action')}</div>
+                <span>
+                  {t('Management.routes.notification.notification.table.data.overSubscribes.action')}
+                  <span style={{ color: '#23beb9' }}> {row.original.descriptionValue} </span>
+
+                  {networkCapitalCodeName(networkName)}
+                  {t('Management.routes.notification.notification.table.data.overSubscribes.description')}
+                </span>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.STALEPAYOUTS) {

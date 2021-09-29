@@ -452,18 +452,19 @@ i18n
                       payout: {
                         title: 'Payout',
                         validator: 'Validator',
-                        action: 'give a payout of',
+                        action: 'received a payout of',
                       },
                       kick: {
                         title: 'Kick',
                         validator: 'Validator',
-                        action: 'kick nominator',
+                        action: 'kick',
                         nominator: 'nominator',
                       },
                       overSubscribes: {
                         title: 'Over subscribe',
                         validator: 'Validator',
-                        action: 'has been over subscribed',
+                        action: 'has been over subscribed. There are about ',
+                        description: ` of stake that won't receive the payout`,
                       },
                       stalePayout: {
                         title: 'Stale payout',
@@ -878,20 +879,21 @@ i18n
                         action: '被罰款',
                       },
                       payout: {
-                        title: '支付獎勵',
+                        title: '收到獎勵',
                         validator: '驗證節點',
-                        action: '支付獎勵',
+                        action: '收到獎勵',
                       },
                       kick: {
                         title: '移除提名人',
                         validator: '驗證節點',
-                        action: '移除提名人',
+                        action: '移除',
                         nominator: '提名人',
                       },
                       overSubscribes: {
                         title: '超額訂閱',
                         validator: '驗證節點',
-                        action: '已經被超超額訂閱',
+                        action: '已經被超額訂閱, 共有',
+                        description: ' 的質押無法領取相對應的獎勵',
                       },
                       stalePayout: {
                         title: '未支付獎勵',
@@ -1290,20 +1292,21 @@ i18n
                         action: '被罚款',
                       },
                       payout: {
-                        title: '支付奖励',
+                        title: '收到奖励',
                         validator: '验证节点',
-                        action: '支付奖励',
+                        action: '收到奖励',
                       },
                       kick: {
                         title: '移除提名人',
                         validator: '验证节点',
-                        action: '移除提名人',
+                        action: '移除',
                         nominator: '提名人',
                       },
                       overSubscribes: {
                         title: '超额订阅',
                         validator: '验证节点',
-                        action: '已经被超超额订阅',
+                        action: '已经被超额订阅, 共有 ',
+                        description: ' 的质押无法领取相对应的奖励',
                       },
                       stalePayout: {
                         title: '未支付奖励',
