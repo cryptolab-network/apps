@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import Modal from 'react-modal';
 import styled from 'styled-components';
+import keys from '../../config/keys';
 
 interface IDialogWithImage {
   image?: any;
   title?: string;
+  titleLinkable?: boolean;
   isOpen: boolean;
   handleDialogClose: Function;
   padding?: string;
@@ -13,6 +15,7 @@ interface IDialogWithImage {
 const Dialog: React.FC<IDialogWithImage> = ({
   image,
   title,
+  titleLinkable = false,
   isOpen,
   handleDialogClose,
   padding,
@@ -51,8 +54,26 @@ const Dialog: React.FC<IDialogWithImage> = ({
   }, [image]);
 
   const titleDOM = useMemo(() => {
-    return title ? <TitleContainer>{title}</TitleContainer> : null;
-  }, [title]);
+    if (title) {
+      if (titleLinkable) {
+        return (
+          <TitleContainer>
+            <a
+              href={keys.tgBotUrl}
+              style={{ textDecoration: 'none', color: 'white' }}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {title}
+            </a>
+          </TitleContainer>
+        );
+      }
+      return <TitleContainer>{title}</TitleContainer>;
+    }
+
+    return null;
+  }, [title, titleLinkable]);
 
   return (
     <Modal

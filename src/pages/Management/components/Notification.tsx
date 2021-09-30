@@ -882,6 +882,7 @@ const Notification: React.FC = () => {
         <Dialog
           image={<QRCode level="L" size={256} value={keys.tgBotUrl} bgColor="#18232f" fgColor="#23beb9" />}
           title={t('Management.routes.notification.alerts.telegram.dialog.title')}
+          titleLinkable={true}
           isOpen={isTgBotShow}
           handleDialogClose={() => {
             handleDialogClose('tgBot');
