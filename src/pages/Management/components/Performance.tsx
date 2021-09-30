@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import { useTranslation } from 'react-i18next';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { hasValues } from '../../../utils/helper';
 import { IAccountChainInfo, queryStakingInfo } from '../../../utils/account';
 import { ApiContext } from '../../../components/Api';
@@ -42,22 +42,30 @@ const Performance = () => {
   const [accountsChainInfo, setAccountsChainInfo] = useState<IAccountChainInfo[]>([]);
   const [accountsRewards, setAccountsRewards] = useState<(IStashRewards | null)[]>([]);
 
+  const currentNetworkLowerCase = useMemo(() => {
+    return networkName.toLowerCase();
+  }, [networkName]);
+
   useEffect(() => {
+    setAccountsChainInfo([]);
+    setAccountsRewards([]);
     if (
       stashRewardsCache &&
-      stashRewardsCache.data &&
-      stashRewardsCache.data.length > 0 &&
-      stashRewardsCache.expireTime &&
-      stashRewardsCache.expireTime.isAfter(dayjs(), 'minute') &&
+      stashRewardsCache[currentNetworkLowerCase] &&
+      stashRewardsCache[currentNetworkLowerCase].data &&
+      stashRewardsCache[currentNetworkLowerCase].data.length > 0 &&
+      stashRewardsCache[currentNetworkLowerCase].expireTime &&
+      stashRewardsCache[currentNetworkLowerCase].expireTime.isAfter(dayjs(), 'minute') &&
       accountChainInfo &&
-      accountChainInfo.data &&
-      accountChainInfo.data.length > 0 &&
-      accountChainInfo.expireTime &&
-      accountChainInfo.expireTime.isAfter(dayjs(), 'minute')
+      accountChainInfo[currentNetworkLowerCase] &&
+      accountChainInfo[currentNetworkLowerCase].data &&
+      accountChainInfo[currentNetworkLowerCase].data.length > 0 &&
+      accountChainInfo[currentNetworkLowerCase].expireTime &&
+      accountChainInfo[currentNetworkLowerCase].expireTime.isAfter(dayjs(), 'minute')
     ) {
       // data hasn't expired
-      setAccountsChainInfo(accountChainInfo.data);
-      setAccountsRewards(stashRewardsCache.data);
+      setAccountsChainInfo(accountChainInfo[currentNetworkLowerCase].data);
+      setAccountsRewards(stashRewardsCache[currentNetworkLowerCase].data);
       setReady(true);
     } else if (accounts.length > 0 && !isReady) {
       // data hasn expired
@@ -99,8 +107,8 @@ const Performance = () => {
         setAccountsChainInfo(arr);
         setAccountsRewards(rewards);
         setReady(true);
-        cacheStashRewards(rewards);
-        cacheAccountChainInfo(arr);
+        cacheStashRewards(rewards, currentNetworkLowerCase);
+        cacheAccountChainInfo(arr, currentNetworkLowerCase);
       });
     }
   }, [
@@ -112,8 +120,9 @@ const Performance = () => {
     networkStatus,
     polkadotApi,
     stashRewardsCache,
+    currentNetworkLowerCase,
   ]);
-  if (!hasWeb3Injected) {
+  if (!hasWeb3Injected || accounts.length === 0) {
     return (
       <CardHeader Header={() => <PerformanceHeader />}>
         <Empty />

@@ -4,13 +4,33 @@ import { IAccountChainInfo } from '../../utils/account';
 import dayjs from 'dayjs';
 
 export interface IStashRewardsCache {
-  data: (IStashRewards | null)[];
-  expireTime: dayjs.Dayjs | null;
+  kusama: {
+    data: (IStashRewards | null)[];
+    expireTime: dayjs.Dayjs | null;
+  };
+  polkadot: {
+    data: (IStashRewards | null)[];
+    expireTime: dayjs.Dayjs | null;
+  };
+  westend: {
+    data: (IStashRewards | null)[];
+    expireTime: dayjs.Dayjs | null;
+  };
 }
 
 export interface IAccountChainInfoCache {
-  data: IAccountChainInfo[];
-  expireTime: dayjs.Dayjs | null;
+  kusama: {
+    data: IAccountChainInfo[];
+    expireTime: dayjs.Dayjs | null;
+  };
+  polkadot: {
+    data: IAccountChainInfo[];
+    expireTime: dayjs.Dayjs | null;
+  };
+  westend: {
+    data: IAccountChainInfo[];
+    expireTime: dayjs.Dayjs | null;
+  };
 }
 
 export interface IPPProps {
@@ -30,20 +50,26 @@ const ManagementPageCache: React.FC = (props) => {
     {} as unknown as IAccountChainInfoCache
   );
 
-  const cacheStashRewards = useCallback((stashRewards: (IStashRewards | null)[]) => {
+  const cacheStashRewards = useCallback((stashRewards: (IStashRewards | null)[], networkName: string) => {
     const expireTime = dayjs().add(10, 'minute');
-    setStashRewardsCache({
-      data: stashRewards,
-      expireTime: expireTime,
-    });
+    setStashRewardsCache((prev) => ({
+      ...prev,
+      [networkName.toLowerCase()]: {
+        data: stashRewards,
+        expireTime: expireTime,
+      },
+    }));
   }, []);
 
-  const cacheAccountChainInfo = useCallback((accountChainInfo: IAccountChainInfo[]) => {
+  const cacheAccountChainInfo = useCallback((accountChainInfo: IAccountChainInfo[], networkName: string) => {
     const expireTime = dayjs().add(10, 'minute');
-    setAccountChainInfo({
-      data: accountChainInfo,
-      expireTime: expireTime,
-    });
+    setAccountChainInfo((prev) => ({
+      ...prev,
+      [networkName.toLowerCase()]: {
+        data: accountChainInfo,
+        expireTime: expireTime,
+      },
+    }));
   }, []);
 
   const value = useMemo<IPPProps>(

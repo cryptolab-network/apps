@@ -1044,7 +1044,7 @@ const Notification: React.FC = () => {
 
   return (
     <MainLayout>
-      {!hasWeb3Injected ? (
+      {!hasWeb3Injected || accounts.length === 0 ? (
         <Empty />
       ) : isFetch ? (
         <ScaleLoader />
