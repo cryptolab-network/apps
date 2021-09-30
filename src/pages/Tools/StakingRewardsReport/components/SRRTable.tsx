@@ -63,7 +63,8 @@ const SRRTable = ({ stashData, currency }) => {
 export default SRRTable;
 
 const SRRTableLayout = styled.div`
-  margin: 9.6px 0 10.1px 0;
+  width: 100%;
+  /* margin: 9.6px 0 10.1px 0;
   padding: 13px 0 18.4px 0;
-  border-radius: 6px;
+  border-radius: 6px; */
 `;

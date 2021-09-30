@@ -1,17 +1,13 @@
-import { useEffect } from 'react';
 import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
-import { tableType } from '../../utils/status/Table';
+import { tableType } from '../../../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
-import { ReactComponent as SortingDescIcon } from '../../assets/images/sorting-desc.svg';
-import { ReactComponent as SortingAscIcon } from '../../assets/images/sorting-asc.svg';
 
 type ICOLUMN = {
   columns: Array<any>;
   data: Array<any>;
   type?: tableType;
   pagination?: boolean;
-  pgSize?: number;
 };
 
 const CustomTable: React.FC<ICOLUMN> = ({
@@ -19,7 +15,6 @@ const CustomTable: React.FC<ICOLUMN> = ({
   data,
   type = tableType.common,
   pagination = false,
-  pgSize = 20,
 }) => {
   const {
     getTableProps,
@@ -36,40 +31,37 @@ const CustomTable: React.FC<ICOLUMN> = ({
     gotoPage,
     nextPage,
     previousPage,
-    setPageSize,
+    // setPageSize,
     state: { pageIndex, pageSize },
   } = useTable(
     {
       columns: userColumns,
       data,
-      initialState: { pageSize: pgSize },
+      initialState: { pageSize: 20 },
     },
     useSortBy,
     useExpanded,
-    usePagination // Use the useExpanded plugin hook,
+    usePagination // Use the useExpanded plugin hook
   );
-
-  useEffect(() => {
-    setPageSize(pgSize);
-  }, [pgSize, setPageSize]);
-
   return (
     <Style>
       <div className="tableWrap">
         <table {...getTableProps()}>
           <thead>
-            {headerGroups.map((headerGroup, i) => (
-              <tr {...headerGroup.getHeaderGroupProps()} key={i}>
-                {headerGroup.headers.map((column, j) => (
-                  <th {...column.getSortByToggleProps()} key={j}>
-                    {column.render('Header')}
-                    <span>
-                      {' '}
-                      {'  '}
-                      {column.isSorted ? column.isSortedDesc ? <SortingDescIcon /> : <SortingAscIcon /> : ''}
-                    </span>
-                  </th>
-                ))}
+            {headerGroups.map((headerGroup) => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => {
+                  if (typeof column.Header === 'string') {
+                    return (
+                      <th {...column.getSortByToggleProps()}>
+                        {column.render('Header')}
+                        <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}</span>
+                      </th>
+                    );
+                  } else {
+                    return <th>{column.render('Header')}</th>;
+                  }
+                })}
               </tr>
             ))}
           </thead>
@@ -77,7 +69,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {page.map((row, i) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()} key={i}>
+                <tr {...row.getRowProps()}>
                   {type === tableType.stake && !row.canExpand && (
                     <>
                       <td colSpan={7}>{row.cells[4].render('Cell')}</td>
@@ -93,7 +85,6 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
-                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>
@@ -108,7 +99,6 @@ const CustomTable: React.FC<ICOLUMN> = ({
                               idx === 4 && row.isExpanded ? '2px solid #20aca8' : '1px solid #404952',
                           }}
                           {...cell.getCellProps()}
-                          key={idx}
                         >
                           {cell.render('Cell')}
                         </td>
@@ -150,8 +140,8 @@ const Style = styled.div`
   .tableWrap {
     display: block;
     width: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-x: scroll;
+    overflow-y: hidden;
   }
 
   table {
@@ -183,12 +173,11 @@ const Style = styled.div`
       &.collapse {
         width: 0.0000000001%;
       }
+      :first-child {
+        text-align: left;
+      }
       :last-child {
         border-right: 0;
-      }
-      :nth-child(2) {
-        text-align: left;
-        max-width: 250px;
       }
     }
   }

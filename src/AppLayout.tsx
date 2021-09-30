@@ -383,7 +383,7 @@ const AppLayout = () => {
   const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
     return (
       <Validator>
-        <Identicon value={address} size={35} theme={theme}/>
+        <Identicon value={address} size={35} theme={theme} />
         <span style={{ marginLeft: 8 }}>{name}</span>
       </Validator>
     );
@@ -641,9 +641,9 @@ const AppLayout = () => {
             {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
             {/* <Api>{mainRender}</Api> */}
           </BrowserRouter>
-          {/* <StarAnimation id="stars" />
+          <StarAnimation id="stars" />
           <StarAnimation id="stars2" />
-          <StarAnimation id="stars3" /> */}
+          <StarAnimation id="stars3" />
         </GradientLight>
       </>
     );
@@ -692,11 +692,11 @@ const HeaderRightDiv = styled.div`
   justify-content: flex-end;
 `;
 
-// const StarAnimation = styled.div`
-//   position: absolute;
-//   z-index: -100;
-//   overflow-y: hidden;
-// `;
+const StarAnimation = styled.div`
+  position: absolute;
+  z-index: -100;
+  overflow-y: hidden;
+`;
 
 const GradientLight = styled.div`
   width: 100%;

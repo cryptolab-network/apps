@@ -1,4 +1,4 @@
-import { ReactComponent as ArrowIcon } from '../../../assets/images/dropdown.svg';
+import { ReactComponent as ArrowIcon } from '../../../../../assets/images/dropdown.svg';
 import styled from 'styled-components';
 import React, { useMemo } from 'react';
 
