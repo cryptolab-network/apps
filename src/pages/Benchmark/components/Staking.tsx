@@ -1266,7 +1266,7 @@ const Staking = () => {
           tmpValue = e.target.value;
           // TODO: deal with input number format and range
           // input unit is KSM
-          const input = BigInt(tmpValue * Math.pow(10, NetworkConfig[networkName].decimals));
+          const input = BigInt((tmpValue * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0));
           const transferrable = BigInt(selectedAccount.balances.availableBalance);
           const bonded = accountChainInfo ? BigInt(accountChainInfo.bonded) : BigInt(0);
           const minBonded = BigInt(minNominatorBond);
@@ -1419,7 +1419,7 @@ const Staking = () => {
       : parseInt(limits.maxNominatorsCount.toString());
     const minNominatorBond = parseInt(limits.minNominatorBond.toString());
     const counterForNominators = parseInt(limits.counterForNominators.toString());
-    let stakeAmount = BigInt(inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals));
+    let stakeAmount = BigInt((inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0));
     const bonded = BigInt(accountChainInfo.bonded);
     // handle tiny number
     const displayBonded = Number(_formatBalance(accountChainInfo.bonded).split(' ')[0]);

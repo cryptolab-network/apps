@@ -404,10 +404,10 @@ i18n
                 alerts: {
                   title: 'Set up alerts',
                   telegram: {
-                    title: 'Receive alerts by Telegram',
+                    title: 'Receive alerts by our Telegram Bot',
                     dialog: {
-                      title: 'Subscribe our telegram alert',
-                      subtitle: '',
+                      title: 'Join our telegram bot',
+                      subtitle: 'https://t.me/cryptolab_nominator_bot',
                     },
                   },
                 },
@@ -833,10 +833,10 @@ i18n
                 alerts: {
                   title: '訂閱通知',
                   telegram: {
-                    title: '使用 Telegram 接收通知',
+                    title: '使用 Telegram Bot 接收通知',
                     dialog: {
-                      title: '訂閱我們的 telegram 通知',
-                      subtitle: '',
+                      title: '加入我們的 telegram bot',
+                      subtitle: 'https://t.me/cryptolab_nominator_bot',
                     },
                   },
                 },
@@ -1246,10 +1246,10 @@ i18n
                 alerts: {
                   title: '订阅通知',
                   telegram: {
-                    title: '使用 Telegram 接收通知',
+                    title: '使用 Telegram Bot 接收通知',
                     dialog: {
-                      title: '订阅我们的 telegram 通知',
-                      subtitle: '',
+                      title: '加入我们的 telegram bot',
+                      subtitle: 'https://t.me/cryptolab_nominator_bot',
                     },
                   },
                 },
