@@ -1,5 +1,4 @@
 import { eventStashAxios } from '../../instance/Axios';
-import keys from '../../config/keys';
 
 interface IEventParams {
   params: {
