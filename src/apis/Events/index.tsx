@@ -1,4 +1,5 @@
 import { eventStashAxios } from '../../instance/Axios';
+import keys from '../../config/keys';
 
 interface IEventParams {
   params: {
@@ -62,7 +63,11 @@ export const apiGetNotificationEvents = (
       return res.data;
     })
     .catch((err) => {
-      console.warn('in apiGetNotificationEvents, err: ', err);
+      if (process.env.REACT_APP_NODE_ENV === 'production') {
+        console.clear();
+      } else {
+        console.warn('in apiGetNotificationEvents, err: ', err);
+      }
       return undefined;
     });
 };
