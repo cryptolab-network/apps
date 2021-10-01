@@ -232,7 +232,7 @@ const Notification: React.FC = () => {
             result.commissions = result.commissions.filter((item) => {
               return item.commissionFrom > 0 ? true : false;
             });
-            result.commissions.forEach((i) => {
+            result.commissions?.forEach((i) => {
               if (i.commissionFrom > 0) {
                 tableList.push({
                   type: FilterType.COMMISSION,
@@ -243,7 +243,7 @@ const Notification: React.FC = () => {
                 });
               }
             });
-            result.slashes.forEach((i) => {
+            result.slashes?.forEach((i) => {
               tableList.push({
                 type: FilterType.SLASH,
                 descriptionAddress: i.validator,
@@ -252,7 +252,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.inactive.forEach((i) => {
+            result.inactive?.forEach((i) => {
               tableList.push({
                 type: FilterType.INACTIVE,
                 descriptionAddress: '',
@@ -261,7 +261,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.payouts.forEach((i) => {
+            result.payouts?.forEach((i) => {
               tableList.push({
                 type: FilterType.PAYOUT,
                 descriptionAddress: i.address,
@@ -270,7 +270,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.kicks.forEach((i) => {
+            result.kicks?.forEach((i) => {
               tableList.push({
                 type: FilterType.KICKS,
                 descriptionAddress: i.address,
@@ -279,7 +279,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.overSubscribes.forEach((i) => {
+            result.overSubscribes?.forEach((i) => {
               tableList.push({
                 type: FilterType.OVERSUBSCRIBES,
                 descriptionAddress: i.address,
@@ -290,7 +290,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.stalePayouts.forEach((i) => {
+            result.stalePayouts?.forEach((i) => {
               tableList.push({
                 type: FilterType.STALEPAYOUTS,
                 descriptionAddress: i.address,
@@ -299,7 +299,7 @@ const Notification: React.FC = () => {
                 affectedAccount: accounts[idx].address,
               });
             });
-            result.chills.forEach((i) => {
+            result.chills?.forEach((i) => {
               tableList.push({
                 type: FilterType.CHILLS,
                 descriptionAddress: i.address,
@@ -309,14 +309,14 @@ const Notification: React.FC = () => {
               });
             });
 
-            commissionCount += result.commissions.length;
-            inactiveCount += result.inactive.length;
-            slashCount += result.slashes.length;
-            payoutCount += result.payouts.length;
-            kicksCount += result.kicks.length;
-            overSubscribesCount += result.overSubscribes.length;
-            chillCount += result.chills.length;
-            stalePayoutCount += result.stalePayouts.length;
+            commissionCount += result.commissions?.length || 0;
+            inactiveCount += result.inactive?.length || 0;
+            slashCount += result.slashes?.length || 0;
+            payoutCount += result.payouts?.length || 0;
+            kicksCount += result.kicks?.length || 0;
+            overSubscribesCount += result.overSubscribes?.length || 0;
+            chillCount += result.chills?.length || 0;
+            stalePayoutCount += result.stalePayouts?.length || 0;
           }
         }
         totalCount =
