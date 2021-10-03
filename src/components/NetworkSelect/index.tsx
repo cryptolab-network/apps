@@ -9,6 +9,8 @@ import './index.css';
 import styled from 'styled-components';
 import { ApiContext } from '../Api';
 import { NetworkConfig } from '../../utils/constants/Network';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
+import { breakWidth } from '../../utils/constants/layout';
 
 const getLogoDiv = (network) => {
   switch (network) {
@@ -24,6 +26,8 @@ const getLogoDiv = (network) => {
 const NetworkSelect: React.FC = () => {
   // context
   const { network, changeNetwork } = useContext(ApiContext);
+  // hooks
+  const { width } = useWindowDimensions();
   // state
   const [isOpen, setOpen] = useState(false);
   //ref
@@ -40,7 +44,7 @@ const NetworkSelect: React.FC = () => {
   };
   const ulPropsCustom = {
     borderColor: 'blue',
-    width: btnRef && btnRef.current && btnRef.current.offsetWidth ? btnRef.current.offsetWidth : 50,
+    width: 178,
   };
 
   const { renderLayer, triggerProps, layerProps, arrowProps } = useLayer({
@@ -63,13 +67,19 @@ const NetworkSelect: React.FC = () => {
   }, [network]);
 
   const DisplayNetworkPanelDOM = useMemo(() => {
-    return (
-      <>
-        {getLogoDiv(network)}
-        <NetworkTitle>{network}</NetworkTitle>
-      </>
-    );
-  }, [network]);
+    if (width > breakWidth.pad) {
+      return (
+        <>
+          {getLogoDiv(network)}
+          <NetworkTitle>{network}</NetworkTitle>
+        </>
+      );
+    } else if (width > breakWidth.mobile && width <= breakWidth.pad) {
+      return <>{getLogoDiv(network)}</>;
+    } else if (width <= breakWidth.mobile) {
+      return null;
+    }
+  }, [network, width]);
 
   const DisplayDropDownItem = useMemo(() => {
     const list = Object.keys(NetworkConfig).map((key, index, array) => {
@@ -96,18 +106,24 @@ const NetworkSelect: React.FC = () => {
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
-          {DisplayNetworkPanelDOM}
-          <div style={{ width: 40 }}>
-            <DropDownIcon
-              style={{
-                stroke: 'black',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transitionDuration: '0.2s',
-              }}
-            />
-          </div>
-        </Button>
+        {width >= breakWidth.mobile ? (
+          <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
+            <>
+              {DisplayNetworkPanelDOM}
+              {width > breakWidth.pad ? (
+                <div style={{ width: 40 }}>
+                  <DropDownIcon
+                    style={{
+                      stroke: 'black',
+                      transform: isOpen ? 'rotate(90deg)' : 'none',
+                      transitionDuration: '0.2s',
+                    }}
+                  />
+                </div>
+              ) : null}
+            </>
+          </Button>
+        ) : null}
       </ButtonLayout>
       {renderLayer(
         <AnimatePresence>
