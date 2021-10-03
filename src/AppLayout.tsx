@@ -55,6 +55,7 @@ const Header: React.FC = () => {
   let { pathname } = useLocation();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
@@ -63,6 +64,21 @@ const Header: React.FC = () => {
         </NavLink>
       </HeaderLeftDiv>
       <HeaderMidDiv>
+        {/*
+          // TODO: the comment code below would be used in RWD feature
+         {width > breakWidth.mobile ? (
+          <>
+            <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
+              {t('app.title.stakingGuide')}
+            </NavLink>
+            <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioBenchmark')}
+            </NavLink>
+            <NavLink to="/management" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioManagement')}
+            </NavLink>
+          </>
+        ) : null} */}
         <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
           {t('app.title.stakingGuide')}
         </NavLink>
@@ -74,6 +90,15 @@ const Header: React.FC = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
+        {/* {width <= breakWidth.mobile ? (
+          <SideMenuIcon />
+        ) : pathname !== '/' ? (
+          <NetworkWallet />
+        ) : (
+          <NavLink to="/benchmark">
+            <Button title={t('app.title.useBenchmark')} />
+          </NavLink>
+        )} */}
         {pathname !== '/' ? (
           <NetworkWallet />
         ) : (
@@ -89,27 +114,34 @@ const Header: React.FC = () => {
 // tools header
 const ToolsHeader: React.FC = () => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
         <NavLink exact to="/">
-          <CryptoLabToolsLogo />
+          {width > breakWidth.mobile && width <= breakWidth.pad ? (
+            <CryptoLabLogoShrink />
+          ) : (
+            <CryptoLabToolsLogo />
+          )}
         </NavLink>
       </HeaderLeftDiv>
       <HeaderMidDiv>
-        <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.valnom')}
-        </NavLink>
-        <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.oneKvMonitor')}
-        </NavLink>
-        <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.stakingRewards')}
-        </NavLink>
+        {width > breakWidth.mobile ? (
+          <>
+            <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.valnom')}
+            </NavLink>
+            <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.oneKvMonitor')}
+            </NavLink>
+            <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.stakingRewards')}
+            </NavLink>
+          </>
+        ) : null}
       </HeaderMidDiv>
-      <HeaderRightDiv>
-        <Network />
-      </HeaderRightDiv>
+      <HeaderRightDiv>{width <= breakWidth.mobile ? <TwitterIcon /> : <Network />}</HeaderRightDiv>
     </HeaderDiv>
   );
 };

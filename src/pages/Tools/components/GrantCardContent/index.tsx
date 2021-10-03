@@ -4,21 +4,38 @@ import { ReactComponent as CryptoLabIcon } from '../../../../assets/images/crypt
 import { ReactComponent as XIcon } from '../../../../assets/images/x.svg';
 import { ReactComponent as Web3BadgeIcon } from '../../../../assets/images/badge-black.svg';
 
-const GrantCardContent = ({ className = '' }) => {
-  return (
-    <GrantCardContentLayout className={className}>
-      <BadgeLayout>
-        <CryptoLabIcon />
-        <XIcon />
-        <Web3BadgeIcon />
-      </BadgeLayout>
-      <GrantLayout>
-        <GrantTitle>CryptoLab Network</GrantTitle>
-        <GrantSubTitle>Supported by </GrantSubTitle>
-        <GrantTitle>Web3 Foundation Grant</GrantTitle>
-      </GrantLayout>
-    </GrantCardContentLayout>
-  );
+const GrantCardContent = ({ className = '', mobile = false }) => {
+  if (!mobile) {
+    return (
+      <GrantCardContentLayout className={className}>
+        <BadgeLayout>
+          <CryptoLabIcon />
+          <XIcon />
+          <Web3BadgeIcon />
+        </BadgeLayout>
+        <GrantLayout>
+          <GrantTitle>CryptoLab Network</GrantTitle>
+          <GrantSubTitle>Supported by </GrantSubTitle>
+          <GrantTitle>Web3 Foundation Grant</GrantTitle>
+        </GrantLayout>
+      </GrantCardContentLayout>
+    );
+  } else {
+    return (
+      <GrantCardMobileContentLayout className={className}>
+        <BadgeLayout>
+          <CryptoLabIcon />
+          <XIcon />
+          <Web3BadgeIcon />
+        </BadgeLayout>
+        <GrantLayout>
+          <GrantTitle>CryptoLab Network</GrantTitle>
+          <GrantSubTitle>Supported by </GrantSubTitle>
+          <GrantTitle>Web3 Foundation Grant</GrantTitle>
+        </GrantLayout>
+      </GrantCardMobileContentLayout>
+    );
+  }
 };
 
 GrantCardContent.propTypes = {
@@ -73,6 +90,14 @@ const GrantSubTitle = styled.div`
   font-size: 10px;
   font-weight: 500;
   color: white;
+`;
+
+const GrantCardMobileContentLayout = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 77.1px;
+  margin: 0 0.4px 150px 0;
 `;
 
 export default GrantCardContent;
