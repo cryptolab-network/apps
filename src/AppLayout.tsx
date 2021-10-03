@@ -6,6 +6,7 @@ import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
+import { ReactComponent as CryptoLabLogoShrink } from './assets/images/main-color-logo-shrink.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 // import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
@@ -46,16 +47,19 @@ import { isMobile } from 'react-device-detect';
 import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
+import useWindowDimensions from './hooks/useWindowDimensions';
+import { breakWidth } from './utils/constants/layout';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
         <NavLink exact to="/">
-          <CryptoLabLogo />
+          {width > breakWidth.mobile && width <= breakWidth.pad ? <CryptoLabLogoShrink /> : <CryptoLabLogo />}
         </NavLink>
       </HeaderLeftDiv>
       <HeaderMidDiv>
