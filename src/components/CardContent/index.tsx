@@ -49,11 +49,8 @@ const CardContentLayout = styled.div`
     -o-transition: background-color 300ms ease-out;
     transition: background-color 300ms ease-out;
   }
-  @media (max-height: 762px) {
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: 18px;
-    padding-top: 28px;
+  @media (max-width: 360px) {
+    width: 90%;
   }
 `;
 

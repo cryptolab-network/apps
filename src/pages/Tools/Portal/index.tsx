@@ -102,7 +102,7 @@ const PortalLayout = styled.div`
 
 const CardsLayout = styled.div`
   width: 100%;
-  margin: 175px 48px 58px 29px;
+  margin: 175px 0px 58px 0px;
   flex: 1;
   display: flex;
   flex-direction: row;

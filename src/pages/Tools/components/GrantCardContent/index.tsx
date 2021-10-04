@@ -23,16 +23,16 @@ const GrantCardContent = ({ className = '', mobile = false }) => {
   } else {
     return (
       <GrantCardMobileContentLayout className={className}>
-        <BadgeLayout>
+        <BadgeMobileLayout>
           <CryptoLabIcon />
           <XIcon />
           <Web3BadgeIcon />
-        </BadgeLayout>
-        <GrantLayout>
+        </BadgeMobileLayout>
+        <GrantMobileLayout>
           <GrantTitle>CryptoLab Network</GrantTitle>
           <GrantSubTitle>Supported by </GrantSubTitle>
           <GrantTitle>Web3 Foundation Grant</GrantTitle>
-        </GrantLayout>
+        </GrantMobileLayout>
       </GrantCardMobileContentLayout>
     );
   }
@@ -59,7 +59,17 @@ const BadgeLayout = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 16px 0 16px;
+  padding: 16px 14px 16px 14px;
+`;
+
+const BadgeMobileLayout = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 14px 16px 14px;
 `;
 
 const GrantLayout = styled.div`
@@ -75,6 +85,25 @@ const GrantLayout = styled.div`
   border: solid 0.5px #23beb9;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
+`;
+
+const GrantMobileLayout = styled.div`
+  box-sizing: border-box;
+  flex: 2;
+  width: 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 9px 14px 9px 14px;
+  background-color: #23beb9;
+  border: solid 1px #23beb9;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  @media (max-width: 360px) {
+    width: 299px;
+  }
 `;
 
 const GrantTitle = styled.div`
@@ -96,8 +125,10 @@ const GrantCardMobileContentLayout = styled.div`
   display: flex;
   flex-direction: column;
   width: 320px;
-  height: 77.1px;
   margin: 0 0.4px 150px 0;
+  @media (max-width: 360px) {
+    width: 299px;
+  }
 `;
 
 export default GrantCardContent;

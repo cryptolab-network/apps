@@ -7,10 +7,14 @@ import { ReactComponent as DropDownIcon } from '../../../../assets/images/dropdo
 import './index.css';
 import styled from 'styled-components';
 import { DataContext } from '../Data';
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 
 const Network: React.FC = () => {
   // context
-  const {network, changeNetwork} = useContext(DataContext);
+  const { network, changeNetwork } = useContext(DataContext);
+  // hooks
+  const { width } = useWindowDimensions();
   // state
   const [isOpen, setOpen] = useState(false);
   //ref
@@ -27,7 +31,7 @@ const Network: React.FC = () => {
   };
   const ulPropsCustom = {
     borderColor: 'blue',
-    width: btnRef && btnRef.current && btnRef.current.offsetWidth ? btnRef.current.offsetWidth : 50,
+    width: 178,
   };
 
   const { renderLayer, triggerProps, layerProps, arrowProps } = useLayer({
@@ -53,41 +57,53 @@ const Network: React.FC = () => {
     let dom = {};
     switch (network) {
       case 'Kusama':
-        dom = (
-          <>
-            <KSMLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>Kusama</NetworkTitle>
-          </>
-        );
+        dom =
+          width > breakWidth.mobile && width <= breakWidth.pad ? (
+            <>
+              <KSMLogo style={{ width: 36, height: 36 }} />
+            </>
+          ) : (
+            <>
+              <KSMLogo style={{ width: 36, height: 36 }} />
+              <NetworkTitle>Kusama</NetworkTitle>
+            </>
+          );
         break;
       case 'Polkadot':
-        dom = (
-          <>
-            <DOTLogo style={{ width: 36, height: 36 }} />
-            <NetworkTitle>Polkadot</NetworkTitle>
-          </>
-        );
+        dom =
+          width > breakWidth.mobile && width <= breakWidth.pad ? (
+            <>
+              <DOTLogo style={{ width: 36, height: 36 }} />
+            </>
+          ) : (
+            <>
+              <DOTLogo style={{ width: 36, height: 36 }} />
+              <NetworkTitle>Polkadot</NetworkTitle>
+            </>
+          );
         break;
       default:
         break;
     }
     return dom;
-  }, [network]);
+  }, [network, width]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
           {DisplayNetworkPanelDOM}
-          <div style={{ width: 40 }}>
-            <DropDownIcon
-              style={{
-                stroke: 'black',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transitionDuration: '0.2s',
-              }}
-            />
-          </div>
+          {width > breakWidth.pad ? (
+            <div style={{ width: 40 }}>
+              <DropDownIcon
+                style={{
+                  stroke: 'black',
+                  transform: isOpen ? 'rotate(90deg)' : 'none',
+                  transitionDuration: '0.2s',
+                }}
+              />
+            </div>
+          ) : null}
         </Button>
       </ButtonLayout>
       {renderLayer(
@@ -136,7 +152,7 @@ const ButtonLayout = styled.div`
   background-color: transparent;
   border: none;
   border-radius: 100px;
-  max-height: 43px;
+  max-height: 44px;
   padding-left: 5px;
   padding-right: 5px;
 `;

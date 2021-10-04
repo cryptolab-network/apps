@@ -6,6 +6,7 @@ import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
+import { ReactComponent as CryptoLabToolsLogoShrink } from './assets/images/tools-logo-shrink.svg';
 import { ReactComponent as CryptoLabLogoShrink } from './assets/images/main-color-logo-shrink.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
@@ -121,6 +122,8 @@ const ToolsHeader: React.FC = () => {
         <NavLink exact to="/">
           {width > breakWidth.mobile && width <= breakWidth.pad ? (
             <CryptoLabLogoShrink />
+          ) : width <= breakWidth.mobile ? (
+            <CryptoLabToolsLogoShrink />
           ) : (
             <CryptoLabToolsLogo />
           )}
