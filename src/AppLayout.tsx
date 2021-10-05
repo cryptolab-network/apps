@@ -180,6 +180,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const defaultLng = localStorage.getItem('i18nextLng');
   const lng = languageOptions.find((l) => l.value === defaultLng);
   const [language, setLanguage] = useState<ILanguage>(lng ? lng : { label: 'English', value: 'en' });
+  const { width } = useWindowDimensions();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -244,141 +245,278 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
         });
       });
   };
-  return (
-    <>
-      <TableDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.general')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('aboutus');
-              }}
+  if (width <= breakWidth.mobile) {
+    return (
+      <>
+        <PromoteDiv>
+          <PromoteContainer>
+            <ColumnDiv>
+              <TdDiv justify_content="flex-start">
+                <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                  <SocialMediaWrapper>
+                    <TwitterIcon width="36px" height="36px" />
+                  </SocialMediaWrapper>
+                </a>
+                <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                  <SocialMediaWrapper>
+                    <GithubIcon width="36px" height="36px" />
+                  </SocialMediaWrapper>
+                </a>
+              </TdDiv>
+              <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
+              <TdDiv justify_content="center">
+                <Input
+                  placeholder={t('app.footer.title.enterEmail')}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                ></Input>
+                <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
+              </TdDiv>
+            </ColumnDiv>
+          </PromoteContainer>
+        </PromoteDiv>
+        <TableDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.general')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('aboutus');
+                }}
+              >
+                {t('app.footer.title.about')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('contactus');
+                }}
+              >
+                {t('app.footer.title.contact')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('validators');
+                }}
+              >
+                {t('app.footer.title.ourValidators')}
+              </DialogA>
+            </TdDiv>
+          </ColumnDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.technology')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
+            </TdDiv>
+            {/* <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
+            </TdDiv> */}
+          </ColumnDiv>
+          {/* <ColumnDiv>
+            <ThDiv>{t('app.footer.title.community')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+            </TdDiv>
+          </ColumnDiv> */}
+          <ColumnDiv style={{ minWidth: '85px' }}>
+            <ThDiv>{t('app.footer.title.language')}</ThDiv>
+            <TdDiv>
+              <DropdownCommon
+                style={{ flex: 1, width: '100%' }}
+                options={languageOptions}
+                value={language}
+                onChange={handleLanguageChange}
+                theme="dark"
+              />
+            </TdDiv>
+          </ColumnDiv>
+        </TableDiv>
+        <CopyRightMobilleDiv>
+          <CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
             >
-              {t('app.footer.title.about')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('contactus');
-              }}
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
             >
-              {t('app.footer.title.contact')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('validators');
-              }}
-            >
-              {t('app.footer.title.ourValidators')}
-            </DialogA>
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.technology')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
-          </TdDiv>
-          {/* <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
-          </TdDiv> */}
-        </ColumnDiv>
-        {/* <ColumnDiv>
-          <ThDiv>{t('app.footer.title.community')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
-          </TdDiv>
-        </ColumnDiv> */}
-        <ColumnDiv style={{ minWidth: '85px' }}>
-          <ThDiv>{t('app.footer.title.language')}</ThDiv>
-          <TdDiv>
-            <DropdownCommon
-              style={{ flex: 1, width: '100%' }}
-              options={languageOptions}
-              value={language}
-              onChange={handleLanguageChange}
-              theme="dark"
-            />
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <TwitterIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <GithubIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </CopyRightTitleDiv>
+        </CopyRightMobilleDiv>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <TableDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.general')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('aboutus');
+                }}
+              >
+                {t('app.footer.title.about')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('contactus');
+                }}
+              >
+                {t('app.footer.title.contact')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('validators');
+                }}
+              >
+                {t('app.footer.title.ourValidators')}
+              </DialogA>
+            </TdDiv>
+          </ColumnDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.technology')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
+            </TdDiv>
+            {/* <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
+            </TdDiv> */}
+          </ColumnDiv>
+          {/* <ColumnDiv>
+            <ThDiv>{t('app.footer.title.community')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+            </TdDiv>
+          </ColumnDiv> */}
+          <ColumnDiv style={{ minWidth: '85px' }}>
+            <ThDiv>{t('app.footer.title.language')}</ThDiv>
+            <TdDiv>
+              <DropdownCommon
+                style={{ flex: 1, width: '100%' }}
+                options={languageOptions}
+                value={language}
+                onChange={handleLanguageChange}
+                theme="dark"
+              />
+            </TdDiv>
+          </ColumnDiv>
+          <ColumnDiv>
+            <TdDiv justify_content="flex-start">
+              <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                <SocialMediaWrapper>
+                  <TwitterIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a>
+              <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                <SocialMediaWrapper>
+                  <GithubIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a>
+              {/* <a href="#">
+                <SocialMediaWrapper>
+                  <YoutubeIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a> */}
+            </TdDiv>
+            <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
+            <TdDiv justify_content="center">
+              <Input
+                placeholder={t('app.footer.title.enterEmail')}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              ></Input>
+              <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
+            </TdDiv>
+          </ColumnDiv>
+        </TableDiv>
+        <CopyRightDiv>
+          <CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
+            >
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
+            >
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            {/* <a href="#">
-              <SocialMediaWrapper>
-                <YoutubeIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
-            </a> */}
-          </TdDiv>
-          <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
-          <TdDiv justify_content="center">
-            <Input
-              placeholder={t('app.footer.title.enterEmail')}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            ></Input>
-            <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
-          </TdDiv>
-        </ColumnDiv>
-      </TableDiv>
-      <CopyRightDiv>
-        <CopyRightTitleDiv>
-          @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a
-            href="https://www.iubenda.com/terms-and-conditions/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
-            title="Terms and Conditions "
-          >
-            T&C
-          </a>{' '}
-          &nbsp;| &nbsp;
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-          <a
-            href="https://www.iubenda.com/privacy-policy/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
-            title={t('app.footer.title.privacyPolicy')}
-          >
-            {t('app.footer.title.privacyPolicy')}
-          </a>
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-        </CopyRightTitleDiv>
-      </CopyRightDiv>
-    </>
-  );
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </CopyRightTitleDiv>
+        </CopyRightDiv>
+      </>
+    );
+  }
 };
 
 // main applayout, include star animation and light gradient
@@ -739,12 +877,12 @@ const TableDiv = styled.div`
   margin-top: 80px;
   padding: 20px 15% 20px 15%;
   width: auto;
-  @media (min-width: 1000px) {
-    width: 70%;
-  }
-  @media (max-width: 1000px) {
-    width: 90%;
+  width: 70%;
+  @media (max-width: 768px) {
     padding: 0px;
+  }
+  @media (max-width: 360px) {
+    width: 90%;
   }
 `;
 
@@ -850,6 +988,16 @@ const CopyRightDiv = styled.div`
   // z-index: 99;
 `;
 
+const CopyRightMobilleDiv = styled.div`
+  width: 100%;
+  margin: 0px;
+  padding: 25px 0px 25px;
+  background-color: #0d1119;
+  // position: fixed;
+  // bottom: 0px;
+  // z-index: 99;
+`;
+
 const CopyRightTitleDiv = styled.div`
   height: 16px;
   font-family: Montserrat;
@@ -925,4 +1073,18 @@ const AboutUsGoalFontStyle = styled.li`
   color: #1faaa6;
   margin-top: 6px;
   margin-bottom: 6px;
+`;
+
+const PromoteDiv = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PromoteContainer = styled.div`
+  width: 320px;
+  @media (max-width: 360px) {
+    width: 299px;
+  }
 `;
