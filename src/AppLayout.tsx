@@ -46,6 +46,7 @@ import { isMobile } from 'react-device-detect';
 import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
+import Wallet from './pages/Tools/components/Wallet';
 
 // header
 const Header: React.FC = () => {
@@ -105,6 +106,7 @@ const ToolsHeader: React.FC = () => {
       </HeaderMidDiv>
       <HeaderRightDiv>
         <Network />
+        <Wallet />
       </HeaderRightDiv>
     </HeaderDiv>
   );
