@@ -1419,7 +1419,9 @@ const Staking = () => {
       : parseInt(limits.maxNominatorsCount.toString());
     const minNominatorBond = parseInt(limits.minNominatorBond.toString());
     const counterForNominators = parseInt(limits.counterForNominators.toString());
-    let stakeAmount = BigInt((inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0));
+    let stakeAmount = BigInt(
+      (inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0)
+    );
     const bonded = BigInt(accountChainInfo.bonded);
     // handle tiny number
     const displayBonded = Number(_formatBalance(accountChainInfo.bonded).split(' ')[0]);
@@ -1884,7 +1886,7 @@ const Staking = () => {
         </FilterInfo>
       </div>
     );
-  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
+  }, [apiOriginTableData.tableData.length, finalFilteredTableData, t]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {

@@ -2,7 +2,8 @@ import styled from 'styled-components';
 import { useTable, useExpanded, usePagination, useSortBy } from 'react-table';
 import { tableType } from '../../../../utils/status/Table';
 import Pagination from './comopnents/Pagination';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type ICOLUMN = {
   columns: Array<any>;
@@ -19,6 +20,8 @@ const CustomTable: React.FC<ICOLUMN> = ({
   pagination = false,
   customPageSize = 20,
 }) => {
+  const { t } = useTranslation();
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -51,6 +54,10 @@ const CustomTable: React.FC<ICOLUMN> = ({
     setPageSize(customPageSize);
   }, [customPageSize, setPageSize]);
 
+  const commissionHeaderName = useMemo(() => {
+    return t('benchmark.staking.table.header.commission') + ' %';
+  }, [t]);
+
   return (
     <Style>
       <div className="tableWrap">
@@ -59,7 +66,7 @@ const CustomTable: React.FC<ICOLUMN> = ({
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => {
-                  if (typeof column.Header === 'string' && column.Header !== 'Commission %') {
+                  if (typeof column.Header === 'string' && column.Header !== commissionHeaderName) {
                     return (
                       <th {...column.getSortByToggleProps()}>
                         {column.render('Header')}
