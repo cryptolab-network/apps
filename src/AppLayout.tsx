@@ -50,6 +50,7 @@ import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
 import useWindowDimensions from './hooks/useWindowDimensions';
 import { breakWidth } from './utils/constants/layout';
+import SideMenu from './components/SideMenu';
 
 // header
 const Header: React.FC = () => {
@@ -113,7 +114,11 @@ const Header: React.FC = () => {
 };
 
 // tools header
-const ToolsHeader: React.FC = () => {
+
+interface IToolsHeader {
+  handleSideMenuToggle: React.MouseEventHandler<SVGSVGElement>;
+}
+const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   return (
@@ -144,7 +149,9 @@ const ToolsHeader: React.FC = () => {
           </>
         ) : null}
       </HeaderMidDiv>
-      <HeaderRightDiv>{width <= breakWidth.mobile ? <TwitterIcon /> : <Network />}</HeaderRightDiv>
+      <HeaderRightDiv>
+        {width <= breakWidth.mobile ? <TwitterIcon onClick={handleSideMenuToggle} /> : <Network />}
+      </HeaderRightDiv>
     </HeaderDiv>
   );
 };
@@ -528,6 +535,7 @@ const AppLayout = () => {
   const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
   const [visibleContactUsDialog, setVisibleContactUsDialog] = useState(false);
   const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
+  const [visibleSideMenu, setVisibleSideMenu] = useState(false);
 
   const handleDialogClose = (name) => {
     switch (name) {
@@ -564,6 +572,10 @@ const AppLayout = () => {
         <span style={{ marginLeft: 8 }}>{name}</span>
       </Validator>
     );
+  };
+
+  const handleSideMenuToggle = () => {
+    setVisibleSideMenu((prev) => !prev);
   };
 
   const ourValidatorsDOM = useMemo(() => {
@@ -684,7 +696,7 @@ const AppLayout = () => {
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
-      return <ToolsHeader />;
+      return <ToolsHeader handleSideMenuToggle={handleSideMenuToggle} />;
     }
     return <Header />;
   }, [isToolsSite]);
@@ -719,6 +731,7 @@ const AppLayout = () => {
       <>
         {headerDOM}
         <RouteContent>
+          <SideMenu isOpen={visibleSideMenu} handleClose={handleSideMenuToggle} />
           <Dialog
             image={<PeopleIcon />}
             title={t('app.footer.title.ourValidators')}
@@ -781,6 +794,7 @@ const AppLayout = () => {
     visibleAboutUsDialog,
     visibleContactUsDialog,
     visibleOurValidatorsDialog,
+    visibleSideMenu,
   ]);
 
   if (isMobile) {
