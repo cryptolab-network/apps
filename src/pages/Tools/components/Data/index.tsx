@@ -8,6 +8,7 @@ import { accountTransform } from '../../../../redux/walletSlice';
 
 export interface IAccount {
   address: string;
+  source: string;
   name?: string;
   genesisHash?: string | null;
 }
