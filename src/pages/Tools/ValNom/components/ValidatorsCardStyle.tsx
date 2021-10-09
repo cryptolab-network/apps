@@ -23,8 +23,10 @@ import { NetworkConfig } from '../../../../utils/constants/Network';
 import { toast } from 'react-toastify';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
 import Pagination from '../../../../components/Pagination';
-
 import { useTranslation } from 'react-i18next';
+import { web3FromSource } from '@polkadot/extension-dapp';
+import type { Signer } from '@polkadot/api/types';
+import { u8aWrapBytes, isFunction, u8aToHex } from '@polkadot/util';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
@@ -209,15 +211,17 @@ const ValidatorGrid = ({ filters, validators }) => {
   }
 };
 
-const ValNomContent = () => {
+const ValNomContent: React.FC = () => {
   const { t } = useTranslation();
   const [filters, setFilters] = useState({
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
   });
-  const { network: networkName } = useContext(DataContext);
+  const { network: networkName, selectedAccount } = useContext(DataContext);
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
+  const [signer, setSigner] = useState<Signer | null>(null);
+  const [signature, setSignature] = useState('');
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -262,6 +266,34 @@ const ValNomContent = () => {
     }
     getValidators();
   }, [chain, notifyError]);
+
+  useEffect(() => {
+    setSignature('');
+    setSigner(null);
+    web3FromSource(selectedAccount.source)
+        .catch((): null => null)
+        .then((injected) => setSigner(injected?.signer || null))
+        .catch(console.error);
+  }, [selectedAccount]);
+
+  const onSign = useCallback((data: string) => {
+    const wrapped = u8aWrapBytes(data);
+    console.log(data);
+    console.log(`signer`);
+    console.log(signer);
+    if (signer && isFunction(signer.signRaw)) {
+      setSignature('');
+      console.log(u8aToHex(wrapped));
+      signer
+        .signRaw({
+          address: selectedAccount.address,
+          data: u8aToHex(wrapped),
+          type: 'bytes'
+        })
+        .then(({ signature }) => setSignature(signature))
+        .catch(console.error);
+    }
+  }, [signer, selectedAccount.address]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -311,6 +343,11 @@ const ValNomContent = () => {
               />
             </HeaderLeft>
             <HeaderRight>
+              {/* todo: Jack, refKey process */}
+              <div>
+                <input type="button" onClick={() => onSign('123456')} value="refKey" />
+              </div>
+              <div>sig: {signature?.substr(0, 10)}</div>
               <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
                 <div onClick={onShowFilters}>
                   <OptionIcon />
