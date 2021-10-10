@@ -159,82 +159,82 @@ const Notification: React.FC = () => {
         let stalePayoutCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          // let result = await apiGetNotificationEvents(
-          //   {
-          //     params: {
-          //       id: accounts[idx].address,
-          //       chain: networkCapitalCodeName(networkName),
-          //     },
-          //   },
-          //   query
-          // );
+          let result = await apiGetNotificationEvents(
+            {
+              params: {
+                id: accounts[idx].address,
+                chain: networkCapitalCodeName(networkName),
+              },
+            },
+            query
+          );
 
           // mock data below for test convenient
-          let result = {
-            commissions: [
-              {
-                commissionFrom: 0,
-                commissionTo: 2,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 123,
-              },
-              {
-                commissionFrom: 2,
-                commissionTo: 3,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 234,
-              },
-            ],
-            slashes: [
-              {
-                era: 123,
-                validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                total: 500000000000,
-              },
-            ],
-            payouts: [
-              {
-                era: 168,
-                amount: 1.1,
-                address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-              },
-            ],
-            inactive: [0, 234],
-            overSubscribes: [
-              {
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 2796,
-                amount: '50000000000000',
-              },
-              {
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 2797,
-                amount: '150000000000000',
-              },
-            ],
-            kicks: [
-              {
-                era: 0,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-              },
-            ],
-            stalePayouts: [
-              {
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-                era: 0,
-                unclaimedPayoutEras: [0, 1, 2, 5],
-              },
-            ],
-            chills: [
-              {
-                era: 0,
-                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-              },
-            ],
-          };
+          // let result = {
+          //   commissions: [
+          //     {
+          //       commissionFrom: 0,
+          //       commissionTo: 2,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 123,
+          //     },
+          //     {
+          //       commissionFrom: 2,
+          //       commissionTo: 3,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 234,
+          //     },
+          //   ],
+          //   slashes: [
+          //     {
+          //       era: 123,
+          //       validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       total: 500000000000,
+          //     },
+          //   ],
+          //   payouts: [
+          //     {
+          //       era: 168,
+          //       amount: 1.1,
+          //       address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //     },
+          //   ],
+          //   inactive: [0, 234],
+          //   overSubscribes: [
+          //     {
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 2796,
+          //       amount: '50000000000000',
+          //     },
+          //     {
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 2797,
+          //       amount: '150000000000000',
+          //     },
+          //   ],
+          //   kicks: [
+          //     {
+          //       era: 0,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+          //     },
+          //   ],
+          //   stalePayouts: [
+          //     {
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //       era: 0,
+          //       unclaimedPayoutEras: [0, 1, 2, 5],
+          //     },
+          //   ],
+          //   chills: [
+          //     {
+          //       era: 0,
+          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+          //     },
+          //   ],
+          // };
 
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
