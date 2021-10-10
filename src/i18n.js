@@ -368,6 +368,7 @@ i18n
               },
               notification: {
                 title: 'Notification',
+                review: 'review',
                 overview: {
                   title: 'Overview',
                   event: {
@@ -797,6 +798,7 @@ i18n
               },
               notification: {
                 title: '通知',
+                review: '審視',
                 overview: {
                   title: '總覽',
                   event: {
@@ -1210,6 +1212,7 @@ i18n
               },
               notification: {
                 title: '通知',
+                review: '审视',
                 overview: {
                   title: '总览',
                   event: {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import type { Option } from '@polkadot/types';
 import type { StakingLedger as PolkadotStakingLedger } from '@polkadot/types/interfaces/staking';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -58,6 +59,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import queryString from 'query-string';
 
 export enum Strategy {
   LOW_RISK,
@@ -181,6 +183,11 @@ interface IApiParams {
 interface INomitableInfo {
   nominatable: boolean;
   warning: any;
+}
+
+interface IQueryParse {
+  advanced: string;
+  validator: string;
 }
 
 const StrategyConfig = {
@@ -307,6 +314,7 @@ enum StrategyType {
 }
 
 const Staking = () => {
+  let location = useLocation();
   const { t } = useTranslation();
 
   const BASIC_DEFAULT_STRATEGY = useMemo(() => {
@@ -701,6 +709,13 @@ const Staking = () => {
       setNominating,
     ]
   );
+
+  useEffect(() => {
+    const parsed: IQueryParse = queryString.parse(location.search) as unknown as IQueryParse;
+    if (parsed.advanced && parsed.advanced === 'true') {
+      setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+    }
+  }, [location]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
