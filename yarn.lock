@@ -1777,15 +1777,15 @@
   dependencies:
     "@babel/runtime" "^7.15.4"
 
-"@polkadot/react-identicon@^0.85.4":
-  version "0.85.4"
-  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.85.4.tgz#5830210efb97e51559015048841809ae3694a96c"
-  integrity sha512-ZuYTTwwEzcKlackw6dFwD7Ck5hFjV7KLy9wr9gWGlX0d0pYrqIDufvaG1Oh1A78vWVZfBtV3whtlezarQexQuw==
+"@polkadot/react-identicon@^0.85.5":
+  version "0.85.5"
+  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.85.5.tgz#b83ceb5c21f04ed5f8baf9c37a1432a4f2385c6c"
+  integrity sha512-fPMRiszrGRUVqkzUhmngoTf6wfAf4TPTY49LuIKCCHrWRvYZC3umnZSx48RnB7Vrama2Gpax6vGVN7VgQSk9lQ==
   dependencies:
     "@babel/runtime" "^7.15.4"
     "@polkadot/keyring" "^7.4.1"
-    "@polkadot/ui-settings" "0.85.4"
-    "@polkadot/ui-shared" "0.85.4"
+    "@polkadot/ui-settings" "0.85.5"
+    "@polkadot/ui-shared" "0.85.5"
     "@polkadot/util" "^7.4.1"
     "@polkadot/util-crypto" "^7.4.1"
     color "^3.2.1"
@@ -1839,10 +1839,10 @@
     "@polkadot/util-crypto" "^7.4.1"
     rxjs "^7.3.0"
 
-"@polkadot/ui-settings@0.85.4":
-  version "0.85.4"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.85.4.tgz#f8d53f4cf25aef770c65bfbd0718c857ee561a40"
-  integrity sha512-WYuP1ZrLfnj6zV8jVqqxOiaqfxmrCQcNmHBCDnqkLfuZX7OiF7xKBAESa8S0jy3uWIDrEqdseF2OcEp0A/XOPg==
+"@polkadot/ui-settings@0.85.5":
+  version "0.85.5"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.85.5.tgz#8f089b6027d824048e412d5dce500b5fadfe92de"
+  integrity sha512-p1nx0ziqgkVUchNGp+I+xCx+ehTXDvhBNZ1D2zt2BO+0vRd9PDGBJ/wM8VzQD0BvFvmDvs5pLvyLqjA4Iuraqg==
   dependencies:
     "@babel/runtime" "^7.15.4"
     "@polkadot/networks" "^7.4.1"
@@ -1850,10 +1850,10 @@
     eventemitter3 "^4.0.7"
     store "^2.0.12"
 
-"@polkadot/ui-shared@0.85.4":
-  version "0.85.4"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.85.4.tgz#f815b1d8b4ab8206d1fa97bf834a96069c9e7735"
-  integrity sha512-Wpwj2P0/Ibrq4Dt6B6FiAKgvZaugE36Yj7k1TzKNVbzczCMmH9lVE6Q1Y+K239mtqljvKGdz3e8IJ/E6z/G/OQ==
+"@polkadot/ui-shared@0.85.5":
+  version "0.85.5"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.85.5.tgz#3ce80a9e44f0126c87bb6e8d27051b9e7abf068d"
+  integrity sha512-uXQtDktmJESCFC3GIW0swwaw34RIERXHigyDs2OagkT9V3hsW9u0WWw9H4+p/JVcjCWij011X4mIYqj3/IH5Mw==
   dependencies:
     "@babel/runtime" "^7.15.4"
     color "^3.2.1"
