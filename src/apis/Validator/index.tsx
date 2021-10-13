@@ -1,3 +1,4 @@
+import { findAllByDisplayValue } from '@testing-library/dom';
 import { CancelToken } from 'axios';
 import {
   nominatedValidatorsAxios,
@@ -6,6 +7,7 @@ import {
   validatorAxios,
   nominateAxios,
   nominatedAxios,
+  validatorRefKeyAxios,
 } from '../../instance/Axios';
 import { Strategy } from '../../pages/Benchmark/components/Staking';
 
@@ -142,6 +144,17 @@ export interface INominatedPost {
   data: INominatedInfo;
 }
 
+export interface IValidatorRefKey {
+  params: string;
+}
+export interface IValidatorRefKeyVerify {
+  params: string;
+  data: {
+    refKey: string;
+    encoded: string;
+  };
+}
+
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
   validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
@@ -207,6 +220,38 @@ export const apiNominated = (data: INominatedPost): Promise<number> => {
     .post(data.params, data.data)
     .then((res) => {
       return 0;
+    })
+    .catch((err) => {
+      return err.response.data.code;
+    });
+};
+
+export const apiGetRefKey = (data: IValidatorRefKey): Promise<string> => {
+  return validatorRefKeyAxios
+    .get(data.params)
+    .then((res) => {
+      if (res.data && res.data.refKey) {
+        return res.data.refKey;
+      } else {
+        return '';
+      }
+    })
+    .catch((err) => {
+      return err.response.data.code;
+    });
+};
+
+export const apiRefKeyVerify = (data: IValidatorRefKeyVerify): Promise<boolean> => {
+  return validatorRefKeyAxios
+    .get(data.params)
+    .then((res) => {
+      console.log('verify result: ', res.data);
+      // if (res.data && res.data) {
+      //   return res.data.refKey;
+      // } else {
+      //   return '';
+      // }
+      return false;
     })
     .catch((err) => {
       return err.response.data.code;

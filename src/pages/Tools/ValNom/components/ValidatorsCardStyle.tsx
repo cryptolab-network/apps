@@ -7,7 +7,7 @@ import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
-import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+import { apiGetAllValidator, IValidator, apiGetRefKey, apiRefKeyVerify } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import Tooltip from '../../../../components/Tooltip';
 import DropdownCommon from '../../../../components/Dropdown/Common';
@@ -19,6 +19,7 @@ import {
 } from './filterOptions';
 import { DataContext } from '../../components/Data';
 import { balanceUnit } from '../../../../utils/string';
+import { networkCapitalCodeName } from '../../../../utils/parser';
 import { NetworkConfig } from '../../../../utils/constants/Network';
 import { toast } from 'react-toastify';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
@@ -27,6 +28,9 @@ import { useTranslation } from 'react-i18next';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import type { Signer } from '@polkadot/api/types';
 import { u8aWrapBytes, isFunction, u8aToHex } from '@polkadot/util';
+import TinyButton from '../../../../components/Button/tiny';
+import { notifySuccess } from '../../../../utils/notify';
+import keys from '../../../../config/keys';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
@@ -222,6 +226,7 @@ const ValNomContent: React.FC = () => {
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [signer, setSigner] = useState<Signer | null>(null);
   const [signature, setSignature] = useState('');
+  const [refKey, setRefKey] = useState('');
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -271,29 +276,45 @@ const ValNomContent: React.FC = () => {
     setSignature('');
     setSigner(null);
     web3FromSource(selectedAccount.source)
-        .catch((): null => null)
-        .then((injected) => setSigner(injected?.signer || null))
-        .catch(console.error);
+      .catch((): null => null)
+      .then((injected) => setSigner(injected?.signer || null))
+      .catch(console.error);
   }, [selectedAccount]);
 
-  const onSign = useCallback((data: string) => {
-    const wrapped = u8aWrapBytes(data);
-    console.log(data);
-    console.log(`signer`);
-    console.log(signer);
-    if (signer && isFunction(signer.signRaw)) {
-      setSignature('');
-      console.log(u8aToHex(wrapped));
-      signer
-        .signRaw({
-          address: selectedAccount.address,
-          data: u8aToHex(wrapped),
-          type: 'bytes'
-        })
-        .then(({ signature }) => setSignature(signature))
-        .catch(console.error);
+  const onSign = useCallback(
+    (data: string) => {
+      const wrapped = u8aWrapBytes(data);
+      if (signer && isFunction(signer.signRaw)) {
+        setSignature('');
+        console.log(u8aToHex(wrapped));
+        signer
+          .signRaw({
+            address: selectedAccount.address,
+            data: u8aToHex(wrapped),
+            type: 'bytes',
+          })
+          .then(({ signature }) => {
+            setSignature(signature);
+            notifySuccess('推薦碼產生完成');
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    },
+    [signer, selectedAccount.address]
+  );
+  const onRefKeyGen = useCallback(async () => {
+    try {
+      const refKey = await apiGetRefKey({
+        params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}`,
+      });
+      setRefKey(refKey);
+      onSign(refKey);
+    } catch (err) {
+      console.error(err);
     }
-  }, [signer, selectedAccount.address]);
+  }, [networkName, selectedAccount.address, onSign]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -344,10 +365,26 @@ const ValNomContent: React.FC = () => {
             </HeaderLeft>
             <HeaderRight>
               {/* todo: Jack, refKey process */}
-              <div>
-                <input type="button" onClick={() => onSign('123456')} value="refKey" />
-              </div>
-              <div>sig: {signature?.substr(0, 10)}</div>
+              {!signature || !refKey ? (
+                <TinyButton
+                  title="產生推薦碼"
+                  fontSize="12"
+                  onClick={() => {
+                    onRefKeyGen();
+                  }}
+                />
+              ) : (
+                <TinyButton
+                  title="分享推薦碼"
+                  fontSize="12"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `${keys.appDomain}/benchmark?refKey=${refKey}&signature=${signature}`
+                    );
+                  }}
+                />
+              )}
+
               <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
                 <div onClick={onShowFilters}>
                   <OptionIcon />

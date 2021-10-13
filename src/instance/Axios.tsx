@@ -51,3 +51,7 @@ export const nominateAxios = Axios.create({
 export const nominatedAxios = Axios.create({
   baseURL: `${prefix}/nominated/`,
 });
+
+export const validatorRefKeyAxios = Axios.create({
+  baseURL: `${prefix}/refKey/stash`,
+});

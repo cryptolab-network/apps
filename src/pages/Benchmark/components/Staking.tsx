@@ -29,7 +29,7 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues, isEmpty } from '../../../utils/helper';
-import { apiGetAllValidator, apiNominate, apiNominated } from '../../../apis/Validator';
+import { apiGetAllValidator, apiNominate, apiNominated, apiRefKeyVerify } from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -188,6 +188,8 @@ interface INomitableInfo {
 interface IQueryParse {
   advanced: string;
   validator: string;
+  refKey: string;
+  signature: string;
 }
 
 const StrategyConfig = {
@@ -714,8 +716,20 @@ const Staking = () => {
     const parsed: IQueryParse = queryString.parse(location.search) as unknown as IQueryParse;
     if (parsed.advanced && parsed.advanced === 'true') {
       setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+    } else if (parsed.refKey && parsed.signature) {
+      // (async () => {
+      //   if (parsed.signature && parsed.refKey) {
+      //     console.log(`signature: ${parsed.signature}, refKey: ${parsed.refKey}`);
+      //     const stashId = await apiRefKeyDecode()
+      //     const verifyResult = await apiRefKeyVerify({
+      //       params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}`,
+      //       data: { refKey: parsed.refKey, encoded: parsed.signature },
+      //     });
+      //     console.log('verifyResult: ', verifyResult);
+      //   }
+      // })();
     }
-  }, [location]);
+  }, [location, networkName, selectedAccount.address]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
