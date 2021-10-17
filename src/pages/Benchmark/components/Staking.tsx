@@ -29,7 +29,7 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues, isEmpty } from '../../../utils/helper';
-import { apiGetAllValidator, apiNominate, apiNominated, apiRefKeyVerify } from '../../../apis/Validator';
+import { apiGetAllValidator, apiNominate, apiNominated, apiRefKeyVerify, IValidator } from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -1691,7 +1691,7 @@ const Staking = () => {
         try {
           // console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
-          let result;
+          let result: IValidator[];
           // retrive validators from in memory cache
           const isOneKv = apiParams.has_joined_1kv ? true : false;
           const now = Math.round(+new Date());
