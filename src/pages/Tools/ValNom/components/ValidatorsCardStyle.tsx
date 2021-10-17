@@ -31,6 +31,7 @@ import { u8aWrapBytes, isFunction, u8aToHex } from '@polkadot/util';
 import TinyButton from '../../../../components/Button/tiny';
 import { notifySuccess } from '../../../../utils/notify';
 import keys from '../../../../config/keys';
+import axios from 'axios';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
@@ -225,8 +226,13 @@ const ValNomContent: React.FC = () => {
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [signer, setSigner] = useState<Signer | null>(null);
-  const [signature, setSignature] = useState('');
-  const [refKey, setRefKey] = useState('');
+  // const [signature, setSignature] = useState('');
+  // const [refKey, setRefKey] = useState('');
+  const [refCodeInfo, setRefCodeInfo] = useState({
+    refKey: '',
+    signature: '',
+    verified: false,
+  });
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -273,7 +279,6 @@ const ValNomContent: React.FC = () => {
   }, [chain, notifyError]);
 
   useEffect(() => {
-    setSignature('');
     setSigner(null);
     web3FromSource(selectedAccount.source)
       .catch((): null => null)
@@ -282,39 +287,65 @@ const ValNomContent: React.FC = () => {
   }, [selectedAccount]);
 
   const onSign = useCallback(
-    (data: string) => {
-      const wrapped = u8aWrapBytes(data);
-      if (signer && isFunction(signer.signRaw)) {
-        setSignature('');
-        console.log(u8aToHex(wrapped));
-        signer
-          .signRaw({
+    async (data: string): Promise<string> => {
+      let signature = '';
+      try {
+        const wrapped = u8aWrapBytes(data);
+        if (signer && isFunction(signer.signRaw)) {
+          const sigResult = await signer.signRaw({
             address: selectedAccount.address,
             data: u8aToHex(wrapped),
             type: 'bytes',
-          })
-          .then(({ signature }) => {
-            setSignature(signature);
-            notifySuccess('推薦碼產生完成');
-          })
-          .catch((error) => {
-            console.error(error);
           });
+
+          if (sigResult && sigResult.signature) {
+            return sigResult.signature;
+          } else {
+            throw new Error('onSign failed, signature undefined');
+          }
+        } else {
+          throw new Error('onSign failed, signer undefined');
+        }
+      } catch (error) {
+        console.error('onSign failed, error: ', error);
+        return signature;
       }
     },
-    [signer, selectedAccount.address]
+    [selectedAccount.address, signer]
   );
+
   const onRefKeyGen = useCallback(async () => {
     try {
+      // get refKey
       const refKey = await apiGetRefKey({
         params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}`,
       });
-      setRefKey(refKey);
-      onSign(refKey);
+      // sign refKey
+      const signedSignature = await onSign(refKey);
+      // verify signature
+      if (refKey && signedSignature) {
+        const verifyResult = await apiRefKeyVerify({
+          params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}/verify`,
+          data: { refKey: refKey, encoded: signedSignature },
+        });
+        if (verifyResult) {
+          setRefCodeInfo({
+            refKey: refKey,
+            signature: signedSignature,
+            verified: true,
+          });
+          notifySuccess('推薦碼產生完成');
+        } else {
+          throw new Error('推薦碼產生失敗1');
+        }
+      } else {
+        throw new Error('推薦碼產生失敗2');
+      }
     } catch (err) {
       console.error(err);
+      notifyError('推薦碼產生失敗');
     }
-  }, [networkName, selectedAccount.address, onSign]);
+  }, [selectedAccount.address, networkName, onSign, notifyError]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -364,26 +395,28 @@ const ValNomContent: React.FC = () => {
               />
             </HeaderLeft>
             <HeaderRight>
-              {/* todo: Jack, refKey process */}
-              {!signature || !refKey ? (
-                <TinyButton
-                  title="產生推薦碼"
-                  fontSize="12"
-                  onClick={() => {
-                    onRefKeyGen();
-                  }}
-                />
-              ) : (
-                <TinyButton
-                  title="分享推薦碼"
-                  fontSize="12"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `${keys.appDomain}/benchmark?refKey=${refKey}&signature=${signature}`
-                    );
-                  }}
-                />
-              )}
+              <span style={{ marginRight: 8 }}>
+                {/* todo: Jack, refKey process */}
+                {!refCodeInfo.verified ? (
+                  <TinyButton
+                    title="產生推薦碼"
+                    fontSize="12"
+                    onClick={() => {
+                      onRefKeyGen();
+                    }}
+                  />
+                ) : (
+                  <TinyButton
+                    title="分享推薦碼"
+                    fontSize="12"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${keys.appDomain}/benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}`
+                      );
+                    }}
+                  />
+                )}
+              </span>
 
               <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
                 <div onClick={onShowFilters}>

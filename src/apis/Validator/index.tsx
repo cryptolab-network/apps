@@ -155,8 +155,8 @@ export interface IValidatorRefKeyVerify {
   };
 }
 
-export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
-  validatorAxios
+export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> => {
+  return validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
     .then((res) => {
       return res.data;
@@ -164,6 +164,7 @@ export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[
     .catch((err) => {
       throw err;
     });
+};
 export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
   singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
     if (res.data.length > 0) {
@@ -243,17 +244,17 @@ export const apiGetRefKey = (data: IValidatorRefKey): Promise<string> => {
 
 export const apiRefKeyVerify = (data: IValidatorRefKeyVerify): Promise<boolean> => {
   return validatorRefKeyAxios
-    .get(data.params)
+    .post(data.params, data.data)
     .then((res) => {
       console.log('verify result: ', res.data);
-      // if (res.data && res.data) {
-      //   return res.data.refKey;
-      // } else {
-      //   return '';
-      // }
+      if (res.data && res.data) {
+        return res.data;
+      }
       return false;
     })
     .catch((err) => {
+      console.error('### err: ');
+      console.error(err.stack);
       return err.response.data.code;
     });
 };
