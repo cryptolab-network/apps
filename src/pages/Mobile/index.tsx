@@ -16,8 +16,6 @@ const Mobile: React.FC<Props> = ({isTools}) => {
           <CryptoLabLogo style={{height: '128px'}} />
           <WarningTitle>{t('app.mobile.warning')}</WarningTitle>
           <WarningDetail>{t('app.mobile.warningDetail')}</WarningDetail>
-          <WarningDetail>{t('app.mobile.warningTools')}</WarningDetail>
-          <a href="https://legacy.cryptolab.network" rel="noreferrer" id="legacy">https://legacy.cryptolab.network</a>
         </WarningLayout>
       </MobileLayout>
     )
@@ -28,8 +26,6 @@ const Mobile: React.FC<Props> = ({isTools}) => {
         <CryptoLabLogo style={{height: '128px'}} />
         <WarningTitle>{t('app.mobile.warning')}</WarningTitle>
         <WarningDetail>{t('app.mobile.warningDetail')}</WarningDetail>
-        <WarningDetail>{t('app.mobile.warningTools')}</WarningDetail>
-          <a href="https://legacy.cryptolab.network" rel="noreferrer" id="legacy">https://legacy.cryptolab.network</a>
       </WarningLayout>
     </MobileLayout>
   )
