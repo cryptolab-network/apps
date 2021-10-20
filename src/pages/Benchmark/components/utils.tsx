@@ -5,7 +5,8 @@ import { getCandidateNumber } from '../../../utils/constants/Validator';
 import { CryptolabKSMValidators, CryptolabDOTValidators } from '../../../utils/constants/Validator';
 import { NetworkNameLowerCase } from '../../../utils/constants/Network';
 import _ from 'lodash';
-import { balanceUnit } from '../../../utils/string';
+import BN from 'bn.js';
+import { NetworkConfig } from '../../../utils/constants/Network';
 
 const ROUND = 10;
 const KSM_MIN_SELF_STAKE = 50;
@@ -345,6 +346,7 @@ export const lowRiskStrategy = (
     tempSelectableCount = selectableCount;
   }
   // low risk data filtered
+  const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
   tempTableData = tempTableData.filter((validator) => {
     if (validator.select) {
       return true;
@@ -352,15 +354,12 @@ export const lowRiskStrategy = (
     let minSelfStakeFlag = false;
     if (
       (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
-        Number(balanceUnit(networkName, validator.selfStake, true, false).split(' ')[0]) >=
-          KSM_MIN_SELF_STAKE) ||
+        new BN(validator.selfStake).gte(new BN(KSM_MIN_SELF_STAKE).mul(decimals))) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
-        Number(balanceUnit(networkName, validator.selfStake, true, false).split(' ')[0]) >=
-          DOT_MIN_SELF_STAKE)
+        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals)))
     ) {
       minSelfStakeFlag = true;
     }
-
     if (
       minSelfStakeFlag &&
       validator.unclaimedEras < 16 &&
@@ -533,16 +532,15 @@ export const advancedConditionFilter = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
-
+  const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
   tempTableData = tempTableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
 
       // min self stake
       if (
-        filtered.minSelfStake &&
-        Number(balanceUnit(networkName, data.selfStake, true, false).split(' ')[0]) <
-          Number(filtered.minSelfStake)
+        filtered.minSelfStake && 
+        new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))
       ) {
         return false;
       }
