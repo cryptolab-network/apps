@@ -65,7 +65,11 @@ export interface ApiProps {
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
   const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
-    return account.genesisHash === null || account.genesisHash === '' || account.genesisHash === networkConfig?.genesisHash;
+    return (
+      account.genesisHash === null ||
+      account.genesisHash === '' ||
+      account.genesisHash === networkConfig?.genesisHash
+    );
   });
 
   return filtered.map((account) => {
@@ -134,7 +138,16 @@ const Api: React.FC = (props) => {
         setNominatorCache({} as unknown as INominatorCache);
       }
     },
-    [setNetwork, network, setApiState, setIsLoading, setSelectedAccount, setValidatorCache, setOneKValidatorCache, setNominatorCache]
+    [
+      setNetwork,
+      network,
+      setApiState,
+      setIsLoading,
+      setSelectedAccount,
+      setValidatorCache,
+      setOneKValidatorCache,
+      setNominatorCache,
+    ]
   );
 
   const selectAccount = useCallback(
@@ -150,13 +163,13 @@ const Api: React.FC = (props) => {
       if (isOneKv) {
         setOneKValidatorCache({
           validators,
-          expireTime
-        })
+          expireTime,
+        });
       } else {
         setValidatorCache({
           validators,
-          expireTime
-        })
+          expireTime,
+        });
       }
     },
     [setValidatorCache, setOneKValidatorCache]
@@ -167,12 +180,11 @@ const Api: React.FC = (props) => {
       const expireTime = Math.round(+new Date()) + 10 * 60 * 1000; // 10 mins
       setNominatorCache({
         nominators,
-        expireTime
-      })
+        expireTime,
+      });
     },
     [setNominatorCache]
-  )
-
+  );
 
   const refreshAccountData = useCallback(
     (account: IAccount) => {
@@ -232,7 +244,7 @@ const Api: React.FC = (props) => {
       oneKValidatorCache,
       cacheValidators,
       nominatorCache,
-      cacheNominators
+      cacheNominators,
     ]
   );
 

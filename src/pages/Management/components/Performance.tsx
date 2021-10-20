@@ -47,8 +47,6 @@ const Performance = () => {
   }, [networkName]);
 
   useEffect(() => {
-    setAccountsChainInfo([]);
-    setAccountsRewards([]);
     if (
       stashRewardsCache &&
       stashRewardsCache[currentNetworkLowerCase] &&

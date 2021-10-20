@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import type { Option } from '@polkadot/types';
 import type { StakingLedger as PolkadotStakingLedger } from '@polkadot/types/interfaces/staking';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -58,6 +59,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import queryString from 'query-string';
 
 export enum Strategy {
   LOW_RISK,
@@ -181,6 +183,11 @@ interface IApiParams {
 interface INomitableInfo {
   nominatable: boolean;
   warning: any;
+}
+
+interface IQueryParse {
+  advanced: string;
+  validator: string;
 }
 
 const StrategyConfig = {
@@ -307,6 +314,7 @@ enum StrategyType {
 }
 
 const Staking = () => {
+  let location = useLocation();
   const { t } = useTranslation();
 
   const BASIC_DEFAULT_STRATEGY = useMemo(() => {
@@ -701,6 +709,13 @@ const Staking = () => {
       setNominating,
     ]
   );
+
+  useEffect(() => {
+    const parsed: IQueryParse = queryString.parse(location.search) as unknown as IQueryParse;
+    if (parsed.advanced && parsed.advanced === 'true') {
+      setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+    }
+  }, [location]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -1419,7 +1434,9 @@ const Staking = () => {
       : parseInt(limits.maxNominatorsCount.toString());
     const minNominatorBond = parseInt(limits.minNominatorBond.toString());
     const counterForNominators = parseInt(limits.counterForNominators.toString());
-    let stakeAmount = BigInt((inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0));
+    let stakeAmount = BigInt(
+      (inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0)
+    );
     const bonded = BigInt(accountChainInfo.bonded);
     // handle tiny number
     const displayBonded = Number(_formatBalance(accountChainInfo.bonded).split(' ')[0]);
@@ -1884,7 +1901,7 @@ const Staking = () => {
         </FilterInfo>
       </div>
     );
-  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
+  }, [apiOriginTableData.tableData.length, finalFilteredTableData, t]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
