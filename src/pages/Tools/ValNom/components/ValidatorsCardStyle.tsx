@@ -18,7 +18,7 @@ import {
   toValidatorFilter,
 } from './filterOptions';
 import { DataContext } from '../../components/Data';
-import { ApiContext } from '../../../../components/Api';
+import { ApiContext, ApiState } from '../../../../components/Api';
 import { balanceUnit } from '../../../../utils/string';
 import { networkCapitalCodeName } from '../../../../utils/parser';
 import { NetworkConfig } from '../../../../utils/constants/Network';
@@ -237,7 +237,7 @@ const ValNomContent: React.FC = () => {
     isReady: false,
   } as unknown as IAccountChainInfo);
 
-  let { api: polkadotApi } = useContext(ApiContext);
+  let { api: polkadotApi, apiState: polkadotApiState } = useContext(ApiContext);
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -295,8 +295,9 @@ const ValNomContent: React.FC = () => {
       .catch((): null => null)
       .then((injected) => setSigner(injected?.signer || null))
       .catch(console.error);
-    queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
-  }, [polkadotApi, selectedAccount]);
+    polkadotApiState === ApiState.READY &&
+      queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+  }, [polkadotApi, polkadotApiState, selectedAccount]);
 
   const onSign = useCallback(
     async (data: string): Promise<string> => {
