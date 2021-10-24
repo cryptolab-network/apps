@@ -134,6 +134,17 @@ i18n
                 nominatorCount: 'Nominator Count',
                 commission: 'Commission',
               },
+              refCode: {
+                refGenComplete: 'Referral code generation completed',
+                refVerifiedFailed: 'Referral code verification failed',
+                refGenFailed: 'Referral code generation failed',
+                refGen: 'Get referral code',
+                refShare: 'Share referral code',
+                signPending: 'Wait for signing',
+                refToClipboard: 'Your referral code has been copied to clipboard',
+                walletSwitchRequired:
+                  'Please switch your wallet to "Validator" or "Controller of validators"',
+              },
             },
             oneKv: {
               title: '1KV Monitor',
@@ -571,6 +582,16 @@ i18n
                 nominatorCount: '提名人總數',
                 commission: '傭金',
               },
+              refCode: {
+                refGenComplete: '推薦碼製作完成',
+                refVerifiedFailed: '推薦碼驗證失敗',
+                refGenFailed: '推薦碼製作失敗',
+                refGen: '產生推薦碼',
+                refShare: '分享推薦碼',
+                signPending: '等待簽名',
+                refToClipboard: '您的推薦碼已複製到剪貼簿',
+                walletSwitchRequired: '請切換您的帳號至「驗證人」或「驗證人的控制者」',
+              },
             },
             validators: {
               apy: '年化報酬率',
@@ -1000,6 +1021,16 @@ i18n
                 averageApy: '平均年化报酬率',
                 nominatorCount: '提名人总数',
                 commission: '佣金',
+              },
+              refCode: {
+                refGenComplete: '推荐码制作完成',
+                refVerifiedFailed: '推荐码验证失败',
+                refGenFailed: '推荐码制作失败',
+                refGen: '产生推荐码',
+                refShare: '分享推荐码',
+                signPending: '等待签名',
+                refToClipboard: '您的推荐码已复制到剪贴簿',
+                walletSwitchRequired: '请切换您的帐号至「验证人」或「验证人的控制者」',
               },
             },
             validators: {

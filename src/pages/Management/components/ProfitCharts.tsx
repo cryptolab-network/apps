@@ -46,7 +46,6 @@ const ProfitChart = ({ chain, accounts, rewards }) => {
       sumProfit += profit.profit;
     });
     setProfit(profitsArray);
-    // console.log('profitsArray: ', profitsArray);
   }, [chain, rewards]);
   return (
     <Chart

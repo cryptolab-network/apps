@@ -29,7 +29,14 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues, isEmpty } from '../../../utils/helper';
-import { apiGetAllValidator, apiNominate, apiNominated, IValidator } from '../../../apis/Validator';
+import {
+  apiGetAllValidator,
+  apiNominate,
+  apiNominated,
+  apiRefKeyVerify,
+  IValidator,
+  apiRefKeyDecode,
+} from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -130,6 +137,7 @@ export interface IAdvancedSetting {
   highApy?: boolean; // switch
   decentralized?: boolean; // switch
   oneKv?: boolean; // switch
+  refStashId?: string | undefined; // url query string
 }
 
 export interface IStakingInfo {
@@ -187,7 +195,9 @@ interface INomitableInfo {
 
 interface IQueryParse {
   advanced: string;
-  validator: string;
+  refKey: string;
+  signature: string;
+  switchNetwork: string;
 }
 
 const StrategyConfig = {
@@ -337,6 +347,7 @@ const Staking = () => {
     validatorCache,
     oneKValidatorCache,
     cacheValidators,
+    changeNetwork,
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -375,6 +386,8 @@ const Staking = () => {
   const [customPageSize, setCustomPageSize] = useState(20);
 
   const [nominating, setNominating] = useState(false);
+
+  const [refStashId, setRefStashId] = useState<string | undefined>(undefined);
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -714,8 +727,21 @@ const Staking = () => {
     const parsed: IQueryParse = queryString.parse(location.search) as unknown as IQueryParse;
     if (parsed.advanced && parsed.advanced === 'true') {
       setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+    } else if (parsed.refKey && parsed.signature && parsed.switchNetwork) {
+      (async () => {
+        setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+        changeNetwork(parsed.switchNetwork);
+        const stashId = await apiRefKeyDecode({ refKey: parsed.refKey });
+        const verifyResult = await apiRefKeyVerify({
+          params: `${stashId}/${networkCapitalCodeName(networkName)}/verify`,
+          data: { refKey: parsed.refKey, encoded: parsed.signature },
+        });
+        if (verifyResult && stashId) {
+          setRefStashId(stashId);
+        }
+      })();
     }
-  }, [location]);
+  }, [changeNetwork, location, networkName, selectedAccount.address]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -899,7 +925,8 @@ const Staking = () => {
         apiOriginTableData,
         advancedOption.supportus,
         networkName,
-        accountChainInfo.validators
+        accountChainInfo.validators,
+        refStashId
       );
       setFinalFilteredTableData(filteredResult);
     }
@@ -918,6 +945,7 @@ const Staking = () => {
     advancedSettingDebounceVal.identity,
     advancedSettingDebounceVal.minSelfStake,
     accountChainInfo.validators,
+    refStashId,
   ]);
 
   useEffect(() => {
@@ -1078,12 +1106,10 @@ const Staking = () => {
                   console.log('expandedSubItem: ', expandedSubItem);
                   const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
                   if (!isClickedOnExpandedSubItem) {
-                    console.log('???1');
                     toggleRowExpanded(expandedSubItem.id, false);
                   }
                   }
                   } else {
-                  console.log('???2');
                   toggleRowExpanded(expandedRow.id, false);
                   }
                   }
@@ -1611,11 +1637,11 @@ const Staking = () => {
                 extrinsicHash: submittable.hash.toHex(),
               },
             }).catch((err) => {
-              console.log(err);
+              console.error(err);
             });
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
           });
       })
       .catch((err) => {
@@ -1675,7 +1701,6 @@ const Staking = () => {
     (async () => {
       if (networkStatus === ApiState.READY) {
         try {
-          // console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
           let result: IValidator[];
           // retrive validators from in memory cache
@@ -1705,12 +1730,9 @@ const Staking = () => {
             // cache new validators
             cacheValidators(result, isOneKv);
           }
-          // console.log('========== API RETURN ==========', tempId);
           setApiOriginTableData(formatToStakingInfo(result, networkName));
           setApiLoading(false);
-        } catch (error) {
-          // console.log('error: ', error);
-        }
+        } catch (error) {}
       } else {
         setApiLoading(true);
       }
@@ -1753,7 +1775,8 @@ const Staking = () => {
         apiOriginTableData,
         advancedOption.supportus,
         networkName,
-        accountChainInfo.validators
+        accountChainInfo.validators,
+        refStashId
       );
     } else {
       filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
@@ -1775,6 +1798,7 @@ const Staking = () => {
     handleValidatorStrategy,
     advancedSettingDebounceVal.minSelfStake,
     accountChainInfo.validators,
+    refStashId,
   ]);
 
   const advancedSettingDOM = useMemo(() => {

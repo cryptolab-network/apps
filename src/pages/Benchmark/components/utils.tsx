@@ -146,6 +146,23 @@ export const supportCryptoLabSelect = (
   return { tableData, selectableCount };
 };
 
+// ref key stash id select
+export const refStashSelect = (
+  tableData: ITableData[],
+  selectableCount: number,
+  stashId: string
+): ISelectResult => {
+  // tag the validator as selected
+  for (let idx = 0; idx < tableData.length && selectableCount > 0; idx++) {
+    if (tableData[idx].account === stashId) {
+      tableData[idx].select = true;
+      selectableCount--;
+    }
+  }
+
+  return { tableData, selectableCount };
+};
+
 export const randomSelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
   // filter out the selectable and commission <= 20's validators
   const tableDataOrigin = _.cloneDeep(tableData);
@@ -514,7 +531,8 @@ export const advancedConditionFilter = (
   originTableData: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
   // filter the validators which block new nomination
@@ -533,15 +551,19 @@ export const advancedConditionFilter = (
     tempSelectableCount = selectableCount;
   }
   const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
+  // if ref stash id exist
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   tempTableData = tempTableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
 
       // min self stake
-      if (
-        filtered.minSelfStake && 
-        new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))
-      ) {
+      if (filtered.minSelfStake && new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))) {
         return false;
       }
 
