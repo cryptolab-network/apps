@@ -443,7 +443,7 @@ const ValNomContent: React.FC = () => {
                     fontSize="12"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `${keys.appDomain}/benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}&switchNetwork=${networkName}`
+                        `${keys.appDomain}benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}&switchNetwork=${networkName}`
                       );
                       notifySuccess(t('tools.valnom.refCode.refToClipboard'));
                     }}
