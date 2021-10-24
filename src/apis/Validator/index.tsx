@@ -1,4 +1,3 @@
-import { findAllByDisplayValue } from '@testing-library/dom';
 import { CancelToken } from 'axios';
 import {
   nominatedValidatorsAxios,
@@ -155,6 +154,10 @@ export interface IValidatorRefKeyVerify {
   };
 }
 
+export interface IValidatorRefKeyDecode {
+  refKey: string;
+}
+
 export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> => {
   return validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
@@ -229,7 +232,7 @@ export const apiNominated = (data: INominatedPost): Promise<number> => {
 
 export const apiGetRefKey = (data: IValidatorRefKey): Promise<string> => {
   return validatorRefKeyAxios
-    .get(data.params)
+    .get(`stash/${data.params}`)
     .then((res) => {
       if (res.data && res.data.refKey) {
         return res.data.refKey;
@@ -238,23 +241,36 @@ export const apiGetRefKey = (data: IValidatorRefKey): Promise<string> => {
       }
     })
     .catch((err) => {
-      return err.response.data.code;
+      return '';
     });
 };
 
 export const apiRefKeyVerify = (data: IValidatorRefKeyVerify): Promise<boolean> => {
   return validatorRefKeyAxios
-    .post(data.params, data.data)
+    .post(`stash/${data.params}`, data.data)
     .then((res) => {
-      console.log('verify result: ', res.data);
-      if (res.data && res.data) {
+      if (res && res.data) {
         return res.data;
       }
       return false;
     })
     .catch((err) => {
-      console.error('### err: ');
-      console.error(err.stack);
-      return err.response.data.code;
+      console.error(err);
+      return false;
+    });
+};
+
+export const apiRefKeyDecode = (data: IValidatorRefKeyDecode): Promise<string> => {
+  return validatorRefKeyAxios
+    .post('decode', { refKey: data.refKey })
+    .then((res) => {
+      if (res && res.data) {
+        return res.data;
+      }
+      return '';
+    })
+    .catch((err) => {
+      console.error(err);
+      return '';
     });
 };

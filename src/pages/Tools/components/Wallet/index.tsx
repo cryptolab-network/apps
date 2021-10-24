@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { useLayer, Arrow } from 'react-laag';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DataContext } from "../Data";
+import { DataContext } from '../Data';
 import styled from 'styled-components';
 import { toast } from 'react-toastify';
 import Identicon from '@polkadot/react-identicon';
@@ -12,13 +12,14 @@ import { useTranslation } from 'react-i18next';
 
 const Wallet = () => {
   const { t } = useTranslation();
-  const {hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading} = useContext(DataContext);
+  const { hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } =
+    useContext(DataContext);
   const [isOpen, setOpen] = useState(false);
   const btnRef = useRef<HTMLDivElement>(null);
-  
+
   const close = () => {
     setOpen(false);
-  }
+  };
 
   const arrowPropsCustom = {
     borderWidth: 0,
@@ -147,10 +148,10 @@ const Wallet = () => {
           <WalletLayout>
             <div>{selectedAccount.name}</div>
             {/* <div> */}
-              {/* <span style={{ color: '#75818d' }}>Balance : </span> */}
-              {/* <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle> */}
-              {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-              {/* <BalanceNumber>123</BalanceNumber> */}
+            {/* <span style={{ color: '#75818d' }}>Balance : </span> */}
+            {/* <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle> */}
+            {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+            {/* <BalanceNumber>123</BalanceNumber> */}
             {/* </div> */}
           </WalletLayout>
           <div style={{ width: 40 }}>
@@ -168,7 +169,6 @@ const Wallet = () => {
       notifyWarn(t('benchmark.staking.warnings.noAccount'));
       return <Hint>No Account</Hint>;
     } else {
-      
     }
   }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, isOpen, notifyWarn, t]);
 
@@ -200,7 +200,7 @@ const Wallet = () => {
       )}
     </>
   );
-}
+};
 
 export default Wallet;
 
@@ -249,12 +249,4 @@ const WalletLayout = styled.div`
   font-weight: bold;
   font-stretch: normal;
   font-style: normal;
-`;
-
-const BalanceTitle = styled.span`
-  color: #23beb9;
-`;
-
-const BalanceNumber = styled.span`
-  color: #23beb9;
 `;

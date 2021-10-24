@@ -107,7 +107,7 @@ export const connectWallet = createAsyncThunk(
             reservedBalance: '0',
             lockedBalance: '0',
             availableBalance: '0',
-          }
+          },
         };
       });
 
@@ -121,7 +121,7 @@ export const connectWallet = createAsyncThunk(
         selectedAccount,
       };
     } catch (err) {
-      // console.log(err);
+      console.error(err);
       throw Error('connectWallet');
     }
   }
@@ -188,4 +188,5 @@ export const accountTransform = (accounts: IAccount[], network: string): IAccoun
   });
 };
 
-export const { selectAccount, setWalletStatus, setFilteredAccounts, setSelectedAccountBalances } = walletSlice.actions;
+export const { selectAccount, setWalletStatus, setFilteredAccounts, setSelectedAccountBalances } =
+  walletSlice.actions;

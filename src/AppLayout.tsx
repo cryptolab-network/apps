@@ -538,7 +538,6 @@ const AppLayout = () => {
         <Route
           path="/tools/*"
           component={() => {
-            console.log(window.location);
             if (window.location.pathname.indexOf('validatorStatus')) {
               // redirect to new site
               const stash = window.location.search.match(/=(.*)&/);
@@ -643,8 +642,13 @@ const AppLayout = () => {
       <>
         <GradientLight>
           <BrowserRouter>
-            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
-            {/* <Api>{mainRender}</Api> */}
+            {isToolsSite ? (
+              <Api>
+                <Data>{mainRender}</Data>
+              </Api>
+            ) : (
+              <Api>{mainRender}</Api>
+            )}
           </BrowserRouter>
           {process.env.REACT_APP_NODE_ENV === 'production' ? (
             <>

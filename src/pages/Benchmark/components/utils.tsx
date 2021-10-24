@@ -145,6 +145,23 @@ export const supportCryptoLabSelect = (
   return { tableData, selectableCount };
 };
 
+// ref key stash id select
+export const refStashSelect = (
+  tableData: ITableData[],
+  selectableCount: number,
+  stashId: string
+): ISelectResult => {
+  // tag the validator as selected
+  for (let idx = 0; idx < tableData.length && selectableCount > 0; idx++) {
+    if (tableData[idx].account === stashId) {
+      tableData[idx].select = true;
+      selectableCount--;
+    }
+  }
+
+  return { tableData, selectableCount };
+};
+
 export const randomSelect = (tableData: ITableData[], selectableCount: number): ISelectResult => {
   // filter out the selectable and commission <= 20's validators
   const tableDataOrigin = _.cloneDeep(tableData);
@@ -515,7 +532,8 @@ export const advancedConditionFilter = (
   originTableData: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
   // filter the validators which block new nomination
@@ -530,6 +548,12 @@ export const advancedConditionFilter = (
       tempSelectableCount,
       networkName
     );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+  // if ref stash id exist
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }

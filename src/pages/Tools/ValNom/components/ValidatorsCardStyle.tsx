@@ -18,6 +18,7 @@ import {
   toValidatorFilter,
 } from './filterOptions';
 import { DataContext } from '../../components/Data';
+import { ApiContext } from '../../../../components/Api';
 import { balanceUnit } from '../../../../utils/string';
 import { networkCapitalCodeName } from '../../../../utils/parser';
 import { NetworkConfig } from '../../../../utils/constants/Network';
@@ -29,9 +30,9 @@ import { web3FromSource } from '@polkadot/extension-dapp';
 import type { Signer } from '@polkadot/api/types';
 import { u8aWrapBytes, isFunction, u8aToHex } from '@polkadot/util';
 import TinyButton from '../../../../components/Button/tiny';
-import { notifySuccess } from '../../../../utils/notify';
+import { notifySuccess, notifyWarn } from '../../../../utils/notify';
 import keys from '../../../../config/keys';
-import axios from 'axios';
+import { queryStakingInfo, IAccountChainInfo, AccountRole } from '../../../../utils/account';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
@@ -226,13 +227,17 @@ const ValNomContent: React.FC = () => {
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
   const [signer, setSigner] = useState<Signer | null>(null);
-  // const [signature, setSignature] = useState('');
-  // const [refKey, setRefKey] = useState('');
   const [refCodeInfo, setRefCodeInfo] = useState({
     refKey: '',
     signature: '',
+    signPending: false,
     verified: false,
   });
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({
+    isReady: false,
+  } as unknown as IAccountChainInfo);
+
+  let { api: polkadotApi } = useContext(ApiContext);
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -280,11 +285,18 @@ const ValNomContent: React.FC = () => {
 
   useEffect(() => {
     setSigner(null);
+    setRefCodeInfo({
+      refKey: '',
+      signature: '',
+      signPending: false,
+      verified: false,
+    });
     web3FromSource(selectedAccount.source)
       .catch((): null => null)
       .then((injected) => setSigner(injected?.signer || null))
       .catch(console.error);
-  }, [selectedAccount]);
+    queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+  }, [polkadotApi, selectedAccount]);
 
   const onSign = useCallback(
     async (data: string): Promise<string> => {
@@ -292,12 +304,13 @@ const ValNomContent: React.FC = () => {
       try {
         const wrapped = u8aWrapBytes(data);
         if (signer && isFunction(signer.signRaw)) {
+          setRefCodeInfo((prev) => ({ ...prev, signPending: true }));
           const sigResult = await signer.signRaw({
             address: selectedAccount.address,
             data: u8aToHex(wrapped),
             type: 'bytes',
           });
-
+          setRefCodeInfo((prev) => ({ ...prev, signPending: false }));
           if (sigResult && sigResult.signature) {
             return sigResult.signature;
           } else {
@@ -308,6 +321,7 @@ const ValNomContent: React.FC = () => {
         }
       } catch (error) {
         console.error('onSign failed, error: ', error);
+        setRefCodeInfo((prev) => ({ ...prev, signPending: false }));
         return signature;
       }
     },
@@ -316,6 +330,13 @@ const ValNomContent: React.FC = () => {
 
   const onRefKeyGen = useCallback(async () => {
     try {
+      if (
+        accountChainInfo.role !== AccountRole.VALIDATOR &&
+        accountChainInfo.role !== AccountRole.CONTROLLER_OF_VALIDATOR
+      ) {
+        notifyWarn(t('tools.valnom.refCode.walletSwitchRequired'));
+        return;
+      }
       // get refKey
       const refKey = await apiGetRefKey({
         params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}`,
@@ -332,20 +353,21 @@ const ValNomContent: React.FC = () => {
           setRefCodeInfo({
             refKey: refKey,
             signature: signedSignature,
+            signPending: false,
             verified: true,
           });
-          notifySuccess('推薦碼產生完成');
+          notifySuccess(t('tools.valnom.refCode.refGenComplete'));
         } else {
-          throw new Error('推薦碼產生失敗1');
+          throw new Error(t('tools.valnom.refCode.refVerifiedFailed'));
         }
       } else {
-        throw new Error('推薦碼產生失敗2');
+        throw new Error(t('tools.valnom.refCode.refGenFailed'));
       }
     } catch (err) {
       console.error(err);
-      notifyError('推薦碼產生失敗');
+      notifyError(t('tools.valnom.refCode.refGenFailed'));
     }
-  }, [selectedAccount.address, networkName, onSign, notifyError]);
+  }, [accountChainInfo.role, selectedAccount.address, networkName, onSign, t, notifyError]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -396,23 +418,33 @@ const ValNomContent: React.FC = () => {
             </HeaderLeft>
             <HeaderRight>
               <span style={{ marginRight: 8 }}>
-                {/* todo: Jack, refKey process */}
-                {!refCodeInfo.verified ? (
+                {!selectedAccount.address ? null : !refCodeInfo.verified && !refCodeInfo.signPending ? (
                   <TinyButton
-                    title="產生推薦碼"
+                    title={t('tools.valnom.refCode.refGen')}
                     fontSize="12"
                     onClick={() => {
                       onRefKeyGen();
                     }}
+                    disabled={!accountChainInfo.isReady}
+                  />
+                ) : !refCodeInfo.verified && refCodeInfo.signPending ? (
+                  <TinyButton
+                    title={t('tools.valnom.refCode.signPending')}
+                    fontSize="12"
+                    onClick={() => {
+                      onRefKeyGen();
+                    }}
+                    disabled={true}
                   />
                 ) : (
                   <TinyButton
-                    title="分享推薦碼"
+                    title={t('tools.valnom.refCode.refShare')}
                     fontSize="12"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `${keys.appDomain}/benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}`
+                        `${keys.appDomain}/benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}&switchNetwork=${networkName}`
                       );
+                      notifySuccess(t('tools.valnom.refCode.refToClipboard'));
                     }}
                   />
                 )}
