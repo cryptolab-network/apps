@@ -342,7 +342,8 @@ export const lowRiskStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -362,6 +363,14 @@ export const lowRiskStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   // low risk data filtered
   const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
   tempTableData = tempTableData.filter((validator) => {
@@ -404,7 +413,8 @@ export const highApyStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -425,6 +435,13 @@ export const highApyStrategy = (
     tempSelectableCount = selectableCount;
   }
 
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   // select previous selected validators first
   const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
   tempTableData = prevValidatorsSelectResult.tableData;
@@ -441,7 +458,8 @@ export const decentralStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -457,6 +475,13 @@ export const decentralStrategy = (
       tempSelectableCount,
       networkName
     );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
@@ -480,7 +505,8 @@ export const oneKvStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -496,6 +522,13 @@ export const oneKvStrategy = (
       tempSelectableCount,
       networkName
     );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }

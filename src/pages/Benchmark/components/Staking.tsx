@@ -729,7 +729,7 @@ const Staking = () => {
       setAdvancedOption((prev) => ({ ...prev, advanced: true }));
     } else if (parsed.refKey && parsed.signature && parsed.switchNetwork) {
       (async () => {
-        setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+        // setAdvancedOption((prev) => ({ ...prev, advanced: true }));
         changeNetwork(parsed.switchNetwork);
         const stashId = await apiRefKeyDecode({ refKey: parsed.refKey });
         const verifyResult = await apiRefKeyVerify({
@@ -1431,13 +1431,13 @@ const Staking = () => {
     (data: IStakingInfo, isSupportUs: boolean, networkName: string): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.HIGH_APY:
-          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.DECENTRAL:
-          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.ONE_KV:
-          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         default:
           return { tableData: [], calculatedApy: 0 };
       }
@@ -1453,6 +1453,12 @@ const Staking = () => {
       notifyWarn('Failed to fetch on-chain data.');
       return;
     }
+
+    const temp = finalFilteredTableData.tableData.filter((v) => v.select);
+    console.log(temp.length);
+    temp.forEach((v) => {
+      console.log(v.display);
+    })
 
     const limits = await queryNominatorLimits(polkadotApi);
     const maxNominatorsCount = limits.maxNominatorsCount.isEmpty
