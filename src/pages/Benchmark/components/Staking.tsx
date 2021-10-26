@@ -737,11 +737,21 @@ const Staking = () => {
           data: { refKey: parsed.refKey, encoded: parsed.signature },
         });
         if (verifyResult && stashId) {
-          setRefStashId(stashId);
+          if (networkStatus === ApiState.READY) {
+            queryStakingInfo(stashId, polkadotApi)
+            .then((info) => {
+              if (info.role === AccountRole.VALIDATOR) {
+                setRefStashId(stashId);
+              } else if (info.role === AccountRole.CONTROLLER_OF_VALIDATOR) {
+                setRefStashId(info.stash);
+              }
+            })
+            .catch(console.error);
+          }
         }
       })();
     }
-  }, [changeNetwork, location, networkName, selectedAccount.address]);
+  }, [changeNetwork, location, networkName, selectedAccount.address, networkStatus, polkadotApi]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -1442,7 +1452,7 @@ const Staking = () => {
           return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value, accountChainInfo.validators]
+    [inputData.strategy.value, accountChainInfo.validators, refStashId]
   );
 
   /**
@@ -1453,12 +1463,6 @@ const Staking = () => {
       notifyWarn('Failed to fetch on-chain data.');
       return;
     }
-
-    const temp = finalFilteredTableData.tableData.filter((v) => v.select);
-    console.log(temp.length);
-    temp.forEach((v) => {
-      console.log(v.display);
-    })
 
     const limits = await queryNominatorLimits(polkadotApi);
     const maxNominatorsCount = limits.maxNominatorsCount.isEmpty
