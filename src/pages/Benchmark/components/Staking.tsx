@@ -739,19 +739,27 @@ const Staking = () => {
         if (verifyResult && stashId) {
           if (networkStatus === ApiState.READY) {
             queryStakingInfo(stashId, polkadotApi)
-            .then((info) => {
-              if (info.role === AccountRole.VALIDATOR) {
-                setRefStashId(stashId);
-              } else if (info.role === AccountRole.CONTROLLER_OF_VALIDATOR) {
-                setRefStashId(info.stash);
-              }
-            })
-            .catch(console.error);
+              .then((info) => {
+                if (info.role === AccountRole.VALIDATOR) {
+                  setRefStashId(stashId);
+                } else if (info.role === AccountRole.CONTROLLER_OF_VALIDATOR) {
+                  setRefStashId(info.stash);
+                }
+              })
+              .catch(console.error);
           }
         }
       })();
     }
-  }, [changeNetwork, location, networkName, selectedAccount.address, networkStatus, polkadotApi]);
+  }, [
+    changeNetwork,
+    location,
+    networkName,
+    selectedAccount.address,
+    networkStatus,
+    polkadotApi,
+    queryStakingInfo,
+  ]);
 
   useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
@@ -1913,6 +1921,13 @@ const Staking = () => {
     advancedSetting.oneKv,
   ]);
 
+  const refResultInfo = useMemo(() => {
+    return (
+      finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.display ||
+      finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account
+    );
+  }, [finalFilteredTableData.tableData, refStashId]);
+
   const filterResultInfo = useMemo(() => {
     let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
       (data) => data.select === true
@@ -1922,7 +1937,12 @@ const Staking = () => {
 
     return (
       <div>
-        <FilterInfo style={{ color: '#20aca8' }}>
+        <FilterInfo
+          style={{
+            color: advancedOption.advanced ? '#20aca8' : 'white',
+            marginLeft: advancedOption.advanced ? 16 : 11,
+          }}
+        >
           {t('benchmark.staking.selected')}: {selectedValidatorsCount}
         </FilterInfo>
         <span>|</span>
@@ -1933,9 +1953,19 @@ const Staking = () => {
         <FilterInfo>
           {t('benchmark.staking.total')}: {totalValidatorsCount}
         </FilterInfo>
+        <span>|</span>
+        <FilterInfo>
+          {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
+        </FilterInfo>
       </div>
     );
-  }, [apiOriginTableData.tableData.length, finalFilteredTableData, t]);
+  }, [
+    advancedOption.advanced,
+    apiOriginTableData.tableData.length,
+    finalFilteredTableData.tableData,
+    refResultInfo,
+    t,
+  ]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -2157,6 +2187,24 @@ const Staking = () => {
           </ContentBlock>
         </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
+        {!advancedOption.advanced &&
+        refStashId &&
+        finalFilteredTableData.tableData.find((data) => data.account === refStashId) !== undefined ? (
+          <>
+            <RefValidatorName>
+              <div style={{ marginLeft: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  {t('benchmark.staking.filterResult')}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 12 }}>
+                  {filterResultInfo}
+                </div>
+              </div>
+            </RefValidatorName>
+            <div style={{ height: 17 }}></div>
+          </>
+        ) : null}
+
         <RewardBlockWrap advanced={advancedOption.advanced}>
           <RewardBlock
             advanced={advancedOption.advanced}
@@ -2373,6 +2421,27 @@ const RewardComponent = styled.div<RewardComponentProps>`
   }
 `;
 
+const RefValidatorName = styled.div`
+  border-radius: 6px;
+  padding: 14px 0px 14px 0px;
+  background-color: #2e3843;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+  width: 620px;
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
+  }
+`;
+
 interface DestinationWrapProps {
   advanced: Boolean;
 }
@@ -2436,7 +2505,7 @@ const ContentBlockTitle = styled.div`
   color: ${(props) => (props.color ? props.color : '#17222d')};
   min-height: 24px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-start;
   font-family: Montserrat;
   font-size: 13px;
