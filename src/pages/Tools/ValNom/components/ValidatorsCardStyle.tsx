@@ -285,11 +285,13 @@ const ValNomContent: React.FC = () => {
 
   useEffect(() => {
     setSigner(null);
+    const refKey = localStorage.getItem(`refKey:${selectedAccount.address}`);
+    const signature = localStorage.getItem(`signature:${selectedAccount.address}`);
     setRefCodeInfo({
-      refKey: '',
-      signature: '',
+      refKey: (refKey !== null) ? refKey : '',
+      signature: (signature !== null) ? signature : '',
       signPending: false,
-      verified: false,
+      verified: (refKey !== null && signature !== null) ? true : false,
     });
     web3FromSource(selectedAccount.source)
       .catch((): null => null)
@@ -357,6 +359,9 @@ const ValNomContent: React.FC = () => {
             signPending: false,
             verified: true,
           });
+          // store refKey and signature into local storage
+          localStorage.setItem(`refKey:${selectedAccount.address}`, refKey);
+          localStorage.setItem(`signature:${selectedAccount.address}`, signedSignature);
           notifySuccess(t('tools.valnom.refCode.refGenComplete'));
         } else {
           throw new Error(t('tools.valnom.refCode.refVerifiedFailed'));
