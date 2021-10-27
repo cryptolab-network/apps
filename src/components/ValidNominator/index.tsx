@@ -138,22 +138,22 @@ const ValidNominator: React.FC<IValidNominator> = ({
     if (statusChange.commission === 1) {
       return (
         <ValuePart>
-            {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
-            <CommissionUpIcon />
+          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+          <CommissionUpIcon />
         </ValuePart>
       );
     }
     if (statusChange.commission === 2) {
       return (
         <ValuePart>
-            {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
-            <CommissionDownIcon />
+          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+          <CommissionDownIcon />
         </ValuePart>
       );
     }
     return (
       <ValuePart>
-          {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
+        {t('tools.valnom.tips.commission')}:<EnhanceValue>{commission}%</EnhanceValue>
       </ValuePart>
     );
   }, [commission, statusChange.commission, t]);
