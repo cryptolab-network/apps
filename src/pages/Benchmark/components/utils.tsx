@@ -11,6 +11,7 @@ import { NetworkConfig } from '../../../utils/constants/Network';
 const ROUND = 10;
 const KSM_MIN_SELF_STAKE = 50;
 const DOT_MIN_SELF_STAKE = 1000;
+const WND_MIN_SELF_STAKE = 1000;
 
 interface IEraStatusBar {
   era: number[];
@@ -382,7 +383,9 @@ export const lowRiskStrategy = (
       (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
         new BN(validator.selfStake).gte(new BN(KSM_MIN_SELF_STAKE).mul(decimals))) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
-        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals)))
+        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals))) ||
+      (networkName.toLowerCase() === NetworkNameLowerCase.WND &&
+        new BN(validator.selfStake).gte(new BN(WND_MIN_SELF_STAKE).mul(decimals)))
     ) {
       minSelfStakeFlag = true;
     }
