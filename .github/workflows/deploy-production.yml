@@ -27,6 +27,7 @@ jobs:
       REACT_APP_GA_TRACKING_ID: ${{ secrets.REACT_APP_GA_TRACKING_ID }}
       REACT_APP_PROXY_TARGET: ${{ secrets.REACT_APP_PROXY_TARGET }}
       REACT_APP_TOOL_DOMAIN: ${{ secrets.REACT_APP_TOOL_DOMAIN }}
+      REACT_APP_DOMAIN: ${{ secrets.REACT_APP_DOMAIN }}
 
     strategy:
       matrix:

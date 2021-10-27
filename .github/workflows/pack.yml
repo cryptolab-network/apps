@@ -29,6 +29,7 @@ jobs:
       REACT_APP_POLKADOT_WSS: ${{ secrets.REACT_APP_POLKADOT_WSS }}
       REACT_APP_PROXY_TARGET: ${{ secrets.REACT_APP_PROXY_TARGET }}
       REACT_APP_TOOL_DOMAIN: ${{ secrets.REACT_APP_TOOL_DOMAIN }}
+      REACT_APP_DOMAIN: ${{ secrets.REACT_APP_DOMAIN }}
 
     strategy:
       matrix:
