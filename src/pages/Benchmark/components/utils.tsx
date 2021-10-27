@@ -11,6 +11,7 @@ import { NetworkConfig } from '../../../utils/constants/Network';
 const ROUND = 10;
 const KSM_MIN_SELF_STAKE = 50;
 const DOT_MIN_SELF_STAKE = 1000;
+const WND_MIN_SELF_STAKE = 1000;
 
 interface IEraStatusBar {
   era: number[];
@@ -138,6 +139,23 @@ export const supportCryptoLabSelect = (
   // tag the validator as selected
   for (let idx = 0; idx < tableData.length && selectableCount > 0; idx++) {
     if (cryptoLabNode.includes(tableData[idx].account)) {
+      tableData[idx].select = true;
+      selectableCount--;
+    }
+  }
+
+  return { tableData, selectableCount };
+};
+
+// ref key stash id select
+export const refStashSelect = (
+  tableData: ITableData[],
+  selectableCount: number,
+  stashId: string
+): ISelectResult => {
+  // tag the validator as selected
+  for (let idx = 0; idx < tableData.length && selectableCount > 0; idx++) {
+    if (tableData[idx].account === stashId) {
       tableData[idx].select = true;
       selectableCount--;
     }
@@ -325,7 +343,8 @@ export const lowRiskStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -345,6 +364,14 @@ export const lowRiskStrategy = (
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   // low risk data filtered
   const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
   tempTableData = tempTableData.filter((validator) => {
@@ -356,7 +383,9 @@ export const lowRiskStrategy = (
       (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
         new BN(validator.selfStake).gte(new BN(KSM_MIN_SELF_STAKE).mul(decimals))) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
-        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals)))
+        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals))) ||
+      (networkName.toLowerCase() === NetworkNameLowerCase.WND &&
+        new BN(validator.selfStake).gte(new BN(WND_MIN_SELF_STAKE).mul(decimals)))
     ) {
       minSelfStakeFlag = true;
     }
@@ -387,7 +416,8 @@ export const highApyStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -408,6 +438,13 @@ export const highApyStrategy = (
     tempSelectableCount = selectableCount;
   }
 
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   // select previous selected validators first
   const prevValidatorsSelectResult = prevValidatorsSelect(tempTableData, tempSelectableCount, prevValidators);
   tempTableData = prevValidatorsSelectResult.tableData;
@@ -424,7 +461,8 @@ export const decentralStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -440,6 +478,13 @@ export const decentralStrategy = (
       tempSelectableCount,
       networkName
     );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
@@ -463,7 +508,8 @@ export const oneKvStrategy = (
   data: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo => {
   let tempTableData = data.tableData;
   // get maximum candidate number base on current network
@@ -479,6 +525,13 @@ export const oneKvStrategy = (
       tempSelectableCount,
       networkName
     );
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
+  // referral validator
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
     tempTableData = tableData;
     tempSelectableCount = selectableCount;
   }
@@ -514,7 +567,8 @@ export const advancedConditionFilter = (
   originTableData: IStakingInfo,
   isSupportUs: boolean,
   networkName: string,
-  prevValidators: string[]
+  prevValidators: string[],
+  refStashId?: string
 ): IStakingInfo | any => {
   let tempTableData = resetSelected(originTableData.tableData);
   // filter the validators which block new nomination
@@ -533,15 +587,19 @@ export const advancedConditionFilter = (
     tempSelectableCount = selectableCount;
   }
   const decimals = new BN(10).pow(new BN(NetworkConfig[networkName].decimals));
+  // if ref stash id exist
+  if (refStashId) {
+    const { tableData, selectableCount } = refStashSelect(tempTableData, tempSelectableCount, refStashId);
+    tempTableData = tableData;
+    tempSelectableCount = selectableCount;
+  }
+
   tempTableData = tempTableData.filter((data) => {
     if (!data.select) {
       // only data hasn't been selected need to be filtered
 
       // min self stake
-      if (
-        filtered.minSelfStake && 
-        new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))
-      ) {
+      if (filtered.minSelfStake && new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))) {
         return false;
       }
 

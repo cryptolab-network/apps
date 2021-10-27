@@ -65,26 +65,36 @@ const ValidatorComponents = ({ chain, validators }) => {
         idx: any
       ) => {
         return (
-          <ValidNominator
-            address={v.id}
-            name={v.identity.display}
-            activeAmount={_formatBalance(v.info.exposure.total)}
-            totalAmount={_formatBalance(v.info.total)}
-            apy={(v.averageApy * 100).toFixed(2)}
-            commission={v.info.commission}
-            count={v.info.nominatorCount}
-            statusChange={v.statusChange}
-            unclaimedPayouts={v.info.unclaimedEras.length}
-            favorite={v.favorite}
-            onClick={() => openValidatorStatus(v.id)}
-          ></ValidNominator>
+          <div style={{ marginBottom: 8 }}>
+            <ValidNominator
+              address={v.id}
+              name={v.identity.display}
+              activeAmount={_formatBalance(v.info.exposure.total)}
+              totalAmount={_formatBalance(v.info.total)}
+              apy={(v.averageApy * 100).toFixed(2)}
+              commission={v.info.commission}
+              count={v.info.nominatorCount}
+              statusChange={v.statusChange}
+              unclaimedPayouts={v.info.unclaimedEras.length}
+              favorite={v.favorite}
+              onClick={() => openValidatorStatus(v.id)}
+            ></ValidNominator>
+          </div>
         );
       }
     );
   }, [_formatBalance, chain, history, validators]);
   if (validatorComponents.length > 0) {
     return (
-      <div style={{ padding: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: 4,
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          width: '85vw',
+        }}
+      >
         {validatorComponents}
       </div>
     );

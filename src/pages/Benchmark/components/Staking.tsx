@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useContext, useRef } from 'react';
 import type { Option } from '@polkadot/types';
 import type { StakingLedger as PolkadotStakingLedger } from '@polkadot/types/interfaces/staking';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
 import Input from '../../../components/Input';
@@ -28,7 +29,14 @@ import { eraStatus } from '../../../utils/status/Era';
 import { tableType } from '../../../utils/status/Table';
 import { networkCapitalCodeName } from '../../../utils/parser';
 import { hasValues, isEmpty } from '../../../utils/helper';
-import { apiGetAllValidator, apiNominate, apiNominated, IValidator } from '../../../apis/Validator';
+import {
+  apiGetAllValidator,
+  apiNominate,
+  apiNominated,
+  apiRefKeyVerify,
+  IValidator,
+  apiRefKeyDecode,
+} from '../../../apis/Validator';
 import { ApiContext } from '../../../components/Api';
 import StakingHeader from './Header';
 import { ApiState } from '../../../components/Api';
@@ -48,7 +56,7 @@ import {
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
-import { balanceUnit } from '../../../utils/string';
+import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import keys from '../../../config/keys';
 import { useDebounce } from 'use-debounce';
@@ -58,6 +66,7 @@ import Warning from '../../../components/Hint/Warn';
 import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
+import queryString from 'query-string';
 
 export enum Strategy {
   LOW_RISK,
@@ -128,6 +137,7 @@ export interface IAdvancedSetting {
   highApy?: boolean; // switch
   decentralized?: boolean; // switch
   oneKv?: boolean; // switch
+  refStashId?: string | undefined; // url query string
 }
 
 export interface IStakingInfo {
@@ -181,6 +191,13 @@ interface IApiParams {
 interface INomitableInfo {
   nominatable: boolean;
   warning: any;
+}
+
+interface IQueryParse {
+  advanced: string;
+  refKey: string;
+  signature: string;
+  switchNetwork: string;
 }
 
 const StrategyConfig = {
@@ -307,6 +324,7 @@ enum StrategyType {
 }
 
 const Staking = () => {
+  let location = useLocation();
   const { t } = useTranslation();
 
   const BASIC_DEFAULT_STRATEGY = useMemo(() => {
@@ -329,6 +347,7 @@ const Staking = () => {
     validatorCache,
     oneKValidatorCache,
     cacheValidators,
+    changeNetwork,
   } = useContext(ApiContext);
   // state
   const [inputData, setInputData] = useState<IInputData>({
@@ -367,6 +386,8 @@ const Staking = () => {
   const [customPageSize, setCustomPageSize] = useState(20);
 
   const [nominating, setNominating] = useState(false);
+
+  const [refStashId, setRefStashId] = useState<string | undefined>(undefined);
 
   const [advancedSettingDebounceVal] = useDebounce(advancedSetting, 1000);
 
@@ -703,6 +724,44 @@ const Staking = () => {
   );
 
   useEffect(() => {
+    const parsed: IQueryParse = queryString.parse(location.search) as unknown as IQueryParse;
+    if (parsed.advanced && parsed.advanced === 'true') {
+      setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+    } else if (parsed.refKey && parsed.signature && parsed.switchNetwork) {
+      (async () => {
+        // setAdvancedOption((prev) => ({ ...prev, advanced: true }));
+        changeNetwork(parsed.switchNetwork);
+        const stashId = await apiRefKeyDecode({ refKey: parsed.refKey });
+        const verifyResult = await apiRefKeyVerify({
+          params: `${stashId}/${networkCapitalCodeName(networkName)}/verify`,
+          data: { refKey: parsed.refKey, encoded: parsed.signature },
+        });
+        if (verifyResult && stashId) {
+          if (networkStatus === ApiState.READY) {
+            queryStakingInfo(stashId, polkadotApi)
+              .then((info) => {
+                if (info.role === AccountRole.VALIDATOR) {
+                  setRefStashId(stashId);
+                } else if (info.role === AccountRole.CONTROLLER_OF_VALIDATOR) {
+                  setRefStashId(info.stash);
+                }
+              })
+              .catch(console.error);
+          }
+        }
+      })();
+    }
+  }, [
+    changeNetwork,
+    location,
+    networkName,
+    selectedAccount.address,
+    networkStatus,
+    polkadotApi,
+    queryStakingInfo,
+  ]);
+
+  useEffect(() => {
     // while advanced option is on, we use custom filter setting as their own strategy
     if (advancedOption.advanced) {
       setInputData((prev) => ({ ...prev, strategy: ADVANCED_DEFAULT_STRATEGY }));
@@ -884,7 +943,8 @@ const Staking = () => {
         apiOriginTableData,
         advancedOption.supportus,
         networkName,
-        accountChainInfo.validators
+        accountChainInfo.validators,
+        refStashId
       );
       setFinalFilteredTableData(filteredResult);
     }
@@ -903,6 +963,7 @@ const Staking = () => {
     advancedSettingDebounceVal.identity,
     advancedSettingDebounceVal.minSelfStake,
     accountChainInfo.validators,
+    refStashId,
   ]);
 
   useEffect(() => {
@@ -1063,12 +1124,10 @@ const Staking = () => {
                   console.log('expandedSubItem: ', expandedSubItem);
                   const isClickedOnExpandedSubItem = expandedSubItem.id === row.id;
                   if (!isClickedOnExpandedSubItem) {
-                    console.log('???1');
                     toggleRowExpanded(expandedSubItem.id, false);
                   }
                   }
                   } else {
-                  console.log('???2');
                   toggleRowExpanded(expandedRow.id, false);
                   }
                   }
@@ -1390,18 +1449,18 @@ const Staking = () => {
     (data: IStakingInfo, isSupportUs: boolean, networkName: string): IStakingInfo => {
       switch (inputData.strategy.value) {
         case Strategy.LOW_RISK:
-          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return lowRiskStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.HIGH_APY:
-          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return highApyStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.DECENTRAL:
-          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return decentralStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         case Strategy.ONE_KV:
-          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators);
+          return oneKvStrategy(data, isSupportUs, networkName, accountChainInfo.validators, refStashId);
         default:
           return { tableData: [], calculatedApy: 0 };
       }
     },
-    [inputData.strategy.value, accountChainInfo.validators]
+    [inputData.strategy.value, accountChainInfo.validators, refStashId]
   );
 
   /**
@@ -1419,7 +1478,9 @@ const Staking = () => {
       : parseInt(limits.maxNominatorsCount.toString());
     const minNominatorBond = parseInt(limits.minNominatorBond.toString());
     const counterForNominators = parseInt(limits.counterForNominators.toString());
-    let stakeAmount = BigInt((inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0));
+    let stakeAmount = BigInt(
+      (inputData.stakeAmount * Math.pow(10, NetworkConfig[networkName].decimals)).toFixed(0)
+    );
     const bonded = BigInt(accountChainInfo.bonded);
     // handle tiny number
     const displayBonded = Number(_formatBalance(accountChainInfo.bonded).split(' ')[0]);
@@ -1594,11 +1655,11 @@ const Staking = () => {
                 extrinsicHash: submittable.hash.toHex(),
               },
             }).catch((err) => {
-              console.log(err);
+              console.error(err);
             });
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
           });
       })
       .catch((err) => {
@@ -1658,7 +1719,6 @@ const Staking = () => {
     (async () => {
       if (networkStatus === ApiState.READY) {
         try {
-          // console.log('========== API Launch ==========', tempId);
           setApiLoading(true);
           let result: IValidator[];
           // retrive validators from in memory cache
@@ -1688,12 +1748,9 @@ const Staking = () => {
             // cache new validators
             cacheValidators(result, isOneKv);
           }
-          // console.log('========== API RETURN ==========', tempId);
           setApiOriginTableData(formatToStakingInfo(result, networkName));
           setApiLoading(false);
-        } catch (error) {
-          // console.log('error: ', error);
-        }
+        } catch (error) {}
       } else {
         setApiLoading(true);
       }
@@ -1736,7 +1793,8 @@ const Staking = () => {
         apiOriginTableData,
         advancedOption.supportus,
         networkName,
-        accountChainInfo.validators
+        accountChainInfo.validators,
+        refStashId
       );
     } else {
       filteredResult = handleValidatorStrategy(apiOriginTableData, advancedOption.supportus, networkName);
@@ -1758,6 +1816,7 @@ const Staking = () => {
     handleValidatorStrategy,
     advancedSettingDebounceVal.minSelfStake,
     accountChainInfo.validators,
+    refStashId,
   ]);
 
   const advancedSettingDOM = useMemo(() => {
@@ -1862,6 +1921,18 @@ const Staking = () => {
     advancedSetting.oneKv,
   ]);
 
+  const refResultInfo = useMemo(() => {
+    const display = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.display;
+    const account = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account;
+    if (display) {
+      return display;
+    } 
+    if (account) {
+      return shortenStashId(account);
+    }
+    return t('tools.valnom.refCode.refValidatorNone');
+  }, [finalFilteredTableData.tableData, refStashId, t]);
+
   const filterResultInfo = useMemo(() => {
     let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
       (data) => data.select === true
@@ -1871,7 +1942,12 @@ const Staking = () => {
 
     return (
       <div>
-        <FilterInfo style={{ color: '#20aca8' }}>
+        <FilterInfo
+          style={{
+            color: '#20aca8',
+            marginLeft: advancedOption.advanced ? 16 : 11,
+          }}
+        >
           {t('benchmark.staking.selected')}: {selectedValidatorsCount}
         </FilterInfo>
         <span>|</span>
@@ -1882,9 +1958,19 @@ const Staking = () => {
         <FilterInfo>
           {t('benchmark.staking.total')}: {totalValidatorsCount}
         </FilterInfo>
+        <span>|</span>
+        <FilterInfo style={{color: '#20aca8'}}>
+          {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
+        </FilterInfo>
       </div>
     );
-  }, [apiOriginTableData.tableData.length, finalFilteredTableData.tableData, t]);
+  }, [
+    advancedOption.advanced,
+    apiOriginTableData.tableData.length,
+    finalFilteredTableData.tableData,
+    refResultInfo,
+    t,
+  ]);
 
   const advancedFilterResult = useMemo(() => {
     if (!advancedOption.advanced) {
@@ -2106,6 +2192,19 @@ const Staking = () => {
           </ContentBlock>
         </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
+        {!advancedOption.advanced ? (<>
+            <RefValidatorName>
+              <div style={{ marginLeft: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  {t('benchmark.staking.filterResult')}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 12 }}>
+                  {filterResultInfo}
+                </div>
+              </div>
+            </RefValidatorName>
+            <div style={{ height: 17 }}></div>
+          </>) : null}
         <RewardBlockWrap advanced={advancedOption.advanced}>
           <RewardBlock
             advanced={advancedOption.advanced}
@@ -2322,6 +2421,27 @@ const RewardComponent = styled.div<RewardComponentProps>`
   }
 `;
 
+const RefValidatorName = styled.div`
+  border-radius: 6px;
+  padding: 14px 0px 14px 0px;
+  background-color: #2e3843;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+  width: 620px;
+  @media (max-width: 1395px) {
+    width: 620px;
+  }
+  @media (max-width: 720px) {
+    width: calc(100vw - 110px);
+  }
+`;
+
 interface DestinationWrapProps {
   advanced: Boolean;
 }
@@ -2385,7 +2505,7 @@ const ContentBlockTitle = styled.div`
   color: ${(props) => (props.color ? props.color : '#17222d')};
   min-height: 24px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-start;
   font-family: Montserrat;
   font-size: 13px;

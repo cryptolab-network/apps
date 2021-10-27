@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { BooleanLiteral } from 'typescript';
 
 interface ITinyButton {
   title?: string;
   onClick?: React.MouseEventHandler;
   primary?: boolean;
+  fontSize?: string;
+  disabled?: boolean;
 }
 const TinyButton: React.FC<ITinyButton> = ({ title = '', onClick, primary = true, ...props }) => {
   return (
@@ -19,7 +20,8 @@ export default TinyButton;
 
 type ButtonProps = {
   primary: boolean;
-  disabled?: BooleanLiteral;
+  disabled?: boolean;
+  fontSize?: string;
 };
 const ButtonStyle = styled.button<ButtonProps>`
   opacity: ${(props) => (props.disabled ? '0.5' : '1')};
@@ -27,7 +29,7 @@ const ButtonStyle = styled.button<ButtonProps>`
   color: ${(props) => (props.primary ? '#23beb9' : '#23beb9')};
   font-family: Montserrat;
   font-weight: bold;
-  font-size: 0.5em;
+  font-size: ${(props) => (props.fontSize ? props.fontSize : '0.5em')};
   padding: 2px 6px;
   border: solid 1px #23beb9;
   border-radius: 100px;

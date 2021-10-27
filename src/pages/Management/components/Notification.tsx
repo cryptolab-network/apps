@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { ReactComponent as TinyChart } from '../../../assets/images/tiny-chart.svg';
 import { ReactComponent as TinyPlain } from '../../../assets/images/tiny-paper-plain.svg';
@@ -27,6 +28,7 @@ import { NetworkNameLowerCase } from '../../../utils/constants/Network';
 import Empty from '../../../components/Empty';
 import { NetworkConfig } from '../../../utils/constants/Network';
 import bignumberjs from 'bignumber.js';
+import TinyButton from '../../../components/Button/tiny';
 
 const FilterType = {
   ALL: 'all',
@@ -48,9 +50,16 @@ const EVENT_7D_ERA = {
 const ALL_ACCOUNT = 'ALL';
 
 const Notification: React.FC = () => {
+  const history = useHistory();
   const { t } = useTranslation();
   // context
-  let { network: networkName, apiState: networkStatus, accounts, hasWeb3Injected } = useContext(ApiContext);
+  let {
+    network: networkName,
+    apiState: networkStatus,
+    accounts,
+    hasWeb3Injected,
+    selectAccount,
+  } = useContext(ApiContext);
 
   const [overview, setOverview] = useState<any[]>([
     {
@@ -425,6 +434,18 @@ const Notification: React.FC = () => {
   const handleFilterChange = (e) => {
     setSelectedAccount(e);
   };
+
+  const redirect2Stake = useCallback(
+    (validator: string, currentAccount: string) => {
+      const currentAccountInfo = accounts.filter((account) => account.address === currentAccount);
+      if (currentAccountInfo.length === 1) {
+        selectAccount(currentAccountInfo[0]);
+      }
+
+      history.push(`/benchmark?advanced=true&validator=${validator}`);
+    },
+    [accounts, history, selectAccount]
+  );
 
   const columns = useMemo(() => {
     return [
@@ -806,19 +827,33 @@ const Notification: React.FC = () => {
         disableSortBy: true,
         Cell: ({ row }) => {
           return (
-            <span>
-              {
-                <Account
-                  address={row.original.affectedAccount}
-                  display={getAccountName(row.original.affectedAccount, accounts)}
+            <span
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Account
+                address={row.original.affectedAccount}
+                display={getAccountName(row.original.affectedAccount, accounts)}
+              />
+              {row.original.type !== FilterType.PAYOUT ? (
+                <TinyButton
+                  title={t('Management.routes.notification.review')}
+                  fontSize="12px"
+                  onClick={() => {
+                    redirect2Stake(row.original.descriptionAddress, row.original.affectedAccount);
+                  }}
                 />
-              }
+              ) : null}
             </span>
           );
         },
       },
     ];
-  }, [accounts, networkName, t]);
+  }, [accounts, networkName, t, redirect2Stake]);
 
   const alertsMethod = useMemo(() => {
     return [

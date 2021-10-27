@@ -6,6 +6,7 @@ import {
   validatorAxios,
   nominateAxios,
   nominatedAxios,
+  validatorRefKeyAxios,
 } from '../../instance/Axios';
 import { Strategy } from '../../pages/Benchmark/components/Staking';
 
@@ -142,8 +143,23 @@ export interface INominatedPost {
   data: INominatedInfo;
 }
 
-export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> =>
-  validatorAxios
+export interface IValidatorRefKey {
+  params: string;
+}
+export interface IValidatorRefKeyVerify {
+  params: string;
+  data: {
+    refKey: string;
+    encoded: string;
+  };
+}
+
+export interface IValidatorRefKeyDecode {
+  refKey: string;
+}
+
+export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[]> => {
+  return validatorAxios
     .get(`${data.params}`, { cancelToken: data.cancelToken, params: data.query })
     .then((res) => {
       return res.data;
@@ -151,6 +167,7 @@ export const apiGetAllValidator = (data: IValidatorRequest): Promise<IValidator[
     .catch((err) => {
       throw err;
     });
+};
 export const apiGetSingleValidator = (data: IValidatorRequest): Promise<IValidatorHistory> =>
   singleValidatorAxios.get(`${data.params}`, { params: data.query }).then((res) => {
     if (res.data.length > 0) {
@@ -210,5 +227,50 @@ export const apiNominated = (data: INominatedPost): Promise<number> => {
     })
     .catch((err) => {
       return err.response.data.code;
+    });
+};
+
+export const apiGetRefKey = (data: IValidatorRefKey): Promise<string> => {
+  return validatorRefKeyAxios
+    .get(`stash/${data.params}`)
+    .then((res) => {
+      if (res.data && res.data.refKey) {
+        return res.data.refKey;
+      } else {
+        return '';
+      }
+    })
+    .catch((err) => {
+      return '';
+    });
+};
+
+export const apiRefKeyVerify = (data: IValidatorRefKeyVerify): Promise<boolean> => {
+  return validatorRefKeyAxios
+    .post(`stash/${data.params}`, data.data)
+    .then((res) => {
+      if (res && res.data) {
+        return res.data;
+      }
+      return false;
+    })
+    .catch((err) => {
+      console.error(err);
+      return false;
+    });
+};
+
+export const apiRefKeyDecode = (data: IValidatorRefKeyDecode): Promise<string> => {
+  return validatorRefKeyAxios
+    .post('decode', { refKey: data.refKey })
+    .then((res) => {
+      if (res && res.data) {
+        return res.data;
+      }
+      return '';
+    })
+    .catch((err) => {
+      console.error(err);
+      return '';
     });
 };

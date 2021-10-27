@@ -46,6 +46,7 @@ import { isMobile } from 'react-device-detect';
 import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
+import Wallet from './pages/Tools/components/Wallet';
 
 // header
 const Header: React.FC = () => {
@@ -105,6 +106,7 @@ const ToolsHeader: React.FC = () => {
       </HeaderMidDiv>
       <HeaderRightDiv>
         <Network />
+        <Wallet />
       </HeaderRightDiv>
     </HeaderDiv>
   );
@@ -533,20 +535,22 @@ const AppLayout = () => {
         <Route path="/guide" component={Guide} />
         <Route path="/benchmark" component={Benchmark} />
         <Route path="/management" component={Management} />
-        <Route path="/tools/*" component={() => {
-          console.log(window.location);
-          if (window.location.pathname.indexOf('validatorStatus')) {
-            // redirect to new site
-            const stash = window.location.search.match(/=(.*)&/);
-            const network = window.location.search.match(/coin=(.*)/);
-            if (stash !== null && network !== null) {
-              window.location.href = `https://tools.cryptolab.network/validator/${stash[1]}/${network[1]}`; 
-              return null;
+        <Route
+          path="/tools/*"
+          component={() => {
+            if (window.location.pathname.indexOf('validatorStatus')) {
+              // redirect to new site
+              const stash = window.location.search.match(/=(.*)&/);
+              const network = window.location.search.match(/coin=(.*)/);
+              if (stash !== null && network !== null) {
+                window.location.href = `https://tools.cryptolab.network/validator/${stash[1]}/${network[1]}`;
+                return null;
+              }
             }
-          } 
-          window.location.href = 'https://tools.cryptolab.network'; 
-          return null;
-        }} />
+            window.location.href = 'https://tools.cryptolab.network';
+            return null;
+          }}
+        />
       </Switch>
     );
   }, [isToolsSite]);
@@ -638,12 +642,21 @@ const AppLayout = () => {
       <>
         <GradientLight>
           <BrowserRouter>
-            {isToolsSite ? <Data>{mainRender}</Data> : <Api>{mainRender}</Api>}
-            {/* <Api>{mainRender}</Api> */}
+            {isToolsSite ? (
+              <Api>
+                <Data>{mainRender}</Data>
+              </Api>
+            ) : (
+              <Api>{mainRender}</Api>
+            )}
           </BrowserRouter>
-          <StarAnimation id="stars" />
-          <StarAnimation id="stars2" />
-          <StarAnimation id="stars3" />
+          {process.env.REACT_APP_NODE_ENV === 'production' ? (
+            <>
+              <StarAnimation id="stars" />
+              <StarAnimation id="stars2" />
+              <StarAnimation id="stars3" />
+            </>
+          ) : null}
         </GradientLight>
       </>
     );
