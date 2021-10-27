@@ -26,7 +26,7 @@ export class ApiHandler {
       await api.isReadyOrError;
       return new ApiHandler(api, network);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       throw Error('create Network');
     }
   }

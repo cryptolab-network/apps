@@ -7,7 +7,7 @@ import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
-import { apiGetAllValidator, IValidator } from '../../../../apis/Validator';
+import { apiGetAllValidator, IValidator, apiGetRefKey, apiRefKeyVerify } from '../../../../apis/Validator';
 import { useHistory } from 'react-router-dom';
 import Tooltip from '../../../../components/Tooltip';
 import DropdownCommon from '../../../../components/Dropdown/Common';
@@ -18,13 +18,21 @@ import {
   toValidatorFilter,
 } from './filterOptions';
 import { DataContext } from '../../components/Data';
+import { ApiContext, ApiState } from '../../../../components/Api';
 import { balanceUnit } from '../../../../utils/string';
+import { networkCapitalCodeName } from '../../../../utils/parser';
 import { NetworkConfig } from '../../../../utils/constants/Network';
 import { toast } from 'react-toastify';
 import CustomScaleLoader from '../../../../components/Spinner/ScaleLoader';
 import Pagination from '../../../../components/Pagination';
-
 import { useTranslation } from 'react-i18next';
+import { web3FromSource } from '@polkadot/extension-dapp';
+import type { Signer } from '@polkadot/api/types';
+import { u8aWrapBytes, isFunction, u8aToHex } from '@polkadot/util';
+import TinyButton from '../../../../components/Button/tiny';
+import { notifySuccess, notifyWarn } from '../../../../utils/notify';
+import keys from '../../../../config/keys';
+import { queryStakingInfo, IAccountChainInfo, AccountRole } from '../../../../utils/account';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
@@ -209,15 +217,27 @@ const ValidatorGrid = ({ filters, validators }) => {
   }
 };
 
-const ValNomContent = () => {
+const ValNomContent: React.FC = () => {
   const { t } = useTranslation();
   const [filters, setFilters] = useState({
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
   });
-  const { network: networkName } = useContext(DataContext);
+  const { network: networkName, selectedAccount } = useContext(DataContext);
   const chain = NetworkConfig[networkName].token;
   const [validators, setValidators] = useState<IValidator[]>([]);
+  const [signer, setSigner] = useState<Signer | null>(null);
+  const [refCodeInfo, setRefCodeInfo] = useState({
+    refKey: '',
+    signature: '',
+    signPending: false,
+    verified: false,
+  });
+  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfo>({
+    isReady: false,
+  } as unknown as IAccountChainInfo);
+
+  let { api: polkadotApi, apiState: polkadotApiState } = useContext(ApiContext);
   const handleFilterChange = (name) => (e) => {
     switch (name) {
       case 'stashId':
@@ -262,6 +282,98 @@ const ValNomContent = () => {
     }
     getValidators();
   }, [chain, notifyError]);
+
+  useEffect(() => {
+    setSigner(null);
+    const refKey = localStorage.getItem(`refKey:${selectedAccount.address}`);
+    const signature = localStorage.getItem(`signature:${selectedAccount.address}`);
+    setRefCodeInfo({
+      refKey: (refKey !== null) ? refKey : '',
+      signature: (signature !== null) ? signature : '',
+      signPending: false,
+      verified: (refKey !== null && signature !== null) ? true : false,
+    });
+    web3FromSource(selectedAccount.source)
+      .catch((): null => null)
+      .then((injected) => setSigner(injected?.signer || null))
+      .catch(console.error);
+    polkadotApiState === ApiState.READY &&
+      queryStakingInfo(selectedAccount.address, polkadotApi).then(setAccountChainInfo).catch(console.error);
+  }, [polkadotApi, polkadotApiState, selectedAccount]);
+
+  const onSign = useCallback(
+    async (data: string): Promise<string> => {
+      let signature = '';
+      try {
+        const wrapped = u8aWrapBytes(data);
+        if (signer && isFunction(signer.signRaw)) {
+          setRefCodeInfo((prev) => ({ ...prev, signPending: true }));
+          const sigResult = await signer.signRaw({
+            address: selectedAccount.address,
+            data: u8aToHex(wrapped),
+            type: 'bytes',
+          });
+          setRefCodeInfo((prev) => ({ ...prev, signPending: false }));
+          if (sigResult && sigResult.signature) {
+            return sigResult.signature;
+          } else {
+            throw new Error('onSign failed, signature undefined');
+          }
+        } else {
+          throw new Error('onSign failed, signer undefined');
+        }
+      } catch (error) {
+        console.error('onSign failed, error: ', error);
+        setRefCodeInfo((prev) => ({ ...prev, signPending: false }));
+        return signature;
+      }
+    },
+    [selectedAccount.address, signer]
+  );
+
+  const onRefKeyGen = useCallback(async () => {
+    try {
+      if (
+        accountChainInfo.role !== AccountRole.VALIDATOR &&
+        accountChainInfo.role !== AccountRole.CONTROLLER_OF_VALIDATOR
+      ) {
+        notifyWarn(t('tools.valnom.refCode.walletSwitchRequired'));
+        return;
+      }
+      // get refKey
+      const refKey = await apiGetRefKey({
+        params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}`,
+      });
+      // sign refKey
+      const signedSignature = await onSign(refKey);
+      // verify signature
+      if (refKey && signedSignature) {
+        const verifyResult = await apiRefKeyVerify({
+          params: `${selectedAccount.address}/${networkCapitalCodeName(networkName)}/verify`,
+          data: { refKey: refKey, encoded: signedSignature },
+        });
+        if (verifyResult) {
+          setRefCodeInfo({
+            refKey: refKey,
+            signature: signedSignature,
+            signPending: false,
+            verified: true,
+          });
+          // store refKey and signature into local storage
+          localStorage.setItem(`refKey:${selectedAccount.address}`, refKey);
+          localStorage.setItem(`signature:${selectedAccount.address}`, signedSignature);
+          notifySuccess(t('tools.valnom.refCode.refGenComplete'));
+        } else {
+          throw new Error(t('tools.valnom.refCode.refVerifiedFailed'));
+        }
+      } else {
+        throw new Error(t('tools.valnom.refCode.refGenFailed'));
+      }
+    } catch (err) {
+      console.error(err);
+      notifyError(t('tools.valnom.refCode.refGenFailed'));
+    }
+  }, [accountChainInfo.role, selectedAccount.address, networkName, onSign, t, notifyError]);
 
   const filtersDOM = useMemo(() => {
     return (
@@ -311,6 +423,39 @@ const ValNomContent = () => {
               />
             </HeaderLeft>
             <HeaderRight>
+              <span style={{ marginRight: 8 }}>
+                {!selectedAccount.address ? null : !refCodeInfo.verified && !refCodeInfo.signPending ? (
+                  <TinyButton
+                    title={t('tools.valnom.refCode.refGen')}
+                    fontSize="12"
+                    onClick={() => {
+                      onRefKeyGen();
+                    }}
+                    disabled={!accountChainInfo.isReady}
+                  />
+                ) : !refCodeInfo.verified && refCodeInfo.signPending ? (
+                  <TinyButton
+                    title={t('tools.valnom.refCode.signPending')}
+                    fontSize="12"
+                    onClick={() => {
+                      onRefKeyGen();
+                    }}
+                    disabled={true}
+                  />
+                ) : (
+                  <TinyButton
+                    title={t('tools.valnom.refCode.refShare')}
+                    fontSize="12"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${keys.appDomain}benchmark?refKey=${refCodeInfo.refKey}&signature=${refCodeInfo.signature}&switchNetwork=${networkName}`
+                      );
+                      notifySuccess(t('tools.valnom.refCode.refToClipboard'));
+                    }}
+                  />
+                )}
+              </span>
+
               <Tooltip content={filtersDOM} visible={showFilters} tooltipToggle={handleOptionToggle}>
                 <div onClick={onShowFilters}>
                   <OptionIcon />
