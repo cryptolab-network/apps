@@ -56,7 +56,7 @@ import {
 import axios from 'axios';
 import { toast, ToastOptions } from 'react-toastify';
 import { ApiPromise } from '@polkadot/api';
-import { balanceUnit } from '../../../utils/string';
+import { balanceUnit, shortenStashId } from '../../../utils/string';
 import { getCandidateNumber } from '../../../utils/constants/Validator';
 import keys from '../../../config/keys';
 import { useDebounce } from 'use-debounce';
@@ -1922,11 +1922,16 @@ const Staking = () => {
   ]);
 
   const refResultInfo = useMemo(() => {
-    return (
-      finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.display ||
-      finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account
-    );
-  }, [finalFilteredTableData.tableData, refStashId]);
+    const display = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.display;
+    const account = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account;
+    if (display) {
+      return display;
+    } 
+    if (account) {
+      return shortenStashId(account);
+    }
+    return t('tools.valnom.refCode.refValidatorNone');
+  }, [finalFilteredTableData.tableData, refStashId, t]);
 
   const filterResultInfo = useMemo(() => {
     let selectedValidatorsCount = finalFilteredTableData.tableData.filter(
@@ -1939,7 +1944,7 @@ const Staking = () => {
       <div>
         <FilterInfo
           style={{
-            color: advancedOption.advanced ? '#20aca8' : 'white',
+            color: '#20aca8',
             marginLeft: advancedOption.advanced ? 16 : 11,
           }}
         >
@@ -1954,7 +1959,7 @@ const Staking = () => {
           {t('benchmark.staking.total')}: {totalValidatorsCount}
         </FilterInfo>
         <span>|</span>
-        <FilterInfo>
+        <FilterInfo style={{color: '#20aca8'}}>
           {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
         </FilterInfo>
       </div>
@@ -2187,10 +2192,7 @@ const Staking = () => {
           </ContentBlock>
         </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
-        {!advancedOption.advanced &&
-        refStashId &&
-        finalFilteredTableData.tableData.find((data) => data.account === refStashId) !== undefined ? (
-          <>
+        {!advancedOption.advanced ? (<>
             <RefValidatorName>
               <div style={{ marginLeft: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -2202,9 +2204,7 @@ const Staking = () => {
               </div>
             </RefValidatorName>
             <div style={{ height: 17 }}></div>
-          </>
-        ) : null}
-
+          </>) : null}
         <RewardBlockWrap advanced={advancedOption.advanced}>
           <RewardBlock
             advanced={advancedOption.advanced}

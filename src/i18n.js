@@ -144,7 +144,8 @@ i18n
                 refToClipboard: 'Your referral code has been copied to clipboard',
                 walletSwitchRequired:
                   'Please switch your wallet to "Validator" or "Controller of validators"',
-                refValidator: 'Referral Validator'
+                refValidator: 'Referral Validator',
+                refValidatorNone: 'None',
               },
             },
             oneKv: {
@@ -592,7 +593,8 @@ i18n
                 signPending: '等待簽名',
                 refToClipboard: '您的推薦碼已複製到剪貼簿',
                 walletSwitchRequired: '請切換您的帳號至「驗證人」或「驗證人的控制者」',
-                refValidator: '推薦驗證人'
+                refValidator: '推薦驗證人',
+                refValidatorNone: '無',
               },
             },
             validators: {
@@ -1033,7 +1035,8 @@ i18n
                 signPending: '等待签名',
                 refToClipboard: '您的推荐码已复制到剪贴簿',
                 walletSwitchRequired: '请切换您的帐号至「验证人」或「验证人的控制者」',
-                refValidator: '推荐验证人'
+                refValidator: '推荐验证人',
+                refValidatorNone: '无',
               },
             },
             validators: {
