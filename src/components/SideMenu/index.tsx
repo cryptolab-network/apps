@@ -92,24 +92,9 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
   };
 
   const clickToggle = useCallback((name) => {
-    console.log('name: ', name);
-    // switch (name) {
-    //   case Toggle.GENERAL:
-    //     setMenuToggle((prev) => ({ ...prev, [Toggle.GENERAL]: !prev[Toggle.GENERAL] }));
-    //     break;
-    //   case Toggle.TECH:
-    //     setMenuToggle((prev) => ({ ...prev, [Toggle.TECH]: !prev[Toggle.TECH] }));
-    //     break;
-    //   case Toggle.LANGUAGE:
-    //     setMenuToggle((prev) => ({ ...prev, [Toggle.LANGUAGE]: !prev[Toggle.LANGUAGE] }));
-
-    //     break;
-    // }
     setMenuToggle((prev) => ({ ...prev, [name]: !prev[name] }));
   }, []);
 
-  // mock data
-  // https://codepen.io/sedlukha/pen/WPeemb
   const menuList = useMemo(() => {
     return [
       {
@@ -180,23 +165,29 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
         menuList: [
           {
             title: 'English',
-            action: () => {},
+            action: () => {
+              changeLanguage('en');
+            },
             menuList: [],
           },
           {
             title: '繁體中文',
-            action: () => {},
+            action: () => {
+              changeLanguage('zh-TW');
+            },
             menuList: [],
           },
           {
             title: '简体中文',
-            action: () => {},
+            action: () => {
+              changeLanguage('zh-CN');
+            },
             menuList: [],
           },
         ],
       },
     ];
-  }, [clickToggle, t]);
+  }, [changeLanguage, clickToggle, t]);
 
   const menuDOM = useMemo(() => {
     return (
