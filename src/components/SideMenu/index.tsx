@@ -6,6 +6,7 @@ import './index.css';
 import keys from '../../config/keys';
 import { getUrls } from '../../utils/url';
 import { useHistory } from 'react-router-dom';
+import Wallet from '../../pages/Tools/components/Wallet';
 
 interface ISideMenu {
   isOpen: boolean;
@@ -291,7 +292,22 @@ const SideMenu: React.FC<ISideMenu> = ({
       contentLabel=""
       ariaHideApp={false}
     >
-      <SideMenuLayout>{menuDOM}</SideMenuLayout>
+      <>
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 34,
+            marginTop: 12,
+          }}
+        >
+          <Wallet sideMenuMode={true} />
+        </div>
+
+        <SideMenuLayout>{menuDOM}</SideMenuLayout>
+      </>
     </Modal>
   );
 };

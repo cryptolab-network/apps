@@ -11,8 +11,9 @@ import { ReactComponent as DropDownIcon } from '../../../../assets/images/dropdo
 import { useTranslation } from 'react-i18next';
 import useWindowDimensions from '../../../../hooks/useWindowDimensions';
 import { breakWidth } from '../../../../utils/constants/layout';
+import './index.css';
 
-const Wallet = () => {
+const Wallet = ({ sideMenuMode = false }) => {
   const { t } = useTranslation();
   const { hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } =
     useContext(DataContext);
@@ -149,11 +150,16 @@ const Wallet = () => {
       return (
         <>
           <Identicon value={selectedAccount.address} size={36} theme={'polkadot'} />
-          {width > breakWidth.mobile && width <= breakWidth.pad ? null : (
+          {sideMenuMode || width > breakWidth.pad ? (
             <WalletLayout>
               <div>{selectedAccount.name}</div>
             </WalletLayout>
-          )}
+          ) : null}
+          {/* {width > breakWidth.mobile && width <= breakWidth.pad ? null : (
+            <WalletLayout>
+              <div>{selectedAccount.name}</div>
+            </WalletLayout>
+          )} */}
         </>
       );
     } else if (selectedAccount && isEmpty(selectedAccount)) {
@@ -161,14 +167,24 @@ const Wallet = () => {
       return <Hint>No Account</Hint>;
     } else {
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, notifyWarn, t, width]);
+  }, [
+    hasWeb3Injected,
+    isWeb3AccessDenied,
+    isLoading,
+    selectedAccount,
+    css,
+    sideMenuMode,
+    width,
+    notifyWarn,
+    t,
+  ]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        <Button {...triggerProps} onClick={handleClick}>
+        <Button {...triggerProps} onClick={handleClick} sideMenuMode={sideMenuMode}>
           {walletDisplayDOM}
-          {width > breakWidth.pad ? (
+          {sideMenuMode || width > breakWidth.pad ? (
             <div style={{ width: 40 }}>
               <DropDownIcon
                 style={{
@@ -215,7 +231,11 @@ const ButtonLayout = styled.div`
   padding-right: 5px;
 `;
 
-const Button = styled.button`
+interface IBtn {
+  sideMenuMode: Boolean;
+}
+
+const Button = styled.button<IBtn>`
   min-width: 238px;
   background-color: #dee0e1;
   border: none;
@@ -226,7 +246,7 @@ const Button = styled.button`
   align-items: center;
   padding: 4px;
   @media (max-width: 968px) {
-    min-width: 0px;
+    min-width: ${(props) => (props.sideMenuMode ? '238px' : '0px')};
   }
 `;
 
