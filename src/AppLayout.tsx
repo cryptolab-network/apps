@@ -52,6 +52,7 @@ import useWindowDimensions from './hooks/useWindowDimensions';
 import { breakWidth } from './utils/constants/layout';
 import SideMenu from './components/SideMenu';
 import Wallet from './pages/Tools/components/Wallet';
+import MenuIcon from './components/MenuIcon';
 
 // header
 const Header: React.FC = () => {
@@ -152,7 +153,7 @@ const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
       </HeaderMidDiv>
       <HeaderRightDiv>
         {width <= breakWidth.mobile ? (
-          <TwitterIcon onClick={handleSideMenuToggle} />
+          <MenuIcon onClick={handleSideMenuToggle} />
         ) : (
           <>
             <Network />
@@ -689,8 +690,6 @@ const AppLayout = () => {
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
-        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
-        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
@@ -718,9 +717,6 @@ const AppLayout = () => {
           <Route path="/validator/:id/:chain" component={ValidatorStatus} />
           <Route path="/onekv" component={OneKV} />
           <Route path="/rewards" component={StakingRewardsReport} />
-          {/* <Route path="/contact" component={Contact} /> */}
-          {/* <Route path="/ourValidators" component={OurValidators} /> */}
-          {/* <Route path="/about" component={About} /> */}
         </Switch>
       );
     }
@@ -755,7 +751,14 @@ const AppLayout = () => {
       <>
         {headerDOM}
         <RouteContent>
-          <SideMenu isOpen={visibleSideMenu} handleClose={handleSideMenuToggle} />
+          <SideMenu
+            isOpen={visibleSideMenu}
+            handleClose={handleSideMenuToggle}
+            handleDialogOpen={(name) => {
+              handleDialogOpen(name);
+            }}
+            handleSideMenuToggle={handleSideMenuToggle}
+          />
           <Dialog
             image={<PeopleIcon />}
             title={t('app.footer.title.ourValidators')}

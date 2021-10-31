@@ -3,10 +3,15 @@ import Modal from 'react-modal';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import './index.css';
+import keys from '../../config/keys';
+import { getUrls } from '../../utils/url';
+import { useHistory } from 'react-router-dom';
 
 interface ISideMenu {
   isOpen: boolean;
   handleClose: Function;
+  handleDialogOpen: Function;
+  handleSideMenuToggle: Function;
 }
 
 enum Toggle {
@@ -49,13 +54,22 @@ const MenuL2Layout = styled.div`
   cursor: pointer;
 `;
 
-const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
+const SideMenu: React.FC<ISideMenu> = ({
+  isOpen,
+  handleClose,
+  handleDialogOpen,
+  handleSideMenuToggle,
+  children,
+}) => {
   const { t, i18n } = useTranslation();
+  const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [menuToggle, setMenuToggle] = useState({
     general: false,
     tech: false,
     language: false,
   });
+  const history = useHistory();
+
   const customStyles = {
     overlay: {
       position: 'fixed',
@@ -86,10 +100,13 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
     },
   };
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    localStorage.setItem('i18nextLng', lng);
-  };
+  const changeLanguage = useCallback(
+    (lng: string) => {
+      i18n.changeLanguage(lng);
+      localStorage.setItem('i18nextLng', lng);
+    },
+    [i18n]
+  );
 
   const clickToggle = useCallback((name) => {
     setMenuToggle((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -99,17 +116,26 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
     return [
       {
         title: 'Validator / Nominator status',
-        action: () => {},
+        action: () => {
+          history.push('/valnom');
+          handleSideMenuToggle();
+        },
         menuList: [],
       },
       {
         title: '1KV Monitor',
-        action: () => {},
+        action: () => {
+          history.push('/onekv');
+          handleSideMenuToggle();
+        },
         menuList: [],
       },
       {
         title: 'Staking Rewards',
-        action: () => {},
+        action: () => {
+          history.push('/rewards');
+          handleSideMenuToggle();
+        },
         menuList: [],
       },
       {
@@ -122,17 +148,29 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
         menuList: [
           {
             title: t('app.footer.title.about'),
-            action: () => {},
+            action: () => {
+              handleDialogOpen('aboutus');
+            },
+            isLink: false,
+            link: '',
             menuList: [],
           },
           {
             title: t('app.footer.title.contact'),
-            action: () => {},
+            action: () => {
+              handleDialogOpen('contactus');
+            },
+            isLink: false,
+            link: '',
             menuList: [],
           },
           {
             title: t('app.footer.title.ourValidators'),
-            action: () => {},
+            action: () => {
+              handleDialogOpen('validators');
+            },
+            isLink: false,
+            link: '',
             menuList: [],
           },
         ],
@@ -147,11 +185,15 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
           {
             title: t('app.footer.title.stakingService'),
             action: () => {},
+            isLink: true,
+            link: staking_url,
             menuList: [],
           },
           {
             title: t('app.footer.title.toolsForValidators'),
             action: () => {},
+            isLink: true,
+            link: tools_url,
             menuList: [],
           },
         ],
@@ -168,6 +210,8 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
             action: () => {
               changeLanguage('en');
             },
+            isLink: false,
+            link: '',
             menuList: [],
           },
           {
@@ -175,6 +219,8 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
             action: () => {
               changeLanguage('zh-TW');
             },
+            isLink: false,
+            link: '',
             menuList: [],
           },
           {
@@ -182,12 +228,14 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
             action: () => {
               changeLanguage('zh-CN');
             },
+            isLink: false,
+            link: '',
             menuList: [],
           },
         ],
       },
     ];
-  }, [changeLanguage, clickToggle, t]);
+  }, [changeLanguage, clickToggle, handleDialogOpen, history, staking_url, t, tools_url]);
 
   const menuDOM = useMemo(() => {
     return (
@@ -202,11 +250,21 @@ const SideMenu: React.FC<ISideMenu> = ({ isOpen, handleClose, children }) => {
               <MenuL1 title={ulL1.title} action={ulL1.action} />
               <UnorderListL2 className="accordion-ull2">
                 {ulL1.menuList.map((ulL2) => {
-                  return (
-                    <ListL2>
-                      <MenuL2 title={ulL2.title} action={ulL2.action} />
-                    </ListL2>
-                  );
+                  if (ulL2.isLink) {
+                    return (
+                      <a href={ulL2.link} style={{ textDecoration: 'none' }}>
+                        <ListL2>
+                          <MenuL2 title={ulL2.title} action={ulL2.action} />
+                        </ListL2>
+                      </a>
+                    );
+                  } else {
+                    return (
+                      <ListL2>
+                        <MenuL2 title={ulL2.title} action={ulL2.action} />
+                      </ListL2>
+                    );
+                  }
                 })}
               </UnorderListL2>
             </ListL1>
