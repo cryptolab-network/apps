@@ -235,7 +235,16 @@ const SideMenu: React.FC<ISideMenu> = ({
         ],
       },
     ];
-  }, [changeLanguage, clickToggle, handleDialogOpen, history, staking_url, t, tools_url]);
+  }, [
+    changeLanguage,
+    clickToggle,
+    handleDialogOpen,
+    handleSideMenuToggle,
+    history,
+    staking_url,
+    t,
+    tools_url,
+  ]);
 
   const menuDOM = useMemo(() => {
     return (
