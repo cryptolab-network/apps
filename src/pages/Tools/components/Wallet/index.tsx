@@ -13,7 +13,7 @@ import useWindowDimensions from '../../../../hooks/useWindowDimensions';
 import { breakWidth } from '../../../../utils/constants/layout';
 import './index.css';
 
-const Wallet = ({ sideMenuMode = false }) => {
+const Wallet = () => {
   const { t } = useTranslation();
   const { hasWeb3Injected, isWeb3AccessDenied, accounts, selectedAccount, selectAccount, isLoading } =
     useContext(DataContext);
@@ -150,7 +150,7 @@ const Wallet = ({ sideMenuMode = false }) => {
       return (
         <>
           <Identicon value={selectedAccount.address} size={36} theme={'polkadot'} />
-          {sideMenuMode || width > breakWidth.pad ? (
+          {width > breakWidth.pad ? (
             <WalletLayout>
               <div>{selectedAccount.name}</div>
             </WalletLayout>
@@ -167,24 +167,14 @@ const Wallet = ({ sideMenuMode = false }) => {
       return <Hint>No Account</Hint>;
     } else {
     }
-  }, [
-    hasWeb3Injected,
-    isWeb3AccessDenied,
-    isLoading,
-    selectedAccount,
-    css,
-    sideMenuMode,
-    width,
-    notifyWarn,
-    t,
-  ]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, width, notifyWarn, t]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        <Button {...triggerProps} onClick={handleClick} sideMenuMode={sideMenuMode}>
+        <Button {...triggerProps} onClick={handleClick}>
           {walletDisplayDOM}
-          {sideMenuMode || width > breakWidth.pad ? (
+          {width > breakWidth.pad ? (
             <div style={{ width: 40 }}>
               <DropDownIcon
                 style={{
@@ -231,11 +221,7 @@ const ButtonLayout = styled.div`
   padding-right: 5px;
 `;
 
-interface IBtn {
-  sideMenuMode: Boolean;
-}
-
-const Button = styled.button<IBtn>`
+const Button = styled.button`
   min-width: 238px;
   background-color: #dee0e1;
   border: none;
@@ -246,7 +232,7 @@ const Button = styled.button<IBtn>`
   align-items: center;
   padding: 4px;
   @media (max-width: 968px) {
-    min-width: ${(props) => (props.sideMenuMode ? '238px' : '0px')};
+    min-width: 0px;
   }
 `;
 

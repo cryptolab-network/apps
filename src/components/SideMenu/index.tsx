@@ -7,6 +7,7 @@ import keys from '../../config/keys';
 import { getUrls } from '../../utils/url';
 import { useHistory } from 'react-router-dom';
 import Wallet from '../../pages/Tools/components/Wallet';
+import Network from '../../pages/Tools/components/Network';
 
 interface ISideMenu {
   isOpen: boolean;
@@ -297,13 +298,17 @@ const SideMenu: React.FC<ISideMenu> = ({
           style={{
             width: '100%',
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'space-around',
             alignItems: 'center',
             marginBottom: 34,
             marginTop: 12,
           }}
         >
-          <Wallet sideMenuMode={true} />
+          <div style={{ flex: 1 }} />
+          <Network />
+          <div style={{ flex: 1 }} />
+          <Wallet />
+          <div style={{ flex: 1 }} />
         </div>
 
         <SideMenuLayout>{menuDOM}</SideMenuLayout>

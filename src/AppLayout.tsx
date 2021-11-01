@@ -264,6 +264,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   if (width <= breakWidth.mobile) {
     return (
       <>
+        <div style={{ height: 88 }} />
         <PromoteDiv>
           <PromoteContainer>
             <ColumnDiv>
@@ -293,79 +294,8 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
             </ColumnDiv>
           </PromoteContainer>
         </PromoteDiv>
-        <TableDiv>
-          <ColumnDiv>
-            <ThDiv>{t('app.footer.title.general')}</ThDiv>
-            <TdDiv>
-              <DotDiv />
-              <DialogA
-                onClick={() => {
-                  handleDialogOpen('aboutus');
-                }}
-              >
-                {t('app.footer.title.about')}
-              </DialogA>
-            </TdDiv>
-            <TdDiv>
-              <DotDiv />
-              <DialogA
-                onClick={() => {
-                  handleDialogOpen('contactus');
-                }}
-              >
-                {t('app.footer.title.contact')}
-              </DialogA>
-            </TdDiv>
-            <TdDiv>
-              <DotDiv />
-              <DialogA
-                onClick={() => {
-                  handleDialogOpen('validators');
-                }}
-              >
-                {t('app.footer.title.ourValidators')}
-              </DialogA>
-            </TdDiv>
-          </ColumnDiv>
-          <ColumnDiv>
-            <ThDiv>{t('app.footer.title.technology')}</ThDiv>
-            <TdDiv>
-              <DotDiv />
-              <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
-            </TdDiv>
-            <TdDiv>
-              <DotDiv />
-              <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
-            </TdDiv>
-            {/* <TdDiv>
-              <DotDiv />
-              <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
-            </TdDiv> */}
-          </ColumnDiv>
-          {/* <ColumnDiv>
-            <ThDiv>{t('app.footer.title.community')}</ThDiv>
-            <TdDiv>
-              <DotDiv />
-              <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
-            </TdDiv>
-            <TdDiv>
-              <DotDiv />
-              <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
-            </TdDiv>
-          </ColumnDiv> */}
-          <ColumnDiv style={{ minWidth: '85px' }}>
-            <ThDiv>{t('app.footer.title.language')}</ThDiv>
-            <TdDiv>
-              <DropdownCommon
-                style={{ flex: 1, width: '100%' }}
-                options={languageOptions}
-                value={language}
-                onChange={handleLanguageChange}
-                theme="dark"
-              />
-            </TdDiv>
-          </ColumnDiv>
-        </TableDiv>
+        <div style={{ height: 40 }} />
+
         <CopyRightMobilleDiv>
           <CopyRightTitleDiv>
             @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
@@ -882,6 +812,9 @@ const RouteContent = styled.div`
   // height: 100%;
   min-height: calc(100vh - 344px - 64px - 96px);
   overflow-y: visible;
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 256px - 64px - 96px);
+  }
 `;
 
 const HeaderLeftDiv = styled.div`

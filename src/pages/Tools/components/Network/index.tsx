@@ -58,7 +58,7 @@ const Network: React.FC = () => {
     switch (network) {
       case 'Kusama':
         dom =
-          width > breakWidth.mobile && width <= breakWidth.pad ? (
+          width <= breakWidth.pad ? (
             <>
               <KSMLogo style={{ width: 36, height: 36 }} />
             </>
@@ -71,7 +71,7 @@ const Network: React.FC = () => {
         break;
       case 'Polkadot':
         dom =
-          width > breakWidth.mobile && width <= breakWidth.pad ? (
+          width <= breakWidth.pad ? (
             <>
               <DOTLogo style={{ width: 36, height: 36 }} />
             </>
