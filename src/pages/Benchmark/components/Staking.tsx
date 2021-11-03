@@ -1925,7 +1925,7 @@ const Staking = () => {
     const account = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account;
     if (display) {
       return display;
-    } 
+    }
     if (account) {
       return shortenStashId(account);
     }
@@ -1938,29 +1938,41 @@ const Staking = () => {
     ).length;
     let filterValidatorsCount = finalFilteredTableData.tableData.length;
     let totalValidatorsCount = apiOriginTableData.tableData.length;
-
     return (
       <div>
-        <FilterInfo
-          style={{
-            color: '#20aca8',
-            marginLeft: advancedOption.advanced ? 16 : 11,
-          }}
-        >
-          {t('benchmark.staking.selected')}: {selectedValidatorsCount}
-        </FilterInfo>
-        <span>|</span>
-        <FilterInfo>
-          {t('benchmark.staking.filtered')}: {filterValidatorsCount}
-        </FilterInfo>
-        <span>|</span>
-        <FilterInfo>
-          {t('benchmark.staking.total')}: {totalValidatorsCount}
-        </FilterInfo>
-        <span>|</span>
-        <FilterInfo style={{color: '#20aca8'}}>
-          {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
-        </FilterInfo>
+        <div>
+          <FilterInfo
+            style={{
+              color: '#20aca8',
+              marginLeft: advancedOption.advanced ? 16 : 11,
+            }}
+          >
+            {t('benchmark.staking.selected')}: {selectedValidatorsCount}
+          </FilterInfo>
+          <span>|</span>
+          <FilterInfo>
+            {t('benchmark.staking.filtered')}: {filterValidatorsCount}
+          </FilterInfo>
+          <span>|</span>
+          <FilterInfo>
+            {t('benchmark.staking.total')}: {totalValidatorsCount}
+          </FilterInfo>
+          {advancedOption.advanced ? (
+            <>
+              <span>|</span>
+              <FilterInfo style={{ color: '#20aca8' }}>
+                {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
+              </FilterInfo>
+            </>
+          ) : null}
+        </div>
+        {!advancedOption.advanced ? (
+          <div>
+            <FilterInfo style={{ color: '#20aca8', marginLeft: advancedOption.advanced ? 16 : 11 }}>
+              {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
+            </FilterInfo>
+          </div>
+        ) : null}
       </div>
     );
   }, [
@@ -2191,7 +2203,8 @@ const Staking = () => {
           </ContentBlock>
         </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
-        {!advancedOption.advanced ? (<>
+        {!advancedOption.advanced ? (
+          <>
             <RefValidatorName>
               <div style={{ marginLeft: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -2203,7 +2216,8 @@ const Staking = () => {
               </div>
             </RefValidatorName>
             <div style={{ height: 17 }}></div>
-          </>) : null}
+          </>
+        ) : null}
         <RewardBlockWrap advanced={advancedOption.advanced}>
           <RewardBlock
             advanced={advancedOption.advanced}
