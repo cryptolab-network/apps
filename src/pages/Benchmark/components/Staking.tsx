@@ -588,7 +588,6 @@ const Staking = () => {
       api.derive.staking.account(address),
       api.query.staking.ledger<Option<PolkadotStakingLedger>>(address),
     ]);
-
     let rewardDestination = info.rewardDestination.isStaked
       ? RewardDestinationType.STAKED
       : info.rewardDestination.isStash
@@ -639,9 +638,9 @@ const Staking = () => {
         : staking.rewardDestination.isController
         ? RewardDestinationType.CONTROLLER
         : RewardDestinationType.ACCOUNT;
-      rewardDestinationAddress =
+      rewardDestinationAddress = 
         rewardDestination === RewardDestinationType.ACCOUNT
-          ? info.rewardDestination.asAccount.toString()
+          ? staking.rewardDestination.asAccount.toString()
           : null;
       if (staking.nextSessionIds.length !== 0) {
         role = AccountRole.CONTROLLER_OF_VALIDATOR;
