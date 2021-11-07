@@ -754,43 +754,28 @@ const AppLayout = () => {
     visibleSideMenu,
   ]);
 
-  if (isMobile) {
-    if (isToolsSite) {
-      return (
-        <>
-          <Mobile isTools={true} />
-        </>
-      );
-    }
-    return (
-      <>
-        <Mobile isTools={false} />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <GradientLight>
-          <BrowserRouter>
-            {isToolsSite ? (
-              <Api>
-                <Data>{mainRender}</Data>
-              </Api>
-            ) : (
-              <Api>{mainRender}</Api>
-            )}
-          </BrowserRouter>
-          {process.env.REACT_APP_NODE_ENV === 'production' ? (
-            <>
-              <StarAnimation id="stars" />
-              <StarAnimation id="stars2" />
-              <StarAnimation id="stars3" />
-            </>
-          ) : null}
-        </GradientLight>
-      </>
-    );
-  }
+  return (
+    <>
+      <GradientLight>
+        <BrowserRouter>
+          {isToolsSite ? (
+            <Api>
+              <Data>{mainRender}</Data>
+            </Api>
+          ) : (
+            <Api>{mainRender}</Api>
+          )}
+        </BrowserRouter>
+        {process.env.REACT_APP_NODE_ENV === 'production' ? (
+          <>
+            <StarAnimation id="stars" />
+            <StarAnimation id="stars2" />
+            <StarAnimation id="stars3" />
+          </>
+        ) : null}
+      </GradientLight>
+    </>
+  );
 };
 
 export default AppLayout;

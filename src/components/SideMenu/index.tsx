@@ -8,6 +8,7 @@ import { getUrls } from '../../utils/url';
 import { useHistory } from 'react-router-dom';
 import Wallet from '../../pages/Tools/components/Wallet';
 import Network from '../../pages/Tools/components/Network';
+import { isMobile } from 'react-device-detect';
 
 interface ISideMenu {
   isOpen: boolean;
@@ -117,7 +118,7 @@ const SideMenu: React.FC<ISideMenu> = ({
   const menuList = useMemo(() => {
     return [
       {
-        title: 'Validator / Nominator status',
+        title: t('tools.title.valnom'),
         action: () => {
           history.push('/valnom');
           handleSideMenuToggle();
@@ -125,7 +126,7 @@ const SideMenu: React.FC<ISideMenu> = ({
         menuList: [],
       },
       {
-        title: '1KV Monitor',
+        title: t('tools.title.oneKvMonitor'),
         action: () => {
           history.push('/onekv');
           handleSideMenuToggle();
@@ -133,7 +134,7 @@ const SideMenu: React.FC<ISideMenu> = ({
         menuList: [],
       },
       {
-        title: 'Staking Rewards',
+        title: t('tools.title.stakingRewards'),
         action: () => {
           history.push('/rewards');
           handleSideMenuToggle();
@@ -307,8 +308,12 @@ const SideMenu: React.FC<ISideMenu> = ({
           <div style={{ flex: 1 }} />
           <Network />
           <div style={{ flex: 1 }} />
-          <Wallet />
-          <div style={{ flex: 1 }} />
+          {isMobile ? null : (
+            <>
+              <Wallet />
+              <div style={{ flex: 1 }} />
+            </>
+          )}
         </div>
 
         <SideMenuLayout>{menuDOM}</SideMenuLayout>
