@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
-import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
+import { BrowserRouter, NavLink, Route, Switch, useLocation, useHistory } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
@@ -14,6 +14,7 @@ import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
 import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
+import { ReactComponent as DropDownIcon } from './assets/images/dropdown.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -44,8 +45,7 @@ import {
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
-import { isMobile } from 'react-device-detect';
-import Mobile from './pages/Mobile';
+import { isMobile } from 'react-device-detect'; 
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
 import useWindowDimensions from './hooks/useWindowDimensions';
@@ -121,11 +121,24 @@ interface IToolsHeader {
   handleSideMenuToggle: React.MouseEventHandler<SVGSVGElement>;
 }
 const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
+  let { pathname } = useLocation();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  return (
-    <HeaderDiv>
-      <HeaderLeftDiv>
+  const history = useHistory();
+
+  const toolsHeaderLeftDOM = useMemo(() => {
+    if (pathname !== '/') {
+      return (
+        <div
+          onClick={() => {
+            history.goBack();
+          }}
+        >
+          <DropDownIcon style={{ stroke: 'white', width: 10, height: 20, transform: 'rotate(180deg)' }} />
+        </div>
+      );
+    } else {
+      return (
         <NavLink exact to="/">
           {width > breakWidth.mobile && width <= breakWidth.pad ? (
             <CryptoLabLogoShrink />
@@ -135,29 +148,51 @@ const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
             <CryptoLabToolsLogo />
           )}
         </NavLink>
+      );
+    }
+  }, [history, pathname, width]);
+
+  const toolsHeaderMidDOM = useMemo(() => {
+    if (width > breakWidth.mobile) {
+      return (
+        <>
+          <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.valnom')}
+          </NavLink>
+          <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.oneKvMonitor')}
+          </NavLink>
+          <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.stakingRewards')}
+          </NavLink>
+        </>
+      );
+    } else {
+      if (pathname.includes('/valnom') || pathname.includes('/validator')) {
+        return <MobileHeaderTitle>{t('tools.title.valnom')}</MobileHeaderTitle>;
+      } else if (pathname.includes('/onekv')) {
+        return <MobileHeaderTitle>{t('tools.title.oneKvMonitor')}</MobileHeaderTitle>;
+      } else if (pathname.includes('/rewards')) {
+        return <MobileHeaderTitle>{t('tools.title.stakingRewards')}</MobileHeaderTitle>;
+      }
+    }
+  }, [pathname, t, width]);
+
+  return (
+    <HeaderDiv>
+      <HeaderLeftDiv>
+        <NavLink exact to="/">
+          {toolsHeaderLeftDOM}
+        </NavLink>
       </HeaderLeftDiv>
-      <HeaderMidDiv>
-        {width > breakWidth.mobile ? (
-          <>
-            <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-              {t('tools.title.valnom')}
-            </NavLink>
-            <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-              {t('tools.title.oneKvMonitor')}
-            </NavLink>
-            <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-              {t('tools.title.stakingRewards')}
-            </NavLink>
-          </>
-        ) : null}
-      </HeaderMidDiv>
+      <HeaderMidDiv>{toolsHeaderMidDOM}</HeaderMidDiv>
       <HeaderRightDiv>
         {width <= breakWidth.mobile ? (
           <MenuIcon onClick={handleSideMenuToggle} />
         ) : (
           <>
             <Network />
-            <Wallet />
+            {!isMobile ? <Wallet /> : null}
           </>
         )}
       </HeaderRightDiv>
@@ -1055,4 +1090,11 @@ const PromoteContainer = styled.div`
   @media (max-width: 360px) {
     width: 299px;
   }
+`;
+
+const MobileHeaderTitle = styled.div`
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1ea9a5;
 `;

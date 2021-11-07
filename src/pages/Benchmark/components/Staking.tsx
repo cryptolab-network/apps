@@ -1926,7 +1926,7 @@ const Staking = () => {
     const account = finalFilteredTableData.tableData.find((data) => data.account === refStashId)?.account;
     if (display) {
       return display;
-    } 
+    }
     if (account) {
       return shortenStashId(account);
     }
@@ -1959,7 +1959,7 @@ const Staking = () => {
           {t('benchmark.staking.total')}: {totalValidatorsCount}
         </FilterInfo>
         <span>|</span>
-        <FilterInfo style={{color: '#20aca8'}}>
+        <FilterInfo style={{ color: '#20aca8' }}>
           {t('tools.valnom.refCode.refValidator')}: {refResultInfo}
         </FilterInfo>
       </div>
@@ -2192,7 +2192,8 @@ const Staking = () => {
           </ContentBlock>
         </ContentBlockWrap>
         <div style={{ height: 17 }}></div>
-        {!advancedOption.advanced ? (<>
+        {!advancedOption.advanced ? (
+          <>
             <RefValidatorName>
               <div style={{ marginLeft: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -2204,7 +2205,8 @@ const Staking = () => {
               </div>
             </RefValidatorName>
             <div style={{ height: 17 }}></div>
-          </>) : null}
+          </>
+        ) : null}
         <RewardBlockWrap advanced={advancedOption.advanced}>
           <RewardBlock
             advanced={advancedOption.advanced}

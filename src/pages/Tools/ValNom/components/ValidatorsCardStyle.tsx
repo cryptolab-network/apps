@@ -493,13 +493,6 @@ const HeaderLeft = styled.div`
   justify-content: flex-start;
 `;
 
-const HeaderRight = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin: 0 0 0 0;
-`;
-
 const OptionHeaderLayout = styled.div`
   display: flex;
   justify-content: space-between;
