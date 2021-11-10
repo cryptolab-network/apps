@@ -45,7 +45,7 @@ import {
 import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
-import { isMobile } from 'react-device-detect'; 
+import { isMobile } from 'react-device-detect';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
 import useWindowDimensions from './hooks/useWindowDimensions';
@@ -127,7 +127,7 @@ const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
   const history = useHistory();
 
   const toolsHeaderLeftDOM = useMemo(() => {
-    if (pathname !== '/') {
+    if (width <= breakWidth.mobile && pathname !== '/') {
       return (
         <div
           onClick={() => {

@@ -20,11 +20,13 @@ import ValidatorTable from './oneKVValidTable';
 import Button from '../../../../components/Button';
 import { useCallback } from 'react';
 import InvalidValidatorTable from './oneKVInvalidTable';
-
 import { useTranslation } from 'react-i18next';
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 
 const OneKVHeader = ({ onSeeValidClicked, seeValid }) => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const onClickSeeInvalid = useCallback(() => {
     onSeeValidClicked(seeValid);
   }, [onSeeValidClicked, seeValid]);
@@ -41,7 +43,7 @@ const OneKVHeader = ({ onSeeValidClicked, seeValid }) => {
         <MonitorIcon width="38.8px" height="38px" />
         <HeaderTitle>
           <Title>{t('tools.oneKv.title')}</Title>
-          <Subtitle>{t('tools.oneKv.subtitle')}</Subtitle>
+          {width <= breakWidth.mobile ? null : <Subtitle>{t('tools.oneKv.subtitle')}</Subtitle>}
         </HeaderTitle>
       </HeaderLeft>
       <HeaderRight>
@@ -154,6 +156,7 @@ const ValNomContent = ({
 
 export const OneKVStatus = () => {
   const { network: networkName } = useContext(DataContext);
+  const { width } = useWindowDimensions();
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IOneKVValidator[]>([]);
   const [invalidValidators, setInvalidValidators] = useState<IOneKVInvalidValidator[]>([]);
@@ -212,41 +215,93 @@ export const OneKVStatus = () => {
     }
     setSeeValid(value);
   }, []);
-  const OneKVTable = ({ seeValid }) => {
-    if (seeValid === true) {
-      return (
-        <ValNomContent
-          valid={true}
-          chain={chain}
-          validators={validators}
-          activeEra={activeEra}
-          validValidators={validValidators}
-          activeValidators={activeValidators}
-          electedValidators={electedValidators}
-          lastUpdatedTime={lastUpdatedTime}
-        />
-      );
+  // const OneKVTable = ({ seeValid }) => {
+  //   if (seeValid === true) {
+  //     return (
+  //       <ValNomContent
+  //         valid={true}
+  //         chain={chain}
+  //         validators={validators}
+  //         activeEra={activeEra}
+  //         validValidators={validValidators}
+  //         activeValidators={activeValidators}
+  //         electedValidators={electedValidators}
+  //         lastUpdatedTime={lastUpdatedTime}
+  //       />
+  //     );
+  //   } else {
+  //     return (
+  //       <ValNomContent
+  //         valid={false}
+  //         chain={chain}
+  //         validators={invalidValidators}
+  //         activeEra={activeEra}
+  //         validValidators={validValidators}
+  //         activeValidators={activeValidators}
+  //         electedValidators={electedValidators}
+  //         lastUpdatedTime={lastUpdatedTime}
+  //       />
+  //     );
+  //   }
+  // };
+
+  const OneKVTable = useCallback(
+    (seeValid) => {
+      if (seeValid === true) {
+        return (
+          <ValNomContent
+            valid={true}
+            chain={chain}
+            validators={validators}
+            activeEra={activeEra}
+            validValidators={validValidators}
+            activeValidators={activeValidators}
+            electedValidators={electedValidators}
+            lastUpdatedTime={lastUpdatedTime}
+          />
+        );
+      } else {
+        return (
+          <ValNomContent
+            valid={false}
+            chain={chain}
+            validators={invalidValidators}
+            activeEra={activeEra}
+            validValidators={validValidators}
+            activeValidators={activeValidators}
+            electedValidators={electedValidators}
+            lastUpdatedTime={lastUpdatedTime}
+          />
+        );
+      }
+    },
+    [
+      activeEra,
+      activeValidators,
+      chain,
+      electedValidators,
+      invalidValidators,
+      lastUpdatedTime,
+      validValidators,
+      validators,
+    ]
+  );
+
+  const OneKVContentDOM = useMemo(() => {
+    if (width > breakWidth.pad) {
+      return OneKVTable(seeValid);
     } else {
-      return (
-        <ValNomContent
-          valid={false}
-          chain={chain}
-          validators={invalidValidators}
-          activeEra={activeEra}
-          validValidators={validValidators}
-          activeValidators={activeValidators}
-          electedValidators={electedValidators}
-          lastUpdatedTime={lastUpdatedTime}
-        />
-      );
+      return <></>;
     }
-  };
+  }, [OneKVTable, seeValid, width]);
+
   return (
     <CardHeader
       Header={() => <OneKVHeader onSeeValidClicked={onSeeValidClicked} seeValid={seeValid} />}
       mainPadding="0 0 0 0"
     >
-      <OneKVTable seeValid={seeValid} />
+      {/* <OneKVTable seeValid={seeValid} /> */}
+      {OneKVContentDOM}
     </CardHeader>
   );
 };

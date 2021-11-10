@@ -34,16 +34,18 @@ import { notifySuccess, notifyWarn } from '../../../../utils/notify';
 import keys from '../../../../config/keys';
 import { queryStakingInfo, IAccountChainInfo, AccountRole } from '../../../../utils/account';
 import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   return (
     <HeaderLayout>
       <HeaderLeft>
         <PeopleIcon width="38.8px" height="38px" />
         <HeaderTitle>
           <Title>{t('tools.valnom.title')}</Title>
-          <Subtitle>{t('tools.valnom.subtitle')}</Subtitle>
+          {width <= breakWidth.mobile ? null : <Subtitle>{t('tools.valnom.subtitle')}</Subtitle>}
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
