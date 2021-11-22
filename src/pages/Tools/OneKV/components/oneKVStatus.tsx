@@ -350,7 +350,9 @@ export const OneKVStatus = () => {
         <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
           <OptionBar>
             <HeaderLayout mobile={true}>
-              <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+              <div
+                style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}
+              >
                 <IconInput
                   Icon={Search}
                   iconSize="16px"
@@ -359,7 +361,7 @@ export const OneKVStatus = () => {
                   onChange={handleFilterChange('stashId')}
                 />
               </div>
-              <HeaderRight>
+              <HeaderRight mobile={true}>
                 <HeaderItem>
                   {t('tools.oneKv.era')}:{' '}
                   <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeEra}</span>
@@ -459,10 +461,14 @@ const HeaderLeft = styled.div`
   justify-content: flex-start;
 `;
 
-const HeaderRight = styled.div`
+interface IHeaderRight {
+  mobile?: boolean;
+}
+const HeaderRight = styled.div<IHeaderRight>`
   display: flex;
-  justify-content: flex-end;
+  justify-content: ${(props) => (props.mobile ? 'flex-start' : 'flex-end')};
   align-items: center;
+  flex-wrap: ${(props) => (props.mobile ? 'wrap' : 'nowrap')};
 `;
 
 const HeaderTitle = styled.div`

@@ -10,7 +10,7 @@ const IconInput = ({ Icon, ...props }) => {
         placeholder={props.placeholder}
         inputLength={props.inputLength}
       />
-      {props.unit ? <Unit>{props.unit}</Unit> : <Unit></Unit>}
+      {props.unit ? <Unit>{props.unit}</Unit> : null}
     </InputLayout>
   );
 };
@@ -18,6 +18,7 @@ const IconInput = ({ Icon, ...props }) => {
 export default IconInput;
 
 const InputLayout = styled.div`
+  width: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
