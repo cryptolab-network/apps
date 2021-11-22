@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ReactComponent as DashboardIcon } from '../../../../assets/images/dashboard.svg';
-// import styled from 'styled-components';
 import { IOneKVValidator } from '../../../../apis/OneKV/validator';
 import Table from './invalidTable';
 import { useTranslation } from 'react-i18next';
-const InvalidValidatorTable = ({ filter, chain, validators }) => {
+const InvalidValidatorTable = ({ chain, validators }) => {
   const { t } = useTranslation();
   const history = useHistory();
   const onClickDashboard = useCallback(
@@ -57,7 +56,11 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
           if (components.length === 0) {
             components = <div></div>;
           }
-          return <span style={{ textAlign: 'left' }} key={value}>{components}</span>;
+          return (
+            <span style={{ textAlign: 'left' }} key={value}>
+              {components}
+            </span>
+          );
         },
       },
     ];
@@ -66,35 +69,7 @@ const InvalidValidatorTable = ({ filter, chain, validators }) => {
   useEffect(() => {
     setDisplayValidators(validators);
   }, [chain, validators]);
-  useMemo(() => {
-    if (filter.stashId.length > 0) {
-      const displayValidators: IOneKVValidator[] = [];
-      validators.forEach((v) => {
-        if (v.stash.toLowerCase().includes(filter.stashId.toLowerCase())) {
-          displayValidators.push(v);
-        } else if (v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
-          displayValidators.push(v);
-        }
-      });
-      setDisplayValidators(displayValidators);
-    } else {
-      setDisplayValidators(validators);
-    }
-  }, [filter.stashId, validators]);
   return <Table columns={columns} data={displayValidators} />;
 };
 
 export default InvalidValidatorTable;
-
-// const OneKVNominated = styled.div`
-//   display: flex;
-//   flex-direction: row;
-//   justify-content: center;
-//   align-items: center;
-// `;
-
-// const LastNominationDate = styled.div`
-//   margin: 0 0 0 4px;
-//   justify-content: center;
-//   align-items: center;
-// `;
