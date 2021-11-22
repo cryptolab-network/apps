@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-
 import { ReactComponent as MonitorIcon } from '../../../../assets/images/monitor.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
-
 import CardHeader from '../../../../components/Card/CardHeader';
 import IconInput from '../../../../components/Input/IconInput';
 import { DataContext } from '../../components/Data';
-
 import {
   apiGetAllOneKVValidator,
   IOneKVInvalidValidator,
@@ -23,6 +20,7 @@ import InvalidValidatorTable from './oneKVInvalidTable';
 import { useTranslation } from 'react-i18next';
 import useWindowDimensions from '../../../../hooks/useWindowDimensions';
 import { breakWidth } from '../../../../utils/constants/layout';
+import OneKvValidCard from './oneKVValidCard';
 
 const OneKVHeader = ({ onSeeValidClicked, seeValid }) => {
   const { t } = useTranslation();
@@ -63,20 +61,6 @@ const ValNomContent = ({
   electedValidators,
   lastUpdatedTime,
 }) => {
-  const [filters, setFilters] = useState({
-    stashId: '',
-  });
-  const { t } = useTranslation();
-  const handleFilterChange = (name) => (e) => {
-    // TODO: input validator, limit
-    switch (name) {
-      case 'stashId':
-        setFilters((prev) => ({ ...prev, stashId: e.target.value }));
-        break;
-      default:
-        break;
-    }
-  };
   const ValidatorTableComponent = useMemo(() => {
     if (valid) {
       return (
@@ -89,7 +73,7 @@ const ValNomContent = ({
             borderRadius: 6,
           }}
         >
-          <ValidatorTable filter={filters} chain={chain} validators={validators} />
+          <ValidatorTable chain={chain} validators={validators} />
         </div>
       );
     } else {
@@ -103,60 +87,19 @@ const ValNomContent = ({
             borderRadius: 6,
           }}
         >
-          <InvalidValidatorTable filter={filters} chain={chain} validators={validators} />
+          <InvalidValidatorTable chain={chain} validators={validators} />
         </div>
       );
     }
-  }, [chain, filters, valid, validators]);
+  }, [chain, valid, validators]);
 
-  return (
-    <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
-      <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
-        <OptionBar>
-          <HeaderLayout>
-            <HeaderLeft>
-              <IconInput
-                Icon={Search}
-                iconSize="16px"
-                placeholder={t('tools.oneKv.optionBar.stashId')}
-                inputLength={256}
-                value={filters.stashId}
-                onChange={handleFilterChange('stashId')}
-              />
-            </HeaderLeft>
-            <HeaderRight>
-              <HeaderItem>
-                {t('tools.oneKv.era')}:{' '}
-                <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeEra}</span>
-              </HeaderItem>
-              <HeaderItem>
-                {t('tools.oneKv.validValidators')}:{' '}
-                <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{validValidators}</span>
-              </HeaderItem>
-              <HeaderItem>
-                {t('tools.oneKv.activeValidators')}:{' '}
-                <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeValidators}</span>
-              </HeaderItem>
-              <HeaderItem>
-                {t('tools.oneKv.electedValidators')}:{' '}
-                <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{electedValidators}</span>
-              </HeaderItem>
-              <HeaderItem>
-                {t('tools.oneKv.lastUpdateTime')}:{' '}
-                <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{lastUpdatedTime}</span>
-              </HeaderItem>
-            </HeaderRight>
-          </HeaderLayout>
-        </OptionBar>
-      </div>
-      <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>{ValidatorTableComponent}</div>
-    </div>
-  );
+  return <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>{ValidatorTableComponent}</div>;
 };
 
 export const OneKVStatus = () => {
   const { network: networkName } = useContext(DataContext);
   const { width } = useWindowDimensions();
+  const { t } = useTranslation();
   const chain = networkName === 'Polkadot' ? 'DOT' : 'KSM';
   const [validators, setValidators] = useState<IOneKVValidator[]>([]);
   const [invalidValidators, setInvalidValidators] = useState<IOneKVInvalidValidator[]>([]);
@@ -206,6 +149,41 @@ export const OneKVStatus = () => {
     getValidators();
   }, [chain]);
   const [seeValid, setSeeValid] = useState(true);
+  const [filters, setFilters] = useState({
+    stashId: '',
+  });
+
+  const validFilteredValidators = useMemo(() => {
+    if (filters.stashId.length > 0) {
+      const displayValidators: IOneKVValidator[] = [];
+      validators.forEach((v) => {
+        if (v.stash.toLowerCase().includes(filters.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        } else if (v.name.toLowerCase().includes(filters.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        }
+      });
+      return displayValidators;
+    } else {
+      return validators;
+    }
+  }, [validators, filters]);
+
+  const invalidFilteredValidators = useMemo(() => {
+    if (filters.stashId.length > 0) {
+      const displayValidators: IOneKVInvalidValidator[] = [];
+      invalidValidators.forEach((v) => {
+        if (v.stash.toLowerCase().includes(filters.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        } else if (v.name.toLowerCase().includes(filters.stashId.toLowerCase())) {
+          displayValidators.push(v);
+        }
+      });
+      return displayValidators;
+    } else {
+      return invalidValidators;
+    }
+  }, [invalidValidators, filters]);
 
   const onSeeValidClicked = useCallback((value) => {
     if (value === true) {
@@ -252,7 +230,7 @@ export const OneKVStatus = () => {
           <ValNomContent
             valid={true}
             chain={chain}
-            validators={validators}
+            validators={validFilteredValidators}
             activeEra={activeEra}
             validValidators={validValidators}
             activeValidators={activeValidators}
@@ -265,7 +243,7 @@ export const OneKVStatus = () => {
           <ValNomContent
             valid={false}
             chain={chain}
-            validators={invalidValidators}
+            validators={invalidFilteredValidators}
             activeEra={activeEra}
             validValidators={validValidators}
             activeValidators={activeValidators}
@@ -280,20 +258,163 @@ export const OneKVStatus = () => {
       activeValidators,
       chain,
       electedValidators,
-      invalidValidators,
+      invalidFilteredValidators,
       lastUpdatedTime,
+      validFilteredValidators,
       validValidators,
-      validators,
     ]
+  );
+
+  const OneKvInValidCardsDOM = useMemo(() => {
+    return <></>;
+  }, []);
+
+  const OneKvValidCardsDOM = useMemo(() => {
+    let dom: any = [];
+    validFilteredValidators.forEach((v) => {
+      dom.push(
+        <OneKvValidCard
+          validatorId={v.stash}
+          name={v.name}
+          commission={v.stakingInfo.validatorPrefs.commission}
+          active={v.activeNominators}
+          nominated={v.elected}
+          nominatedAt={v.nominatedAt}
+          order={v.nominationOrder}
+          selfStake={v.selfStake}
+          rank={v.rank}
+          inclusion={v.inclusion}
+          chain={chain}
+        />
+      );
+    });
+
+    return dom;
+  }, [chain, validFilteredValidators]);
+
+  const handleFilterChange = (name) => (e) => {
+    // TODO: input validator, limit
+    switch (name) {
+      case 'stashId':
+        setFilters((prev) => ({ ...prev, stashId: e.target.value }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  const OptionBarDOM = useMemo(() => {
+    if (width > breakWidth.pad) {
+      return (
+        <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+          <OptionBar>
+            <HeaderLayout>
+              <HeaderLeft>
+                <IconInput
+                  Icon={Search}
+                  iconSize="16px"
+                  placeholder={t('tools.oneKv.optionBar.stashId')}
+                  inputLength={256}
+                  value={filters.stashId}
+                  onChange={handleFilterChange('stashId')}
+                />
+              </HeaderLeft>
+              <HeaderRight>
+                <HeaderItem>
+                  {t('tools.oneKv.era')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeEra}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.validValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{validValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.activeValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.electedValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{electedValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.lastUpdateTime')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{lastUpdatedTime}</span>
+                </HeaderItem>
+              </HeaderRight>
+            </HeaderLayout>
+          </OptionBar>
+        </div>
+      );
+    } else {
+      return (
+        <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+          <OptionBar>
+            <HeaderLayout mobile={true}>
+              <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                <IconInput
+                  Icon={Search}
+                  iconSize="16px"
+                  placeholder={t('tools.oneKv.optionBar.stashId')}
+                  value={filters.stashId}
+                  onChange={handleFilterChange('stashId')}
+                />
+              </div>
+              <HeaderRight>
+                <HeaderItem>
+                  {t('tools.oneKv.era')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeEra}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.validValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{validValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.activeValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.electedValidators')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{electedValidators}</span>
+                </HeaderItem>
+                <HeaderItem>
+                  {t('tools.oneKv.lastUpdateTime')}:{' '}
+                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{lastUpdatedTime}</span>
+                </HeaderItem>
+              </HeaderRight>
+            </HeaderLayout>
+          </OptionBar>
+        </div>
+      );
+    }
+  }, [
+    activeEra,
+    activeValidators,
+    electedValidators,
+    filters.stashId,
+    lastUpdatedTime,
+    t,
+    validValidators,
+    width,
+  ]);
+
+  const OneKVCards = useCallback(
+    (seeValid) => {
+      if (seeValid === true) {
+        return <CardsLayout>{OneKvValidCardsDOM}</CardsLayout>;
+      } else {
+        return <CardsLayout>{OneKvInValidCardsDOM}</CardsLayout>;
+      }
+    },
+    [OneKvInValidCardsDOM, OneKvValidCardsDOM]
   );
 
   const OneKVContentDOM = useMemo(() => {
     if (width > breakWidth.pad) {
       return OneKVTable(seeValid);
     } else {
-      return <></>;
+      return OneKVCards(seeValid);
     }
-  }, [OneKVTable, seeValid, width]);
+  }, [OneKVTable, OneKVCards, seeValid, width]);
 
   return (
     <CardHeader
@@ -301,14 +422,34 @@ export const OneKVStatus = () => {
       mainPadding="0 0 0 0"
     >
       {/* <OneKVTable seeValid={seeValid} /> */}
-      {OneKVContentDOM}
+      <MainContainer>
+        {OptionBarDOM}
+        {OneKVContentDOM}
+      </MainContainer>
     </CardHeader>
   );
 };
 
-const HeaderLayout = styled.div`
+const MainContainer = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+`;
+
+const OptionBarContainer = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+`;
+
+interface IHeaderLayout {
+  mobile?: boolean;
+}
+
+const HeaderLayout = styled.div<IHeaderLayout>`
   width: 100%;
   display: flex;
+  flex-direction: ${(props) => (props.mobile ? 'column' : 'row')};
   justify-content: space-between;
   align-items: center;
 `;
@@ -374,4 +515,10 @@ const HeaderItem = styled.div`
   color: white;
   margin: 0 20px 0 20px;
   align-items: center;
+`;
+
+const CardsLayout = styled.div`
+  overflow-y: scroll;
+  box-sizing: border-box;
+  width: 100%;
 `;
