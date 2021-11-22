@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const IconInput = ({ Icon, ...props }) => {
   return (
     <InputLayout {...props}>
-      <Icon style={{ height: props.iconSize }}/>
+      <Icon style={{ height: props.iconSize }} />
       <InputStyle
         onChange={props.onChange}
         value={props.value}
@@ -29,7 +29,7 @@ interface InputStyleProps {
   inputLength: number;
 }
 const InputStyle = styled.input<InputStyleProps>`
-  width: ${(props) => (props.inputLength ? props.inputLength : 45)}px;
+  width: ${(props) => (props.inputLength ? props.inputLength + 'px' : '100%')};
   background: transparent;
   border: none;
   font-family: Montserrat;
