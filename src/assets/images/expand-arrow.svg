@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16.402" height="8.908">
+    <defs>
+        <style>
+            .cls-expand-arrow-1{fill:current;stroke:current;stroke-linecap:round}
+        </style>
+    </defs>
+    <g id="Group_4760" data-name="Group 4760" transform="rotate(45 12.293 6.506)">
+        <path id="Line_1" data-name="Line 1" class="cls-expand-arrow-1" transform="translate(0 10.598)" d="M0 0h10.598"/>
+        <path id="Line_2" data-name="Line 2" class="cls-expand-arrow-1" transform="rotate(90 5.299 5.299)" d="M0 0h10.598"/>
+    </g>
+</svg>

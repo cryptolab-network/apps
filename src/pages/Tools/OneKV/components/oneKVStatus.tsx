@@ -362,25 +362,25 @@ export const OneKVStatus = () => {
                 />
               </div>
               <HeaderRight mobile={true}>
-                <HeaderItem>
-                  {t('tools.oneKv.era')}:{' '}
-                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeEra}</span>
+                <HeaderItem mobile={true}>
+                  <div>{t('tools.oneKv.era')}</div>
+                  <div style={{ color: '#23b3b9' }}>{activeEra}</div>
                 </HeaderItem>
-                <HeaderItem>
-                  {t('tools.oneKv.validValidators')}:{' '}
-                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{validValidators}</span>
+                <HeaderItem mobile={true}>
+                  <div>{t('tools.oneKv.validValidators')}</div>
+                  <div style={{ color: '#23b3b9' }}>{validValidators}</div>
                 </HeaderItem>
-                <HeaderItem>
-                  {t('tools.oneKv.activeValidators')}:{' '}
-                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{activeValidators}</span>
+                <HeaderItem mobile={true}>
+                  <div>{t('tools.oneKv.activeValidators')}</div>
+                  <div style={{ color: '#23b3b9' }}>{activeValidators}</div>
                 </HeaderItem>
-                <HeaderItem>
-                  {t('tools.oneKv.electedValidators')}:{' '}
-                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{electedValidators}</span>
+                <HeaderItem mobile={true}>
+                  <div>{t('tools.oneKv.electedValidators')}</div>
+                  <div style={{ color: '#23b3b9' }}>{electedValidators}</div>
                 </HeaderItem>
-                <HeaderItem>
-                  {t('tools.oneKv.lastUpdateTime')}:{' '}
-                  <span style={{ color: '#23b3b9', margin: '0 4px 0 4px' }}>{lastUpdatedTime}</span>
+                <HeaderItem mobile={true}>
+                  <div>{t('tools.oneKv.lastUpdateTime')}</div>
+                  <div style={{ color: '#23b3b9' }}>{lastUpdatedTime}</div>
                 </HeaderItem>
               </HeaderRight>
             </HeaderLayout>
@@ -438,12 +438,6 @@ const MainContainer = styled.div`
   padding: 4px;
 `;
 
-const OptionBarContainer = styled.div`
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px;
-`;
-
 interface IHeaderLayout {
   mobile?: boolean;
 }
@@ -465,7 +459,9 @@ interface IHeaderRight {
   mobile?: boolean;
 }
 const HeaderRight = styled.div<IHeaderRight>`
+  width: ${(props) => (props.mobile ? '100%' : 'auto')};
   display: flex;
+  flex-direction: ${(props) => (props.mobile ? 'column' : 'row')};
   justify-content: ${(props) => (props.mobile ? 'flex-start' : 'flex-end')};
   align-items: center;
   flex-wrap: ${(props) => (props.mobile ? 'wrap' : 'nowrap')};
@@ -507,9 +503,14 @@ const OptionBar = styled.div`
   background-color: #2f3842;
 `;
 
-const HeaderItem = styled.div`
+interface IHeaderItem {
+  mobile?: boolean;
+}
+const HeaderItem = styled.div<IHeaderItem>`
+  width: ${(props) => (props.mobile ? '100%' : 'auto')};
   display: flex;
   flex-direction: row;
+  justify-content: ${(props) => (props.mobile ? 'space-between' : 'flex-start')};
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -519,12 +520,11 @@ const HeaderItem = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: white;
-  margin: 0 20px 0 20px;
+  margin: ${(props) => (props.mobile ? '0 0 0 0' : '0 20px 0 20px')};
   align-items: center;
 `;
 
 const CardsLayout = styled.div`
-  overflow-y: scroll;
   box-sizing: border-box;
   width: 100%;
 `;
