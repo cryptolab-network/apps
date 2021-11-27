@@ -41,16 +41,10 @@ const InvalidValidatorTable = ({ chain, validators }) => {
       },
       {
         Header: t('tools.oneKv.table.header.reasons'),
-        accessor: 'validity',
+        accessor: 'reasons',
         maxWidth: 180,
         Cell: ({ value }) => {
-          const reasons = value.reduce((acc, r) => {
-            if (r.valid === false) {
-              acc.push(r.details);
-            }
-            return acc;
-          }, []);
-          let components = reasons.map((reason, i) => {
+          let components = value.map((reason, i) => {
             return <li key={i}>{reason}</li>;
           });
           if (components.length === 0) {

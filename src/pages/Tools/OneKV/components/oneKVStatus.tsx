@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import useWindowDimensions from '../../../../hooks/useWindowDimensions';
 import { breakWidth } from '../../../../utils/constants/layout';
 import OneKvValidCard from './oneKVValidCard';
+import OneKvInvalidCard from './oneKVInvalidCard';
 
 const OneKVHeader = ({ onSeeValidClicked, seeValid }) => {
   const { t } = useTranslation();
@@ -266,8 +267,22 @@ export const OneKVStatus = () => {
   );
 
   const OneKvInValidCardsDOM = useMemo(() => {
-    return <></>;
-  }, []);
+    let dom: any = [];
+    invalidFilteredValidators.forEach((iv) => {
+      let components = iv.reasons.map((reason, i) => {
+        return (
+          <li key={i} style={{ wordWrap: 'break-word' }}>
+            {reason}
+          </li>
+        );
+      });
+      dom.push(<OneKvInvalidCard validatorId={iv.stash} name={iv.name} reason={<div>{components}</div>} />);
+    });
+    if (dom.length > 0) {
+      return dom;
+    }
+    return null;
+  }, [invalidFilteredValidators]);
 
   const OneKvValidCardsDOM = useMemo(() => {
     let dom: any = [];
