@@ -88,6 +88,20 @@ export const apiGetAllOneKVValidator = (
         v.nominationOrder = idx + 1;
         return v;
       });
+      res.data.invalid = res.data.invalid.map((iv) => {
+        let reasons = iv.validity.reduce((acc, r) => {
+          if (r.valid === false) {
+            acc.push(r.details);
+          }
+          return acc;
+        }, []);
+
+        return {
+          name: iv.name,
+          stash: iv.stash,
+          reasons: reasons,
+        };
+      });
       return res.data;
     }
   });
