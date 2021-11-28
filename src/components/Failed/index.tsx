@@ -1,18 +1,17 @@
 import styled from 'styled-components';
-import { ReactComponent as EmptyIcon } from '../../assets/images/empty.svg';
 import { useTranslation } from 'react-i18next';
 
-const Empty = () => {
+const Failed = () => {
   const { t } = useTranslation();
+
   return (
     <MainLayout>
-      <EmptyIcon style={{ maxWidth: '50%' }} />
-      <Hint>{t('common.empty')}</Hint>
+      <Hint>{t('common.error')}</Hint>
     </MainLayout>
   );
 };
 
-export default Empty;
+export default Failed;
 
 const MainLayout = styled.div`
   margin-top: 16px;

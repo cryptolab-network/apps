@@ -497,6 +497,10 @@ i18n
               },
             },
           },
+          common: {
+            error: 'Oops! Something went wrong.',
+            empty: 'There is no data to display.',
+          },
         },
       },
       'zh-TW': {
@@ -939,6 +943,10 @@ i18n
               },
             },
           },
+          common: {
+            error: '糟糕! 發生了一些錯誤',
+            empty: '沒有要顯示的數據',
+          },
         },
       },
       'zh-CN': {
@@ -1364,6 +1372,10 @@ i18n
                 },
               },
             },
+          },
+          common: {
+            error: '糟糕！发生了一些错误',
+            empty: '没有要显示的数据',
           },
         },
       },

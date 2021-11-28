@@ -22,6 +22,9 @@ import useWindowDimensions from '../../../../hooks/useWindowDimensions';
 import { breakWidth } from '../../../../utils/constants/layout';
 import OneKvValidCard from './oneKVValidCard';
 import OneKvInvalidCard from './oneKVInvalidCard';
+import ScaleLoader from '../../../../components/Spinner/ScaleLoader';
+import Failed from '../../../../components/Failed';
+import Empty from '../../../../components/Empty';
 
 const OneKVHeader = ({ onSeeValidClicked, seeValid }) => {
   const { t } = useTranslation();
@@ -98,6 +101,12 @@ const ValNomContent = ({
 };
 
 export const OneKVStatus = () => {
+  const enum DataLoadingStatus {
+    LOADING = 'loading',
+    ERROR = 'error',
+    EMPTY = 'empty',
+    DONE = 'done',
+  }
   const { network: networkName } = useContext(DataContext);
   const { width } = useWindowDimensions();
   const { t } = useTranslation();
@@ -109,6 +118,7 @@ export const OneKVStatus = () => {
   const [activeValidators, setActiveValidators] = useState<number>(0);
   const [electedValidators, setElectedValidators] = useState<number>(0);
   const [lastUpdatedTime, setlastUpdatedTime] = useState<string>('N/A');
+  const [isDataLoadingStatus, setIsDataLoadingStatus] = useState(DataLoadingStatus.LOADING);
   useEffect(() => {
     const mergeOneKVData = (oneKV: IOneKVValidators, oneKVNominators: IOneKVNominators) => {
       oneKV.valid = oneKV.valid.map((v) => {
@@ -143,12 +153,14 @@ export const OneKVStatus = () => {
         setValidators(oneKV.valid);
         setInvalidValidators(oneKV.invalid);
         setlastUpdatedTime(dayjs(oneKV.modifiedTime * 1000).toLocaleString());
+        setIsDataLoadingStatus(DataLoadingStatus.DONE);
       } catch (err) {
         console.error(err);
+        setIsDataLoadingStatus(DataLoadingStatus.ERROR);
       }
     }
     getValidators();
-  }, [chain]);
+  }, [DataLoadingStatus.DONE, DataLoadingStatus.ERROR, chain]);
   const [seeValid, setSeeValid] = useState(true);
   const [filters, setFilters] = useState({
     stashId: '',
@@ -194,64 +206,43 @@ export const OneKVStatus = () => {
     }
     setSeeValid(value);
   }, []);
-  // const OneKVTable = ({ seeValid }) => {
-  //   if (seeValid === true) {
-  //     return (
-  //       <ValNomContent
-  //         valid={true}
-  //         chain={chain}
-  //         validators={validators}
-  //         activeEra={activeEra}
-  //         validValidators={validValidators}
-  //         activeValidators={activeValidators}
-  //         electedValidators={electedValidators}
-  //         lastUpdatedTime={lastUpdatedTime}
-  //       />
-  //     );
-  //   } else {
-  //     return (
-  //       <ValNomContent
-  //         valid={false}
-  //         chain={chain}
-  //         validators={invalidValidators}
-  //         activeEra={activeEra}
-  //         validValidators={validValidators}
-  //         activeValidators={activeValidators}
-  //         electedValidators={electedValidators}
-  //         lastUpdatedTime={lastUpdatedTime}
-  //       />
-  //     );
-  //   }
-  // };
 
   const OneKVTable = useCallback(
     (seeValid) => {
       if (seeValid === true) {
-        return (
-          <ValNomContent
-            valid={true}
-            chain={chain}
-            validators={validFilteredValidators}
-            activeEra={activeEra}
-            validValidators={validValidators}
-            activeValidators={activeValidators}
-            electedValidators={electedValidators}
-            lastUpdatedTime={lastUpdatedTime}
-          />
-        );
+        if (validFilteredValidators.length === 0) {
+          return <Empty />;
+        } else {
+          return (
+            <ValNomContent
+              valid={true}
+              chain={chain}
+              validators={validFilteredValidators}
+              activeEra={activeEra}
+              validValidators={validValidators}
+              activeValidators={activeValidators}
+              electedValidators={electedValidators}
+              lastUpdatedTime={lastUpdatedTime}
+            />
+          );
+        }
       } else {
-        return (
-          <ValNomContent
-            valid={false}
-            chain={chain}
-            validators={invalidFilteredValidators}
-            activeEra={activeEra}
-            validValidators={validValidators}
-            activeValidators={activeValidators}
-            electedValidators={electedValidators}
-            lastUpdatedTime={lastUpdatedTime}
-          />
-        );
+        if (invalidFilteredValidators.length === 0) {
+          return <Empty />;
+        } else {
+          return (
+            <ValNomContent
+              valid={false}
+              chain={chain}
+              validators={invalidFilteredValidators}
+              activeEra={activeEra}
+              validValidators={validValidators}
+              activeValidators={activeValidators}
+              electedValidators={electedValidators}
+              lastUpdatedTime={lastUpdatedTime}
+            />
+          );
+        }
       }
     },
     [
@@ -417,21 +408,51 @@ export const OneKVStatus = () => {
   const OneKVCards = useCallback(
     (seeValid) => {
       if (seeValid === true) {
-        return <CardsLayout>{OneKvValidCardsDOM}</CardsLayout>;
+        if (OneKvValidCardsDOM.length === 0) {
+          return <Empty />;
+        } else {
+          return <CardsLayout>{OneKvValidCardsDOM}</CardsLayout>;
+        }
       } else {
-        return <CardsLayout>{OneKvInValidCardsDOM}</CardsLayout>;
+        if (OneKvInValidCardsDOM.length === 0) {
+          return <Empty />;
+        } else {
+          return <CardsLayout>{OneKvInValidCardsDOM}</CardsLayout>;
+        }
       }
     },
     [OneKvInValidCardsDOM, OneKvValidCardsDOM]
   );
 
   const OneKVContentDOM = useMemo(() => {
-    if (width > breakWidth.pad) {
-      return OneKVTable(seeValid);
+    if (isDataLoadingStatus === DataLoadingStatus.LOADING) {
+      return (
+        <div style={{ margin: '16px 0px 16px 0px' }}>
+          <ScaleLoader />
+        </div>
+      );
+    } else if (isDataLoadingStatus === DataLoadingStatus.ERROR) {
+      return (
+        <div>
+          <Failed />
+        </div>
+      );
     } else {
-      return OneKVCards(seeValid);
+      if (width > breakWidth.pad) {
+        return OneKVTable(seeValid);
+      } else {
+        return OneKVCards(seeValid);
+      }
     }
-  }, [OneKVTable, OneKVCards, seeValid, width]);
+  }, [
+    isDataLoadingStatus,
+    DataLoadingStatus.LOADING,
+    DataLoadingStatus.ERROR,
+    width,
+    OneKVTable,
+    seeValid,
+    OneKVCards,
+  ]);
 
   return (
     <CardHeader
