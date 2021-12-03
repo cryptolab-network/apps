@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useContext } from 'react';
+import { useCallback, useEffect, useState, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   apiGetSingleValidator,
@@ -11,6 +11,7 @@ import {
 } from '../../../apis/Validator';
 import { ReactComponent as PrevArrow } from '../../../assets/images/prev-arrow.svg';
 import Account from '../../../components/Account';
+import CardHeaderFullWidth from '../../../components/Card/CardHeaderFullWidth';
 import CardHeader from '../../../components/Card/CardHeader';
 import Chart from '../../../components/Chart';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -20,6 +21,7 @@ import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { DataContext } from '../components/Data';
 import { sendPageView } from '../../../utils/ga';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
 
 const findLastEra = (info: IEraInfo[]): IEraInfo => {
   let lastEraInfo = info[0];
@@ -78,7 +80,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
         </Exposure>
         <Value>
           <ValueTitle>{t('tools.validators.apy')}:</ValueTitle>
-          {(validator.averageApy * 100).toFixed(2)} %
+          <div>{(validator.averageApy * 100).toFixed(2)} %</div>
         </Value>
         <Value>
           <ValueTitle>{t('tools.validators.nominatorCount')}:</ValueTitle>
@@ -96,6 +98,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
 const ValidatorStatus = (props) => {
   sendPageView(useLocation());
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const [activeNominators, setActiveNominators] = useState<INominator[]>([]);
   const [nominators, setNominators] = useState<INominator[]>([]);
   const [selfStake, setSelfStake] = useState<string>('0');
@@ -253,9 +256,10 @@ const ValidatorStatus = (props) => {
     }
     getValidator();
   }, [props.match.params.id, props.match.params.chain, _formatBalance, notifyError, t]);
-  return (
-    <ValidatorStatusLayout>
-      <MainLayout>
+
+  const CardUIDOM = useMemo(() => {
+    if (width > 1440) {
+      return (
         <CardHeader
           Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
           mainPadding="0 0 0 0"
@@ -283,7 +287,11 @@ const ValidatorStatus = (props) => {
                   xAxisHeight={80}
                   xAxisFontSize={12}
                   yAxisRDomain={[0, 100]}
-                  legendPayload={[{ value: 'Nominators' }, {value: 'Active Nominators'}, { value: 'Commission (%)' }]}
+                  legendPayload={[
+                    { value: 'Nominators' },
+                    { value: 'Active Nominators' },
+                    { value: 'Commission (%)' },
+                  ]}
                   config={{
                     xKey: 'era',
                     firstDataKey: 'nominators',
@@ -325,7 +333,126 @@ const ValidatorStatus = (props) => {
             </div>
           </div>
         </CardHeader>
-      </MainLayout>
+      );
+    } else {
+      return (
+        <CardHeaderFullWidth
+          Header={() => <ValidatorStatusHeader validator={validator} chain={props.match.params.chain} />}
+          mainPadding="0 0 0 0"
+        >
+          <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+            <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
+              <ValidatorInfoLayout>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
+                  <InfoItem>{selfStake}</InfoItem>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
+                  <InfoItem>{unclaimedEras}</InfoItem>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
+                  <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+                </div>
+              </ValidatorInfoLayout>
+            </div>
+
+            <ChartsLayout>
+              <ChartContainer>
+                <Chart
+                  data={chartData1}
+                  leftLabel="Nominator Count"
+                  rightLabel="Commission ( % )"
+                  xAxisHeight={80}
+                  xAxisFontSize={12}
+                  yAxisRDomain={[0, 100]}
+                  legendPayload={[
+                    { value: 'Nominators' },
+                    { value: 'Active Nominators' },
+                    { value: 'Commission (%)' },
+                  ]}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'nominators',
+                    secondDataKey: 'activeNominators',
+                    thirdDataKey: 'commission',
+                    firstDataYAxis: 'left',
+                    thirdDataYAxis: 'right',
+                  }}
+                />
+              </ChartContainer>
+              <ChartContainer>
+                <Chart
+                  data={chartData2}
+                  leftLabel="APY"
+                  xAxisHeight={80}
+                  xAxisFontSize={12}
+                  yAxisLDomain={[0, 25]}
+                  legendPayload={[{ value: 'APY (%)' }]}
+                  config={{
+                    xKey: 'era',
+                    firstDataKey: 'apy',
+                    firstDataYAxis: 'left',
+                  }}
+                />
+              </ChartContainer>
+            </ChartsLayout>
+            <div style={{ boxSizing: 'border-box', padding: 4 }}>
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">{t('tools.validators.activeNominators')}</ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={activeNominators} />
+              </ContentColumnLayout>
+              <Space />
+              <ContentColumnLayout width="100%" justifyContent="flex-start">
+                <ContentBlockTitle color="white">
+                  {t('tools.validators.inactiveNominators')}
+                </ContentBlockTitle>
+                <NominatorGrid chain={props.match.params.chain} nominators={nominators} />
+              </ContentColumnLayout>
+            </div>
+          </div>
+        </CardHeaderFullWidth>
+      );
+    }
+  }, [
+    activeNominators,
+    chartData1,
+    chartData2,
+    nominators,
+    props.match.params.chain,
+    selfStake,
+    slashes.length,
+    t,
+    unclaimedEras,
+    validator,
+    width,
+  ]);
+
+  return (
+    <ValidatorStatusLayout>
+      <MainLayout>{CardUIDOM}</MainLayout>
     </ValidatorStatusLayout>
   );
 };
@@ -341,7 +468,7 @@ const ValidatorStatusLayout = styled.div`
 `;
 
 const MainLayout = styled.div`
-  width: 1400px;
+  max-width: 1400px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -355,18 +482,35 @@ const HeaderLayout = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  @media (max-width: 968px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
 `;
 
 const HeaderLeft = styled.div`
   display: flex;
+  box-sizing: border-box;
   justify-content: flex-start;
   align-items: center;
+  @media (max-width: 968px) {
+    width: 100%;
+  }
 `;
 
 const HeaderRight = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
+  @media (max-width: 968px) {
+    margin-top: 16px;
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
 `;
 
 const PrevArrowLayout = styled.div`
@@ -375,42 +519,39 @@ const PrevArrowLayout = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  margin-left: 18px;
 `;
 
 const HeaderTitle = styled.div`
   color: white;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  margin-left: 18px;
+  padding-left: 18px;
+  overflow: hidden;
 `;
 
 const Title = styled.div`
-  width: 600px;
+  width: 100%;
   font-family: Montserrat;
   font-size: 18px;
   font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.22;
 `;
 
 const Subtitle = styled.div`
+  width: 100%;
   font-family: Montserrat;
   font-size: 11px;
   font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.55;
   margin: 8px 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  /* width: 240px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -419,8 +560,12 @@ const Exposure = styled.div`
   line-height: 1.42;
   letter-spacing: normal;
   text-align: left;
-  color: var(--nav-fg);
   margin-left: 32px;
+  @media (max-width: 968px) {
+    margin-left: 0px;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const ExposureActive = styled.div`
@@ -446,6 +591,12 @@ const Value = styled.div`
   text-align: left;
   color: #23beb9;
   margin-left: 32px;
+  @media (max-width: 968px) {
+    width: 100%;
+    margin-left: 0px;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const ValueTitle = styled.div`
@@ -463,6 +614,14 @@ const ChartsLayout = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  @media (max-width: 1440px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-x: scroll;
+    height: 1000px;
+  }
 `;
 
 const ChartContainer = styled.div`
@@ -480,6 +639,11 @@ const ChartContainer = styled.div`
   font-family: Montserrat;
   font-size: 11px;
   font-weight: 500;
+  @media (max-width: 1440px) {
+    width: calc(100% - 8px);
+    min-width: 700px;
+    overflow-x: scroll;
+  }
 `;
 
 const ContentColumnLayout = styled.div<ContentColumnLayoutProps>`
@@ -515,13 +679,16 @@ const Space = styled.div`
 const ValidatorInfoLayout = styled.div`
   box-sizing: border-box;
   width: 100%;
-  height: 50px;
+  /* height: 50px; */
   padding: 12px;
   display: flex;
   flex-direction: row;
   border-radius: 6px;
   background-color: #2f3842;
   align-items: center;
+  @media (max-width: 968px) {
+    flex-wrap: wrap;
+  }
 `;
 
 const InfoTitle = styled.div`
@@ -535,6 +702,9 @@ const InfoTitle = styled.div`
   text-align: left;
   color: white;
   margin: 0 0 0 25.4px;
+  @media (max-width: 968px) {
+    margin: 0 0 0 0;
+  }
 `;
 
 const InfoItem = styled.div`
@@ -548,6 +718,9 @@ const InfoItem = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: #21aca8;
+  @media (max-width: 968px) {
+    margin: 0 0 0 0;
+  }
 `;
 
 const InfoDivider = styled.div`

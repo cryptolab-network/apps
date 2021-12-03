@@ -11,7 +11,7 @@ import { balanceUnit } from '../../../../utils/string';
 
 import { useTranslation } from 'react-i18next';
 
-const ValidatorTable = ({ filter, chain, validators }) => {
+const ValidatorTable = ({ chain, validators }) => {
   const { t } = useTranslation();
   const history = useHistory();
   const onClickDashboard = useCallback(
@@ -138,21 +138,7 @@ const ValidatorTable = ({ filter, chain, validators }) => {
   useEffect(() => {
     setDisplayValidators(validators);
   }, [chain, validators]);
-  useMemo(() => {
-    if (filter.stashId.length > 0) {
-      const displayValidators: IOneKVValidator[] = [];
-      validators.forEach((v) => {
-        if (v.stash.toLowerCase().includes(filter.stashId.toLowerCase())) {
-          displayValidators.push(v);
-        } else if (v.name.toLowerCase().includes(filter.stashId.toLowerCase())) {
-          displayValidators.push(v);
-        }
-      });
-      setDisplayValidators(displayValidators);
-    } else {
-      setDisplayValidators(validators);
-    }
-  }, [filter.stashId, validators]);
+
   return <Table columns={columns} data={displayValidators} pagination={true} />;
 };
 

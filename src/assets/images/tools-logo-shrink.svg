@@ -1,0 +1,30 @@
+<svg id="Group_4708" data-name="Group 4708" xmlns="http://www.w3.org/2000/svg" width="204" height="50">
+    <defs>
+        <style>
+            .cls-tools-logo-shrink-5{fill:#23beb9}.cls-tools-logo-shrink-2{fill:#fff}.cls-tools-logo-shrink-4{fill:none}
+        </style>
+    </defs>
+    <g id="Group_6" data-name="Group 6">
+        <text id="CryptoLab" transform="translate(47 30)" style="font-size:17px;font-family:Montserrat-Bold,Montserrat;font-weight:700;fill:#23beb9"><tspan x="0" y="0">Crypto</tspan><tspan class="cls-tools-logo-shrink-2" y="0">Lab</tspan></text>
+        <text id="Tools" transform="translate(158 30)" style="fill:#fff;font-size:17px;font-family:Montserrat-Bold,Montserrat;font-weight:700"><tspan x="0" y="0">Tools</tspan></text>
+        <g id="Group_1" data-name="Group 1">
+            <g id="Group_3" data-name="Group 3">
+                <path id="Rectangle_1" data-name="Rectangle 1" class="cls-tools-logo-shrink-4" d="M0 0h50v50H0z"/>
+                <g id="Group_2" data-name="Group 2" transform="translate(5.096 6.786)">
+                    <path id="Path_1" data-name="Path 1" class="cls-tools-logo-shrink-5" d="m384.683 220.67-2.636-4.561-2.664 4.608a3.068 3.068 0 0 0-.234.561 3 3 0 0 0-.149.935v.1a3.053 3.053 0 0 0 6.1-.1 2.965 2.965 0 0 0-.417-1.543z" transform="translate(-349.364 -199.397)"/>
+                    <g id="Group_1-2" data-name="Group 1">
+                        <path id="Path_2" data-name="Path 2" class="cls-tools-logo-shrink-4" d="M226.364 161.793a8.728 8.728 0 0 0 5.611-.216l.678-2.319a1.042 1.042 0 0 1 .264-.445l4.343-4.343-4.186-4.186-4.343 4.343a1.043 1.043 0 0 1-.445.264l-5.644 1.649-5.978 1.746-.458.131-.168.048a18.783 18.783 0 0 1 6.747 1.622 29.881 29.881 0 0 0 3.579 1.706z" transform="translate(-210.69 -143.383)"/>
+                        <path id="Path_3" data-name="Path 3" class="cls-tools-logo-shrink-2" d="m339.542 113.464-9.169-9.169a1.043 1.043 0 0 0-1.476 1.476l9.17 9.169a1.043 1.043 0 0 0 1.475-1.476z" transform="translate(-306.469 -103.989)"/>
+                        <path id="Path_4" data-name="Path 4" class="cls-tools-logo-shrink-2" d="M208.987 121.569a1.043 1.043 0 0 0-1.475 1.475l1.016 1.016-4.207 4.207-6.835 2-4.531 1.324-.442.126a7.6 7.6 0 0 0-3.65 1.826c1.432.029 2.871.163 3.457.193.2.01.4.023.593.037l.168-.048.458-.131 5.978-1.746 5.644-1.649a1.044 1.044 0 0 0 .445-.264l4.343-4.343 4.186 4.186-4.343 4.343a1.042 1.042 0 0 0-.264.445l-.678 2.319c.818-.267 1.627-.6 2.445-.926l.161-.552 4.207-4.207 1.016 1.016a1.043 1.043 0 0 0 1.476-1.476z" transform="translate(-187.568 -118.689)"/>
+                        <path id="Path_5" data-name="Path 5" class="cls-tools-logo-shrink-5" d="M194.6 206.73a2.318 2.318 0 0 0-.235 2.264c.194.269 1.205 1.393 5.667 5.814.185.183.318.314.38.377l.015.015.011.011.015.015.373.376c4.422 4.462 5.545 5.473 5.814 5.667a2.318 2.318 0 0 0 2.264-.235c.943-.641 1.252-1.732 1.609-3l.131-.459 1.032-3.532 1.686-5.771a8.727 8.727 0 0 1-5.611.216 29.881 29.881 0 0 1-3.582-1.707 18.783 18.783 0 0 0-6.747-1.622 4.639 4.639 0 0 0-2.822 1.571z" transform="translate(-192.085 -190.087)"/>
+                        <path id="Path_6" data-name="Path 6" class="cls-tools-logo-shrink-2" d="m199.771 212.74-1.032 3.532a39.49 39.49 0 0 0-.131.459c-.358 1.264-.667 2.355-1.609 3a2.318 2.318 0 0 1-2.264.235c-.269-.194-1.393-1.205-5.814-5.667l-.373-.376-.015-.015-.011-.011-.015-.015c-.062-.063-.2-.194-.38-.377-4.462-4.421-5.473-5.545-5.667-5.814a2.318 2.318 0 0 1 .235-2.264 4.639 4.639 0 0 1 2.828-1.562c-.2-.014-.4-.027-.593-.037-.586-.03-2.025-.164-3.457-.193a4.743 4.743 0 0 0-.5.618 4.384 4.384 0 0 0-.343 4.435c.177.339.789 1.1 6.032 6.3l.349.346.045.045.045.045.346.348c.662.669 1.252 1.261 1.779 1.788 3.6 3.6 4.225 4.09 4.521 4.244a4.384 4.384 0 0 0 4.435-.343 6.7 6.7 0 0 0 2.444-4.153c.042-.147.083-.295.126-.442l.786-2.692 2.373-8.122c-.817.33-1.627.659-2.445.926z" transform="translate(-180.172 -188.776)"/>
+                        <circle id="Ellipse_1" data-name="Ellipse 1" class="cls-tools-logo-shrink-2" cx="1.994" cy="1.994" r="1.994" transform="translate(8.469 18.156)"/>
+                        <circle id="Ellipse_2" data-name="Ellipse 2" class="cls-tools-logo-shrink-2" cx="1.496" cy="1.496" r="1.496" transform="translate(14.617 21.711)"/>
+                        <circle id="Ellipse_3" data-name="Ellipse 3" class="cls-tools-logo-shrink-5" cx=".997" cy=".997" r=".997" transform="translate(15.791 14.428)"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+    <circle id="Ellipse_191" data-name="Ellipse 191" class="cls-tools-logo-shrink-2" cx="2" cy="2" r="2" transform="translate(149 24)"/>
+</svg>

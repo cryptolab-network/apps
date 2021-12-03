@@ -44,13 +44,15 @@ const Account: React.FC<IAccount> = ({
 export default Account;
 
 const AccountLayout = styled.div`
+  width: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
 `;
 
 const Address = styled.div`
-  width: 100%;
+  display: inline-block;
+  max-width: 100%;
   color: white;
   font-family: Montserrat;
   font-size: 13px;

@@ -2,16 +2,19 @@ import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
-import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
+import { BrowserRouter, NavLink, Route, Switch, useLocation, useHistory } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
+import { ReactComponent as CryptoLabToolsLogoShrink } from './assets/images/tools-logo-shrink.svg';
+import { ReactComponent as CryptoLabLogoShrink } from './assets/images/main-color-logo-shrink.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 // import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
 import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
+import { ReactComponent as DropDownIcon } from './assets/images/dropdown.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -43,23 +46,43 @@ import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
 import { isMobile } from 'react-device-detect';
-import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
+import useWindowDimensions from './hooks/useWindowDimensions';
+import { breakWidth } from './utils/constants/layout';
+import SideMenu from './components/SideMenu';
 import Wallet from './pages/Tools/components/Wallet';
+import MenuIcon from './components/MenuIcon';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
         <NavLink exact to="/">
-          <CryptoLabLogo />
+          {width > breakWidth.mobile && width <= breakWidth.pad ? <CryptoLabLogoShrink /> : <CryptoLabLogo />}
         </NavLink>
       </HeaderLeftDiv>
       <HeaderMidDiv>
+        {/*
+          // TODO: the comment code below would be used in RWD feature
+         {width > breakWidth.mobile ? (
+          <>
+            <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
+              {t('app.title.stakingGuide')}
+            </NavLink>
+            <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioBenchmark')}
+            </NavLink>
+            <NavLink to="/management" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioManagement')}
+            </NavLink>
+          </>
+        ) : null} */}
         <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
           {t('app.title.stakingGuide')}
         </NavLink>
@@ -71,6 +94,15 @@ const Header: React.FC = () => {
         </NavLink>
       </HeaderMidDiv>
       <HeaderRightDiv>
+        {/* {width <= breakWidth.mobile ? (
+          <SideMenuIcon />
+        ) : pathname !== '/' ? (
+          <NetworkWallet />
+        ) : (
+          <NavLink to="/benchmark">
+            <Button title={t('app.title.useBenchmark')} />
+          </NavLink>
+        )} */}
         {pathname !== '/' ? (
           <NetworkWallet />
         ) : (
@@ -84,29 +116,85 @@ const Header: React.FC = () => {
 };
 
 // tools header
-const ToolsHeader: React.FC = () => {
+
+interface IToolsHeader {
+  handleSideMenuToggle: React.MouseEventHandler<SVGSVGElement>;
+}
+const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
+  let { pathname } = useLocation();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const history = useHistory();
+
+  const toolsHeaderLeftDOM = useMemo(() => {
+    if (width <= breakWidth.mobile && pathname !== '/') {
+      return (
+        <div
+          onClick={() => {
+            history.goBack();
+          }}
+        >
+          <DropDownIcon style={{ stroke: 'white', width: 10, height: 20, transform: 'rotate(180deg)' }} />
+        </div>
+      );
+    } else {
+      return (
+        <NavLink exact to="/">
+          {width > breakWidth.mobile && width <= breakWidth.pad ? (
+            <CryptoLabLogoShrink />
+          ) : width <= breakWidth.mobile ? (
+            <CryptoLabToolsLogoShrink />
+          ) : (
+            <CryptoLabToolsLogo />
+          )}
+        </NavLink>
+      );
+    }
+  }, [history, pathname, width]);
+
+  const toolsHeaderMidDOM = useMemo(() => {
+    if (width > breakWidth.mobile) {
+      return (
+        <>
+          <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.valnom')}
+          </NavLink>
+          <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.oneKvMonitor')}
+          </NavLink>
+          <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.stakingRewards')}
+          </NavLink>
+        </>
+      );
+    } else {
+      if (pathname.includes('/valnom') || pathname.includes('/validator')) {
+        return <MobileHeaderTitle>{t('tools.title.valnom')}</MobileHeaderTitle>;
+      } else if (pathname.includes('/onekv')) {
+        return <MobileHeaderTitle>{t('tools.title.oneKvMonitor')}</MobileHeaderTitle>;
+      } else if (pathname.includes('/rewards')) {
+        return <MobileHeaderTitle>{t('tools.title.stakingRewards')}</MobileHeaderTitle>;
+      }
+    }
+  }, [pathname, t, width]);
+
   return (
     <HeaderDiv>
       <HeaderLeftDiv>
         <NavLink exact to="/">
-          <CryptoLabToolsLogo />
+          {toolsHeaderLeftDOM}
         </NavLink>
       </HeaderLeftDiv>
-      <HeaderMidDiv>
-        <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.valnom')}
-        </NavLink>
-        <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.oneKvMonitor')}
-        </NavLink>
-        <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.stakingRewards')}
-        </NavLink>
-      </HeaderMidDiv>
+      <HeaderMidDiv>{toolsHeaderMidDOM}</HeaderMidDiv>
       <HeaderRightDiv>
-        <Network />
-        <Wallet />
+        {width <= breakWidth.mobile ? (
+          <MenuIcon onClick={handleSideMenuToggle} />
+        ) : (
+          <>
+            <Network />
+            {!isMobile ? <Wallet /> : null}
+          </>
+        )}
       </HeaderRightDiv>
     </HeaderDiv>
   );
@@ -143,6 +231,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const defaultLng = localStorage.getItem('i18nextLng');
   const lng = languageOptions.find((l) => l.value === defaultLng);
   const [language, setLanguage] = useState<ILanguage>(lng ? lng : { label: 'English', value: 'en' });
+  const { width } = useWindowDimensions();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -207,141 +296,208 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
         });
       });
   };
-  return (
-    <>
-      <TableDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.general')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('aboutus');
-              }}
+  if (width <= breakWidth.mobile) {
+    return (
+      <>
+        <div style={{ height: 88 }} />
+        <PromoteDiv>
+          <PromoteContainer>
+            <ColumnDiv>
+              <TdDiv justify_content="flex-start">
+                <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                  <SocialMediaWrapper>
+                    <TwitterIcon width="36px" height="36px" />
+                  </SocialMediaWrapper>
+                </a>
+                <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                  <SocialMediaWrapper>
+                    <GithubIcon width="36px" height="36px" />
+                  </SocialMediaWrapper>
+                </a>
+              </TdDiv>
+              <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
+              <TdDiv justify_content="center">
+                <Input
+                  placeholder={t('app.footer.title.enterEmail')}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                ></Input>
+                <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
+              </TdDiv>
+            </ColumnDiv>
+          </PromoteContainer>
+        </PromoteDiv>
+        <div style={{ height: 40 }} />
+
+        <CopyRightMobilleDiv>
+          <CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
             >
-              {t('app.footer.title.about')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('contactus');
-              }}
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
             >
-              {t('app.footer.title.contact')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('validators');
-              }}
-            >
-              {t('app.footer.title.ourValidators')}
-            </DialogA>
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.technology')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
-          </TdDiv>
-          {/* <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
-          </TdDiv> */}
-        </ColumnDiv>
-        {/* <ColumnDiv>
-          <ThDiv>{t('app.footer.title.community')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
-          </TdDiv>
-        </ColumnDiv> */}
-        <ColumnDiv style={{ minWidth: '85px' }}>
-          <ThDiv>{t('app.footer.title.language')}</ThDiv>
-          <TdDiv>
-            <DropdownCommon
-              style={{ flex: 1, width: '100%' }}
-              options={languageOptions}
-              value={language}
-              onChange={handleLanguageChange}
-              theme="dark"
-            />
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <TwitterIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <GithubIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </CopyRightTitleDiv>
+        </CopyRightMobilleDiv>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <TableDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.general')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('aboutus');
+                }}
+              >
+                {t('app.footer.title.about')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('contactus');
+                }}
+              >
+                {t('app.footer.title.contact')}
+              </DialogA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <DialogA
+                onClick={() => {
+                  handleDialogOpen('validators');
+                }}
+              >
+                {t('app.footer.title.ourValidators')}
+              </DialogA>
+            </TdDiv>
+          </ColumnDiv>
+          <ColumnDiv>
+            <ThDiv>{t('app.footer.title.technology')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
+            </TdDiv>
+            {/* <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
+            </TdDiv> */}
+          </ColumnDiv>
+          {/* <ColumnDiv>
+            <ThDiv>{t('app.footer.title.community')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+            </TdDiv>
+          </ColumnDiv> */}
+          <ColumnDiv style={{ minWidth: '85px' }}>
+            <ThDiv>{t('app.footer.title.language')}</ThDiv>
+            <TdDiv>
+              <DropdownCommon
+                style={{ flex: 1, width: '100%' }}
+                options={languageOptions}
+                value={language}
+                onChange={handleLanguageChange}
+                theme="dark"
+              />
+            </TdDiv>
+          </ColumnDiv>
+          <ColumnDiv>
+            <TdDiv justify_content="flex-start">
+              <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                <SocialMediaWrapper>
+                  <TwitterIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a>
+              <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                <SocialMediaWrapper>
+                  <GithubIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a>
+              {/* <a href="#">
+                <SocialMediaWrapper>
+                  <YoutubeIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a> */}
+            </TdDiv>
+            <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
+            <TdDiv justify_content="center">
+              <Input
+                placeholder={t('app.footer.title.enterEmail')}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              ></Input>
+              <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
+            </TdDiv>
+          </ColumnDiv>
+        </TableDiv>
+        <CopyRightDiv>
+          <CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
+            >
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
+            >
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            {/* <a href="#">
-              <SocialMediaWrapper>
-                <YoutubeIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
-            </a> */}
-          </TdDiv>
-          <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
-          <TdDiv justify_content="center">
-            <Input
-              placeholder={t('app.footer.title.enterEmail')}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            ></Input>
-            <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
-          </TdDiv>
-        </ColumnDiv>
-      </TableDiv>
-      <CopyRightDiv>
-        <CopyRightTitleDiv>
-          @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a
-            href="https://www.iubenda.com/terms-and-conditions/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
-            title="Terms and Conditions "
-          >
-            T&C
-          </a>{' '}
-          &nbsp;| &nbsp;
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-          <a
-            href="https://www.iubenda.com/privacy-policy/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
-            title={t('app.footer.title.privacyPolicy')}
-          >
-            {t('app.footer.title.privacyPolicy')}
-          </a>
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-        </CopyRightTitleDiv>
-      </CopyRightDiv>
-    </>
-  );
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </CopyRightTitleDiv>
+        </CopyRightDiv>
+      </>
+    );
+  }
 };
 
 // main applayout, include star animation and light gradient
@@ -353,6 +509,7 @@ const AppLayout = () => {
   const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
   const [visibleContactUsDialog, setVisibleContactUsDialog] = useState(false);
   const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
+  const [visibleSideMenu, setVisibleSideMenu] = useState(false);
 
   const handleDialogClose = (name) => {
     switch (name) {
@@ -389,6 +546,10 @@ const AppLayout = () => {
         <span style={{ marginLeft: 8 }}>{name}</span>
       </Validator>
     );
+  };
+
+  const handleSideMenuToggle = () => {
+    setVisibleSideMenu((prev) => !prev);
   };
 
   const ourValidatorsDOM = useMemo(() => {
@@ -494,8 +655,6 @@ const AppLayout = () => {
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
-        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
-        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
         <div style={{ marginTop: 34, textAlign: 'left' }}>
           <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
@@ -509,7 +668,7 @@ const AppLayout = () => {
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
-      return <ToolsHeader />;
+      return <ToolsHeader handleSideMenuToggle={handleSideMenuToggle} />;
     }
     return <Header />;
   }, [isToolsSite]);
@@ -523,9 +682,6 @@ const AppLayout = () => {
           <Route path="/validator/:id/:chain" component={ValidatorStatus} />
           <Route path="/onekv" component={OneKV} />
           <Route path="/rewards" component={StakingRewardsReport} />
-          {/* <Route path="/contact" component={Contact} /> */}
-          {/* <Route path="/ourValidators" component={OurValidators} /> */}
-          {/* <Route path="/about" component={About} /> */}
         </Switch>
       );
     }
@@ -560,6 +716,14 @@ const AppLayout = () => {
       <>
         {headerDOM}
         <RouteContent>
+          <SideMenu
+            isOpen={visibleSideMenu}
+            handleClose={handleSideMenuToggle}
+            handleDialogOpen={(name) => {
+              handleDialogOpen(name);
+            }}
+            handleSideMenuToggle={handleSideMenuToggle}
+          />
           <Dialog
             image={<PeopleIcon />}
             title={t('app.footer.title.ourValidators')}
@@ -622,45 +786,31 @@ const AppLayout = () => {
     visibleAboutUsDialog,
     visibleContactUsDialog,
     visibleOurValidatorsDialog,
+    visibleSideMenu,
   ]);
 
-  if (isMobile) {
-    if (isToolsSite) {
-      return (
-        <>
-          <Mobile isTools={true} />
-        </>
-      );
-    }
-    return (
-      <>
-        <Mobile isTools={false} />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <GradientLight>
-          <BrowserRouter>
-            {isToolsSite ? (
-              <Api>
-                <Data>{mainRender}</Data>
-              </Api>
-            ) : (
-              <Api>{mainRender}</Api>
-            )}
-          </BrowserRouter>
-          {process.env.REACT_APP_NODE_ENV === 'production' ? (
-            <>
-              <StarAnimation id="stars" />
-              <StarAnimation id="stars2" />
-              <StarAnimation id="stars3" />
-            </>
-          ) : null}
-        </GradientLight>
-      </>
-    );
-  }
+  return (
+    <>
+      <GradientLight>
+        <BrowserRouter>
+          {isToolsSite ? (
+            <Api>
+              <Data>{mainRender}</Data>
+            </Api>
+          ) : (
+            <Api>{mainRender}</Api>
+          )}
+        </BrowserRouter>
+        {process.env.REACT_APP_NODE_ENV === 'production' ? (
+          <>
+            <StarAnimation id="stars" />
+            <StarAnimation id="stars2" />
+            <StarAnimation id="stars3" />
+          </>
+        ) : null}
+      </GradientLight>
+    </>
+  );
 };
 
 export default AppLayout;
@@ -682,6 +832,9 @@ const RouteContent = styled.div`
   // height: 100%;
   min-height: calc(100vh - 344px - 64px - 96px);
   overflow-y: visible;
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 256px - 64px - 96px);
+  }
 `;
 
 const HeaderLeftDiv = styled.div`
@@ -727,12 +880,12 @@ const TableDiv = styled.div`
   margin-top: 80px;
   padding: 20px 15% 20px 15%;
   width: auto;
-  @media (min-width: 1000px) {
-    width: 70%;
-  }
-  @media (max-width: 1000px) {
-    width: 90%;
+  width: 70%;
+  @media (max-width: 768px) {
     padding: 0px;
+  }
+  @media (max-width: 360px) {
+    width: 90%;
   }
 `;
 
@@ -838,6 +991,16 @@ const CopyRightDiv = styled.div`
   // z-index: 99;
 `;
 
+const CopyRightMobilleDiv = styled.div`
+  width: 100%;
+  margin: 0px;
+  padding: 25px 0px 25px;
+  background-color: #0d1119;
+  // position: fixed;
+  // bottom: 0px;
+  // z-index: 99;
+`;
+
 const CopyRightTitleDiv = styled.div`
   height: 16px;
   font-family: Montserrat;
@@ -913,4 +1076,25 @@ const AboutUsGoalFontStyle = styled.li`
   color: #1faaa6;
   margin-top: 6px;
   margin-bottom: 6px;
+`;
+
+const PromoteDiv = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PromoteContainer = styled.div`
+  width: 320px;
+  @media (max-width: 360px) {
+    width: 299px;
+  }
+`;
+
+const MobileHeaderTitle = styled.div`
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1ea9a5;
 `;
