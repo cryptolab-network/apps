@@ -267,13 +267,20 @@ export const OneKVStatus = () => {
           </li>
         );
       });
-      dom.push(<OneKvInvalidCard validatorId={iv.stash} name={iv.name} reason={<div>{components}</div>} />);
+      dom.push(
+        <OneKvInvalidCard
+          validatorId={iv.stash}
+          name={iv.name}
+          reason={<div>{components}</div>}
+          chain={chain}
+        />
+      );
     });
     if (dom.length > 0) {
       return dom;
     }
     return null;
-  }, [invalidFilteredValidators]);
+  }, [invalidFilteredValidators, chain]);
 
   const OneKvValidCardsDOM = useMemo(() => {
     let dom: any = [];

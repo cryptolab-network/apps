@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import Row from './Row';
 import { ReactComponent as DashboardIcon } from '../../../../../assets/images/dashboard.svg';
 import { ReactComponent as ActiveIcon } from '../../../../../assets/images/active.svg';
@@ -22,12 +23,20 @@ const OneKvValidCard = ({
   chain,
 }) => {
   const [isExpend, setIsExpend] = useState(false);
+  const history = useHistory();
 
   const _formatBalance = useCallback(
     (value: any) => {
       return <span>{balanceUnit(chain, value, true, true)}</span>;
     },
     [chain]
+  );
+
+  const onClickDashboard = useCallback(
+    (id: string) => {
+      history.push(`/validator/${id}/${chain}`);
+    },
+    [chain, history]
   );
 
   return (
@@ -38,8 +47,7 @@ const OneKvValidCard = ({
           value={
             <DashboardIcon
               onClick={() => {
-                console.log(`dashboard of validator ${validatorId} has been clicked`);
-                // onClickDashboard(validatorId);
+                onClickDashboard(validatorId);
               }}
             />
           }

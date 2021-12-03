@@ -1,12 +1,22 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { ReactComponent as DashboardIcon } from '../../../../../assets/images/dashboard.svg';
 import { ReactComponent as ExpendIcon } from '../../../../../assets/images/expand-arrow.svg';
 import Row from './Row';
 import Reason from './Reason';
 
-const OneKvInvalidCard = ({ validatorId, name, reason }) => {
+const OneKvInvalidCard = ({ validatorId, name, reason, chain }) => {
   const [isExpend, setIsExpend] = useState(false);
+  const history = useHistory();
+
+  const onClickDashboard = useCallback(
+    (id: string) => {
+      history.push(`/validator/${id}/${chain}`);
+    },
+    [chain, history]
+  );
+
   return (
     <MainLayout>
       <CardLayout>
@@ -15,8 +25,7 @@ const OneKvInvalidCard = ({ validatorId, name, reason }) => {
           value={
             <DashboardIcon
               onClick={() => {
-                console.log(`dashboard of validator ${validatorId} has been clicked`);
-                // onClickDashboard(validatorId);
+                onClickDashboard(validatorId);
               }}
             />
           }

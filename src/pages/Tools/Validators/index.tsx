@@ -80,7 +80,7 @@ const ValidatorStatusHeader = ({ chain, validator }) => {
         </Exposure>
         <Value>
           <ValueTitle>{t('tools.validators.apy')}:</ValueTitle>
-          {(validator.averageApy * 100).toFixed(2)} %
+          <div>{(validator.averageApy * 100).toFixed(2)} %</div>
         </Value>
         <Value>
           <ValueTitle>{t('tools.validators.nominatorCount')}:</ValueTitle>
@@ -343,14 +343,39 @@ const ValidatorStatus = (props) => {
           <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
             <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
               <ValidatorInfoLayout>
-                <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
-                <InfoItem>{selfStake}</InfoItem>
-                <InfoDivider />
-                <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
-                <InfoItem>{unclaimedEras}</InfoItem>
-                <InfoDivider />
-                <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
-                <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.selfStake')}: </InfoTitle>
+                  <InfoItem>{selfStake}</InfoItem>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.unclaimedEras')}: </InfoTitle>
+                  <InfoItem>{unclaimedEras}</InfoItem>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <InfoTitle>{t('tools.validators.slashes')}:</InfoTitle>
+                  <InfoItem>{slashes.length === 0 ? 'None' : slashes.length}</InfoItem>
+                </div>
               </ValidatorInfoLayout>
             </div>
 
@@ -527,7 +552,6 @@ const Subtitle = styled.div`
 const Exposure = styled.div`
   display: flex;
   flex-direction: row;
-  /* width: 240px; */
   font-family: Montserrat;
   font-size: 12px;
   font-weight: 500;
@@ -536,8 +560,12 @@ const Exposure = styled.div`
   line-height: 1.42;
   letter-spacing: normal;
   text-align: left;
-  color: var(--nav-fg);
   margin-left: 32px;
+  @media (max-width: 968px) {
+    margin-left: 0px;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const ExposureActive = styled.div`
@@ -563,6 +591,12 @@ const Value = styled.div`
   text-align: left;
   color: #23beb9;
   margin-left: 32px;
+  @media (max-width: 968px) {
+    width: 100%;
+    margin-left: 0px;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const ValueTitle = styled.div`
@@ -668,6 +702,9 @@ const InfoTitle = styled.div`
   text-align: left;
   color: white;
   margin: 0 0 0 25.4px;
+  @media (max-width: 968px) {
+    margin: 0 0 0 0;
+  }
 `;
 
 const InfoItem = styled.div`
@@ -681,6 +718,9 @@ const InfoItem = styled.div`
   letter-spacing: normal;
   text-align: left;
   color: #21aca8;
+  @media (max-width: 968px) {
+    margin: 0 0 0 0;
+  }
 `;
 
 const InfoDivider = styled.div`
