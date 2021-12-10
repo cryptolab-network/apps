@@ -2,11 +2,13 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Account from '../../../../components/Account';
-
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 import { useTranslation } from 'react-i18next';
 
 const StashInformation = ({ stashId, stashData, chain, currency }) => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const [totalRewards, setTotalRewards] = useState(0);
   const [totalInFiat, setTotalInFiat] = useState(0);
   const [firstRewardDate, setFirstRewardDate] = useState('N/A');
@@ -30,30 +32,60 @@ const StashInformation = ({ stashId, stashData, chain, currency }) => {
     }
   }, [stashData, stashData.eraRewards]);
   return (
-    <div>
+    <div style={{ maxWidth: '100%' }}>
       <Title>{t('tools.stakingRewards.stashInformation')}</Title>
       <HorizontalBar />
       <InformationItem>
-        <InformationTitle>{t('tools.stakingRewards.stashId')}</InformationTitle>
-        <Account address={stashId} display={stashId} />
+        <div
+          style={{
+            boxSizing: 'border-box',
+            padding: width > breakWidth.pad ? '28.9px 0px 28.9px 0px' : '14px 0px 7px 0px',
+          }}
+        >
+          <InformationTitle>{t('tools.stakingRewards.stashId')}</InformationTitle>
+        </div>
+        <div
+          style={{
+            boxSizing: 'border-box',
+            maxWidth: '100%',
+            padding: width > breakWidth.pad ? '28.9px 0px 28.9px 0px' : '14px 0px 7px 0px',
+          }}
+        >
+          <Account address={stashId} display={stashId} />
+        </div>
       </InformationItem>
       <HorizontalBar />
       <InformationItem>
-        <InformationTitle>{t('tools.stakingRewards.totalRewards')}</InformationTitle>
-        <InformationContent>
-          <div style={{ margin: '0 16px 0 0' }}>
-            <span style={{ color: '#23beb9' }}>
-              {totalRewards.toFixed(4)} {chain}
-            </span>
-            &nbsp; / &nbsp;
-            {totalInFiat.toFixed(2)} {currency}
-          </div>
-          <div>
-            ({t('tools.stakingRewards.from')} &nbsp;
-            <span style={{ color: '#23beb9' }}>{firstRewardDate}</span>&nbsp; {t('tools.stakingRewards.to')}{' '}
-            &nbsp;<span style={{ color: '#23beb9' }}>{lastRewardDate}</span>)
-          </div>
-        </InformationContent>
+        <div
+          style={{
+            boxSizing: 'border-box',
+            padding: width > breakWidth.pad ? '28.9px 0px 28.9px 0px' : '14px 0px 7px 0px',
+          }}
+        >
+          <InformationTitle>{t('tools.stakingRewards.totalRewards')}</InformationTitle>
+        </div>
+
+        <div
+          style={{
+            boxSizing: 'border-box',
+            padding: width > breakWidth.pad ? '28.9px 0px 28.9px 0px' : '14px 0px 7px 0px',
+          }}
+        >
+          <InformationContent>
+            <div style={{ margin: '0 16px 0 0' }}>
+              <span style={{ color: '#23beb9' }}>
+                {totalRewards.toFixed(4)} {chain}
+              </span>
+              &nbsp; / &nbsp;
+              {totalInFiat.toFixed(2)} {currency}
+            </div>
+            <div>
+              ({t('tools.stakingRewards.from')} &nbsp;
+              <span style={{ color: '#23beb9' }}>{firstRewardDate}</span>&nbsp; {t('tools.stakingRewards.to')}{' '}
+              &nbsp;<span style={{ color: '#23beb9' }}>{lastRewardDate}</span>)
+            </div>
+          </InformationContent>
+        </div>
       </InformationItem>
     </div>
   );
@@ -84,22 +116,21 @@ const HorizontalBar = styled.div`
 `;
 
 const InformationItem = styled.div`
-  height: 16px;
-  margin: 28.9px 0 28.9px 0px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 100%;
   font-family: Montserrat;
   font-size: 13px;
   font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.23;
-  letter-spacing: normal;
   text-align: left;
   color: white;
-  opacity: 1;
-  flex-direction: row;
-  align-items: center;
-  justify-content: left;
-  display: flex;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
 `;
 
 const InformationTitle = styled.div`

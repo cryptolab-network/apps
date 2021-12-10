@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 import CardHeader from '../../../../components/Card/CardHeader';
+import CardHeaderFullWidth from '../../../../components/Card/CardHeaderFullWidth';
 import IconInput from '../../../../components/Input/IconInput';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import { ReactComponent as EmptyStashIcon } from '../../../../assets/images/empty-staking-rewards.svg';
 import { ReactComponent as DownloadIcon } from '../../../../assets/images/download.svg';
 import { ReactComponent as FiltersIcon } from '../../../../assets/images/filter.svg';
 import SRRHeader from './SRRHeader';
-import { useCallback, useMemo, useState, useContext } from 'react';
+import { useCallback, useMemo, useState, useContext, useRef } from 'react';
 import StashInformation from './StashInformation';
 import { useEffect } from 'react';
 import { apiGetStashRewards, IStashRewards } from '../../../../apis/StashRewards';
@@ -25,6 +26,8 @@ import Dialog from '../../../../components/Dialog';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import SRRChart from './SRRChart';
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 
 interface ISRRFilters {
   stashId: string;
@@ -65,7 +68,7 @@ const ValidatorComponents = ({ chain, validators }) => {
         idx: any
       ) => {
         return (
-          <div style={{ marginBottom: 8 }}>
+          <div style={{ padding: 4, boxSizing: 'border-box' }} key={idx}>
             <ValidNominator
               address={v.id}
               name={v.identity.display}
@@ -88,11 +91,8 @@ const ValidatorComponents = ({ chain, validators }) => {
     return (
       <div
         style={{
-          padding: 4,
           display: 'flex',
-          justifyContent: 'space-between',
           flexWrap: 'wrap',
-          width: '85vw',
         }}
       >
         {validatorComponents}
@@ -302,13 +302,25 @@ const SRRContent = ({ filters }) => {
   if (state === State.EMPTY) {
     return (
       <EmptyStashIconLayout>
-        <EmptyStashIcon />
+        <div
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '0 8px 0 8x',
+          }}
+        >
+          <EmptyStashIcon />
+        </div>
+
         <EmptyStashDescription>{t('tools.stakingRewards.description')}</EmptyStashDescription>
       </EmptyStashIconLayout>
     );
   } else if (state === State.LOADED || state === State.LOADING_VALIDATORS) {
     return (
-      <>
+      <div style={{ width: '100%' }}>
         <Dialog
           isOpen={filterDialogVisible}
           handleDialogClose={() => {
@@ -318,47 +330,53 @@ const SRRContent = ({ filters }) => {
         >
           {FilterOptionsLayout}
         </Dialog>
-        <StashInformationLayout>
-          <StashInformation
-            stashId={filters.stashId}
-            stashData={stashData}
-            chain={chain}
-            currency={_filters.currency}
-          />
-        </StashInformationLayout>
+        <div style={{ boxSizing: 'border-box', padding: 4, maxWidth: '100%' }}>
+          <StashInformationLayout>
+            <StashInformation
+              stashId={filters.stashId}
+              stashData={stashData}
+              chain={chain}
+              currency={_filters.currency}
+            />
+          </StashInformationLayout>
+        </div>
 
         <ContentLayout>
-          <ContentItem>
-            <Toolbar>
-              <ToolbarLeft>Era Rewards</ToolbarLeft>
-              <ToolbarRight>
-                <Tooltip
-                  content={DownloadOptionsLayout}
-                  visible={showDownload}
-                  tooltipToggle={handleDownloadToggle}
-                >
-                  <DownloadIcon />
-                </Tooltip>
-                <div
-                  onClick={() => {
-                    handleDialogOpen('filters');
-                  }}
-                  style={{ cursor: 'pointer', marginLeft: '16px' }}
-                >
-                  <FiltersIcon />
-                </div>
-              </ToolbarRight>
-            </Toolbar>
-            <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
-          </ContentItem>
-          <ContentItem>
-            <SRRChartLayout>
-              <SRRChart stashData={stashData} chain={chain} />
-            </SRRChartLayout>
-          </ContentItem>
+          <ContentItemLayout>
+            <ContentItem>
+              <Toolbar>
+                <ToolbarLeft>Era Rewards</ToolbarLeft>
+                <ToolbarRight>
+                  <Tooltip
+                    content={DownloadOptionsLayout}
+                    visible={showDownload}
+                    tooltipToggle={handleDownloadToggle}
+                  >
+                    <DownloadIcon />
+                  </Tooltip>
+                  <div
+                    onClick={() => {
+                      handleDialogOpen('filters');
+                    }}
+                    style={{ cursor: 'pointer', marginLeft: '16px' }}
+                  >
+                    <FiltersIcon />
+                  </div>
+                </ToolbarRight>
+              </Toolbar>
+              <SRRTable currency={_filters.currency} stashData={stashData.eraRewards} />
+            </ContentItem>
+          </ContentItemLayout>
+          <ContentItemLayout>
+            <ContentItem>
+              <SRRChartLayout>
+                <SRRChart stashData={stashData} chain={chain} />
+              </SRRChartLayout>
+            </ContentItem>
+          </ContentItemLayout>
         </ContentLayout>
         <ValidatorComponents chain={chain} validators={validators} />
-      </>
+      </div>
     );
   } else if (state === State.LOADING) {
     return (
@@ -385,6 +403,12 @@ const SRRLayout = () => {
     currency: 'USD',
     startBalance: 0.1,
   });
+  const searchInputRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log('monitoring width: ', searchInputRef?.current?.offsetWidth);
+  }, []);
+
   const handleFilterChange = (name: string) => (e: { target: { value: any } }) => {
     switch (name) {
       case 'stashId':
@@ -397,31 +421,47 @@ const SRRLayout = () => {
 
   return (
     <SRRContentLayout>
-      <OptionBar>
-        <HeaderLayout>
-          <HeaderLeft>
-            <IconInput
-              Icon={Search}
-              iconSize="16px"
-              placeholder={t('tools.stakingRewards.optionBar.title')}
-              inputLength={512}
-              value={filters.stashId}
-              onChange={handleFilterChange('stashId')}
-            />
-          </HeaderLeft>
-        </HeaderLayout>
-      </OptionBar>
+      <div ref={searchInputRef} style={{ width: '100%' }}>
+        <OptionBar>
+          <HeaderLayout>
+            <HeaderLeft>
+              <IconInput
+                Icon={Search}
+                iconSize="16px"
+                placeholder={t('tools.stakingRewards.optionBar.title')}
+                inputLength={
+                  searchInputRef && searchInputRef.current && searchInputRef.current.offsetWidth
+                    ? searchInputRef.current.offsetWidth - 65
+                    : 180
+                }
+                value={filters.stashId}
+                onChange={handleFilterChange('stashId')}
+              />
+            </HeaderLeft>
+          </HeaderLayout>
+        </OptionBar>
+      </div>
       <SRRContent filters={filters} />
     </SRRContentLayout>
   );
 };
 
 const SRRStatus = () => {
-  return (
-    <CardHeader Header={() => <SRRHeader />} mainPadding="0 0 0 0">
-      <SRRLayout />
-    </CardHeader>
-  );
+  const { width } = useWindowDimensions();
+
+  if (width > breakWidth.pad) {
+    return (
+      <CardHeader Header={() => <SRRHeader />} mainPadding="0 0 0 0">
+        <SRRLayout />
+      </CardHeader>
+    );
+  } else {
+    return (
+      <CardHeaderFullWidth Header={() => <SRRHeader />} mainPadding="0 0 0 0">
+        <SRRLayout />
+      </CardHeaderFullWidth>
+    );
+  }
 };
 
 export default SRRStatus;
@@ -480,10 +520,11 @@ const EmptyStashDescription = styled.div`
 `;
 
 const StashInformationLayout = styled.div`
+  box-sizing: border-box;
+  width: 100%;
   border-radius: 6px;
   background-color: #2f3842;
   padding: 16px 16px 16px 16px;
-  margin: 8px 4px 4px 4px;
 `;
 
 const Toolbar = styled.div`
@@ -508,29 +549,35 @@ const ToolbarRight = styled.div`
 const ContentLayout = styled.div`
   width: 100%;
   display: flex;
-
-  flex-direction: row;
+  box-sizing: border-box;
   justify-content: center;
   align-items: center;
-  @media (max-width: 1395px) {
+  @media (max-width: 968px) {
     flex-direction: column;
-    width: calc(100% - 8px);
-    margin-left: 4px;
+  }
+`;
+
+const ContentItemLayout = styled.div`
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  @media (max-width: 968px) {
+    flex-direction: column;
+    overflow-x: scroll;
   }
 `;
 
 const ContentItem = styled.div`
-  flex: 1;
   width: 100%;
   height: 650px;
   border-radius: 6px;
   box-sizing: border-box;
   background-color: #2f3842;
   padding: 16px 16px 16px 16px;
-  margin: 4px 4px 4px 4px;
-  @media (max-width: 1395px) {
-    width: 100%;
-    margin: 4px 8px 4px 8px;
+  overflow-x: scroll;
+  @media (max-width: 968px) {
+    min-width: 650px;
   }
 `;
 
