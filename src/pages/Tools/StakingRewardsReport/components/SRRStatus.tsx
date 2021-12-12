@@ -403,11 +403,13 @@ const SRRLayout = () => {
     currency: 'USD',
     startBalance: 0.1,
   });
+  const [inputWidth, setInputWidth] = useState<number>();
   const searchInputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log('monitoring width: ', searchInputRef?.current?.offsetWidth);
-  }, []);
+    setInputWidth(searchInputRef?.current?.offsetWidth);
+  }, [searchInputRef?.current?.offsetWidth]);
 
   const handleFilterChange = (name: string) => (e: { target: { value: any } }) => {
     switch (name) {
@@ -429,11 +431,7 @@ const SRRLayout = () => {
                 Icon={Search}
                 iconSize="16px"
                 placeholder={t('tools.stakingRewards.optionBar.title')}
-                inputLength={
-                  searchInputRef && searchInputRef.current && searchInputRef.current.offsetWidth
-                    ? searchInputRef.current.offsetWidth - 65
-                    : 180
-                }
+                inputLength={inputWidth ? inputWidth - 61 : 180}
                 value={filters.stashId}
                 onChange={handleFilterChange('stashId')}
               />
