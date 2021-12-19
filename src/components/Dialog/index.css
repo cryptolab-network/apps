@@ -1,0 +1,32 @@
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.74);
+  z-index: 1100;
+}
+
+.Modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: 652px;
+  min-height: 493px;
+  max-height: 90vh;
+  overflow-y: scroll;
+  overflow-x: auto;
+  border: solid 1px #23beb9;
+  border-radius: 8px;
+  background-color: #18232f;
+}
+
+@media (max-width: 768px) {
+  .Modal {
+    width: calc(100% - 32px);
+  }
+}

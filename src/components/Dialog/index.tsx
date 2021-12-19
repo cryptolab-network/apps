@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Modal from 'react-modal';
 import styled from 'styled-components';
 import keys from '../../config/keys';
+import './index.css';
 
 interface IDialogWithImage {
   image?: any;
@@ -38,11 +39,12 @@ const Dialog: React.FC<IDialogWithImage> = ({
       bottom: 'auto',
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
-      minWidth: 'calc(100vw - 652)>0' ? '652px' : '90vw',
+      minWidth: 'calc(100vw - 652px) > 0px' ? '652px' : '90vw',
       minHeight: 'calc(100vh - 493)>0' ? '493px' : '70vh',
       maxWidth: '90vw',
       maxHeight: '90vh',
-      OverflowY: 'scroll',
+      overflowY: 'scroll',
+      overflowX: 'hidden',
       border: 'solid 1px #23beb9',
       borderRadius: 8,
       backgroundColor: '#18232f',
@@ -79,7 +81,9 @@ const Dialog: React.FC<IDialogWithImage> = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={handleDialogClose}
-      style={customStyles}
+      // style={customStyles}
+      className="Modal"
+      overlayClassName="Overlay"
       contentLabel=""
       ariaHideApp={false}
     >
@@ -99,6 +103,8 @@ interface IDialogMainLayout {
 }
 
 const DialogMainLayout = styled.div<IDialogMainLayout>`
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
   padding: ${(props) => (props.padding ? props.padding : '68px 16px 53px 16px')};
   display: flex;
   flex-direction: column;
