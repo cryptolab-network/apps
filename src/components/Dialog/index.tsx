@@ -22,35 +22,6 @@ const Dialog: React.FC<IDialogWithImage> = ({
   padding,
   children,
 }) => {
-  const customStyles = {
-    overlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.74)',
-      zIndex: 1100,
-    },
-    content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-      minWidth: 'calc(100vw - 652px) > 0px' ? '652px' : '90vw',
-      minHeight: 'calc(100vh - 493)>0' ? '493px' : '70vh',
-      maxWidth: '90vw',
-      maxHeight: '90vh',
-      overflowY: 'scroll',
-      overflowX: 'hidden',
-      border: 'solid 1px #23beb9',
-      borderRadius: 8,
-      backgroundColor: '#18232f',
-    },
-  };
-
   const imageDOM = useMemo(() => {
     return image ? <ImageContainer>{image}</ImageContainer> : null;
   }, [image]);
@@ -81,7 +52,6 @@ const Dialog: React.FC<IDialogWithImage> = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={handleDialogClose}
-      // style={customStyles}
       className="Modal"
       overlayClassName="Overlay"
       contentLabel=""
@@ -112,6 +82,7 @@ const DialogMainLayout = styled.div<IDialogMainLayout>`
 `;
 
 const ImageContainer = styled.div`
+  max-width: calc(100% - 32px);
   display: flex;
   justify-content: center;
   align-items: center;

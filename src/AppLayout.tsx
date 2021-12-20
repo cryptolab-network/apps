@@ -581,7 +581,7 @@ const AppLayout = () => {
     return (
       <>
         <DialogMainContainer>
-          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+          <DialogListContainer gap={true}>
             <div style={{ marginBottom: 12 }}>Polkadot</div>
             {polkadotValidator}
           </DialogListContainer>
@@ -624,7 +624,7 @@ const AppLayout = () => {
     return (
       <>
         <DialogMainContainer>
-          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+          <DialogListContainer gap={true}>
             <div style={{ marginBottom: 12 }}>Riot</div>
             <ul style={{ paddingLeft: 20 }}>
               <LiStyle>tanis_37:matrix.org</LiStyle>
@@ -651,7 +651,7 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
-          width: 'calc(100vw - 652)>0' ? '652px' : '90vw',
+          width: 'calc(100% - 32px)',
         }}
       >
         <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
@@ -1027,14 +1027,30 @@ const DialogMainContainer = styled.div`
   font-weight: bold;
   text-align: left;
   color: white;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
-const DialogListContainer = styled.span`
+interface IDialogListContainer {
+  gap?: boolean;
+}
+
+const DialogListContainer = styled.span<IDialogListContainer>`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   padding: 6px 50px 6px 50px;
+  border-right: ${(props) => (props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none')};
+  @media (max-width: 768px) {
+    box-sizing: border-box;
+    border-right: none;
+    border-bottom: ${(props) => (props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none')};
+    width: calc(100% - 16px);
+    padding: 16px 8px 16px 8px;
+  }
 `;
 
 const Validator = styled.div`
