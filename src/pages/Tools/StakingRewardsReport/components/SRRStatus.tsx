@@ -407,7 +407,6 @@ const SRRLayout = () => {
   const searchInputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('monitoring width: ', searchInputRef?.current?.offsetWidth);
     setInputWidth(searchInputRef?.current?.offsetWidth);
   }, [searchInputRef?.current?.offsetWidth]);
 

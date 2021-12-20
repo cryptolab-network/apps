@@ -40,10 +40,7 @@ const WalletSelect: React.FC = () => {
     borderColor: 'transparent',
     backgroundColor: 'transparent',
   };
-  console.log(
-    'btn width: ',
-    btnRef && btnRef.current && btnRef.current.offsetWidth ? btnRef.current.offsetWidth : 0
-  );
+
   const ulPropsCustom = {
     borderColor: 'blue',
     width: 248,
