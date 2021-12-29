@@ -55,7 +55,7 @@ import Wallet from './pages/Tools/components/Wallet';
 import MenuIcon from './components/MenuIcon';
 import Mobile from './pages/Mobile';
 
-import * as SC from './styles'
+import * as SC from './styles';
 
 // header
 const Header: React.FC = () => {
@@ -327,7 +327,9 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
                     setEmail(e.target.value);
                   }}
                 ></SC.Input>
-                <SC.SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SC.SubmitButton>
+                <SC.SubmitButton onClick={onSubscribeNewsletter}>
+                  {t('app.footer.title.subscribe')}
+                </SC.SubmitButton>
               </SC.TdDiv>
             </SC.ColumnDiv>
           </SC.PromoteContainer>
@@ -466,7 +468,9 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
                   setEmail(e.target.value);
                 }}
               ></SC.Input>
-              <SC.SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SC.SubmitButton>
+              <SC.SubmitButton onClick={onSubscribeNewsletter}>
+                {t('app.footer.title.subscribe')}
+              </SC.SubmitButton>
             </SC.TdDiv>
           </SC.ColumnDiv>
         </SC.TableDiv>
@@ -637,7 +641,16 @@ const AppLayout = () => {
           <SC.DialogListContainer>
             <div style={{ marginBottom: 12 }}>Github</div>
             <ul style={{ paddingLeft: 20 }}>
-              <SC.LiStyle>Https://github.com/crytolab-network</SC.LiStyle>
+              <SC.LiStyle>
+                <a
+                  style={{ color: 'inherit', textDecoration: 'inherit' }}
+                  href="https://github.com/cryptolab-network"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  https://github.com/cryptolab-network
+                </a>
+              </SC.LiStyle>
             </ul>
           </SC.DialogListContainer>
         </SC.DialogMainContainer>
