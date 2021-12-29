@@ -41,6 +41,7 @@ const CardContentLayout = styled.div`
   padding-top: 48px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
   :hover {
     background-color: #21ada9;
     border: solid 1px #23beb9;

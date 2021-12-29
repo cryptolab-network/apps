@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
 import { BrowserRouter, NavLink, Route, Switch, useLocation, useHistory } from 'react-router-dom';

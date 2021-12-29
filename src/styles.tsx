@@ -101,8 +101,7 @@ interface Td {
 export const TdDiv = styled.div<Td>`
   display: inline-flex;
   height: 3em;
-  justify-content: ${(props) =>
-    props.justify_content ? props.justify_content : 'left'};
+  justify-content: ${(props) => (props.justify_content ? props.justify_content : 'left')};
   align-items: ${(props) => (props.align_items ? props.align_items : 'center')};
   color: white;
   font-family: Montserrat;
@@ -133,6 +132,7 @@ export const LinkA = styled.a`
 export const DialogA = styled.span`
   color: white;
   text-decoration: none;
+  cursor: pointer;
   :hover {
     color: #23beb9;
   }
@@ -227,13 +227,11 @@ export const DialogListContainer = styled.span<IDialogListContainer>`
   justify-content: flex-start;
   align-items: flex-start;
   padding: 6px 50px 6px 50px;
-  border-right: ${(props) =>
-    props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'};
+  border-right: ${(props) => (props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none')};
   @media (max-width: 768px) {
     box-sizing: border-box;
     border-right: none;
-    border-bottom: ${(props) =>
-      props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'};
+    border-bottom: ${(props) => (props.gap ? '1px solid rgba(255, 255, 255, 0.2)' : 'none')};
     width: calc(100% - 16px);
     padding: 16px 8px 16px 8px;
   }
