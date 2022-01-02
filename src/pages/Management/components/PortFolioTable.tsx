@@ -95,9 +95,10 @@ const PortfolioTable = ({ chain, accounts, rewards }) => {
           moment(reward.eraRewards[reward.eraRewards.length - 1].timestamp),
           'days'
         );
-        const staked = (
-          parseInt(account[0].bonded, 16) / Math.pow(10, NetworkConfig[chain].decimals)
-        ).toFixed(4);
+        const staked =
+          account && account[0] && account[0].bonded
+            ? (parseInt(account[0].bonded, 16) / Math.pow(10, NetworkConfig[chain].decimals)).toFixed(4)
+            : '0';
         acc.push({
           stash: reward.stash,
           staked: staked,
