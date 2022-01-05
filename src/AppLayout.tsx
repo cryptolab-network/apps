@@ -1,17 +1,19 @@
 import { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import Button from './components/Button';
 import NetworkWallet from './components/NetworkWallet';
-import { BrowserRouter, NavLink, Route, Switch, useLocation } from 'react-router-dom';
+import { BrowserRouter, NavLink, Route, Switch, useLocation, useHistory } from 'react-router-dom';
 import Portal from './pages/Portal';
 import { ReactComponent as CryptoLabLogo } from './assets/images/main-horizontal-color-logo.svg';
 import { ReactComponent as CryptoLabToolsLogo } from './assets/images/tools-logo.svg';
+import { ReactComponent as CryptoLabToolsLogoShrink } from './assets/images/tools-logo-shrink.svg';
+import { ReactComponent as CryptoLabLogoShrink } from './assets/images/main-color-logo-shrink.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
 // import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
 import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
+import { ReactComponent as DropDownIcon } from './assets/images/dropdown.svg';
 import './css/AppLayout.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -43,23 +45,46 @@ import Identicon from '@polkadot/react-identicon';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { useTranslation } from 'react-i18next';
 import { isMobile } from 'react-device-detect';
-import Mobile from './pages/Mobile';
 import DropdownCommon from './components/Dropdown/Common';
 import { initGA } from './utils/ga';
+import useWindowDimensions from './hooks/useWindowDimensions';
+import { breakWidth } from './utils/constants/layout';
+import SideMenu from './components/SideMenu';
 import Wallet from './pages/Tools/components/Wallet';
+import MenuIcon from './components/MenuIcon';
+import Mobile from './pages/Mobile';
+
+import * as SC from './styles';
 
 // header
 const Header: React.FC = () => {
   let { pathname } = useLocation();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+
   return (
-    <HeaderDiv>
-      <HeaderLeftDiv>
+    <SC.HeaderDiv>
+      <SC.HeaderLeftDiv>
         <NavLink exact to="/">
-          <CryptoLabLogo />
+          {width > breakWidth.mobile && width <= breakWidth.pad ? <CryptoLabLogoShrink /> : <CryptoLabLogo />}
         </NavLink>
-      </HeaderLeftDiv>
-      <HeaderMidDiv>
+      </SC.HeaderLeftDiv>
+      <SC.HeaderMidDiv>
+        {/*
+          // TODO: the comment code below would be used in RWD feature
+         {width > breakWidth.mobile ? (
+          <>
+            <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
+              {t('app.title.stakingGuide')}
+            </NavLink>
+            <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioBenchmark')}
+            </NavLink>
+            <NavLink to="/management" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioManagement')}
+            </NavLink>
+          </>
+        ) : null} */}
         <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
           {t('app.title.stakingGuide')}
         </NavLink>
@@ -69,8 +94,17 @@ const Header: React.FC = () => {
         <NavLink to="/management" className="header-item" activeClassName="header-item-active">
           {t('app.title.portfolioManagement')}
         </NavLink>
-      </HeaderMidDiv>
-      <HeaderRightDiv>
+      </SC.HeaderMidDiv>
+      <SC.HeaderRightDiv>
+        {/* {width <= breakWidth.mobile ? (
+          <SideMenuIcon />
+        ) : pathname !== '/' ? (
+          <NetworkWallet />
+        ) : (
+          <NavLink to="/benchmark">
+            <Button title={t('app.title.useBenchmark')} />
+          </NavLink>
+        )} */}
         {pathname !== '/' ? (
           <NetworkWallet />
         ) : (
@@ -78,37 +112,93 @@ const Header: React.FC = () => {
             <Button title={t('app.title.useBenchmark')} />
           </NavLink>
         )}
-      </HeaderRightDiv>
-    </HeaderDiv>
+      </SC.HeaderRightDiv>
+    </SC.HeaderDiv>
   );
 };
 
 // tools header
-const ToolsHeader: React.FC = () => {
+
+interface IToolsHeader {
+  handleSideMenuToggle: React.MouseEventHandler<SVGSVGElement>;
+}
+const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
+  let { pathname } = useLocation();
   const { t } = useTranslation();
-  return (
-    <HeaderDiv>
-      <HeaderLeftDiv>
+  const { width } = useWindowDimensions();
+  const history = useHistory();
+
+  const toolsHeaderLeftDOM = useMemo(() => {
+    if (width <= breakWidth.mobile && pathname !== '/') {
+      return (
+        <div
+          onClick={() => {
+            history.goBack();
+          }}
+        >
+          <DropDownIcon style={{ stroke: 'white', width: 10, height: 20, transform: 'rotate(180deg)' }} />
+        </div>
+      );
+    } else {
+      return (
         <NavLink exact to="/">
-          <CryptoLabToolsLogo />
+          {width > breakWidth.mobile && width <= breakWidth.pad ? (
+            <CryptoLabLogoShrink />
+          ) : width <= breakWidth.mobile ? (
+            <CryptoLabToolsLogoShrink />
+          ) : (
+            <CryptoLabToolsLogo />
+          )}
         </NavLink>
-      </HeaderLeftDiv>
-      <HeaderMidDiv>
-        <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.valnom')}
+      );
+    }
+  }, [history, pathname, width]);
+
+  const toolsHeaderMidDOM = useMemo(() => {
+    if (width > breakWidth.mobile) {
+      return (
+        <>
+          <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.valnom')}
+          </NavLink>
+          <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.oneKvMonitor')}
+          </NavLink>
+          <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
+            {t('tools.title.stakingRewards')}
+          </NavLink>
+        </>
+      );
+    } else {
+      if (pathname.includes('/valnom') || pathname.includes('/validator')) {
+        return <SC.MobileHeaderTitle>{t('tools.title.valnom')}</SC.MobileHeaderTitle>;
+      } else if (pathname.includes('/onekv')) {
+        return <SC.MobileHeaderTitle>{t('tools.title.oneKvMonitor')}</SC.MobileHeaderTitle>;
+      } else if (pathname.includes('/rewards')) {
+        return <SC.MobileHeaderTitle>{t('tools.title.stakingRewards')}</SC.MobileHeaderTitle>;
+      }
+    }
+  }, [pathname, t, width]);
+
+  return (
+    <SC.HeaderDiv>
+      <SC.HeaderLeftDiv>
+        <NavLink exact to="/">
+          {toolsHeaderLeftDOM}
         </NavLink>
-        <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.oneKvMonitor')}
-        </NavLink>
-        <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-          {t('tools.title.stakingRewards')}
-        </NavLink>
-      </HeaderMidDiv>
-      <HeaderRightDiv>
-        <Network />
-        <Wallet />
-      </HeaderRightDiv>
-    </HeaderDiv>
+      </SC.HeaderLeftDiv>
+      <SC.HeaderMidDiv>{toolsHeaderMidDOM}</SC.HeaderMidDiv>
+      <SC.HeaderRightDiv>
+        {width <= breakWidth.mobile ? (
+          <MenuIcon onClick={handleSideMenuToggle} />
+        ) : (
+          <>
+            <Network />
+            {!isMobile ? <Wallet /> : null}
+          </>
+        )}
+      </SC.HeaderRightDiv>
+    </SC.HeaderDiv>
   );
 };
 
@@ -143,6 +233,7 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
   const defaultLng = localStorage.getItem('i18nextLng');
   const lng = languageOptions.find((l) => l.value === defaultLng);
   const [language, setLanguage] = useState<ILanguage>(lng ? lng : { label: 'English', value: 'en' });
+  const { width } = useWindowDimensions();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -207,141 +298,212 @@ const Footer: React.FC<IFooter> = ({ handleDialogOpen }) => {
         });
       });
   };
-  return (
-    <>
-      <TableDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.general')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('aboutus');
-              }}
+  if (width <= breakWidth.mobile) {
+    return (
+      <>
+        <div style={{ height: 88 }} />
+        <SC.PromoteDiv>
+          <SC.PromoteContainer>
+            <SC.ColumnDiv>
+              <SC.TdDiv justify_content="flex-start">
+                <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                  <SC.SocialMediaWrapper>
+                    <TwitterIcon width="36px" height="36px" />
+                  </SC.SocialMediaWrapper>
+                </a>
+                <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                  <SC.SocialMediaWrapper>
+                    <GithubIcon width="36px" height="36px" />
+                  </SC.SocialMediaWrapper>
+                </a>
+              </SC.TdDiv>
+              <SC.TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</SC.TdDiv>
+              <SC.TdDiv justify_content="center">
+                <SC.Input
+                  placeholder={t('app.footer.title.enterEmail')}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                ></SC.Input>
+                <SC.SubmitButton onClick={onSubscribeNewsletter}>
+                  {t('app.footer.title.subscribe')}
+                </SC.SubmitButton>
+              </SC.TdDiv>
+            </SC.ColumnDiv>
+          </SC.PromoteContainer>
+        </SC.PromoteDiv>
+        <div style={{ height: 40 }} />
+
+        <SC.CopyRightMobilleDiv>
+          <SC.CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
             >
-              {t('app.footer.title.about')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('contactus');
-              }}
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
             >
-              {t('app.footer.title.contact')}
-            </DialogA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <DialogA
-              onClick={() => {
-                handleDialogOpen('validators');
-              }}
-            >
-              {t('app.footer.title.ourValidators')}
-            </DialogA>
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <ThDiv>{t('app.footer.title.technology')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={staking_url}>{t('app.footer.title.stakingService')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</LinkA>
-          </TdDiv>
-          {/* <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
-          </TdDiv> */}
-        </ColumnDiv>
-        {/* <ColumnDiv>
-          <ThDiv>{t('app.footer.title.community')}</ThDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
-          </TdDiv>
-          <TdDiv>
-            <DotDiv />
-            <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
-          </TdDiv>
-        </ColumnDiv> */}
-        <ColumnDiv style={{ minWidth: '85px' }}>
-          <ThDiv>{t('app.footer.title.language')}</ThDiv>
-          <TdDiv>
-            <DropdownCommon
-              style={{ flex: 1, width: '100%' }}
-              options={languageOptions}
-              value={language}
-              onChange={handleLanguageChange}
-              theme="dark"
-            />
-          </TdDiv>
-        </ColumnDiv>
-        <ColumnDiv>
-          <TdDiv justify_content="flex-start">
-            <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <TwitterIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
-              <SocialMediaWrapper>
-                <GithubIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </SC.CopyRightTitleDiv>
+        </SC.CopyRightMobilleDiv>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <SC.TableDiv>
+          <SC.ColumnDiv>
+            <SC.ThDiv>{t('app.footer.title.general')}</SC.ThDiv>
+            <SC.TdDiv>
+              <SC.DotDiv />
+              <SC.DialogA
+                onClick={() => {
+                  handleDialogOpen('aboutus');
+                }}
+              >
+                {t('app.footer.title.about')}
+              </SC.DialogA>
+            </SC.TdDiv>
+            <SC.TdDiv>
+              <SC.DotDiv />
+              <SC.DialogA
+                onClick={() => {
+                  handleDialogOpen('contactus');
+                }}
+              >
+                {t('app.footer.title.contact')}
+              </SC.DialogA>
+            </SC.TdDiv>
+            <SC.TdDiv>
+              <SC.DotDiv />
+              <SC.DialogA
+                onClick={() => {
+                  handleDialogOpen('validators');
+                }}
+              >
+                {t('app.footer.title.ourValidators')}
+              </SC.DialogA>
+            </SC.TdDiv>
+          </SC.ColumnDiv>
+          <SC.ColumnDiv>
+            <SC.ThDiv>{t('app.footer.title.technology')}</SC.ThDiv>
+            <SC.TdDiv>
+              <SC.DotDiv />
+              <SC.LinkA href={staking_url}>{t('app.footer.title.stakingService')}</SC.LinkA>
+            </SC.TdDiv>
+            <SC.TdDiv>
+              <SC.DotDiv />
+              <SC.LinkA href={tools_url}>{t('app.footer.title.toolsForValidators')}</SC.LinkA>
+            </SC.TdDiv>
+            {/* <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.telegramBots')}</LinkA>
+            </TdDiv> */}
+          </SC.ColumnDiv>
+          {/* <ColumnDiv>
+            <ThDiv>{t('app.footer.title.community')}</ThDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.blog')}</LinkA>
+            </TdDiv>
+            <TdDiv>
+              <DotDiv />
+              <LinkA href="#">{t('app.footer.title.medium')}</LinkA>
+            </TdDiv>
+          </ColumnDiv> */}
+          <SC.ColumnDiv style={{ minWidth: '85px' }}>
+            <SC.ThDiv>{t('app.footer.title.language')}</SC.ThDiv>
+            <SC.TdDiv>
+              <DropdownCommon
+                style={{ flex: 1, width: '100%' }}
+                options={languageOptions}
+                value={language}
+                onChange={handleLanguageChange}
+                theme="dark"
+              />
+            </SC.TdDiv>
+          </SC.ColumnDiv>
+          <SC.ColumnDiv>
+            <SC.TdDiv justify_content="flex-start">
+              <a href="https://twitter.com/CryptolabN" rel="noreferrer" target="_blank">
+                <SC.SocialMediaWrapper>
+                  <TwitterIcon width="36px" height="36px" />
+                </SC.SocialMediaWrapper>
+              </a>
+              <a href="https://github.com/cryptolab-network" rel="noreferrer" target="_blank">
+                <SC.SocialMediaWrapper>
+                  <GithubIcon width="36px" height="36px" />
+                </SC.SocialMediaWrapper>
+              </a>
+              {/* <a href="#">
+                <SocialMediaWrapper>
+                  <YoutubeIcon width="36px" height="36px" />
+                </SocialMediaWrapper>
+              </a> */}
+            </SC.TdDiv>
+            <SC.TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</SC.TdDiv>
+            <SC.TdDiv justify_content="center">
+              <SC.Input
+                placeholder={t('app.footer.title.enterEmail')}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              ></SC.Input>
+              <SC.SubmitButton onClick={onSubscribeNewsletter}>
+                {t('app.footer.title.subscribe')}
+              </SC.SubmitButton>
+            </SC.TdDiv>
+          </SC.ColumnDiv>
+        </SC.TableDiv>
+        <SC.CopyRightDiv>
+          <SC.CopyRightTitleDiv>
+            @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
+            <a
+              href="https://www.iubenda.com/terms-and-conditions/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
+              title="Terms and Conditions "
+            >
+              T&C
+            </a>{' '}
+            &nbsp;| &nbsp;
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+            <a
+              href="https://www.iubenda.com/privacy-policy/37411829"
+              style={{ textDecoration: 'none', color: 'white' }}
+              className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
+              title={t('app.footer.title.privacyPolicy')}
+            >
+              {t('app.footer.title.privacyPolicy')}
             </a>
-            {/* <a href="#">
-              <SocialMediaWrapper>
-                <YoutubeIcon width="36px" height="36px" />
-              </SocialMediaWrapper>
-            </a> */}
-          </TdDiv>
-          <TdDiv align_items="flex-end">{t('app.footer.title.subscribeDescription')}</TdDiv>
-          <TdDiv justify_content="center">
-            <Input
-              placeholder={t('app.footer.title.enterEmail')}
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            ></Input>
-            <SubmitButton onClick={onSubscribeNewsletter}>{t('app.footer.title.subscribe')}</SubmitButton>
-          </TdDiv>
-        </ColumnDiv>
-      </TableDiv>
-      <CopyRightDiv>
-        <CopyRightTitleDiv>
-          @ 2021. Made with ❤️ &nbsp; by CryptoLab &nbsp;| &nbsp;
-          <a
-            href="https://www.iubenda.com/terms-and-conditions/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iubenda-noiframe "
-            title="Terms and Conditions "
-          >
-            T&C
-          </a>{' '}
-          &nbsp;| &nbsp;
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-          <a
-            href="https://www.iubenda.com/privacy-policy/37411829"
-            style={{ textDecoration: 'none', color: 'white' }}
-            className="iubenda-nostyle no-brand iubenda-noiframe iubenda-embed iub-legal-only iubenda-noiframe "
-            title={t('app.footer.title.privacyPolicy')}
-          >
-            {t('app.footer.title.privacyPolicy')}
-          </a>
-          <Helmet>
-            <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
-          </Helmet>
-        </CopyRightTitleDiv>
-      </CopyRightDiv>
-    </>
-  );
+            <Helmet>
+              <script type="text/javascript">{`(function (w,d) {var loader = function () {var s = d.createElement("script"), tag = d.getElementsByTagName("script")[0]; s.src="https://cdn.iubenda.com/iubenda.js"; tag.parentNode.insertBefore(s,tag);}; if(w.addEventListener){w.addEventListener("load", loader, false);}else if(w.attachEvent){w.attachEvent("onload", loader);}else{w.onload = loader;}})(window, document);`}</script>
+            </Helmet>
+          </SC.CopyRightTitleDiv>
+        </SC.CopyRightDiv>
+      </>
+    );
+  }
 };
 
 // main applayout, include star animation and light gradient
@@ -353,6 +515,7 @@ const AppLayout = () => {
   const [visibleOurValidatorsDialog, setVisibleOurValidatorsDialog] = useState(false);
   const [visibleContactUsDialog, setVisibleContactUsDialog] = useState(false);
   const [visibleAboutUsDialog, setVisibleAboutUsDialog] = useState(false);
+  const [visibleSideMenu, setVisibleSideMenu] = useState(false);
 
   const handleDialogClose = (name) => {
     switch (name) {
@@ -384,11 +547,15 @@ const AppLayout = () => {
 
   const ValidatorNode: React.FC<IValidator> = ({ name, address, theme }) => {
     return (
-      <Validator>
+      <SC.Validator>
         <Identicon value={address} size={35} theme={theme} />
         <span style={{ marginLeft: 8 }}>{name}</span>
-      </Validator>
+      </SC.Validator>
     );
+  };
+
+  const handleSideMenuToggle = () => {
+    setVisibleSideMenu((prev) => !prev);
   };
 
   const ourValidatorsDOM = useMemo(() => {
@@ -419,16 +586,16 @@ const AppLayout = () => {
 
     return (
       <>
-        <DialogMainContainer>
-          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+        <SC.DialogMainContainer>
+          <SC.DialogListContainer gap={true}>
             <div style={{ marginBottom: 12 }}>Polkadot</div>
             {polkadotValidator}
-          </DialogListContainer>
-          <DialogListContainer>
+          </SC.DialogListContainer>
+          <SC.DialogListContainer>
             <div style={{ marginBottom: 12 }}>Kusama</div>
             {kusamaValidator}
-          </DialogListContainer>
-        </DialogMainContainer>
+          </SC.DialogListContainer>
+        </SC.DialogMainContainer>
         <div
           style={{
             width: '100%',
@@ -462,21 +629,30 @@ const AppLayout = () => {
   const contactUsDOM = useMemo(() => {
     return (
       <>
-        <DialogMainContainer>
-          <DialogListContainer style={{ borderRight: '1px solid rgba(255, 255, 255, 0.2)' }}>
+        <SC.DialogMainContainer>
+          <SC.DialogListContainer gap={true}>
             <div style={{ marginBottom: 12 }}>Riot</div>
             <ul style={{ paddingLeft: 20 }}>
-              <LiStyle>tanis_37:matrix.org</LiStyle>
-              <LiStyle>yaohsin:matrix.org</LiStyle>
+              <SC.LiStyle>tanis_37:matrix.org</SC.LiStyle>
+              <SC.LiStyle>yaohsin:matrix.org</SC.LiStyle>
             </ul>
-          </DialogListContainer>
-          <DialogListContainer>
+          </SC.DialogListContainer>
+          <SC.DialogListContainer>
             <div style={{ marginBottom: 12 }}>Github</div>
             <ul style={{ paddingLeft: 20 }}>
-              <LiStyle>Https://github.com/crytolab-network</LiStyle>
+              <SC.LiStyle>
+                <a
+                  style={{ color: 'inherit', textDecoration: 'inherit' }}
+                  href="https://github.com/cryptolab-network"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  https://github.com/cryptolab-network
+                </a>
+              </SC.LiStyle>
             </ul>
-          </DialogListContainer>
-        </DialogMainContainer>
+          </SC.DialogListContainer>
+        </SC.DialogMainContainer>
       </>
     );
   }, []);
@@ -490,17 +666,15 @@ const AppLayout = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
-          width: 'calc(100vw - 652)>0' ? '652px' : '90vw',
+          width: 'calc(100% - 32px)',
         }}
       >
-        <AboutUsFontStyle>{t('about.description')}</AboutUsFontStyle>
-        {/* <AboutUsFontStyle>{t('about.subDescription1')}</AboutUsFontStyle>
-        <AboutUsFontStyle>{t('about.subDescription2')}</AboutUsFontStyle> */}
+        <SC.AboutUsFontStyle>{t('about.description')}</SC.AboutUsFontStyle>
         <div style={{ marginTop: 34, textAlign: 'left' }}>
-          <AboutUsFontStyle>{t('about.mission')}</AboutUsFontStyle>
+          <SC.AboutUsFontStyle>{t('about.mission')}</SC.AboutUsFontStyle>
           <ul style={{ paddingLeft: 20 }}>
-            <AboutUsGoalFontStyle>{t('about.mission1')}</AboutUsGoalFontStyle>
-            <AboutUsGoalFontStyle>{t('about.mission2')}</AboutUsGoalFontStyle>
+            <SC.AboutUsGoalFontStyle>{t('about.mission1')}</SC.AboutUsGoalFontStyle>
+            <SC.AboutUsGoalFontStyle>{t('about.mission2')}</SC.AboutUsGoalFontStyle>
           </ul>
         </div>
       </div>
@@ -509,7 +683,7 @@ const AppLayout = () => {
 
   const headerDOM = useMemo(() => {
     if (isToolsSite) {
-      return <ToolsHeader />;
+      return <ToolsHeader handleSideMenuToggle={handleSideMenuToggle} />;
     }
     return <Header />;
   }, [isToolsSite]);
@@ -523,9 +697,6 @@ const AppLayout = () => {
           <Route path="/validator/:id/:chain" component={ValidatorStatus} />
           <Route path="/onekv" component={OneKV} />
           <Route path="/rewards" component={StakingRewardsReport} />
-          {/* <Route path="/contact" component={Contact} /> */}
-          {/* <Route path="/ourValidators" component={OurValidators} /> */}
-          {/* <Route path="/about" component={About} /> */}
         </Switch>
       );
     }
@@ -559,7 +730,15 @@ const AppLayout = () => {
     return (
       <>
         {headerDOM}
-        <RouteContent>
+        <SC.RouteContent>
+          <SideMenu
+            isOpen={visibleSideMenu}
+            handleClose={handleSideMenuToggle}
+            handleDialogOpen={(name) => {
+              handleDialogOpen(name);
+            }}
+            handleSideMenuToggle={handleSideMenuToggle}
+          />
           <Dialog
             image={<PeopleIcon />}
             title={t('app.footer.title.ourValidators')}
@@ -602,7 +781,7 @@ const AppLayout = () => {
             pauseOnHover
           />
           {switchtDOM}
-        </RouteContent>
+        </SC.RouteContent>
         <HelmetProvider>
           <Footer
             handleDialogOpen={(name) => {
@@ -622,16 +801,10 @@ const AppLayout = () => {
     visibleAboutUsDialog,
     visibleContactUsDialog,
     visibleOurValidatorsDialog,
+    visibleSideMenu,
   ]);
 
-  if (isMobile) {
-    if (isToolsSite) {
-      return (
-        <>
-          <Mobile isTools={true} />
-        </>
-      );
-    }
+  if (isMobile && !isToolsSite) {
     return (
       <>
         <Mobile isTools={false} />
@@ -640,7 +813,7 @@ const AppLayout = () => {
   } else {
     return (
       <>
-        <GradientLight>
+        <SC.GradientLight>
           <BrowserRouter>
             {isToolsSite ? (
               <Api>
@@ -652,12 +825,12 @@ const AppLayout = () => {
           </BrowserRouter>
           {process.env.REACT_APP_NODE_ENV === 'production' ? (
             <>
-              <StarAnimation id="stars" />
-              <StarAnimation id="stars2" />
-              <StarAnimation id="stars3" />
+              <SC.StarAnimation id="stars" />
+              <SC.StarAnimation id="stars2" />
+              <SC.StarAnimation id="stars3" />
             </>
           ) : null}
-        </GradientLight>
+        </SC.GradientLight>
       </>
     );
   }
@@ -666,251 +839,3 @@ const AppLayout = () => {
 export default AppLayout;
 
 AppLayout.prototype = {};
-
-const HeaderDiv = styled.div`
-  height: 96px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 30px;
-  padding-left: 30px;
-  background-color: transparent;
-`;
-
-const RouteContent = styled.div`
-  display: flex;
-  // height: 100%;
-  min-height: calc(100vh - 344px - 64px - 96px);
-  overflow-y: visible;
-`;
-
-const HeaderLeftDiv = styled.div`
-  flex: 2;
-  display: flex;
-  justify-content: flex-start;
-`;
-
-const HeaderMidDiv = styled.div`
-  display: flex;
-  justify-content: center;
-  flex-grow: 1;
-  ul li {
-    display: inline;
-  }
-`;
-
-const HeaderRightDiv = styled.div`
-  flex: 2;
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const StarAnimation = styled.div`
-  position: absolute;
-  z-index: -100;
-  overflow-y: hidden;
-`;
-
-const GradientLight = styled.div`
-  width: 100%;
-  position: absolute;
-  z-index: 100;
-  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-`;
-
-const TableDiv = styled.div`
-  display: flex;
-  flex-flow: row;
-  justify-content: space-between;
-  height: 224px;
-  margin: auto;
-  margin-top: 80px;
-  padding: 20px 15% 20px 15%;
-  width: auto;
-  @media (min-width: 1000px) {
-    width: 70%;
-  }
-  @media (max-width: 1000px) {
-    width: 90%;
-    padding: 0px;
-  }
-`;
-
-const ColumnDiv = styled.div`
-  display: flex;
-  flex-flow: column;
-  justify-content: flex-start;
-  align-items: left;
-  // border: 1px solid green;
-`;
-
-const ThDiv = styled.div`
-  display: flex;
-  height: 3em;
-  text-align: center;
-  color: white;
-  font-family: Montserrat;
-  font-size: 16px;
-  font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  // border: 1px solid red;
-`;
-
-interface Td {
-  justify_content?: string;
-  align_items?: string;
-}
-
-const TdDiv = styled.div<Td>`
-  display: inline-flex;
-  height: 3em;
-  justify-content: ${(props) => (props.justify_content ? props.justify_content : 'left')};
-  align-items: ${(props) => (props.align_items ? props.align_items : 'center')};
-  color: white;
-  font-family: Montserrat;
-  font-size: 14px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.29;
-  letter-spacing: normal;
-  // border: 1px solid red;
-`;
-
-const DotDiv = styled.div`
-  width: 4px;
-  height: 4px;
-  margin: 7px;
-  background-color: #23beb9;
-`;
-
-const LinkA = styled.a`
-  color: white;
-  text-decoration: none;
-  :hover {
-    color: #23beb9;
-  }
-`;
-
-const DialogA = styled.span`
-  color: white;
-  text-decoration: none;
-  :hover {
-    color: #23beb9;
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  height: 70%;
-  margin: 0;
-  padding: 0 0 0 12px;
-  opacity: 1;
-  border-radius: 4px 0px 0px 4px;
-  border: solid 1px #1faaa6;
-  background-color: #141b26;
-  color: white;
-`;
-
-const SubmitButton = styled.button`
-  min-width: fit-content;
-  height: 75%;
-  margin: 0;
-  border: 0;
-  padding: 7px 15px 7.6px 12.6px;
-  opacity: 1;
-  background-color: #1faaa6;
-  border-radius: 0px 4px 4px 0px;
-  color: white;
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.23;
-`;
-const CopyRightDiv = styled.div`
-  width: 100%;
-  margin: 0px;
-  padding: 25px 0px 25px;
-  background-color: #0d1119;
-  // position: fixed;
-  // bottom: 0px;
-  // z-index: 99;
-`;
-
-const CopyRightTitleDiv = styled.div`
-  height: 16px;
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: bold;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.23;
-  letter-spacing: normal;
-  color: white;
-  text-align: center;
-`;
-
-const SocialMediaWrapper = styled.div`
-  margin-right: 15px;
-`;
-
-const DialogMainContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  font-family: Montserrat;
-  font-size: 20px;
-  font-weight: bold;
-  text-align: left;
-  color: white;
-`;
-
-const DialogListContainer = styled.span`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 6px 50px 6px 50px;
-`;
-
-const Validator = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 6px 0px 6px 0px;
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: bold;
-
-  text-align: left;
-  color: #23beb9;
-`;
-
-const LiStyle = styled.li`
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: left;
-  color: #23beb9;
-  margin-top: 3px;
-  margin-bottom: 3px;
-`;
-
-const AboutUsFontStyle = styled.div`
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: left;
-  color: white;
-`;
-
-const AboutUsGoalFontStyle = styled.li`
-  font-family: Montserrat;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: left;
-  color: #1faaa6;
-  margin-top: 6px;
-  margin-bottom: 6px;
-`;

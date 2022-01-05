@@ -9,6 +9,9 @@ import ScaleLoader from 'react-spinners/ScaleLoader';
 import { isEmpty } from '../../../../utils/helper';
 import { ReactComponent as DropDownIcon } from '../../../../assets/images/dropdown.svg';
 import { useTranslation } from 'react-i18next';
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
+import './index.css';
 
 const Wallet = () => {
   const { t } = useTranslation();
@@ -16,6 +19,8 @@ const Wallet = () => {
     useContext(DataContext);
   const [isOpen, setOpen] = useState(false);
   const btnRef = useRef<HTMLDivElement>(null);
+
+  const { width } = useWindowDimensions();
 
   const close = () => {
     setOpen(false);
@@ -28,7 +33,7 @@ const Wallet = () => {
   };
   const ulPropsCustom = {
     borderColor: 'blue',
-    width: btnRef && btnRef.current && btnRef.current.offsetWidth ? btnRef.current.offsetWidth : 50,
+    width: 248,
   };
 
   const { renderLayer, triggerProps, layerProps, arrowProps } = useLayer({
@@ -144,25 +149,17 @@ const Wallet = () => {
     } else if (selectedAccount && !isEmpty(selectedAccount)) {
       return (
         <>
-          <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-          <WalletLayout>
-            <div>{selectedAccount.name}</div>
-            {/* <div> */}
-            {/* <span style={{ color: '#75818d' }}>Balance : </span> */}
-            {/* <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle> */}
-            {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-            {/* <BalanceNumber>123</BalanceNumber> */}
-            {/* </div> */}
-          </WalletLayout>
-          <div style={{ width: 40 }}>
-            <DropDownIcon
-              style={{
-                stroke: 'black',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transitionDuration: '0.2s',
-              }}
-            />
-          </div>
+          <Identicon value={selectedAccount.address} size={36} theme={'polkadot'} />
+          {width > breakWidth.pad ? (
+            <WalletLayout>
+              <div>{selectedAccount.name}</div>
+            </WalletLayout>
+          ) : null}
+          {/* {width > breakWidth.mobile && width <= breakWidth.pad ? null : (
+            <WalletLayout>
+              <div>{selectedAccount.name}</div>
+            </WalletLayout>
+          )} */}
         </>
       );
     } else if (selectedAccount && isEmpty(selectedAccount)) {
@@ -170,13 +167,24 @@ const Wallet = () => {
       return <Hint>No Account</Hint>;
     } else {
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, isOpen, notifyWarn, t]);
+  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, width, notifyWarn, t]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
         <Button {...triggerProps} onClick={handleClick}>
           {walletDisplayDOM}
+          {width > breakWidth.pad ? (
+            <div style={{ width: 40 }}>
+              <DropDownIcon
+                style={{
+                  stroke: 'black',
+                  transform: isOpen ? 'rotate(90deg)' : 'none',
+                  transitionDuration: '0.2s',
+                }}
+              />
+            </div>
+          ) : null}
         </Button>
       </ButtonLayout>
       {renderLayer(
@@ -223,6 +231,9 @@ const Button = styled.button`
   justify-content: flex-start;
   align-items: center;
   padding: 4px;
+  @media (max-width: 968px) {
+    min-width: 0px;
+  }
 `;
 
 const Hint = styled.div`

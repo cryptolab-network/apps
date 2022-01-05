@@ -3,78 +3,75 @@ import { IStashRewards } from '../../apis/StashRewards';
 import { IAccountChainInfo } from '../../utils/account';
 import dayjs from 'dayjs';
 
-export interface IStashRewardsCache {
+export interface IPerformanceCache {
   kusama: {
-    data: (IStashRewards | null)[];
+    rewardsData: (IStashRewards | null)[];
+    accountsData: IAccountChainInfo[];
     expireTime: dayjs.Dayjs | null;
   };
   polkadot: {
-    data: (IStashRewards | null)[];
+    rewardsData: (IStashRewards | null)[];
+    accountsData: IAccountChainInfo[];
     expireTime: dayjs.Dayjs | null;
   };
   westend: {
-    data: (IStashRewards | null)[];
-    expireTime: dayjs.Dayjs | null;
-  };
-}
-
-export interface IAccountChainInfoCache {
-  kusama: {
-    data: IAccountChainInfo[];
-    expireTime: dayjs.Dayjs | null;
-  };
-  polkadot: {
-    data: IAccountChainInfo[];
-    expireTime: dayjs.Dayjs | null;
-  };
-  westend: {
-    data: IAccountChainInfo[];
+    rewardsData: (IStashRewards | null)[];
+    accountsData: IAccountChainInfo[];
     expireTime: dayjs.Dayjs | null;
   };
 }
 
 export interface IPPProps {
-  stashRewardsCache: IStashRewardsCache;
-  cacheStashRewards: Function;
-  accountChainInfo: IAccountChainInfoCache;
-  cacheAccountChainInfo: Function;
+  performanceCache: IPerformanceCache;
+  cachePerformance: Function;
+  isPerformanceCacheValid: Function;
 }
 
 export const ManagementPageCacheContext = React.createContext({} as unknown as IPPProps);
 
 const ManagementPageCache: React.FC = (props) => {
-  const [stashRewardsCache, setStashRewardsCache] = useState<IStashRewardsCache>(
-    {} as unknown as IStashRewardsCache
-  );
-  const [accountChainInfo, setAccountChainInfo] = useState<IAccountChainInfoCache>(
-    {} as unknown as IAccountChainInfoCache
+  const [performanceCache, setPerformanceCache] = useState<IPerformanceCache>(
+    {} as unknown as IPerformanceCache
   );
 
-  const cacheStashRewards = useCallback((stashRewards: (IStashRewards | null)[], networkName: string) => {
-    const expireTime = dayjs().add(10, 'minute');
-    setStashRewardsCache((prev) => ({
-      ...prev,
-      [networkName.toLowerCase()]: {
-        data: stashRewards,
-        expireTime: expireTime,
-      },
-    }));
-  }, []);
+  const cachePerformance = useCallback(
+    (rewardsValue: IStashRewards, accountsValue: IAccountChainInfo, networkName: string) => {
+      const expireTime = dayjs().add(10, 'minute');
+      setPerformanceCache((prev) => ({
+        ...prev,
+        [networkName.toLowerCase()]: {
+          rewardsData: rewardsValue,
+          accountsData: accountsValue,
+          expireTime: expireTime,
+        },
+      }));
+    },
+    []
+  );
 
-  const cacheAccountChainInfo = useCallback((accountChainInfo: IAccountChainInfo[], networkName: string) => {
-    const expireTime = dayjs().add(10, 'minute');
-    setAccountChainInfo((prev) => ({
-      ...prev,
-      [networkName.toLowerCase()]: {
-        data: accountChainInfo,
-        expireTime: expireTime,
-      },
-    }));
-  }, []);
+  const isPerformanceCacheValid = useCallback(
+    (networkName: string) => {
+      return (
+        performanceCache &&
+        performanceCache[networkName] &&
+        performanceCache[networkName].rewardsData &&
+        performanceCache[networkName].rewardsData.length > 0 &&
+        performanceCache[networkName].accountsData &&
+        performanceCache[networkName].accountsData.length > 0 &&
+        performanceCache[networkName].expireTime &&
+        performanceCache[networkName].expireTime.isAfter(dayjs(), 'minute')
+      );
+    },
+    [performanceCache]
+  );
 
   const value = useMemo<IPPProps>(
-    () => ({ stashRewardsCache, cacheStashRewards, accountChainInfo, cacheAccountChainInfo }),
-    [stashRewardsCache, cacheStashRewards, accountChainInfo, cacheAccountChainInfo]
+    () => ({
+      performanceCache,
+      cachePerformance,
+      isPerformanceCacheValid,
+    }),
+    [performanceCache, cachePerformance, isPerformanceCacheValid]
   );
 
   return (

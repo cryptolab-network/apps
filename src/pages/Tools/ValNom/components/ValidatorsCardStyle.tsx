@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { ReactComponent as PeopleIcon } from '../../../../assets/images/people.svg';
 import { ReactComponent as Search } from '../../../../assets/images/search.svg';
 import { ReactComponent as OptionIcon } from '../../../../assets/images/option-icon.svg';
-import CardHeader from '../../../../components/Card/CardHeader';
+import CardHeaderValNom from '../../../../components/Card/CardHeaderValNom';
 import IconInput from '../../../../components/Input/IconInput';
 import ValidNominator from '../../../../components/ValidNominator';
 import { lsGetFavorites } from '../../../../utils/localStorage';
@@ -33,16 +33,19 @@ import TinyButton from '../../../../components/Button/tiny';
 import { notifySuccess, notifyWarn } from '../../../../utils/notify';
 import keys from '../../../../config/keys';
 import { queryStakingInfo, IAccountChainInfo, AccountRole } from '../../../../utils/account';
+import useWindowDimensions from '../../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../../utils/constants/layout';
 
 const ValNomHeader = () => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   return (
     <HeaderLayout>
       <HeaderLeft>
         <PeopleIcon width="38.8px" height="38px" />
         <HeaderTitle>
           <Title>{t('tools.valnom.title')}</Title>
-          <Subtitle>{t('tools.valnom.subtitle')}</Subtitle>
+          {width <= breakWidth.mobile ? null : <Subtitle>{t('tools.valnom.subtitle')}</Subtitle>}
         </HeaderTitle>
       </HeaderLeft>
     </HeaderLayout>
@@ -219,6 +222,7 @@ const ValidatorGrid = ({ filters, validators }) => {
 
 const ValNomContent: React.FC = () => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const [filters, setFilters] = useState({
     stashId: '',
     strategy: { label: filterOptions[0], value: 1 },
@@ -288,10 +292,10 @@ const ValNomContent: React.FC = () => {
     const refKey = localStorage.getItem(`refKey:${selectedAccount.address}`);
     const signature = localStorage.getItem(`signature:${selectedAccount.address}`);
     setRefCodeInfo({
-      refKey: (refKey !== null) ? refKey : '',
-      signature: (signature !== null) ? signature : '',
+      refKey: refKey !== null ? refKey : '',
+      signature: signature !== null ? signature : '',
       signPending: false,
-      verified: (refKey !== null && signature !== null) ? true : false,
+      verified: refKey !== null && signature !== null ? true : false,
     });
     web3FromSource(selectedAccount.source)
       .catch((): null => null)
@@ -409,20 +413,20 @@ const ValNomContent: React.FC = () => {
   }
   return (
     <ValNomContentLayout>
-      <div style={{ width: 'calc(100% - 2px)', boxSizing: 'border-box', padding: 4 }}>
+      <div style={{ width: '100%', boxSizing: 'border-box', padding: 4 }}>
         <OptionBar>
-          <HeaderLayout>
-            <HeaderLeft>
+          <OptionHeaderLayout>
+            <OptionHeaderLeft>
               <IconInput
                 Icon={Search}
                 iconSize="16px"
                 placeholder="Polkadot/Kusama Stash ID"
-                inputLength={256}
+                inputLength={width > 540 ? 256 : 180}
                 value={filters.stashId}
                 onChange={handleFilterChange('stashId')}
               />
-            </HeaderLeft>
-            <HeaderRight>
+            </OptionHeaderLeft>
+            <OptionHeaderRight>
               <span style={{ marginRight: 8 }}>
                 {!selectedAccount.address ? null : !refCodeInfo.verified && !refCodeInfo.signPending ? (
                   <TinyButton
@@ -461,8 +465,8 @@ const ValNomContent: React.FC = () => {
                   <OptionIcon />
                 </div>
               </Tooltip>
-            </HeaderRight>
-          </HeaderLayout>
+            </OptionHeaderRight>
+          </OptionHeaderLayout>
         </OptionBar>
       </div>
       <ValidatorGrid filters={toValidatorFilter(filters)} validators={validators} />
@@ -472,9 +476,9 @@ const ValNomContent: React.FC = () => {
 
 const ValNomStatus = () => {
   return (
-    <CardHeader Header={() => <ValNomHeader />} mainPadding="0 0 0 0">
+    <CardHeaderValNom Header={() => <ValNomHeader />} mainPadding="0 0 0 0">
       <ValNomContent />
-    </CardHeader>
+    </CardHeaderValNom>
   );
 };
 
@@ -491,11 +495,34 @@ const HeaderLeft = styled.div`
   justify-content: flex-start;
 `;
 
-const HeaderRight = styled.div`
+const OptionHeaderLayout = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @media (max-width: 540px) {
+    flex-direction: column;
+  }
+`;
+
+const OptionHeaderLeft = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  @media (max-width: 540px) {
+    width: 100%;
+    align-items: center;
+  }
+`;
+
+const OptionHeaderRight = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin: 0 15.4px 0 0;
+  margin: 0 0 0 0;
+  @media (max-width: 540px) {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 `;
 
 const HeaderTitle = styled.div`
@@ -565,11 +592,14 @@ const GridLayout = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  @media (max-width: 1920px) {
-    width: 1392px;
-  }
 
   @media (max-width: 1440px) {
     width: 928px;
+  }
+  @media (max-width: 968px) {
+    width: 464px;
+  }
+  @media (max-width: 540px) {
+    width: 232px;
   }
 `;

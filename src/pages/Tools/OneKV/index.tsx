@@ -17,7 +17,7 @@ const OneKV = (props) => {
 export default OneKV;
 
 const OneKVLayout = styled.div`
-  width: 100%;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -26,6 +26,7 @@ const OneKVLayout = styled.div`
 
 const MainLayout = styled.div`
   height: 100%;
+  max-width: calc(100vw - 16px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

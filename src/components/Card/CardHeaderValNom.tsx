@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding = '' }) => {
+const CardHeaderValNom = ({ Header, children = {}, alignItems = 'center', mainPadding = '' }) => {
   return (
     <CardHeaderLayout>
       <HeaderLayout>
@@ -13,14 +13,24 @@ const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding 
   );
 };
 
-export default CardHeader;
+export default CardHeaderValNom;
 
 const CardHeaderLayout = styled.div`
-  width: calc(100% - 16px);
+  width: 1400px;
   border-radius: 8px;
   border: solid 1px #23beb9;
   background-color: #18232f;
   margin-top: 25px;
+  @media (max-width: 1440px) {
+    width: 936px;
+  }
+  @media (max-width: 968px) {
+    width: 472px;
+  }
+
+  @media (max-width: 540px) {
+    width: 240px;
+  }
 `;
 
 const HeaderLayout = styled.div`

@@ -3,14 +3,14 @@ import styled from 'styled-components';
 const IconInput = ({ Icon, ...props }) => {
   return (
     <InputLayout {...props}>
-      <Icon style={{ height: props.iconSize }}/>
+      <Icon style={{ height: props.iconSize }} />
       <InputStyle
         onChange={props.onChange}
         value={props.value}
         placeholder={props.placeholder}
         inputLength={props.inputLength}
       />
-      {props.unit ? <Unit>{props.unit}</Unit> : <Unit></Unit>}
+      {props.unit ? <Unit>{props.unit}</Unit> : null}
     </InputLayout>
   );
 };
@@ -18,6 +18,7 @@ const IconInput = ({ Icon, ...props }) => {
 export default IconInput;
 
 const InputLayout = styled.div`
+  width: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -29,7 +30,7 @@ interface InputStyleProps {
   inputLength: number;
 }
 const InputStyle = styled.input<InputStyleProps>`
-  width: ${(props) => (props.inputLength ? props.inputLength : 45)}px;
+  width: ${(props) => (props.inputLength ? props.inputLength + 'px' : '100%')};
   background: transparent;
   border: none;
   font-family: Montserrat;

@@ -11,6 +11,8 @@ import { balanceUnit } from '../../utils/string';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { isEmpty } from '../../utils/helper';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
+import { breakWidth } from '../../utils/constants/layout';
 
 const WalletSelect: React.FC = () => {
   const { t } = useTranslation();
@@ -25,6 +27,8 @@ const WalletSelect: React.FC = () => {
   } = useContext(ApiContext);
   const [isOpen, setOpen] = useState(false);
 
+  const { width } = useWindowDimensions();
+
   const btnRef = useRef<HTMLDivElement>(null);
 
   const close = () => {
@@ -36,9 +40,10 @@ const WalletSelect: React.FC = () => {
     borderColor: 'transparent',
     backgroundColor: 'transparent',
   };
+
   const ulPropsCustom = {
     borderColor: 'blue',
-    width: btnRef && btnRef.current && btnRef.current.offsetWidth ? btnRef.current.offsetWidth : 50,
+    width: 248,
   };
 
   const { renderLayer, triggerProps, layerProps, arrowProps } = useLayer({
@@ -161,41 +166,57 @@ const WalletSelect: React.FC = () => {
     } else if (selectedAccount && !isEmpty(selectedAccount)) {
       return (
         <>
-          <Identicon value={selectedAccount.address} size={32} theme={'polkadot'} />
-          <WalletLayout>
-            <div>{selectedAccount.name}</div>
-            <div>
-              <span style={{ color: '#75818d' }}>Balance : </span>
-              <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
-              {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-              {/* <BalanceNumber>123</BalanceNumber> */}
-            </div>
-          </WalletLayout>
-          <div style={{ width: 40 }}>
-            <DropDownIcon
-              style={{
-                stroke: 'black',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transitionDuration: '0.2s',
-              }}
-            />
-          </div>
+          <Identicon value={selectedAccount.address} size={36} theme={'polkadot'} />
+          {width > breakWidth.pad ? (
+            <>
+              <WalletLayout>
+                <div>{selectedAccount.name}</div>
+                <div>
+                  <span style={{ color: '#75818d' }}>Balance : </span>
+                  <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
+                  {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
+                  {/* <BalanceNumber>123</BalanceNumber> */}
+                </div>
+              </WalletLayout>
+              <div style={{ width: 40 }}>
+                <DropDownIcon
+                  style={{
+                    stroke: 'black',
+                    transform: isOpen ? 'rotate(90deg)' : 'none',
+                    transitionDuration: '0.2s',
+                  }}
+                />
+              </div>
+            </>
+          ) : null}
         </>
       );
     } else if (isEmpty(selectedAccount)) {
       notifyWarn(t('benchmark.staking.warnings.noAccount'));
       return <Hint>No Account</Hint>;
     } else {
-      
     }
-  }, [hasWeb3Injected, isWeb3AccessDenied, isLoading, selectedAccount, css, _formatBalance, isOpen, notifyWarn, t]);
+  }, [
+    hasWeb3Injected,
+    isWeb3AccessDenied,
+    isLoading,
+    selectedAccount,
+    css,
+    width,
+    _formatBalance,
+    isOpen,
+    notifyWarn,
+    t,
+  ]);
 
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        <Button {...triggerProps} onClick={handleClick}>
-          {walletDisplayDOM}
-        </Button>
+        {width >= breakWidth.mobile ? (
+          <Button {...triggerProps} onClick={handleClick}>
+            {walletDisplayDOM}
+          </Button>
+        ) : null}
       </ButtonLayout>
       {renderLayer(
         <AnimatePresence>
@@ -232,7 +253,6 @@ const ButtonLayout = styled.div`
 `;
 
 const Button = styled.button`
-  min-width: 238px;
   background-color: #dee0e1;
   border: none;
   border-radius: 100px;
@@ -241,6 +261,9 @@ const Button = styled.button`
   justify-content: flex-start;
   align-items: center;
   padding: 4px;
+  @media (min-width: 968px) {
+    min-width: 238px;
+  } ;
 `;
 
 const Hint = styled.div`

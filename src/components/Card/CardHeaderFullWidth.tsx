@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding = '' }) => {
+const CardHeaderFullWidth = ({ Header, children = {}, alignItems = 'center', mainPadding = '' }) => {
   return (
     <CardHeaderLayout>
       <HeaderLayout>
@@ -13,10 +13,10 @@ const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding 
   );
 };
 
-export default CardHeader;
+export default CardHeaderFullWidth;
 
 const CardHeaderLayout = styled.div`
-  width: calc(100% - 16px);
+  width: calc(100vw - 32px);
   border-radius: 8px;
   border: solid 1px #23beb9;
   background-color: #18232f;
@@ -25,7 +25,7 @@ const CardHeaderLayout = styled.div`
 
 const HeaderLayout = styled.div`
   width: 100%;
-  max-height: 72px;
+  /* max-height: 72px; */
   border-bottom: solid 1px #23beb9;
   padding: 17px 27px 17px 27px;
   box-sizing: border-box;

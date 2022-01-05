@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { hasValues } from '../../../utils/helper';
 import { IAccountChainInfo, queryStakingInfo } from '../../../utils/account';
-import { ApiContext } from '../../../components/Api';
+import { ApiContext, IAccount } from '../../../components/Api';
 import { ApiState } from '../../../components/Api';
 import { ManagementPageCacheContext } from '../../../components/MemCache/ManagementPage';
 import { apiGetStashRewards, IStashRewards } from '../../../apis/StashRewards';
@@ -12,8 +12,17 @@ import moment from 'moment';
 import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
 import PortfolioTable from './PortFolioTable';
 import ProfitChart from './ProfitCharts';
-import dayjs from 'dayjs';
 import Empty from '../../../components/Empty';
+
+interface INetworkReady {
+  kusama: boolean;
+  polkadot: boolean;
+}
+
+interface IAccountsInfo {
+  accounts: IAccountChainInfo[];
+  rewards: IStashRewards | null;
+}
 
 const PerformanceHeader = () => {
   const { t } = useTranslation();
@@ -36,41 +45,42 @@ const Performance = () => {
     accounts,
     hasWeb3Injected,
   } = useContext(ApiContext);
-  let { stashRewardsCache, cacheStashRewards, accountChainInfo, cacheAccountChainInfo } =
+  let { performanceCache, cachePerformance, isPerformanceCacheValid } =
     useContext(ManagementPageCacheContext);
-  const [isReady, setReady] = useState<boolean>(false);
-  const [accountsChainInfo, setAccountsChainInfo] = useState<IAccountChainInfo[]>([]);
-  const [accountsRewards, setAccountsRewards] = useState<(IStashRewards | null)[]>([]);
+  const [needRefetch, setNeedRefetch] = useState<INetworkReady>({
+    kusama: true,
+    polkadot: true,
+  });
+
+  const [accountsInfo, setAccountsInfo] = useState<IAccountsInfo>({} as IAccountsInfo);
+  const [accountCache, setAccountCache] = useState<IAccount[]>([]);
 
   const currentNetworkLowerCase = useMemo(() => {
     return networkName.toLowerCase();
   }, [networkName]);
 
   useEffect(() => {
-    if (
-      stashRewardsCache &&
-      stashRewardsCache[currentNetworkLowerCase] &&
-      stashRewardsCache[currentNetworkLowerCase].data &&
-      stashRewardsCache[currentNetworkLowerCase].data.length > 0 &&
-      stashRewardsCache[currentNetworkLowerCase].expireTime &&
-      stashRewardsCache[currentNetworkLowerCase].expireTime.isAfter(dayjs(), 'minute') &&
-      accountChainInfo &&
-      accountChainInfo[currentNetworkLowerCase] &&
-      accountChainInfo[currentNetworkLowerCase].data &&
-      accountChainInfo[currentNetworkLowerCase].data.length > 0 &&
-      accountChainInfo[currentNetworkLowerCase].expireTime &&
-      accountChainInfo[currentNetworkLowerCase].expireTime.isAfter(dayjs(), 'minute')
-    ) {
-      // data hasn't expired
-      setAccountsChainInfo(accountChainInfo[currentNetworkLowerCase].data);
-      setAccountsRewards(stashRewardsCache[currentNetworkLowerCase].data);
-      setReady(true);
-    } else if (accounts.length > 0 && !isReady) {
-      // data hasn expired
+    if (isPerformanceCacheValid(currentNetworkLowerCase)) {
+      setAccountsInfo({
+        accounts: performanceCache[currentNetworkLowerCase].accountsData,
+        rewards: performanceCache[currentNetworkLowerCase].rewardsData,
+      });
+      setNeedRefetch((prev) => ({ ...prev, [currentNetworkLowerCase]: false }));
+    } else {
+      setNeedRefetch((prev) => ({ ...prev, [currentNetworkLowerCase]: true }));
+    }
+  }, [currentNetworkLowerCase, isPerformanceCacheValid, performanceCache]);
+
+  useEffect(() => {
+    setAccountCache(accounts);
+  }, [accounts]);
+
+  useEffect(() => {
+    if (networkStatus === ApiState.READY && accountCache.length > 0 && needRefetch[currentNetworkLowerCase]) {
       const arr: IAccountChainInfo[] = [];
       const rewards: (IStashRewards | null)[] = [];
       const promises: Promise<any>[] = [];
-      accounts.forEach((account) => {
+      accountCache.forEach((account) => {
         if (hasValues(account) === true && networkStatus === ApiState.READY) {
           const promise = queryStakingInfo(account.address, polkadotApi)
             .then((info) => {
@@ -102,37 +112,30 @@ const Performance = () => {
         }
       });
       Promise.all(promises).then(() => {
-        setAccountsChainInfo(arr);
-        setAccountsRewards(rewards);
-        setReady(true);
-        cacheStashRewards(rewards, currentNetworkLowerCase);
-        cacheAccountChainInfo(arr, currentNetworkLowerCase);
+        cachePerformance(rewards, arr, currentNetworkLowerCase);
       });
+    } else if (
+      networkStatus !== ApiState.READY &&
+      accountCache.length > 0 &&
+      needRefetch[currentNetworkLowerCase]
+    ) {
+      setAccountCache([]);
     }
-  }, [
-    accountChainInfo,
-    accounts,
-    cacheAccountChainInfo,
-    cacheStashRewards,
-    isReady,
-    networkStatus,
-    polkadotApi,
-    stashRewardsCache,
-    currentNetworkLowerCase,
-  ]);
+  }, [accountCache, cachePerformance, currentNetworkLowerCase, needRefetch, networkStatus, polkadotApi]);
+
   if (!hasWeb3Injected || accounts.length === 0) {
     return (
       <CardHeader Header={() => <PerformanceHeader />}>
         <Empty />
       </CardHeader>
     );
-  } else if (isReady) {
+  } else if (!needRefetch[currentNetworkLowerCase]) {
     return (
       <CardHeader Header={() => <PerformanceHeader />}>
         <ProfitChartLayout>
-          <ProfitChart chain={networkName} accounts={accountsChainInfo} rewards={accountsRewards} />
+          <ProfitChart chain={networkName} accounts={accountsInfo.accounts} rewards={accountsInfo.rewards} />
         </ProfitChartLayout>
-        <PortfolioTable chain={networkName} accounts={accountsChainInfo} rewards={accountsRewards} />
+        <PortfolioTable chain={networkName} accounts={accountsInfo.accounts} rewards={accountsInfo.rewards} />
       </CardHeader>
     );
   } else {
