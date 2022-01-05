@@ -1,7 +1,4 @@
 import { ApiPromise } from '@polkadot/api';
-import { Option } from '@polkadot/types';
-import { ActiveEraInfo } from '@polkadot/types/interfaces/staking';
-import { ValidatorCount } from '@polkadot/types/interfaces/session/types';
 import BN from 'bn.js';
 
 const POLKADOT_PARAMS = {
@@ -38,7 +35,7 @@ const CHAIN_PARAMS = {
 };
 
 export const chainGetValidatorCounts = async (chain: string, api: ApiPromise): Promise<number> => {
-  const validatorCount = await api.query.staking.validatorCount<ValidatorCount>();
+  const validatorCount = await api.query.staking.validatorCount();
   return validatorCount.toNumber();
 };
 
@@ -55,7 +52,7 @@ export const chainGetWaitingCount = async (chain: string, api: ApiPromise): Prom
 export const queryActiveEra = async (api: ApiPromise) => {
   // console.time('chain :: queryActiveEra');
   try {
-    const [activeEra] = await Promise.all([api.query.staking.activeEra<Option<ActiveEraInfo>>()]);
+    const [activeEra] = await Promise.all([api.query.staking.activeEra()]);
     // console.timeEnd('chain :: queryActiveEra')
 
     return activeEra.unwrap().index.toNumber();
@@ -70,7 +67,7 @@ const queryErasTotalStake = async (api: ApiPromise, activeEra: number) => {
   try {
     const [erasTotalStake] = await Promise.all([api.query.staking.erasTotalStake(activeEra)]);
     // console.timeEnd('chain :: queryErasTotalStake');
-    return new BN(erasTotalStake.toString());
+    return erasTotalStake;
   } catch (err) {
     // console.log(err);
     return null;
@@ -82,7 +79,7 @@ const queryTotalIssuance = async (api: ApiPromise) => {
   try {
     const [totalIssuance] = await Promise.all([api.query.balances.totalIssuance()]);
     // console.timeEnd('chain :: queryTotalIssuance')
-    return new BN(totalIssuance.toString());
+    return totalIssuance;
   } catch (err) {
     // console.log(err);
     return null;

@@ -381,12 +381,11 @@ export const lowRiskStrategy = (
     let minSelfStakeFlag = false;
     if (
       (networkName.toLowerCase() === NetworkNameLowerCase.KSM &&
-        new BN(validator.selfStake.toString()).gte(new BN(KSM_MIN_SELF_STAKE).mul(decimals))) 
-        ||
+        new BN(validator.selfStake).gte(new BN(KSM_MIN_SELF_STAKE).mul(decimals))) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.DOT &&
-        new BN(validator.selfStake.toString()).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals))) ||
+        new BN(validator.selfStake).gte(new BN(DOT_MIN_SELF_STAKE).mul(decimals))) ||
       (networkName.toLowerCase() === NetworkNameLowerCase.WND &&
-        new BN(validator.selfStake.toString()).gte(new BN(WND_MIN_SELF_STAKE).mul(decimals)))
+        new BN(validator.selfStake).gte(new BN(WND_MIN_SELF_STAKE).mul(decimals)))
     ) {
       minSelfStakeFlag = true;
     }
@@ -600,7 +599,7 @@ export const advancedConditionFilter = (
       // only data hasn't been selected need to be filtered
 
       // min self stake
-      if (filtered.minSelfStake && new BN(data.selfStake.toString()).lt(new BN(filtered.minSelfStake).mul(decimals))) {
+      if (filtered.minSelfStake && new BN(data.selfStake).lt(new BN(filtered.minSelfStake).mul(decimals))) {
         return false;
       }
 
