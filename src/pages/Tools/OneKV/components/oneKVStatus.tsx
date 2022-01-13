@@ -119,48 +119,51 @@ export const OneKVStatus = () => {
   const [electedValidators, setElectedValidators] = useState<number>(0);
   const [lastUpdatedTime, setlastUpdatedTime] = useState<string>('N/A');
   const [isDataLoadingStatus, setIsDataLoadingStatus] = useState(DataLoadingStatus.LOADING);
-  useEffect(() => {
-    const mergeOneKVData = (oneKV: IOneKVValidators, oneKVNominators: IOneKVNominators) => {
-      oneKV.valid = oneKV.valid.map((v) => {
-        v.elected = false;
+
+  const mergeOneKVData = (oneKV: IOneKVValidators, oneKVNominators: IOneKVNominators) => {
+    oneKV.valid = oneKV.valid.map((v) => {
+      v.elected = false;
+      // eslint-disable-next-line array-callback-return
+      oneKVNominators.nominators.map((n) => {
         // eslint-disable-next-line array-callback-return
-        oneKVNominators.nominators.map((n) => {
-          // eslint-disable-next-line array-callback-return
-          n.current.map((p) => {
-            if (p.stash === v.stash) {
-              v.elected = true;
-            }
-          });
+        n.current.map((p) => {
+          if (p.stash === v.stash) {
+            v.elected = true;
+          }
         });
-        return v;
       });
-      return oneKV;
-    };
-    async function getValidators() {
-      try {
-        let oneKV = await apiGetAllOneKVValidator({ params: chain });
-        setActiveEra(oneKV.activeEra);
-        setValidValidators(oneKV.validatorCount);
-        setActiveValidators(oneKV.electedCount);
-        const oneKVNominators = await apiGetOneKVNominators({ params: chain });
-        setElectedValidators(
-          oneKVNominators.nominators.reduce((acc, n) => {
-            acc += n.current.length;
-            return acc;
-          }, 0)
-        );
-        oneKV = mergeOneKVData(oneKV, oneKVNominators);
-        setValidators(oneKV.valid);
-        setInvalidValidators(oneKV.invalid);
-        setlastUpdatedTime(dayjs(oneKV.modifiedTime * 1000).toLocaleString());
-        setIsDataLoadingStatus(DataLoadingStatus.DONE);
-      } catch (err) {
-        console.error(err);
-        setIsDataLoadingStatus(DataLoadingStatus.ERROR);
-      }
+      return v;
+    });
+    return oneKV;
+  };
+
+  const getValidators = useCallback(async () => {
+    try {
+      let oneKV = await apiGetAllOneKVValidator({ params: chain });
+      setActiveEra(oneKV.activeEra);
+      setValidValidators(oneKV.validatorCount);
+      setActiveValidators(oneKV.electedCount);
+      const oneKVNominators = await apiGetOneKVNominators({ params: chain });
+      setElectedValidators(
+        oneKVNominators.nominators.reduce((acc, n) => {
+          acc += n.current.length;
+          return acc;
+        }, 0)
+      );
+      oneKV = mergeOneKVData(oneKV, oneKVNominators);
+      setValidators(oneKV.valid);
+      setInvalidValidators(oneKV.invalid);
+      setlastUpdatedTime(dayjs(oneKV.modifiedTime * 1000).toLocaleString());
+      setIsDataLoadingStatus(DataLoadingStatus.DONE);
+    } catch (err) {
+      console.error(err);
+      setIsDataLoadingStatus(DataLoadingStatus.ERROR);
     }
-    getValidators();
   }, [DataLoadingStatus.DONE, DataLoadingStatus.ERROR, chain]);
+
+  useEffect(() => {
+    getValidators();
+  }, [getValidators]);
   const [seeValid, setSeeValid] = useState(true);
   const [filters, setFilters] = useState({
     stashId: '',

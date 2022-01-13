@@ -77,6 +77,12 @@ export const apiGetAllOneKVValidator = (
         return v !== undefined && v.valid === false;
       });
       res.data.valid = res.data.valid.sort((a: IOneKVValidator, b: IOneKVValidator) => {
+        if (!a.aggregate) {
+          return 1;
+        }
+        if (!b.aggregate) {
+          return -1;
+        }
         if (a.aggregate.total > b.aggregate.total) {
           return -1;
         } else if (a.aggregate.total < b.aggregate.total) {
