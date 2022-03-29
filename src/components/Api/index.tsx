@@ -26,6 +26,7 @@ export interface IAccount {
   name?: string;
   balances: IBalance;
   genesisHash?: string | null;
+  source?: string;
 }
 
 export interface IValidatorCache {
@@ -65,6 +66,10 @@ export interface ApiProps {
 const accountTransform = (accounts: IAccount[], network: string): IAccount[] => {
   const networkConfig = NetworkConfig[network];
   const filtered = accounts.filter((account) => {
+    // add all accounts from talisman
+    if (account.source === 'talisman') {
+      return true;
+    }
     return (
       account.genesisHash === null ||
       account.genesisHash === '' ||
@@ -267,7 +272,7 @@ const Api: React.FC = (props) => {
               },
             };
           });
-
+          
           const accounts = accountTransform(all, network);
           queryBalances(accounts, api)
             .then((accountsWithBalances) => {
