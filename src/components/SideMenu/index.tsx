@@ -8,6 +8,7 @@ import { getUrls } from '../../utils/url';
 import { useHistory } from 'react-router-dom';
 import Wallet from '../../pages/Tools/components/Wallet';
 import Network from '../../pages/Tools/components/Network';
+import NetworkWallet from '../../components/NetworkWallet';
 import { isMobile } from 'react-device-detect';
 
 interface ISideMenu {
@@ -64,6 +65,7 @@ const SideMenu: React.FC<ISideMenu> = ({
   handleSideMenuToggle,
   children,
 }) => {
+  const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
   const { t, i18n } = useTranslation();
   const [staking_url, tools_url] = getUrls(window.location, keys.toolDomain);
   const [menuToggle, setMenuToggle] = useState({
@@ -116,31 +118,64 @@ const SideMenu: React.FC<ISideMenu> = ({
   }, []);
 
   const menuList = useMemo(() => {
-    return [
-      {
-        title: t('tools.title.valnom'),
-        action: () => {
-          history.push('/valnom');
-          handleSideMenuToggle();
+    let dom: any[] = [];
+    if (isToolsSite) {
+      dom.push(
+        {
+          title: t('tools.title.valnom'),
+          action: () => {
+            history.push('/valnom');
+            handleSideMenuToggle();
+          },
+          menuList: [],
         },
-        menuList: [],
-      },
-      {
-        title: t('tools.title.oneKvMonitor'),
-        action: () => {
-          history.push('/onekv');
-          handleSideMenuToggle();
+        {
+          title: t('tools.title.oneKvMonitor'),
+          action: () => {
+            history.push('/onekv');
+            handleSideMenuToggle();
+          },
+          menuList: [],
         },
-        menuList: [],
-      },
-      {
-        title: t('tools.title.stakingRewards'),
-        action: () => {
-          history.push('/rewards');
-          handleSideMenuToggle();
+        {
+          title: t('tools.title.stakingRewards'),
+          action: () => {
+            history.push('/rewards');
+            handleSideMenuToggle();
+          },
+          menuList: [],
+        }
+      );
+    } else {
+      dom.push(
+        {
+          title: t('app.title.stakingGuide'),
+          action: () => {
+            history.push('/guide');
+            handleSideMenuToggle();
+          },
+          menuList: [],
         },
-        menuList: [],
-      },
+        {
+          title: t('app.title.portfolioBenchmark'),
+          action: () => {
+            history.push('/benchmark');
+            handleSideMenuToggle();
+          },
+          menuList: [],
+        },
+        {
+          title: t('app.title.portfolioManagement'),
+          action: () => {
+            history.push('/management');
+            handleSideMenuToggle();
+          },
+          menuList: [],
+        }
+      );
+    }
+
+    dom.push(
       {
         title: t('app.footer.title.general'),
         action: () => {
@@ -236,43 +271,52 @@ const SideMenu: React.FC<ISideMenu> = ({
             menuList: [],
           },
         ],
-      },
-    ];
+      }
+    );
+
+    return dom;
   }, [
     changeLanguage,
     clickToggle,
     handleDialogOpen,
     handleSideMenuToggle,
     history,
+    isToolsSite,
     staking_url,
     t,
     tools_url,
   ]);
 
   const menuDOM = useMemo(() => {
+    if (menuList.length === 0) {
+      return null;
+    }
     return (
       <UnorderListL1>
-        {menuList.map((ulL1) => {
+        {menuList.map((ulL1, l1idx) => {
           return ulL1.menuList.length === 0 ? (
-            <ListL1>
+            <ListL1 key={`ll1-${l1idx}`}>
               <MenuL1 title={ulL1.title} action={ulL1.action} />
             </ListL1>
           ) : (
-            <ListL1 className={`accordion-item, ${menuToggle[ulL1.extendLabel!] && 'accordion-item-open'}`}>
+            <ListL1
+              className={`accordion-item, ${menuToggle[ulL1.extendLabel!] && 'accordion-item-open'}`}
+              key={`ll1-${l1idx}`}
+            >
               <MenuL1 title={ulL1.title} action={ulL1.action} />
               <UnorderListL2 className="accordion-ull2">
-                {ulL1.menuList.map((ulL2) => {
+                {ulL1.menuList.map((ulL2, l2idx) => {
                   if (ulL2.isLink) {
                     return (
-                      <a href={ulL2.link} style={{ textDecoration: 'none' }}>
-                        <ListL2>
+                      <a href={ulL2.link} style={{ textDecoration: 'none' }} key={`a-${l2idx}`}>
+                        <ListL2 key={`ll2-${l2idx}`}>
                           <MenuL2 title={ulL2.title} action={ulL2.action} />
                         </ListL2>
                       </a>
                     );
                   } else {
                     return (
-                      <ListL2>
+                      <ListL2 key={`ll2-${l2idx}`}>
                         <MenuL2 title={ulL2.title} action={ulL2.action} />
                       </ListL2>
                     );
@@ -305,14 +349,30 @@ const SideMenu: React.FC<ISideMenu> = ({
             marginTop: 12,
           }}
         >
-          <div style={{ flex: 1 }} />
-          <Network />
-          <div style={{ flex: 1 }} />
-          {isMobile ? null : (
+          {isToolsSite ? (
             <>
-              <Wallet />
               <div style={{ flex: 1 }} />
+              <Network />
+              <div style={{ flex: 1 }} />
+              {isMobile ? null : (
+                <>
+                  <Wallet />
+                  <div style={{ flex: 1 }} />
+                </>
+              )}
             </>
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <NetworkWallet />
+            </div>
           )}
         </div>
 
