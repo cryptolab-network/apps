@@ -77,7 +77,7 @@ const NetworkSelect: React.FC = () => {
     } else if (width > breakWidth.mobile && width <= breakWidth.pad) {
       return <>{getLogoDiv(network)}</>;
     } else if (width <= breakWidth.mobile) {
-      return null;
+      return <>{getLogoDiv(network)}</>;
     }
   }, [network, width]);
 
@@ -106,24 +106,22 @@ const NetworkSelect: React.FC = () => {
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        {width >= breakWidth.mobile ? (
-          <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
-            <>
-              {DisplayNetworkPanelDOM}
-              {width > breakWidth.pad ? (
-                <div style={{ width: 40 }}>
-                  <DropDownIcon
-                    style={{
-                      stroke: 'black',
-                      transform: isOpen ? 'rotate(90deg)' : 'none',
-                      transitionDuration: '0.2s',
-                    }}
-                  />
-                </div>
-              ) : null}
-            </>
-          </Button>
-        ) : null}
+        <Button {...triggerProps} onClick={() => setOpen(!isOpen)}>
+          <>
+            {DisplayNetworkPanelDOM}
+            {width > breakWidth.pad ? (
+              <div style={{ width: 40 }}>
+                <DropDownIcon
+                  style={{
+                    stroke: 'black',
+                    transform: isOpen ? 'rotate(90deg)' : 'none',
+                    transitionDuration: '0.2s',
+                  }}
+                />
+              </div>
+            ) : null}
+          </>
+        </Button>
       </ButtonLayout>
       {renderLayer(
         <AnimatePresence>

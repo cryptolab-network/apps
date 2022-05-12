@@ -115,8 +115,6 @@ const WalletSelect: React.FC = () => {
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
-          {/* <Identicon value={account.address} size={16} theme={'polkadot'} />
-            <NetworkTitleLight>{account.name}</NetworkTitleLight> */}
         </li>
       );
     } else {
@@ -168,26 +166,13 @@ const WalletSelect: React.FC = () => {
         <>
           <Identicon value={selectedAccount.address} size={36} theme={'polkadot'} />
           {width > breakWidth.pad ? (
-            <>
-              <WalletLayout>
-                <div>{selectedAccount.name}</div>
-                <div>
-                  <span style={{ color: '#75818d' }}>Balance : </span>
-                  <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
-                  {/* <BalanceNumber>{selectedAccount.balance}</BalanceNumber> */}
-                  {/* <BalanceNumber>123</BalanceNumber> */}
-                </div>
-              </WalletLayout>
-              <div style={{ width: 40 }}>
-                <DropDownIcon
-                  style={{
-                    stroke: 'black',
-                    transform: isOpen ? 'rotate(90deg)' : 'none',
-                    transitionDuration: '0.2s',
-                  }}
-                />
+            <WalletLayout>
+              <div>{selectedAccount.name}</div>
+              <div>
+                <span style={{ color: '#75818d' }}>Balance : </span>
+                <BalanceTitle>{_formatBalance(selectedAccount?.balances?.totalBalance)}</BalanceTitle>
               </div>
-            </>
+            </WalletLayout>
           ) : null}
         </>
       );
@@ -204,7 +189,6 @@ const WalletSelect: React.FC = () => {
     css,
     width,
     _formatBalance,
-    isOpen,
     notifyWarn,
     t,
   ]);
@@ -212,11 +196,20 @@ const WalletSelect: React.FC = () => {
   return (
     <>
       <ButtonLayout ref={btnRef}>
-        {width >= breakWidth.mobile ? (
-          <Button {...triggerProps} onClick={handleClick}>
-            {walletDisplayDOM}
-          </Button>
-        ) : null}
+        <Button {...triggerProps} onClick={handleClick}>
+          {walletDisplayDOM}
+          {width >= breakWidth.pad ? (
+            <div style={{ width: 40 }}>
+              <DropDownIcon
+                style={{
+                  stroke: 'black',
+                  transform: isOpen ? 'rotate(90deg)' : 'none',
+                  transitionDuration: '0.2s',
+                }}
+              />
+            </div>
+          ) : null}
+        </Button>
       </ButtonLayout>
       {renderLayer(
         <AnimatePresence>
