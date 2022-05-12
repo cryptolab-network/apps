@@ -126,7 +126,7 @@ const Chart: React.FC<IChart> = ({
       leftLabel: config.leftLabel ? config.leftLabel : leftLabel,
       rightLabel: config.rightLabel ? config.rightLabel : rightLabel,
     };
-    if (data.length) {
+    if (data && data.length && data[0]) {
       Object.keys(data[0]).forEach((key, idx) => {
         if (idx === 0 && key) {
           tempConfig.xKey = config.xKey ? config.xKey : key;
