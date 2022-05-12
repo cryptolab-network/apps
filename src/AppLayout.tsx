@@ -9,7 +9,6 @@ import { ReactComponent as CryptoLabToolsLogoShrink } from './assets/images/tool
 import { ReactComponent as CryptoLabLogoShrink } from './assets/images/main-color-logo-shrink.svg';
 import { ReactComponent as TwitterIcon } from './assets/images/twitter_icon.svg';
 import { ReactComponent as GithubIcon } from './assets/images/github_icon.svg';
-// import { ReactComponent as YoutubeIcon } from './assets/images/youtube_icon.svg';
 import { ReactComponent as PeopleIcon } from './assets/images/people.svg';
 import { ReactComponent as ContactIcon } from './assets/images/contact-logo.svg';
 import { ReactComponent as AboutIcon } from './assets/images/about-us-logo.svg';
@@ -52,83 +51,20 @@ import { breakWidth } from './utils/constants/layout';
 import SideMenu from './components/SideMenu';
 import Wallet from './pages/Tools/components/Wallet';
 import MenuIcon from './components/MenuIcon';
-import Mobile from './pages/Mobile';
 
 import * as SC from './styles';
 
-// header
-const Header: React.FC = () => {
-  let { pathname } = useLocation();
-  const { t } = useTranslation();
-  const { width } = useWindowDimensions();
-
-  return (
-    <SC.HeaderDiv>
-      <SC.HeaderLeftDiv>
-        <NavLink exact to="/">
-          {width > breakWidth.mobile && width <= breakWidth.pad ? <CryptoLabLogoShrink /> : <CryptoLabLogo />}
-        </NavLink>
-      </SC.HeaderLeftDiv>
-      <SC.HeaderMidDiv>
-        {/*
-          // TODO: the comment code below would be used in RWD feature
-         {width > breakWidth.mobile ? (
-          <>
-            <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
-              {t('app.title.stakingGuide')}
-            </NavLink>
-            <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
-              {t('app.title.portfolioBenchmark')}
-            </NavLink>
-            <NavLink to="/management" className="header-item" activeClassName="header-item-active">
-              {t('app.title.portfolioManagement')}
-            </NavLink>
-          </>
-        ) : null} */}
-        <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
-          {t('app.title.stakingGuide')}
-        </NavLink>
-        <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
-          {t('app.title.portfolioBenchmark')}
-        </NavLink>
-        <NavLink to="/management" className="header-item" activeClassName="header-item-active">
-          {t('app.title.portfolioManagement')}
-        </NavLink>
-      </SC.HeaderMidDiv>
-      <SC.HeaderRightDiv>
-        {/* {width <= breakWidth.mobile ? (
-          <SideMenuIcon />
-        ) : pathname !== '/' ? (
-          <NetworkWallet />
-        ) : (
-          <NavLink to="/benchmark">
-            <Button title={t('app.title.useBenchmark')} />
-          </NavLink>
-        )} */}
-        {pathname !== '/' ? (
-          <NetworkWallet />
-        ) : (
-          <NavLink to="/benchmark">
-            <Button title={t('app.title.useBenchmark')} />
-          </NavLink>
-        )}
-      </SC.HeaderRightDiv>
-    </SC.HeaderDiv>
-  );
-};
-
-// tools header
-
-interface IToolsHeader {
+interface IHeader {
   handleSideMenuToggle: React.MouseEventHandler<SVGSVGElement>;
 }
-const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
+const Header: React.FC<IHeader> = ({ handleSideMenuToggle }) => {
+  const isToolsSite = window.location.host.split('.')[0] === keys.toolDomain;
   let { pathname } = useLocation();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const history = useHistory();
 
-  const toolsHeaderLeftDOM = useMemo(() => {
+  const headerLeftDOM = useMemo(() => {
     if (width <= breakWidth.mobile && pathname !== '/') {
       return (
         <div
@@ -145,30 +81,52 @@ const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
           {width > breakWidth.mobile && width <= breakWidth.pad ? (
             <CryptoLabLogoShrink />
           ) : width <= breakWidth.mobile ? (
-            <CryptoLabToolsLogoShrink />
-          ) : (
+            isToolsSite ? (
+              <CryptoLabToolsLogoShrink />
+            ) : (
+              <CryptoLabLogoShrink />
+            )
+          ) : isToolsSite ? (
             <CryptoLabToolsLogo />
+          ) : (
+            <CryptoLabLogo />
           )}
         </NavLink>
       );
     }
-  }, [history, pathname, width]);
+  }, [history, isToolsSite, pathname, width]);
 
-  const toolsHeaderMidDOM = useMemo(() => {
+  const headerMidDOM = useMemo(() => {
     if (width > breakWidth.mobile) {
-      return (
-        <>
-          <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
-            {t('tools.title.valnom')}
-          </NavLink>
-          <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
-            {t('tools.title.oneKvMonitor')}
-          </NavLink>
-          <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
-            {t('tools.title.stakingRewards')}
-          </NavLink>
-        </>
-      );
+      if (isToolsSite) {
+        return (
+          <>
+            <NavLink to="/valnom" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.valnom')}
+            </NavLink>
+            <NavLink to="/onekv" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.oneKvMonitor')}
+            </NavLink>
+            <NavLink to="/rewards" className="header-item" activeClassName="header-item-active">
+              {t('tools.title.stakingRewards')}
+            </NavLink>
+          </>
+        );
+      } else {
+        return (
+          <>
+            <NavLink to="/guide" className="header-item" activeClassName="header-item-active">
+              {t('app.title.stakingGuide')}
+            </NavLink>
+            <NavLink to="/benchmark" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioBenchmark')}
+            </NavLink>
+            <NavLink to="/management" className="header-item" activeClassName="header-item-active">
+              {t('app.title.portfolioManagement')}
+            </NavLink>
+          </>
+        );
+      }
     } else {
       if (pathname.includes('/valnom') || pathname.includes('/validator')) {
         return <SC.MobileHeaderTitle>{t('tools.title.valnom')}</SC.MobileHeaderTitle>;
@@ -178,26 +136,44 @@ const ToolsHeader: React.FC<IToolsHeader> = ({ handleSideMenuToggle }) => {
         return <SC.MobileHeaderTitle>{t('tools.title.stakingRewards')}</SC.MobileHeaderTitle>;
       }
     }
-  }, [pathname, t, width]);
+  }, [isToolsSite, pathname, t, width]);
+
+  const headerRightDOM = useMemo(() => {
+    if (width <= breakWidth.mobile) {
+      return <MenuIcon onClick={handleSideMenuToggle} />;
+    } else {
+      if (isToolsSite) {
+        return (
+          <>
+            <Network />
+            {!isMobile ? <Wallet /> : null}
+          </>
+        );
+      } else {
+        return (
+          <>
+            {pathname !== '/' ? (
+              <NetworkWallet />
+            ) : (
+              <NavLink to="/benchmark">
+                <Button title={t('app.title.useBenchmark')} />
+              </NavLink>
+            )}
+          </>
+        );
+      }
+    }
+  }, [handleSideMenuToggle, isToolsSite, pathname, t, width]);
 
   return (
     <SC.HeaderDiv>
       <SC.HeaderLeftDiv>
         <NavLink exact to="/">
-          {toolsHeaderLeftDOM}
+          {headerLeftDOM}
         </NavLink>
       </SC.HeaderLeftDiv>
-      <SC.HeaderMidDiv>{toolsHeaderMidDOM}</SC.HeaderMidDiv>
-      <SC.HeaderRightDiv>
-        {width <= breakWidth.mobile ? (
-          <MenuIcon onClick={handleSideMenuToggle} />
-        ) : (
-          <>
-            <Network />
-            {!isMobile ? <Wallet /> : null}
-          </>
-        )}
-      </SC.HeaderRightDiv>
+      <SC.HeaderMidDiv>{headerMidDOM}</SC.HeaderMidDiv>
+      <SC.HeaderRightDiv>{headerRightDOM}</SC.HeaderRightDiv>
     </SC.HeaderDiv>
   );
 };
@@ -682,11 +658,8 @@ const AppLayout = () => {
   }, [t]);
 
   const headerDOM = useMemo(() => {
-    if (isToolsSite) {
-      return <ToolsHeader handleSideMenuToggle={handleSideMenuToggle} />;
-    }
-    return <Header />;
-  }, [isToolsSite]);
+    return <Header handleSideMenuToggle={handleSideMenuToggle} />;
+  }, []);
 
   const switchtDOM = useMemo(() => {
     if (isToolsSite) {
@@ -804,36 +777,36 @@ const AppLayout = () => {
     visibleSideMenu,
   ]);
 
-  if (isMobile && !isToolsSite) {
-    return (
-      <>
-        <Mobile isTools={false} />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <SC.GradientLight>
-          <BrowserRouter>
-            {isToolsSite ? (
-              <Api>
-                <Data>{mainRender}</Data>
-              </Api>
-            ) : (
-              <Api>{mainRender}</Api>
-            )}
-          </BrowserRouter>
-          {process.env.REACT_APP_NODE_ENV === 'production' ? (
-            <>
-              <SC.StarAnimation id="stars" />
-              <SC.StarAnimation id="stars2" />
-              <SC.StarAnimation id="stars3" />
-            </>
-          ) : null}
-        </SC.GradientLight>
-      </>
-    );
-  }
+  // if (isMobile && !isToolsSite) {
+  //   return (
+  //     <>
+  //       <Mobile isTools={false} />
+  //     </>
+  //   );
+  // } else {
+  return (
+    <>
+      <SC.GradientLight>
+        <BrowserRouter>
+          {isToolsSite ? (
+            <Api>
+              <Data>{mainRender}</Data>
+            </Api>
+          ) : (
+            <Api>{mainRender}</Api>
+          )}
+        </BrowserRouter>
+        {process.env.REACT_APP_NODE_ENV === 'production' ? (
+          <>
+            <SC.StarAnimation id="stars" />
+            <SC.StarAnimation id="stars2" />
+            <SC.StarAnimation id="stars3" />
+          </>
+        ) : null}
+      </SC.GradientLight>
+    </>
+  );
+  // }
 };
 
 export default AppLayout;
