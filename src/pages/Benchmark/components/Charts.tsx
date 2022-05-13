@@ -367,7 +367,8 @@ const ChartsLayout = styled.div`
   align-items: center;
   padding: 4px;
   @media (max-width: 1395px) {
-    width: 95vw;
+    max-width: 95vw;
+    min-width: unset;
   }
 `;
 
