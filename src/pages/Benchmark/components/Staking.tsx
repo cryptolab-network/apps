@@ -67,6 +67,8 @@ import '../index.css';
 import ReactTooltip from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import queryString from 'query-string';
+import { breakWidth } from '../../../utils/constants/layout';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
 
 export enum Strategy {
   LOW_RISK,
@@ -326,6 +328,7 @@ enum StrategyType {
 const Staking = () => {
   let location = useLocation();
   const { t } = useTranslation();
+  const { width, isMobile } = useWindowDimensions();
 
   const BASIC_DEFAULT_STRATEGY = useMemo(() => {
     return {
@@ -478,25 +481,25 @@ const Staking = () => {
       return (
         <>
           <KSMLogo />
-          <LogoTitle>KSM</LogoTitle>
+          {width <= breakWidth.pad ? null : <LogoTitle>KSM</LogoTitle>}
         </>
       );
     } else if (networkCapitalCodeName(networkName) === NetworkCodeName.DOT) {
       return (
         <>
           <DOTLogo />
-          <LogoTitle>DOT</LogoTitle>
+          {width <= breakWidth.pad ? null : <LogoTitle>DOT</LogoTitle>}
         </>
       );
     } else {
       return (
         <>
           <WNDLogo />
-          <LogoTitle>WND</LogoTitle>
+          {width <= breakWidth.pad ? null : <LogoTitle>WND</LogoTitle>}
         </>
       );
     }
-  }, [networkName]);
+  }, [networkName, width]);
 
   const eraInfoDisplayDom = useMemo(() => {
     if (eraInfo) {
@@ -2032,56 +2035,72 @@ const Staking = () => {
           <BalanceContextLeft>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>{t('benchmark.staking.role')}</BalanceContextLabel>
+                <BalanceContextLabel isMobile={isMobile}>{t('benchmark.staking.role')}</BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>{displayRole(accountChainInfo?.role)}</BalanceContextValue>
-              </div>
-            </BalanceContextRow>
-            <BalanceContextRow>
-              <div>
-                <BalanceContextLabel>{t('benchmark.staking.nominees')}</BalanceContextLabel>
-              </div>
-              <div>
-                <BalanceContextValue>{accountChainInfo?.validators?.length}</BalanceContextValue>
+                <BalanceContextValue isMobile={isMobile}>
+                  {displayRole(accountChainInfo?.role)}
+                </BalanceContextValue>
               </div>
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>{t('benchmark.staking.bonded')}</BalanceContextLabel>
+                <BalanceContextLabel isMobile={isMobile}>
+                  {t('benchmark.staking.nominees')}
+                </BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>{_formatBalance(accountChainInfo?.bonded)}</BalanceContextValue>
+                <BalanceContextValue isMobile={isMobile}>
+                  {accountChainInfo?.validators?.length}
+                </BalanceContextValue>
+              </div>
+            </BalanceContextRow>
+            <BalanceContextRow>
+              <div>
+                <BalanceContextLabel isMobile={isMobile}>{t('benchmark.staking.bonded')}</BalanceContextLabel>
+              </div>
+              <div>
+                <BalanceContextValue isMobile={isMobile}>
+                  {_formatBalance(accountChainInfo?.bonded)}
+                </BalanceContextValue>
               </div>
             </BalanceContextRow>
           </BalanceContextLeft>
           <BalanceContextRight>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>{t('benchmark.staking.transferrable')}</BalanceContextLabel>
+                <BalanceContextLabel isMobile={isMobile}>
+                  {t('benchmark.staking.transferrable')}
+                </BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>
+                <BalanceContextValue isMobile={isMobile}>
                   {_formatBalance(selectedAccount?.balances?.availableBalance)}
                 </BalanceContextValue>
               </div>
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>{t('benchmark.staking.reserved')}</BalanceContextLabel>
+                <BalanceContextLabel isMobile={isMobile}>
+                  {t('benchmark.staking.reserved')}
+                </BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>
+                <BalanceContextValue isMobile={isMobile}>
                   {_formatBalance(selectedAccount?.balances?.reservedBalance)}
                 </BalanceContextValue>
               </div>
             </BalanceContextRow>
             <BalanceContextRow>
               <div>
-                <BalanceContextLabel>{t('benchmark.staking.redeemable')}</BalanceContextLabel>
+                <BalanceContextLabel isMobile={isMobile}>
+                  {t('benchmark.staking.redeemable')}
+                </BalanceContextLabel>
               </div>
               <div>
-                <BalanceContextValue>{_formatBalance(accountChainInfo?.redeemable)}</BalanceContextValue>
+                <BalanceContextValue isMobile={isMobile}>
+                  {_formatBalance(accountChainInfo?.redeemable)}
+                </BalanceContextValue>
               </div>
             </BalanceContextRow>
           </BalanceContextRight>
@@ -2099,6 +2118,7 @@ const Staking = () => {
     selectedAccount?.balances?.reservedBalance,
     t,
     displayRole,
+    isMobile,
   ]);
 
   return (
@@ -2331,6 +2351,7 @@ const BalanceContextBlock = styled.div<IBalanceContextBlock>`
     width: calc(100vw - 160px);
     border-radius: 0px 0px 6px 6px;
   }
+  overflow-y: scroll;
 `;
 
 const BalanceContextLeft = styled.div`
@@ -2350,17 +2371,21 @@ const BalanceContextRow = styled.div`
   justify-content: space-between;
 `;
 
-const BalanceContextLabel = styled.div`
+interface IBalanceDiv {
+  isMobile?: boolean;
+}
+
+const BalanceContextLabel = styled.div<IBalanceDiv>`
   font-family: Montserrat;
-  font-size: 15px;
+  font-size: ${(props) => (props.isMobile ? 10 : 15)}px;
   font-weight: 500;
   text-align: center;
   color: white;
 `;
 
-const BalanceContextValue = styled.div`
+const BalanceContextValue = styled.div<IBalanceDiv>`
   font-family: Montserrat;
-  font-size: 15px;
+  font-size: ${(props) => (props.isMobile ? 10 : 15)}px;
   font-weight: 500;
   text-align: right;
   color: #23beb9;

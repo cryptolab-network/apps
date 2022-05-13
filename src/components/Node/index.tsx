@@ -1,11 +1,14 @@
 import styled from 'styled-components';
 import { ReactComponent as NodeBadge } from '../../assets/images/node-badge.svg';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
 
 const Node = ({ title, address }) => {
+  const { isMobile } = useWindowDimensions();
+
   return (
     <NodeLayout>
-      <NodeBadge />
-      <NodeTitle>{title}</NodeTitle>
+      {!isMobile && <NodeBadge />}
+      {!isMobile && <NodeTitle>{title}</NodeTitle>}
       <NodeAddress>{address}</NodeAddress>
     </NodeLayout>
   );
@@ -39,7 +42,7 @@ const NodeTitle = styled.div`
 `;
 
 const NodeAddress = styled.div`
-  display: flex;
+  display: block;
   justify-content: flex-end;
   align-items: center;
   font-family: Montserrat;
@@ -51,4 +54,7 @@ const NodeAddress = styled.div`
   letter-spacing: normal;
   text-align: right;
   color: #525a63;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;

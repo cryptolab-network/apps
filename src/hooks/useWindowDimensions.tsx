@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { breakWidth } from '../utils/constants/layout';
 
 const getWindowDimensions = () => {
   const { innerWidth: width, innerHeight: height } = window;
   return {
     width,
     height,
+    isMobile: width <= breakWidth.mobile ? true : false,
   };
 };
 
