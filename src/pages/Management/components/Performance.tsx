@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import CardHeader from '../../../components/Card/CardHeader';
+import CardHeaderFullWidth from '../../../components/Card/CardHeaderFullWidth';
 import { useTranslation } from 'react-i18next';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { hasValues } from '../../../utils/helper';
@@ -13,6 +14,8 @@ import CustomScaleLoader from '../../../components/Spinner/ScaleLoader';
 import PortfolioTable from './PortFolioTable';
 import ProfitChart from './ProfitCharts';
 import Empty from '../../../components/Empty';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
+import { breakWidth } from '../../../utils/constants/layout';
 
 interface INetworkReady {
   kusama: boolean;
@@ -51,6 +54,7 @@ const Performance = () => {
     kusama: true,
     polkadot: true,
   });
+  const { width } = useWindowDimensions();
 
   const [accountsInfo, setAccountsInfo] = useState<IAccountsInfo>({} as IAccountsInfo);
   const [accountCache, setAccountCache] = useState<IAccount[]>([]);
@@ -58,6 +62,42 @@ const Performance = () => {
   const currentNetworkLowerCase = useMemo(() => {
     return networkName.toLowerCase();
   }, [networkName]);
+
+  const performanceContent = useMemo(() => {
+    if (!hasWeb3Injected || accounts.length === 0) {
+      return <Empty />;
+    } else if (!needRefetch[currentNetworkLowerCase]) {
+      return (
+        <>
+          <ProfitChartLayoutContainer>
+            <ProfitChartLayout>
+              <ProfitChart
+                chain={networkName}
+                accounts={accountsInfo.accounts}
+                rewards={accountsInfo.rewards}
+              />
+            </ProfitChartLayout>
+          </ProfitChartLayoutContainer>
+
+          <PortfolioTable
+            chain={networkName}
+            accounts={accountsInfo.accounts}
+            rewards={accountsInfo.rewards}
+          />
+        </>
+      );
+    } else {
+      return <CustomScaleLoader />;
+    }
+  }, [
+    accounts.length,
+    accountsInfo.accounts,
+    accountsInfo.rewards,
+    currentNetworkLowerCase,
+    hasWeb3Injected,
+    needRefetch,
+    networkName,
+  ]);
 
   useEffect(() => {
     if (isPerformanceCacheValid(currentNetworkLowerCase)) {
@@ -123,26 +163,17 @@ const Performance = () => {
     }
   }, [accountCache, cachePerformance, currentNetworkLowerCase, needRefetch, networkStatus, polkadotApi]);
 
-  if (!hasWeb3Injected || accounts.length === 0) {
+  if (width > breakWidth.pad) {
     return (
-      <CardHeader Header={() => <PerformanceHeader />}>
-        <Empty />
-      </CardHeader>
-    );
-  } else if (!needRefetch[currentNetworkLowerCase]) {
-    return (
-      <CardHeader Header={() => <PerformanceHeader />}>
-        <ProfitChartLayout>
-          <ProfitChart chain={networkName} accounts={accountsInfo.accounts} rewards={accountsInfo.rewards} />
-        </ProfitChartLayout>
-        <PortfolioTable chain={networkName} accounts={accountsInfo.accounts} rewards={accountsInfo.rewards} />
+      <CardHeader Header={() => <PerformanceHeader />} mainPadding="0 0 0 0">
+        {performanceContent}
       </CardHeader>
     );
   } else {
     return (
-      <CardHeader Header={() => <PerformanceHeader />}>
-        <CustomScaleLoader />
-      </CardHeader>
+      <CardHeaderFullWidth Header={() => <PerformanceHeader />} mainPadding="0 0 0 0">
+        {performanceContent}
+      </CardHeaderFullWidth>
     );
   }
 };
@@ -192,4 +223,14 @@ const Subtitle = styled.div`
 const ProfitChartLayout = styled.div`
   height: 300px;
   width: 1100px;
+`;
+
+const ProfitChartLayoutContainer = styled.div`
+  height: 300px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16px;
+  @media (max-width: 968px) {
+    overflow-x: scroll;
+  }
 `;
