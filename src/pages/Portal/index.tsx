@@ -137,6 +137,7 @@ const SloganMobileLayout = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: center;
   padding-bottom: 64px;
   @media (max-height: 762px) {
     padding-bottom: 32px;

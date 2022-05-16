@@ -707,7 +707,7 @@ const AppLayout = () => {
           <div
             style={{
               width: '100%',
-              height: 48,
+              height: 50,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
