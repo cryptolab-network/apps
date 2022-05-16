@@ -34,6 +34,7 @@ const ButtonStyle = styled.button<ButtonProps>`
   border: solid 1px #23beb9;
   border-radius: 100px;
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  white-space: nowrap;
   :hover:not([disabled]) {
     background-color: #169692;
     color: #ffffff;

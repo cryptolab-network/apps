@@ -182,6 +182,7 @@ const Style = styled.div`
       }
       :first-child {
         text-align: left;
+        max-width: 250px;
       }
       :last-child {
         border-right: 0;
