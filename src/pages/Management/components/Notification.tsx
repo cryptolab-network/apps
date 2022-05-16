@@ -8,6 +8,7 @@ import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon
 // import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
 import QRCode from 'react-qr-code';
 import DashboardItem from './DashboardItem';
+import DashboardMobileItem from './DashboardMobileItem';
 import Tooltip from '../../../components/Tooltip';
 import Dialog from '../../../components/Dialog';
 import Input from '../../../components/Input';
@@ -29,6 +30,8 @@ import Empty from '../../../components/Empty';
 import { NetworkConfig } from '../../../utils/constants/Network';
 import bignumberjs from 'bignumber.js';
 import TinyButton from '../../../components/Button/tiny';
+import { breakWidth } from '../../../utils/constants/layout';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
 
 const FilterType = {
   ALL: 'all',
@@ -52,6 +55,7 @@ const ALL_ACCOUNT = 'ALL';
 const Notification: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   // context
   let {
     network: networkName,
@@ -159,82 +163,82 @@ const Notification: React.FC = () => {
         let stalePayoutCount = 0;
         let tableList: any[] = [];
         for (let idx = 0; idx < accounts.length; idx++) {
-          let result = await apiGetNotificationEvents(
-            {
-              params: {
-                id: accounts[idx].address,
-                chain: networkCapitalCodeName(networkName),
-              },
-            },
-            query
-          );
+          // let result = await apiGetNotificationEvents(
+          //   {
+          //     params: {
+          //       id: accounts[idx].address,
+          //       chain: networkCapitalCodeName(networkName),
+          //     },
+          //   },
+          //   query
+          // );
 
           // mock data below for test convenient
-          // let result = {
-          //   commissions: [
-          //     {
-          //       commissionFrom: 0,
-          //       commissionTo: 2,
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       era: 123,
-          //     },
-          //     {
-          //       commissionFrom: 2,
-          //       commissionTo: 3,
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       era: 234,
-          //     },
-          //   ],
-          //   slashes: [
-          //     {
-          //       era: 123,
-          //       validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       total: 500000000000,
-          //     },
-          //   ],
-          //   payouts: [
-          //     {
-          //       era: 168,
-          //       amount: 1.1,
-          //       address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-          //     },
-          //   ],
-          //   inactive: [0, 234],
-          //   overSubscribes: [
-          //     {
-          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       era: 2796,
-          //       amount: '50000000000000',
-          //     },
-          //     {
-          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       era: 2797,
-          //       amount: '150000000000000',
-          //     },
-          //   ],
-          //   kicks: [
-          //     {
-          //       era: 0,
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
-          //     },
-          //   ],
-          //   stalePayouts: [
-          //     {
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //       era: 0,
-          //       unclaimedPayoutEras: [0, 1, 2, 5],
-          //     },
-          //   ],
-          //   chills: [
-          //     {
-          //       era: 0,
-          //       address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
-          //     },
-          //   ],
-          // };
+          let result = {
+            commissions: [
+              {
+                commissionFrom: 0,
+                commissionTo: 2,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 123,
+              },
+              {
+                commissionFrom: 2,
+                commissionTo: 3,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 234,
+              },
+            ],
+            slashes: [
+              {
+                era: 123,
+                validator: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                total: 500000000000,
+              },
+            ],
+            payouts: [
+              {
+                era: 168,
+                amount: 1.1,
+                address: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+              },
+            ],
+            inactive: [0, 234],
+            overSubscribes: [
+              {
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 2796,
+                amount: '50000000000000',
+              },
+              {
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 2797,
+                amount: '150000000000000',
+              },
+            ],
+            kicks: [
+              {
+                era: 0,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                nominator: 'FjuNAeqDWUSLbp11psbU3b2fCa8Zsj9JFKHhsmTHEXMbg8J',
+              },
+            ],
+            stalePayouts: [
+              {
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+                era: 0,
+                unclaimedPayoutEras: [0, 1, 2, 5],
+              },
+            ],
+            chills: [
+              {
+                era: 0,
+                address: 'CgHEFst3jhyJZ57fSuAzRS6VaUrFL7BwFKi5XKWPV3g3zTo',
+              },
+            ],
+          };
 
           if (result) {
             // filter commission from 0's validator, it means it's just initiate
@@ -864,56 +868,125 @@ const Notification: React.FC = () => {
     ];
   }, [t]);
 
-  const dashBoardDOM = useMemo(() => {
+  const overviewDOM = useMemo(() => {
     let overViewContent: any[] = [];
-    let setUpAlerts: any[] = [];
-
+    let isMobile = width > breakWidth.pad ? false : true;
     overview.forEach((i, idx) => {
-      if (idx === 0) {
-        overViewContent.push(<InvisibleSpace key={`dashboard-invisible-${idx}`} />);
-      }
-      if (idx > 0) {
-        overViewContent.push(<Space key={`dashboard-space-${idx}`} />);
-      }
-      overViewContent.push(
-        <DashboardItem
-          key={`dashboard-item-${idx}`}
-          mainValue={i.value}
-          mainValueDanger={i.danger}
-          title={i.title}
-          subtitle={i.subtitle}
-        />
-      );
-      if (idx === overview.length - 1) {
-        overViewContent.push(<InvisibleSpace />);
+      if (!isMobile) {
+        if (idx === 0) {
+          overViewContent.push(<InvisibleSpace key={`dashboard-invisible-${idx}`} />);
+        }
+        if (idx > 0) {
+          overViewContent.push(<Space key={`dashboard-space-${idx}`} />);
+        }
+        overViewContent.push(
+          <DashboardItem
+            key={`dashboard-item-${idx}`}
+            mainValue={i.value}
+            mainValueDanger={i.danger}
+            title={i.title}
+            subtitle={i.subtitle}
+          />
+        );
+        if (idx === overview.length - 1) {
+          overViewContent.push(<InvisibleSpace />);
+        }
+      } else {
+        overViewContent.push(
+          <DashboardMobileItem
+            key={`dashboard-item-${idx}`}
+            mainValue={i.value}
+            mainValueDanger={i.danger}
+            title={i.title}
+            subtitle={i.subtitle}
+          />
+        );
       }
     });
+    if (!isMobile) {
+      return (
+        <Overview>
+          <DashboardTitle>
+            <TinyChart /> {t('Management.routes.notification.overview.title')}
+          </DashboardTitle>
+          <OverviewPanel>{overViewContent}</OverviewPanel>
+        </Overview>
+      );
+    } else {
+      return (
+        <OverviewMobile>
+          <DashboardTitle>
+            <TinyChart /> {t('Management.routes.notification.overview.title')}
+          </DashboardTitle>
+          <OverviewPanelMobile>{overViewContent}</OverviewPanelMobile>
+        </OverviewMobile>
+      );
+    }
+  }, [overview, t, width]);
 
+  const alertsDOM = useMemo(() => {
+    let setUpAlerts: any[] = [];
+    let isMobile = width > breakWidth.pad ? false : true;
     alertsMethod.forEach((i, idx) => {
-      if (idx === 0) {
-        setUpAlerts.push(<InvisibleSpace key={`alerts-invisible-${idx}`} />);
-      }
-      if (idx > 0) {
-        setUpAlerts.push(<Space key={`alerts-space-${idx}`} />);
-      }
-      setUpAlerts.push(
-        <DashboardItem
-          key={`alerts-item-${idx}`}
-          MainIcon={i.icon}
-          title={i.title}
-          clickable={true}
-          onClick={() => {
-            handleDialogOpen(idx);
-          }}
-        />
-      );
-      if (idx === alertsMethod.length - 1) {
-        setUpAlerts.push(<InvisibleSpace />);
+      if (!isMobile) {
+        if (idx === 0) {
+          setUpAlerts.push(<InvisibleSpace key={`alerts-invisible-${idx}`} />);
+        }
+        if (idx > 0) {
+          setUpAlerts.push(<Space key={`alerts-space-${idx}`} />);
+        }
+        setUpAlerts.push(
+          <DashboardItem
+            key={`alerts-item-${idx}`}
+            MainIcon={i.icon}
+            title={i.title}
+            clickable={true}
+            onClick={() => {
+              handleDialogOpen(idx);
+            }}
+          />
+        );
+        if (idx === alertsMethod.length - 1) {
+          setUpAlerts.push(<InvisibleSpace />);
+        }
+      } else {
+        setUpAlerts.push(
+          <DashboardMobileItem
+            key={`alerts-item-${idx}`}
+            MainIcon={i.icon}
+            title={i.title}
+            clickable={true}
+            onClick={() => {
+              handleDialogOpen(idx);
+            }}
+          />
+        );
       }
     });
+    if (!isMobile) {
+      return (
+        <Alerts>
+          <DashboardTitle>
+            <TinyPlain /> {t('Management.routes.notification.alerts.title')}
+          </DashboardTitle>
+          <OverviewPanel>{setUpAlerts}</OverviewPanel>
+        </Alerts>
+      );
+    } else {
+      return (
+        <AlertsMobile>
+          <DashboardTitle>
+            <TinyPlain /> {t('Management.routes.notification.alerts.title')}
+          </DashboardTitle>
+          <OverviewPanelMobile>{setUpAlerts}</OverviewPanelMobile>
+        </AlertsMobile>
+      );
+    }
+  }, [alertsMethod, t, width]);
 
+  const dashBoardDOM = useMemo(() => {
     return (
-      <Dashboard>
+      <Dashboard isMobile={width <= breakWidth.pad ? true : false}>
         <Dialog
           image={<QRCode level="L" size={256} value={keys.tgBotUrl} bgColor="#18232f" fgColor="#23beb9" />}
           title={t('Management.routes.notification.alerts.telegram.dialog.title')}
@@ -951,21 +1024,23 @@ const Notification: React.FC = () => {
             </div>
           </div>
         </Dialog>
-        <Overview>
+        {/* <Overview>
           <DashboardTitle>
             <TinyChart /> {t('Management.routes.notification.overview.title')}
           </DashboardTitle>
           <OverviewPanel>{overViewContent}</OverviewPanel>
-        </Overview>
-        <Alerts>
+        </Overview> */}
+        {overviewDOM}
+        {/* <Alerts>
           <DashboardTitle>
             <TinyPlain /> {t('Management.routes.notification.alerts.title')}
           </DashboardTitle>
           <OverviewPanel>{setUpAlerts}</OverviewPanel>
-        </Alerts>
+        </Alerts> */}
+        {alertsDOM}
       </Dashboard>
     );
-  }, [alertsMethod, isEmailSubscribeShow, isTgBotShow, overview, t]);
+  }, [alertsDOM, isEmailSubscribeShow, isTgBotShow, overviewDOM, t, width]);
 
   const filterDOM = useMemo(() => {
     return (
@@ -1109,15 +1184,20 @@ const MainLayout = styled.div`
   align-items: center;
   padding: 7px;
   @media (max-width: 1395px) {
-    width: 95vw;
+    max-width: 95vw;
+    min-width: unset;
   }
 `;
 
-const Dashboard = styled.div`
+interface IDashboard {
+  isMobile?: boolean;
+}
+const Dashboard = styled.div<IDashboard>`
   width: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-direction: ${(props) => (props.isMobile ? 'column' : 'row')};
 `;
 
 const DashboardTitle = styled.div`
@@ -1134,6 +1214,15 @@ const DashboardTitle = styled.div`
 
 const Overview = styled.div`
   flex: 5;
+  box-sizing: border-box;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+`;
+const OverviewMobile = styled.div`
+  width: 100%;
   box-sizing: border-box;
   padding: 7px;
   display: flex;
@@ -1165,9 +1254,29 @@ const OverviewPanel = styled.div`
   align-items: center;
   padding: 45px 0px 45px 0px;
 `;
+const OverviewPanelMobile = styled.div`
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 8px;
+  background-color: #2e3843;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 8px 8px 8px;
+`;
 
 const Alerts = styled.div`
   flex: 1;
+  box-sizing: border-box;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+`;
+const AlertsMobile = styled.div`
+  width: 100%;
   box-sizing: border-box;
   padding: 7px;
   display: flex;
