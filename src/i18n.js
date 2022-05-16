@@ -501,6 +501,10 @@ i18n
             error: 'Oops! Something went wrong.',
             empty: 'There is no data to display.',
           },
+          banner: {
+            nftHolder01: '🔥 Our new product "Alcheneko" is about to launch, join our DC',
+            nftHolder02: 'to get the latest news 🚀',
+          },
         },
       },
       'zh-TW': {
@@ -947,6 +951,10 @@ i18n
             error: '糟糕! 發生了一些錯誤',
             empty: '沒有要顯示的數據',
           },
+          banner: {
+            nftHolder01: '🔥 我們的新產品「煉金喵」即將登場, 現在加入我們的 DC 群',
+            nftHolder02: '掌握最新消息 🚀',
+          },
         },
       },
       'zh-CN': {
@@ -1376,6 +1384,10 @@ i18n
           common: {
             error: '糟糕！发生了一些错误',
             empty: '没有要显示的数据',
+          },
+          banner: {
+            nftHolder01: '🔥 我们的新产品「炼金喵」即将登场, 现在加入我们的 DC 群',
+            nftHolder02: '掌握最新消息 🚀',
           },
         },
       },

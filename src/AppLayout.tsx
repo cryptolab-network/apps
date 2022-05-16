@@ -51,6 +51,7 @@ import { breakWidth } from './utils/constants/layout';
 import SideMenu from './components/SideMenu';
 import Wallet from './pages/Tools/components/Wallet';
 import MenuIcon from './components/MenuIcon';
+import discordLogo from './assets/images/discord-logo.png';
 
 import * as SC from './styles';
 
@@ -702,6 +703,24 @@ const AppLayout = () => {
   const mainRender = useMemo(() => {
     return (
       <>
+        <a href="https://discord.gg/KyevBvCG49" style={{ textDecoration: 'none' }}>
+          <div
+            style={{
+              width: '100%',
+              height: 48,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#23beb9',
+              color: 'white',
+              fontSize: 20,
+              fontWeight: 'bold',
+            }}
+          >
+            {t('banner.nftHolder01')}
+            <img src={discordLogo} alt="discord" style={{ maxHeight: '90%' }} /> {t('banner.nftHolder02')}
+          </div>
+        </a>
         {headerDOM}
         <SC.RouteContent>
           <SideMenu
