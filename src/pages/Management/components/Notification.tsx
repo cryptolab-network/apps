@@ -8,6 +8,7 @@ import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon
 // import { ReactComponent as Qrcode } from '../../../assets/images/tg-qrcode.svg';
 import QRCode from 'react-qr-code';
 import DashboardItem from './DashboardItem';
+import DashboardMobileItem from './DashboardMobileItem';
 import Tooltip from '../../../components/Tooltip';
 import Dialog from '../../../components/Dialog';
 import Input from '../../../components/Input';
@@ -29,6 +30,8 @@ import Empty from '../../../components/Empty';
 import { NetworkConfig } from '../../../utils/constants/Network';
 import bignumberjs from 'bignumber.js';
 import TinyButton from '../../../components/Button/tiny';
+import { breakWidth } from '../../../utils/constants/layout';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
 
 const FilterType = {
   ALL: 'all',
@@ -52,6 +55,7 @@ const ALL_ACCOUNT = 'ALL';
 const Notification: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   // context
   let {
     network: networkName,
@@ -457,49 +461,65 @@ const Notification: React.FC = () => {
           if (row.original.type === FilterType.COMMISSION) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.commission.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.commission.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.INACTIVE) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.inactive.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.inactive.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.SLASH) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.slash.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.slash.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.KICKS) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.kick.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.kick.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.OVERSUBSCRIBES) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.overSubscribes.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.overSubscribes.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.PAYOUT) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.payout.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.payout.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.STALEPAYOUTS) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.stalePayout.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.stalePayout.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           } else if (row.original.type === FilterType.CHILLS) {
             return (
               <DescriptionStyle>
-                {t('Management.routes.notification.notification.table.data.chill.title')}
+                <NotifyTypeStyle>
+                  {t('Management.routes.notification.notification.table.data.chill.title')}
+                </NotifyTypeStyle>
               </DescriptionStyle>
             );
           }
@@ -839,7 +859,7 @@ const Notification: React.FC = () => {
                 address={row.original.affectedAccount}
                 display={getAccountName(row.original.affectedAccount, accounts)}
               />
-              {row.original.type !== FilterType.PAYOUT ? (
+              {row.original.type !== FilterType.PAYOUT && width > breakWidth.pad ? (
                 <TinyButton
                   title={t('Management.routes.notification.review')}
                   fontSize="12px"
@@ -853,7 +873,7 @@ const Notification: React.FC = () => {
         },
       },
     ];
-  }, [accounts, networkName, t, redirect2Stake]);
+  }, [t, networkName, accounts, width, redirect2Stake]);
 
   const alertsMethod = useMemo(() => {
     return [
@@ -864,56 +884,125 @@ const Notification: React.FC = () => {
     ];
   }, [t]);
 
-  const dashBoardDOM = useMemo(() => {
+  const overviewDOM = useMemo(() => {
     let overViewContent: any[] = [];
-    let setUpAlerts: any[] = [];
-
+    let isMobile = width > breakWidth.pad ? false : true;
     overview.forEach((i, idx) => {
-      if (idx === 0) {
-        overViewContent.push(<InvisibleSpace key={`dashboard-invisible-${idx}`} />);
-      }
-      if (idx > 0) {
-        overViewContent.push(<Space key={`dashboard-space-${idx}`} />);
-      }
-      overViewContent.push(
-        <DashboardItem
-          key={`dashboard-item-${idx}`}
-          mainValue={i.value}
-          mainValueDanger={i.danger}
-          title={i.title}
-          subtitle={i.subtitle}
-        />
-      );
-      if (idx === overview.length - 1) {
-        overViewContent.push(<InvisibleSpace />);
+      if (!isMobile) {
+        if (idx === 0) {
+          overViewContent.push(<InvisibleSpace key={`dashboard-invisible-${idx}`} />);
+        }
+        if (idx > 0) {
+          overViewContent.push(<Space key={`dashboard-space-${idx}`} />);
+        }
+        overViewContent.push(
+          <DashboardItem
+            key={`dashboard-item-${idx}`}
+            mainValue={i.value}
+            mainValueDanger={i.danger}
+            title={i.title}
+            subtitle={i.subtitle}
+          />
+        );
+        if (idx === overview.length - 1) {
+          overViewContent.push(<InvisibleSpace />);
+        }
+      } else {
+        overViewContent.push(
+          <DashboardMobileItem
+            key={`dashboard-item-${idx}`}
+            mainValue={i.value}
+            mainValueDanger={i.danger}
+            title={i.title}
+            subtitle={i.subtitle}
+          />
+        );
       }
     });
+    if (!isMobile) {
+      return (
+        <Overview>
+          <DashboardTitle>
+            <TinyChart /> {t('Management.routes.notification.overview.title')}
+          </DashboardTitle>
+          <OverviewPanel>{overViewContent}</OverviewPanel>
+        </Overview>
+      );
+    } else {
+      return (
+        <OverviewMobile>
+          <DashboardTitle>
+            <TinyChart /> {t('Management.routes.notification.overview.title')}
+          </DashboardTitle>
+          <OverviewPanelMobile>{overViewContent}</OverviewPanelMobile>
+        </OverviewMobile>
+      );
+    }
+  }, [overview, t, width]);
 
+  const alertsDOM = useMemo(() => {
+    let setUpAlerts: any[] = [];
+    let isMobile = width > breakWidth.pad ? false : true;
     alertsMethod.forEach((i, idx) => {
-      if (idx === 0) {
-        setUpAlerts.push(<InvisibleSpace key={`alerts-invisible-${idx}`} />);
-      }
-      if (idx > 0) {
-        setUpAlerts.push(<Space key={`alerts-space-${idx}`} />);
-      }
-      setUpAlerts.push(
-        <DashboardItem
-          key={`alerts-item-${idx}`}
-          MainIcon={i.icon}
-          title={i.title}
-          clickable={true}
-          onClick={() => {
-            handleDialogOpen(idx);
-          }}
-        />
-      );
-      if (idx === alertsMethod.length - 1) {
-        setUpAlerts.push(<InvisibleSpace />);
+      if (!isMobile) {
+        if (idx === 0) {
+          setUpAlerts.push(<InvisibleSpace key={`alerts-invisible-${idx}`} />);
+        }
+        if (idx > 0) {
+          setUpAlerts.push(<Space key={`alerts-space-${idx}`} />);
+        }
+        setUpAlerts.push(
+          <DashboardItem
+            key={`alerts-item-${idx}`}
+            MainIcon={i.icon}
+            title={i.title}
+            clickable={true}
+            onClick={() => {
+              handleDialogOpen(idx);
+            }}
+          />
+        );
+        if (idx === alertsMethod.length - 1) {
+          setUpAlerts.push(<InvisibleSpace />);
+        }
+      } else {
+        setUpAlerts.push(
+          <DashboardMobileItem
+            key={`alerts-item-${idx}`}
+            MainIcon={i.icon}
+            title={i.title}
+            clickable={true}
+            onClick={() => {
+              handleDialogOpen(idx);
+            }}
+          />
+        );
       }
     });
+    if (!isMobile) {
+      return (
+        <Alerts>
+          <DashboardTitle>
+            <TinyPlain /> {t('Management.routes.notification.alerts.title')}
+          </DashboardTitle>
+          <OverviewPanel>{setUpAlerts}</OverviewPanel>
+        </Alerts>
+      );
+    } else {
+      return (
+        <AlertsMobile>
+          <DashboardTitle>
+            <TinyPlain /> {t('Management.routes.notification.alerts.title')}
+          </DashboardTitle>
+          <OverviewPanelMobile>{setUpAlerts}</OverviewPanelMobile>
+        </AlertsMobile>
+      );
+    }
+  }, [alertsMethod, t, width]);
 
+  const dashBoardDOM = useMemo(() => {
     return (
-      <Dashboard>
+      <Dashboard isMobile={width <= breakWidth.pad ? true : false}>
         <Dialog
           image={<QRCode level="L" size={256} value={keys.tgBotUrl} bgColor="#18232f" fgColor="#23beb9" />}
           title={t('Management.routes.notification.alerts.telegram.dialog.title')}
@@ -951,21 +1040,23 @@ const Notification: React.FC = () => {
             </div>
           </div>
         </Dialog>
-        <Overview>
+        {/* <Overview>
           <DashboardTitle>
             <TinyChart /> {t('Management.routes.notification.overview.title')}
           </DashboardTitle>
           <OverviewPanel>{overViewContent}</OverviewPanel>
-        </Overview>
-        <Alerts>
+        </Overview> */}
+        {overviewDOM}
+        {/* <Alerts>
           <DashboardTitle>
             <TinyPlain /> {t('Management.routes.notification.alerts.title')}
           </DashboardTitle>
           <OverviewPanel>{setUpAlerts}</OverviewPanel>
-        </Alerts>
+        </Alerts> */}
+        {alertsDOM}
       </Dashboard>
     );
-  }, [alertsMethod, isEmailSubscribeShow, isTgBotShow, overview, t]);
+  }, [alertsDOM, isEmailSubscribeShow, isTgBotShow, overviewDOM, t, width]);
 
   const filterDOM = useMemo(() => {
     return (
@@ -1109,15 +1200,20 @@ const MainLayout = styled.div`
   align-items: center;
   padding: 7px;
   @media (max-width: 1395px) {
-    width: 95vw;
+    max-width: 95vw;
+    min-width: unset;
   }
 `;
 
-const Dashboard = styled.div`
+interface IDashboard {
+  isMobile?: boolean;
+}
+const Dashboard = styled.div<IDashboard>`
   width: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-direction: ${(props) => (props.isMobile ? 'column' : 'row')};
 `;
 
 const DashboardTitle = styled.div`
@@ -1134,6 +1230,15 @@ const DashboardTitle = styled.div`
 
 const Overview = styled.div`
   flex: 5;
+  box-sizing: border-box;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+`;
+const OverviewMobile = styled.div`
+  width: 100%;
   box-sizing: border-box;
   padding: 7px;
   display: flex;
@@ -1165,9 +1270,29 @@ const OverviewPanel = styled.div`
   align-items: center;
   padding: 45px 0px 45px 0px;
 `;
+const OverviewPanelMobile = styled.div`
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 8px;
+  background-color: #2e3843;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 8px 8px 8px;
+`;
 
 const Alerts = styled.div`
   flex: 1;
+  box-sizing: border-box;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+`;
+const AlertsMobile = styled.div`
+  width: 100%;
   box-sizing: border-box;
   padding: 7px;
   display: flex;
@@ -1187,6 +1312,7 @@ const TableLayout = styled.div`
 
 const TablePanel = styled.div`
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1264,4 +1390,8 @@ const DescriptionStyle = styled.div`
   font-weight: 500;
   text-align: left;
   color: white;
+`;
+
+const NotifyTypeStyle = styled.div`
+  white-space: nowrap;
 `;

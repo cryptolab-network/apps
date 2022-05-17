@@ -5,27 +5,38 @@ import Switch from '../../../components/Switch';
 import { ReactComponent as OptionIcon } from '../../../assets/images/option-icon.svg';
 import { ReactComponent as BeakerSmall } from '../../../assets/images/beaker-small.svg';
 import { useTranslation } from 'react-i18next';
+import { breakWidth } from '../../../utils/constants/layout';
+import useWindowDimensions from '../../../hooks/useWindowDimensions';
 
 const StakingHeader = ({ advancedOption, optionToggle, onChange }) => {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const advancedDOM = useMemo(() => {
     return (
       <AdvancedOptionLayout>
         <AdvancedOption>
-          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>{t('benchmark.staking.advanced')}</span>
+          <span style={{ color: advancedOption.advanced ? '#23beb9' : '#fff' }}>
+            {t('benchmark.staking.advanced')}
+          </span>
           <div style={{ marginLeft: 16 }}>
-            <Switch checked={advancedOption.advanced} onChange={onChange('advanced')} />
+            <Switch
+              checked={advancedOption.advanced}
+              onChange={onChange('advanced')}
+              disabled={width < breakWidth.mobile ? true : false}
+            />
           </div>
         </AdvancedOption>
         <AdvancedOption>
-          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>{t('benchmark.staking.supportUs')}</span>
+          <span style={{ color: advancedOption.supportus ? '#23beb9' : '#fff' }}>
+            {t('benchmark.staking.supportUs')}
+          </span>
           <div style={{ marginLeft: 16 }}>
             <Switch checked={advancedOption.supportus} onChange={onChange('supportus')} />
           </div>
         </AdvancedOption>
       </AdvancedOptionLayout>
     );
-  }, [advancedOption.advanced, advancedOption.supportus, onChange, t]);
+  }, [advancedOption.advanced, advancedOption.supportus, onChange, t, width]);
 
   return (
     <HeaderLayout>

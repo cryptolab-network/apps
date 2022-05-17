@@ -22,14 +22,14 @@ const Benchmark = () => {
         label: t('benchmark.routes.charts'),
         value: 'charts',
       },
-    ]
+    ];
   }, [t]);
 
   return (
     <BenchmarkLayout>
       <MainLayout>
         <SwitchTab tabs={tabs} />
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', maxWidth: '100vw' }}>
           <Switch>
             <Route exact path={`${path}`} component={Staking} />
             <Route exact path={`${path}/charts`} component={Charts} />

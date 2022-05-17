@@ -151,25 +151,31 @@ interface ICommission {
 
 const parseValidatorCommissions = (network: string, validators: IValidator[]): ICommission[] => {
   const commissions: ICommission[] = [];
-  validators.forEach((validator) => {
+  console.log('validators:', validators);
+  validators.forEach((validator, vIdx) => {
     let xaxis = CDCXAxis.polkadot;
     let xaxisTitle = CDCXAxis.polkadotTitle;
     if (network === 'Kusama') {
       xaxis = CDCXAxis.kusama;
       xaxisTitle = CDCXAxis.kusamaTitle;
     }
+    if (vIdx === 0) {
+      // for commissions array init
+      for (let idx = 0; idx < xaxis.length; idx++) {
+        commissions[idx] = {
+          commission: `${xaxisTitle[idx]}`,
+          count: 0,
+        };
+      }
+    }
+
     for (let i = 1; i <= xaxis.length; i++) {
       let c = validator.info.commission;
+
       if (c < 0.01) {
         c = 0;
       }
       if (c <= xaxis[i - 1]) {
-        if (commissions[i - 1] === undefined) {
-          commissions[i - 1] = {
-            commission: `${xaxisTitle[i - 1]}`,
-            count: 0,
-          };
-        }
         commissions[i - 1].count++;
         break;
       }
@@ -361,7 +367,8 @@ const ChartsLayout = styled.div`
   align-items: center;
   padding: 4px;
   @media (max-width: 1395px) {
-    width: 95vw;
+    max-width: 95vw;
+    min-width: unset;
   }
 `;
 

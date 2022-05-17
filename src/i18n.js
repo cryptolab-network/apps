@@ -502,8 +502,8 @@ i18n
             empty: 'There is no data to display.',
           },
           banner: {
-            nftHolder01: '🔥 Our new product "Alcheneko" is about to launch, join our DC',
-            nftHolder02: 'to get the latest news 🚀',
+            nftHolder01: '🔥 Our new product "Alcheneko" is now live, join our DC',
+            nftHolder02: '',
           },
         },
       },
@@ -952,8 +952,8 @@ i18n
             empty: '沒有要顯示的數據',
           },
           banner: {
-            nftHolder01: '🔥 我們的新產品「煉金喵」即將登場, 現在加入我們的 DC 群',
-            nftHolder02: '掌握最新消息 🚀',
+            nftHolder01: '🔥 我們的新產品「煉金喵」公售中, 加入我們的 DC 群',
+            nftHolder02: '',
           },
         },
       },
@@ -1386,8 +1386,8 @@ i18n
             empty: '没有要显示的数据',
           },
           banner: {
-            nftHolder01: '🔥 我们的新产品「炼金喵」即将登场, 现在加入我们的 DC 群',
-            nftHolder02: '掌握最新消息 🚀',
+            nftHolder01: '🔥 我们的新产品「炼金喵」公售中, 加入我们的 DC 群',
+            nftHolder02: '',
           },
         },
       },

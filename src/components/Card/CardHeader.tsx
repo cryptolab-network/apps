@@ -16,7 +16,7 @@ const CardHeader = ({ Header, children = {}, alignItems = 'center', mainPadding 
 export default CardHeader;
 
 const CardHeaderLayout = styled.div`
-  width: calc(100% - 16px);
+  width: calc(100% - 0px);
   border-radius: 8px;
   border: solid 1px #23beb9;
   background-color: #18232f;

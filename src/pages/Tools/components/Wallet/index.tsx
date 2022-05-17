@@ -98,8 +98,6 @@ const Wallet = () => {
       dom.push(
         <li className="li" key={'wallet-select-non'}>
           (No available account)
-          {/* <Identicon value={account.address} size={16} theme={'polkadot'} />
-            <NetworkTitleLight>{account.name}</NetworkTitleLight> */}
         </li>
       );
     } else {
@@ -116,9 +114,6 @@ const Wallet = () => {
             <Identicon value={account.address} size={32} theme={'polkadot'} />
             <WalletLayout>
               <div>{account.name}</div>
-              {/* <div>
-                Balance : <BalanceNumber>{_formatBalance(account.balances.totalBalance)}</BalanceNumber>
-              </div> */}
             </WalletLayout>
           </li>
         );
@@ -155,11 +150,6 @@ const Wallet = () => {
               <div>{selectedAccount.name}</div>
             </WalletLayout>
           ) : null}
-          {/* {width > breakWidth.mobile && width <= breakWidth.pad ? null : (
-            <WalletLayout>
-              <div>{selectedAccount.name}</div>
-            </WalletLayout>
-          )} */}
         </>
       );
     } else if (selectedAccount && isEmpty(selectedAccount)) {
