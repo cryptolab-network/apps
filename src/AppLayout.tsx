@@ -169,9 +169,7 @@ const Header: React.FC<IHeader> = ({ handleSideMenuToggle }) => {
   return (
     <SC.HeaderDiv>
       <SC.HeaderLeftDiv>
-        <NavLink exact to="/">
-          {headerLeftDOM}
-        </NavLink>
+        {headerLeftDOM}
       </SC.HeaderLeftDiv>
       <SC.HeaderMidDiv>{headerMidDOM}</SC.HeaderMidDiv>
       <SC.HeaderRightDiv>{headerRightDOM}</SC.HeaderRightDiv>
